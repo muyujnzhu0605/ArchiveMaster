@@ -1,0 +1,41 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.UselessJpgCleanerPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:UselessJpgCleanerViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <StackPanel
+            Orientation="Vertical"
+            Spacing="8">
+            <ct:FilePickerTextBox
+                FileNames="{Binding Dir}"
+                Label="目录："
+                Type="OpenFolder" />
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="RAW文件后缀：" />
+                <TextBox Text="{Binding Config.RawExtension}" />
+
+            </StackPanel>
+
+        </StackPanel>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <ListBox
+            x:Name="lstDirs"
+            Grid.Row="8"
+            DisplayMemberBinding="{Binding Name}"
+            ItemsSource="{Binding DeletingJpgFiles}" />
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

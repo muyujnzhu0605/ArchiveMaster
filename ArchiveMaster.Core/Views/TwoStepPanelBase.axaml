@@ -1,0 +1,92 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.TwoStepPanelBase"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    Background="{DynamicResource Background2}"
+    mc:Ignorable="d">
+    <Grid
+        Margin="8"
+        RowDefinitions="Auto,8,Auto,8,Auto,8,*,8,Auto,8,Auto,8,Auto">
+        <Grid
+            ColumnDefinitions="Auto,8,*"
+            RowDefinitions="*,*">
+
+            <TextBlock
+                Grid.Column="2"
+                FontSize="16"
+                FontWeight="Bold"
+                Text="{Binding #root.Title}" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,4,0,0"
+                Text="{Binding #root.Description}" />
+            <Button
+                Grid.RowSpan="99"
+                Width="36"
+                Height="36"
+                Margin="-4,-4,0,0"
+                Padding="0"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Background="Transparent"
+                Click="ReturnButton_Click">
+                <TextBlock
+                    FontFamily="avares://ArchiveMaster.Core/Assets/#Segoe Fluent Icons"
+                    FontSize="16"
+                    Text="&#xE0A6;" />
+            </Button>
+        </Grid>
+
+        <ContentControl
+            Grid.Row="2"
+            Content="{Binding ElementName=root, Path=ConfigsContent}"
+            IsEnabled="{Binding CanInitialize}" />
+        <StackPanel
+            Grid.Row="4"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="8">
+            <Button
+                Command="{Binding InitializeCommand}"
+                Content="初始化" />
+            <Button
+                Command="{Binding ResetCommand}"
+                Content="重置" />
+        </StackPanel>
+        <ContentControl
+            Grid.Row="6"
+            Content="{Binding ElementName=root, Path=ResultsContent}" />
+        <StackPanel
+            Grid.Row="8"
+            HorizontalAlignment="Center"
+            IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}"
+            Orientation="Horizontal"
+            Spacing="8">
+            <Button
+                Command="{Binding ExecuteCommand}"
+                Content="执行" />
+            <Button
+                Command="{Binding CancelExecuteCommand}"
+                Content="取消"
+                IsEnabled="{Binding ExecuteCommand.CanBeCanceled}" />
+        </StackPanel>
+
+        <ProgressBar
+            Grid.Row="10"
+            IsIndeterminate="{Binding ProgressIndeterminate}"
+            Maximum="1"
+            Minimum="0"
+            Value="{Binding Progress}" />
+
+        <TextBlock
+            Grid.Row="12"
+            Text="{Binding Message}" />
+    </Grid>
+</UserControl>

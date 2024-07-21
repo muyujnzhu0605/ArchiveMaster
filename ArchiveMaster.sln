@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.UI", "ArchiveMaster.UI\ArchiveMaster.UI.csproj", "{8B0668B2-6C34-45F9-868C-3A6B93E065D9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A} = {B650BAE5-6F4E-4AAC-BE9F-550CB919240A}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.UI.Desktop", "ArchiveMaster.UI.Desktop\ArchiveMaster.UI.Desktop.csproj", "{9186ABDC-98D6-4F28-9F1C-112BE18C7F95}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A} = {B650BAE5-6F4E-4AAC-BE9F-550CB919240A}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Core", "ArchiveMaster.Core\ArchiveMaster.Core.csproj", "{B3A659AA-1D1B-4440-BC79-0D17FA5512B5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.PhotoArchive", "ArchiveMaster.Module.PhotoArchive\ArchiveMaster.Module.PhotoArchive.csproj", "{B650BAE5-6F4E-4AAC-BE9F-550CB919240A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.FileTools", "ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj", "{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B0668B2-6C34-45F9-868C-3A6B93E065D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B0668B2-6C34-45F9-868C-3A6B93E065D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B0668B2-6C34-45F9-868C-3A6B93E065D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B0668B2-6C34-45F9-868C-3A6B93E065D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9186ABDC-98D6-4F28-9F1C-112BE18C7F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9186ABDC-98D6-4F28-9F1C-112BE18C7F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9186ABDC-98D6-4F28-9F1C-112BE18C7F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9186ABDC-98D6-4F28-9F1C-112BE18C7F95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3A659AA-1D1B-4440-BC79-0D17FA5512B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3A659AA-1D1B-4440-BC79-0D17FA5512B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3A659AA-1D1B-4440-BC79-0D17FA5512B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3A659AA-1D1B-4440-BC79-0D17FA5512B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1FDF463E-CFE7-477B-94E8-5D38744ECC9A}
+	EndGlobalSection
+EndGlobal

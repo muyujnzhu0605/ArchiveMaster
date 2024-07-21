@@ -1,0 +1,204 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.EncryptorPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    x:DataType="vm:EncryptorViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.Styles>
+        <Style Selector="ct|FormItem">
+            <Setter Property="LabelWidth" Value="96" />
+        </Style>
+    </v:TwoStepPanelBase.Styles>
+    <v:TwoStepPanelBase.ConfigsContent>
+        <StackPanel
+            Orientation="Vertical"
+            Spacing="8">
+            <ct:FormItem Label="原始目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.RawDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="加密目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.EncryptedDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="密码：">
+                <Grid ColumnDefinitions="*,8,Auto">
+                    <TextBox
+                        PasswordChar="*"
+                        Text="{Binding Config.Password}" />
+                    <CheckBox
+                        Grid.Column="2"
+                        Content="记住密码"
+                        IsChecked="{Binding Config.RememberPassword}" />
+                </Grid>
+            </ct:FormItem>
+
+            <ct:FormItem Label="加解密项目：">
+
+                <WrapPanel>
+                    <WrapPanel.Styles>
+                        <Style Selector="CheckBox">
+                            <Setter Property="Margin" Value="0,0,8,0" />
+                        </Style>
+                    </WrapPanel.Styles>
+                    <CheckBox
+                        Content="文件内容"
+                        IsChecked="True"
+                        IsEnabled="False" />
+                    <CheckBox
+                        Content="文件名"
+                        IsChecked="{Binding Config.EncryptFileNames}"
+                        IsEnabled="{Binding !#chkEncryptDirectoryStructure.IsChecked}" />
+                    <CheckBox
+                        Content="文件夹名"
+                        IsChecked="{Binding Config.EncryptFolderNames}"
+                        IsEnabled="{Binding !#chkEncryptDirectoryStructure.IsChecked}" />
+                    <CheckBox
+                        x:Name="chkEncryptDirectoryStructure"
+                        Content="目录结构（包括文件和文件夹名）"
+                        IsChecked="{Binding Config.EncryptDirectoryStructure}"
+                        ToolTip.Tip="使用单独的文件记录加密后的文件名，防止加密后文件名超过系统支持的最大长度" />
+                </WrapPanel>
+            </ct:FormItem>
+            <ct:FormItem Label="选项：">
+                <WrapPanel>
+                    <WrapPanel.Styles>
+                        <Style Selector="ct|FormItem">
+                            <Setter Property="LabelWidth" Value="NaN" />
+                            <Setter Property="Margin" Value="0,0,8,0" />
+                        </Style>
+                        <Style Selector="CheckBox">
+                            <Setter Property="Margin" Value="0,0,8,0" />
+                        </Style>
+                    </WrapPanel.Styles>
+                    <ct:FormItem Label="填充模式：">
+                        <ComboBox
+                            ItemsSource="{Binding PaddingModes}"
+                            SelectedItem="{Binding Config.PaddingMode}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="加密算法：">
+                        <ComboBox
+                            ItemsSource="{Binding CipherModes}"
+                            SelectedItem="{Binding Config.CipherMode}" />
+                    </ct:FormItem>
+
+
+                    <CheckBox
+                        Content="删除处理前文件"
+                        IsChecked="{Binding Config.DeleteSourceFiles}" />
+                    <CheckBox
+                        Content="覆盖已存在文件"
+                        IsChecked="{Binding Config.OverwriteExistedFiles}" />
+                </WrapPanel>
+            </ct:FormItem>
+
+
+            <ct:FormItem Label="操作：">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <RadioButton
+                        Content="加密"
+                        IsChecked="{Binding IsEncrypting}" />
+                    <RadioButton Content="解密" />
+                </StackPanel>
+            </ct:FormItem>
+        </StackPanel>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <DataGrid
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="True"
+            CanUserSortColumns="False"
+            ItemsSource="{Binding ProcessingFiles}">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn
+                    Binding="{Binding IsEnable}"
+                    Header="处理" />
+                <DataGridTemplateColumn
+                    CanUserResize="False"
+                    Header="已加密">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:EncryptorFileInfo">
+                            <Ellipse
+                                Width="8"
+                                Height="8"
+                                Fill="Green"
+                                IsVisible="{Binding IsEncrypted}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+
+                <DataGridTextColumn
+                    Width="180"
+                    Binding="{Binding Name}"
+                    Header="文件名"
+                    IsReadOnly="True" />
+
+                <DataGridTextColumn
+                    Width="240"
+                    Binding="{Binding RelativePath}"
+                    Header="文件路径"
+                    IsReadOnly="True" />
+
+                <DataGridTextColumn
+                    Width="180"
+                    Binding="{Binding TargetName}"
+                    Header="目标文件名"
+                    IsReadOnly="True" />
+
+                <DataGridTextColumn
+                    Width="240"
+                    Binding="{Binding TargetRelativePath}"
+                    Header="目标文件路径"
+                    IsReadOnly="True" />
+
+                <DataGridTemplateColumn
+                    Width="240"
+                    Header="错误信息">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:EncryptorFileInfo">
+                            <Button
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                Cursor="Hand"
+                                IsVisible="{Binding Error, Converter={StaticResource NotNullConverter}}">
+                                <TextBlock
+                                    Text="{Binding Error.Message}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <Grid RowDefinitions="Auto,8,Auto">
+                                            <TextBlock
+                                                Text="{Binding Error}"
+                                                TextWrapping="Wrap" />
+                                            <Button
+                                                Grid.Row="2"
+                                                HorizontalAlignment="Left"
+                                                Command="{Binding $parent[DataGrid].DataContext.CopyErrorCommand}"
+                                                CommandParameter="{Binding Error}"
+                                                Content="复制" />
+                                        </Grid>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

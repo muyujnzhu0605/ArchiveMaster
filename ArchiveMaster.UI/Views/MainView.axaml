@@ -1,0 +1,123 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.MainView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:local="clr-namespace:ArchiveMaster.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:MainViewModel"
+    IsEnabled="{Binding IsEnable}"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <Grid>
+        <ScrollViewer
+            Grid.Row="2"
+            Margin="8,16"
+            Classes.hidden="{Binding IsToolOpened}"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Styles>
+                <Style Selector="ScrollViewer">
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="Transitions">
+                        <Transitions>
+                            <DoubleTransition
+                                Easing="CubicEaseInOut"
+                                Property="Opacity"
+                                Duration="0:0:0.3" />
+                        </Transitions>
+                    </Setter>
+                    <Style Selector="^.hidden">
+                        <Setter Property="IsHitTestVisible" Value="False" />
+                        <Setter Property="Opacity" Value="0" />
+                    </Style>
+                </Style>
+
+            </ScrollViewer.Styles>
+            <ItemsControl ItemsSource="{Binding PanelGroups}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel
+                            Orientation="Vertical"
+                            Spacing="16" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel
+                            Orientation="Vertical"
+                            Spacing="8">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                FontSize="20"
+                                FontWeight="Bold"
+                                Text="{Binding GroupName}" />
+                            <Border
+                                MaxWidth="240"
+                                BorderBrush="{DynamicResource Foreground3}"
+                                BorderThickness="0,2,0,0" />
+                            <ItemsControl ItemsSource="{Binding Panels}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel
+                                            HorizontalAlignment="Center"
+                                            ItemHeight="280"
+                                            ItemWidth="200" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <local:ToolItemBox
+                                            x:Name="tib"
+                                            Title="{Binding Title}"
+                                            Description="{Binding Description}"
+                                            Icon="{Binding IconUri}">
+                                            <Interaction.Behaviors>
+                                                <EventTriggerBehavior
+                                                    EventName="PointerPressed"
+                                                    SourceObject="tib">
+                                                    <InvokeCommandAction
+                                                        Command="{Binding #root.DataContext.EnterToolCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </EventTriggerBehavior>
+                                            </Interaction.Behaviors>
+                                        </local:ToolItemBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <ContentControl
+            Classes.hidden="{Binding !IsToolOpened}"
+            Content="{Binding MainContent}">
+            <ContentControl.Styles>
+                <Style Selector="ContentControl">
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="Transitions">
+                        <Transitions>
+                            <DoubleTransition
+                                Easing="CubicEaseInOut"
+                                Property="Opacity"
+                                Duration="0:0:0.3" />
+                        </Transitions>
+                    </Setter>
+                    <Style Selector="^.hidden">
+                        <Setter Property="IsHitTestVisible" Value="False" />
+                        <Setter Property="Opacity" Value="0" />
+                    </Style>
+                </Style>
+            </ContentControl.Styles>
+        </ContentControl>
+    </Grid>
+</UserControl>

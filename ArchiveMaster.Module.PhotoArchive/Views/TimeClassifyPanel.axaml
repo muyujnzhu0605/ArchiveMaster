@@ -1,0 +1,55 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.TimeClassifyPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TimeClassifyViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <StackPanel
+            Orientation="Vertical"
+            Spacing="8">
+            <ct:FilePickerTextBox
+                FileNames="{Binding Dir}"
+                Label="目录："
+                Type="OpenFolder" />
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="最小时间间隔：" />
+                <NumericUpDown
+                    Width="120"
+                    FormatString="0"
+                    Maximum="1440"
+                    Minimum="1"
+                    Value="{Binding Config.MinTimeInterval, Converter={StaticResource TimeSpanNumberConverter}, ConverterParameter=m}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="分钟" />
+            </StackPanel>
+
+        </StackPanel>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            Grid.Row="8"
+            ColumnDefinitions="*,8,*">
+            <ListBox
+                x:Name="lstDirs"
+                DisplayMemberBinding="{Binding Name}"
+                ItemsSource="{Binding SameTimePhotosDirs}" />
+            <ListBox
+                Grid.Column="2"
+                DisplayMemberBinding="{Binding Name}"
+                ItemsSource="{Binding #lstDirs.SelectedItem.Subs}" />
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

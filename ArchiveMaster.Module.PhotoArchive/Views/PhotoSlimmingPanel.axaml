@@ -1,0 +1,131 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PhotoSlimmingPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:PhotoSlimmingViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="*,8,Auto">
+            <ListBox
+                DisplayMemberBinding="{Binding Name}"
+                ItemsSource="{Binding Configs}"
+                SelectedItem="{Binding Config}" />
+            <Grid
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                ColumnDefinitions="Auto,8,Auto"
+                IsEnabled="{Binding !IsWorking}"
+                RowDefinitions="Auto,8,Auto">
+                <Button
+                    Command="{Binding CreateCommand}"
+                    Content="新增" />
+                <Button
+                    Grid.Row="2"
+                    Command="{Binding EditCommand}"
+                    Content="修改"
+                    IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
+                <Button
+                    Grid.Column="2"
+                    Command="{Binding RemoveCommand}"
+                    Content="删除"
+                    IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Command="{Binding CloneCommand}"
+                    Content="克隆"
+                    IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
+            </Grid>
+        </Grid>
+
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            Grid.Row="6"
+            ColumnDefinitions="*,8,*,8,*,8,*">
+            <Grid.Styles>
+                <Style Selector="ListBox">
+                    <Setter Property="ItemTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <TextBlock
+                                    Text="{Binding .}"
+                                    TextWrapping="Wrap" />
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Grid.Styles>
+            <gb:GroupBox Header="待复制">
+                <Grid RowDefinitions="*,8,Auto">
+                    <ListBox ItemsSource="{Binding CopyFiles.ProcessingFilesRelativePaths}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        IsVisible="{Binding CopyFiles, Converter={StaticResource NotNullConverter}}">
+                        <Run Text="共" />
+                        <Run Text="{Binding CopyFiles.ProcessingFiles.Count}" />
+                        <Run Text="个文件，跳过" />
+                        <Run Text="{Binding CopyFiles.SkippedFiles.Count}" />
+                        <Run Text="个文件" />
+                    </TextBlock>
+                </Grid>
+            </gb:GroupBox>
+            <gb:GroupBox
+                Grid.Column="2"
+                Header="待压缩">
+                <Grid RowDefinitions="*,8,Auto">
+                    <ListBox ItemsSource="{Binding CompressFiles.ProcessingFilesRelativePaths}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        IsVisible="{Binding CompressFiles, Converter={StaticResource NotNullConverter}}">
+                        <Run Text="共" />
+                        <Run Text="{Binding CompressFiles.ProcessingFiles.Count}" />
+                        <Run Text="个文件，跳过" />
+                        <Run Text="{Binding CompressFiles.SkippedFiles.Count}" />
+                        <Run Text="个文件" />
+                    </TextBlock>
+                </Grid>
+            </gb:GroupBox>
+            <gb:GroupBox
+                Grid.Column="4"
+                Header="待删除">
+                <Grid RowDefinitions="*,8,Auto">
+                    <ListBox ItemsSource="{Binding DeleteFiles.ProcessingFilesRelativePaths}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        IsVisible="{Binding DeleteFiles, Converter={StaticResource NotNullConverter}}">
+                        <Run Text="共" />
+                        <Run Text="{Binding DeleteFiles.ProcessingFiles.Count}" />
+                        <Run Text="个文件，跳过" />
+                        <Run Text="{Binding DeleteFiles.SkippedFiles.Count}" />
+                        <Run Text="个文件" />
+                    </TextBlock>
+                </Grid>
+            </gb:GroupBox>
+            <gb:GroupBox
+                Grid.Column="6"
+                Header="错误信息">
+                <Grid RowDefinitions="*,8,Auto">
+                    <ListBox ItemsSource="{Binding ErrorMessages}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        IsVisible="{Binding ErrorMessages, Converter={StaticResource NotNullConverter}}">
+                        <Run Text="共" />
+                        <Run Text="{Binding ErrorMessages.Count}" />
+                        <Run Text="条信息" />
+                    </TextBlock>
+                </Grid>
+            </gb:GroupBox>
+
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>
