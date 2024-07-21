@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
-    Title="照片归档工具"
+    Title="文件归档大师"
     Width="800"
     Height="600"
     MinWidth="400"

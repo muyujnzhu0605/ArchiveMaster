@@ -14,18 +14,26 @@
     
     Clear-Host
 
+    $moduleDirectories = Get-ChildItem -Path . -Directory -Filter "ArchiveMaster.Module.*"
+
     Write-Output "正在发布win-x64"
-    dotnet publish PhotoArchivingTools.Desktop -r win-x64 -c Release -o Publish/win-x64 --self-contained $c /p:PublishSingleFile=$s 
-    Move-Item Publish/win-x64/PhotoArchivingTools.Desktop.exe Publish/win-x64/PAT.exe
+    
+    foreach ($module in $moduleDirectories) {
+        dotnet publish $module.FullName -r win-x64 -c Release -o Publish/win-x64/temp
+    }
+    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o Publish/win-x64 --self-contained $c /p:PublishSingleFile=$s 
+    Copy-Item Publish/win-x64/temp/ArchiveMaster.Module.* Publish/win-x64
+    Remove-Item -r Publish/win-x64/temp
 
     Write-Output "正在发布linux-x64"
-    dotnet publish PhotoArchivingTools.Desktop -r linux-x64 -c Release -o Publish/linux-x64 --self-contained $c /p:PublishSingleFile=$s 
-    Move-Item Publish/linux-x64/PhotoArchivingTools.Desktop Publish/linux-x64/PAT.exe
-    # if ($b) {
-    #     Write-Output "正在发布browser-wasm"
-    #     dotnet publish MyDiary.UI/MyDiary.UI.Browser -r browser-wasm -c Release -o Publish/web --self-contained true
-    #     Copy-Item -Recurse $Env:TEMP/MyDiary_Release\MyDiary.UI.Browser\net8.0\browser-wasm/AppBundle Publish/web
-    # }
+        
+    foreach ($module in $moduleDirectories) {
+        dotnet publish $module.FullName -r linux-x64 -c Release -o Publish/linux-x64/temp
+    }
+    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o Publish/linux-x64 --self-contained $c /p:PublishSingleFile=$s
+    Copy-Item Publish/linux-x64/temp/ArchiveMaster.Module.* Publish/linux-x64
+    Remove-Item -r Publish/linux-x64/temp
+    Remove-Item -r ./*/obj/
    
     Write-Output "操作完成"
 

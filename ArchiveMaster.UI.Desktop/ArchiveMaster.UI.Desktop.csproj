@@ -8,6 +8,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+    <ApplicationIcon>../ArchiveMaster.UI/Assets/icon_light.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

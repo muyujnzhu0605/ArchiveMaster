@@ -7,7 +7,7 @@ namespace ArchiveMaster.Views
     {
         public RepairModifiedTimePanel()
         {
-            DataContext = new RepairModifiedTimeModel();
+            DataContext = new RepairModifiedTimeViewModel();
             InitializeComponent();
         }
     }

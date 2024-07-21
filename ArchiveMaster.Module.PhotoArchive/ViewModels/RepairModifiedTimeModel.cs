@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RepairModifiedTimeModel : TwoStepViewModelBase
+public partial class RepairModifiedTimeViewModel : TwoStepViewModelBase
 {
     private RepairModifiedTimeUtility utility;
 
