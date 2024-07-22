@@ -17,17 +17,9 @@
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="FzLib.Avalonia" />
     <PackageReference Include="Magick.NET-Q16-AnyCPU" />
     <PackageReference Include="MetadataExtractor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="FzLib">
-      <HintPath>..\libs\FzLib.dll</HintPath>
-    </Reference>
-    <Reference Include="FzLib.Avalonia">
-      <HintPath>..\libs\FzLib.Avalonia.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

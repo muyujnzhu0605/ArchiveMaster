@@ -20,13 +20,4 @@
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.PhotoArchive\ArchiveMaster.Module.PhotoArchive.csproj" />
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="FzLib">
-      <HintPath>..\..\模块\Publish\Release\net8.0\FzLib.dll</HintPath>
-    </Reference>
-    <Reference Include="FzLib.Avalonia">
-      <HintPath>..\..\模块\Publish\Release\net8.0\FzLib.Avalonia.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>
