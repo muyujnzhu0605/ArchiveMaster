@@ -19,6 +19,7 @@
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
+            <FontFamily x:Key="IconFont">avares://ArchiveMaster.Core/Assets/#Segoe Fluent Icons</FontFamily>
             <c:BitmapAssetValueConverter x:Key="BitmapAssetValueConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://FzLib.Avalonia/Resources.axaml" />

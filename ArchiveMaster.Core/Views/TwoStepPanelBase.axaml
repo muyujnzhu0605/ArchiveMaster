@@ -6,10 +6,8 @@
     xmlns:local="using:ArchiveMaster.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="root"
-    Title="{Binding Title}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    Description="{Binding Description}"
     mc:Ignorable="d">
     <local:PanelBase.PanelContent>
         <Grid

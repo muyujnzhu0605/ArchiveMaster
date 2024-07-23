@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\PanelBase.cs">
+    <Compile Update="Views\PanelBase.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
     <Compile Update="Views\TwoStepPanelBase.axaml.cs">

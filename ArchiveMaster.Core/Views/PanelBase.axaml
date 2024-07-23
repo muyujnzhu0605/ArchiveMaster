@@ -14,7 +14,7 @@
         Margin="8"
         RowDefinitions="Auto,8,*">
         <Grid
-            ColumnDefinitions="Auto,8,*"
+            ColumnDefinitions="Auto,8,*,8,Auto"
             RowDefinitions="*,*">
 
             <TextBlock
@@ -26,7 +26,8 @@
                 Grid.Row="1"
                 Grid.Column="2"
                 Margin="0,4,0,0"
-                Text="{Binding #root.Description}" />
+                Text="{Binding #root.Description}"
+                TextTrimming="CharacterEllipsis" />
             <Button
                 Grid.RowSpan="99"
                 Width="36"
@@ -39,10 +40,16 @@
                 Background="Transparent"
                 Click="ReturnButton_Click">
                 <TextBlock
-                    FontFamily="avares://ArchiveMaster.Core/Assets/#Segoe Fluent Icons"
+                    FontFamily="{StaticResource IconFont}"
                     FontSize="16"
                     Text="&#xE0A6;" />
             </Button>
+
+            <ContentControl
+                Grid.RowSpan="99"
+                Grid.Column="99"
+                Content="{Binding #root.RightTopContent}" />
+
         </Grid>
 
         <ContentControl

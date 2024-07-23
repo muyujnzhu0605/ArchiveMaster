@@ -12,8 +12,12 @@ namespace ArchiveMaster.Views
         public static readonly StyledProperty<object> PanelContentProperty =
             AvaloniaProperty.Register<PanelBase, object>(nameof(PanelContent));
 
+        public static readonly StyledProperty<object> RightTopContentProperty =
+            AvaloniaProperty.Register<PanelBase, object>(nameof(RightTopContent));
+
         public static readonly StyledProperty<string> TitleProperty =
-                    AvaloniaProperty.Register<PanelBase, string>(nameof(Title));
+                            AvaloniaProperty.Register<PanelBase, string>(nameof(Title));
+
         public PanelBase()
         {
             InitializeComponent();
@@ -31,6 +35,12 @@ namespace ArchiveMaster.Views
         {
             get => GetValue(PanelContentProperty);
             set => SetValue(PanelContentProperty, value);
+        }
+
+        public object RightTopContent
+        {
+            get => GetValue(RightTopContentProperty);
+            set => SetValue(RightTopContentProperty, value);
         }
         public string Title
         {

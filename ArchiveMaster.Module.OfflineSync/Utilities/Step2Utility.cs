@@ -1,5 +1,4 @@
-﻿using ArchiveMaster.Configs;
-using ArchiveMaster.Models;
+﻿using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using FzLib.Collection;
 using Newtonsoft.Json;
@@ -14,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
+using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.Utility
 {

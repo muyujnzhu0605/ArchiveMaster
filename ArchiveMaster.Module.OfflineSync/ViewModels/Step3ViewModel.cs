@@ -1,8 +1,8 @@
-﻿using ArchiveMaster.Configs;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib;
 using ArchiveMaster.Views;
 using System.Collections;
+using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels
 {

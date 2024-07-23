@@ -1,4 +1,4 @@
-﻿using ArchiveMaster.Configs;
+﻿using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
 using Avalonia.Data.Converters;
 using System;

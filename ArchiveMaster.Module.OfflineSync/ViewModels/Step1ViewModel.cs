@@ -1,6 +1,7 @@
-﻿using ArchiveMaster.ViewModels;
+﻿using ArchiveMaster.Configs;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib;
+using Mapster;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 
@@ -14,6 +15,16 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> syncDirs = new ObservableCollection<string>();
 
+        public Step1ViewModel()
+        {
+            Config.Adapt(this);
+            AppConfig.Instance.BeforeSaving += (s, e) =>
+            {
+                this.Adapt(Config);
+            };
+        }
+
+        public Step1Config Config { get; } = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
         public void AddSyncDir(string path)
         {
             DirectoryInfo newDirInfo = new DirectoryInfo(path);

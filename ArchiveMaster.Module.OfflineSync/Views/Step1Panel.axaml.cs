@@ -10,13 +10,13 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// UpdatePanel.xaml 的交互逻辑
     /// </summary>
-    public partial class Step1Panel : PanelBase
+    public partial class Step1Panel : OfflineSyncPanelBase
     {
         private readonly Step1Utility u = new Step1Utility();
 
         public Step1Panel()
         {
-            ViewModel = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+            ViewModel = new Step1ViewModel();
             DataContext = ViewModel;
             InitializeComponent();
             PanelHelper.RegisterMessageAndProgressEvent(u, ViewModel);

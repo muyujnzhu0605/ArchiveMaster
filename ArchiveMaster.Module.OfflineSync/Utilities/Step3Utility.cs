@@ -1,4 +1,4 @@
-﻿using ArchiveMaster.Configs;
+﻿using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using FzLib.IO;

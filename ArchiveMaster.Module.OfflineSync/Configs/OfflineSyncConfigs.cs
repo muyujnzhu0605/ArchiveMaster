@@ -15,7 +15,6 @@ namespace ArchiveMaster.Configs
     {
         public static readonly int MaxTimeTolerance = 3;
 
-
         public Dictionary<string, SingleConfig> ConfigCollection { get; set; } = new Dictionary<string, SingleConfig>();
         
         [JsonIgnore]
@@ -23,9 +22,9 @@ namespace ArchiveMaster.Configs
         {
             get
             {
-                if (ConfigCollection.ContainsKey(CurrentConfigName))
+                if (ConfigCollection.TryGetValue(CurrentConfigName, out SingleConfig value))
                 {
-                    return ConfigCollection[CurrentConfigName];
+                    return value;
                 }
                 else
                 {
@@ -41,8 +40,8 @@ namespace ArchiveMaster.Configs
 
     public class SingleConfig
     {
-        public Step1ViewModel Step1 { get; set; } = new  Step1ViewModel();
-        public Step2ViewModel Step2 { get; set; } = new Step2ViewModel();
-        public Step3ViewModel Step3 { get; set; } = new Step3ViewModel();
+        public Step1Config Step1 { get; set; } = new Step1Config();
+        public Step2Config Step2 { get; set; } = new Step2Config();
+        //public Step3Config Step3 { get; set; } = new Step3Config();
     }
 }
