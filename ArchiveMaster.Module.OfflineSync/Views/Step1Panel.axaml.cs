@@ -10,7 +10,7 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// UpdatePanel.xaml 的交互逻辑
     /// </summary>
-    public partial class Step1Panel : UserControl
+    public partial class Step1Panel : PanelBase
     {
         private readonly Step1Utility u = new Step1Utility();
 

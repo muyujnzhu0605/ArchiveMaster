@@ -23,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\PanelBase.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
     <Compile Update="Views\TwoStepPanelBase.axaml.cs">
       <DependentUpon>TwoStepPanelBase.axaml</DependentUpon>
     </Compile>

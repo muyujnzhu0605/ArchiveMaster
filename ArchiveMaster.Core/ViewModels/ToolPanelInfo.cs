@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ArchiveMaster.Views;
+using System;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -21,7 +22,7 @@ public class ToolPanelInfo
 
     public string IconUri { get; private set; }
 
-    public object PanelInstance { get; set; }
+    public PanelBase PanelInstance { get; set; }
 
     public Type PanelType { get; private set; }
 

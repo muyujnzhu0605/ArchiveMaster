@@ -33,16 +33,15 @@ public partial class MainViewModel : ObservableObject
     {
         if (panelInfo.PanelInstance == null)
         {
-            panelInfo.PanelInstance = Activator.CreateInstance(panelInfo.PanelType) as TwoStepPanelBase;
-            (panelInfo.PanelInstance as TwoStepPanelBase).RequestClosing += (s, e) =>
+            panelInfo.PanelInstance = Activator.CreateInstance(panelInfo.PanelType) as PanelBase;
+            panelInfo.PanelInstance.RequestClosing += (s, e) =>
             {
                 IsToolOpened = false;
             };
         }
-        TwoStepPanelBase panel = panelInfo.PanelInstance as TwoStepPanelBase;
-        panel.Title = panelInfo.Title;
-        panel.Description = panelInfo.Description;
-        MainContent = panel;
+        panelInfo.PanelInstance.Title = panelInfo.Title;
+        panelInfo.PanelInstance.Description = panelInfo.Description;
+        MainContent = panelInfo.PanelInstance;
         IsToolOpened = true;
     }
 }
