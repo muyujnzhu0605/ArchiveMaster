@@ -9,9 +9,17 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class SimpleFileInfo : SimpleFileOrDirInfo
     {
+        [ObservableProperty]
+        private long length;
+
+        public SimpleFileInfo() : base()
+        {
+
+        }
         public SimpleFileInfo(string path) : base(path)
         {
-            Time = System.IO.File.GetLastWriteTime(path);
+            Length = FileInfo.Length;
+            Time = FileInfo.LastWriteTime;
         }
 
         [ObservableProperty]

@@ -19,5 +19,6 @@
     <ProjectReference Include="..\ArchiveMaster.UI\ArchiveMaster.UI.csproj" />
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.PhotoArchive\ArchiveMaster.Module.PhotoArchive.csproj" />
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
+    <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj" />
   </ItemGroup>
 </Project>

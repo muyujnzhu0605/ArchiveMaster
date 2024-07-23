@@ -58,12 +58,12 @@ namespace ArchiveMaster.Utilities
             List<SimpleDirInfo> subDirs = null;
             List<SimpleDirInfo> targetDirs = new List<SimpleDirInfo>();
 
-            await Task.Run(() =>
+            await Task.Run((Action)(() =>
             {
                 NotifyProgressUpdate(0, -1, "正在搜索文件");
                 files = Directory.EnumerateFiles(Config.Dir)
                     .Select(p => new SimpleFileInfo(p))
-                    .OrderBy(p => p.Time)
+                    .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
                     .ToList();
                 subDirs = Directory.EnumerateDirectories(Config.Dir)
                     .Select(p => new SimpleDirInfo(p))
@@ -112,7 +112,7 @@ namespace ArchiveMaster.Utilities
                         throw new NotImplementedException();
                     }
                 }
-            });
+            }));
 
             foreach (var dir in targetDirs)
             {

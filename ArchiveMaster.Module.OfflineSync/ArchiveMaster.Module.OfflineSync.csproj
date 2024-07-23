@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ArchiveMaster</RootNamespace>
+    <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaXaml Remove="Views\Step2Panel.axaml" />
+    <AvaloniaXaml Remove="Views\Step3Panel.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Views\MainWindow.xaml.cs" />
+    <Compile Remove="Views\Step2Panel.axaml.cs" />
+    <Compile Remove="Views\Step3Panel.axaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Views\MainWindow.xaml" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Xaml.Behaviors" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="BinToss.GroupBox.Avalonia" />
+
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
+    <PackageReference Include="FzLib.Avalonia" />
+    <PackageReference Include="Mapster" />
+
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+</Project>

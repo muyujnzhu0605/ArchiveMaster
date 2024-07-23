@@ -1,0 +1,396 @@
+﻿<UserControl
+    x:Class="ArchiveMaster.Views.Step2Panel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:model="clr-namespace:OffsiteBackupOfflineSync.Model;assembly=OffsiteBackupOfflineSync.Core"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="8" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <ui:SimpleStackPanel
+                Margin="8"
+                IsEnabled="{Binding CanEditConfigs}"
+                Spacing="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="96" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="异地快照文件：" />
+                    <TextBox
+                        Grid.Column="2"
+                        MaxLines="3"
+                        Text="{Binding OffsiteSnapshot}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        Grid.Column="4"
+                        Click="BrowseOffsiteSnapshotButton_Click"
+                        Content="浏览.." />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        VerticalAlignment="Center"
+                        Text="本地搜索目录：" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        ui:ControlHelper.PlaceholderText="在选择的目录中搜索需要同步的目录；一行一项"
+                        AcceptsReturn="True"
+                        MaxLines="3"
+                        Text="{Binding LocalDir}" />
+                    <Button
+                        Grid.Row="2"
+                        Grid.Column="4"
+                        Click="BrowseLocalDirButton_Click"
+                        Content="添加.." />
+
+                </Grid>
+                <Grid HorizontalAlignment="Right">
+                    <Button
+                        Width="128"
+                        Click="MatchDirsButton_Click"
+                        Content="1. 匹配目录" />
+                </Grid>
+            </ui:SimpleStackPanel>
+            <DataGrid
+                Grid.Row="2"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserReorderColumns="True"
+                ItemsSource="{Binding MatchingDirs}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding OffsiteDir}"
+                        Header="异地目录"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding LocalDir}"
+                        Header="本地目录" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <ui:SimpleStackPanel
+                Margin="8"
+                IsEnabled="{Binding CanEditConfigs}"
+                Spacing="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="96" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Row="4"
+                        VerticalAlignment="Center"
+                        Text="导出补丁目录：" />
+                    <TextBox
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Text="{Binding PatchDir}" />
+                    <Button
+                        Grid.Row="4"
+                        Grid.Column="4"
+                        Click="BrowsePatchDirButton_Click"
+                        Content="浏览.." />
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="96" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="黑名单：" />
+                    <TextBox
+                        Grid.Column="2"
+                        ui:ControlHelper.PlaceholderText="可以是文件名，也可以是完整路径；一行一项"
+                        AcceptsReturn="True"
+                        MaxLines="5"
+                        Text="{Binding BlackList}"
+                        VerticalScrollBarVisibility="Auto" />
+                    <CheckBox
+                        Grid.Column="4"
+                        VerticalAlignment="Center"
+                        Content="使用正则表达式"
+                        IsChecked="{Binding BlackListUseRegex}" />
+                </Grid>
+                <Grid HorizontalAlignment="Right">
+                    <Button
+                        Width="128"
+                        Click="SearchChangeButton_Click"
+                        Content="2. 查找更改" />
+                </Grid>
+            </ui:SimpleStackPanel>
+            <DataGrid
+                Grid.Row="2"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserReorderColumns="True"
+                ItemsSource="{Binding Files}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn
+                        Width="36"
+                        CanUserReorder="False"
+                        CanUserResize="False"
+                        CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    Margin="8,0"
+                                    IsChecked="{Binding Checked, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="完成">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    x:Name="e"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="Green"
+                                    Text="●"
+                                    Visibility="Collapsed" />
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Complete}">
+                                        <DataTrigger.Value>
+                                            <sys:Boolean>True</sys:Boolean>
+                                        </DataTrigger.Value>
+                                        <DataTrigger.Setters>
+                                            <Setter TargetName="e" Property="Visibility" Value="Visible" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn
+                        Width="200"
+                        Binding="{Binding Name}"
+                        ElementStyle="{StaticResource DataGridCheckBoxColumnTextWrappingStyle}"
+                        Header="文件名"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Width="400"
+                        Binding="{Binding ., Converter={StaticResource SyncFilePathConverter}}"
+                        ElementStyle="{StaticResource DataGridCheckBoxColumnTextWrappingStyle}"
+                        Header="路径"
+                        IsReadOnly="True" />
+
+                    <DataGridTextColumn
+                        Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
+                        CanUserResize="False"
+                        Header="修改时间"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding Length, Converter={StaticResource FileLength2StringConverter}}"
+                        CanUserResize="False"
+                        Header="大小"
+                        IsReadOnly="True" />
+
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="更新类型"
+                        SortMemberPath="UpdateType">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}" />
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding UpdateType}">
+                                        <DataTrigger.Value>
+                                            <model:FileUpdateType>Add</model:FileUpdateType>
+                                        </DataTrigger.Value>
+                                        <Setter Property="TextElement.Foreground" Value="Green" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding UpdateType}">
+                                        <DataTrigger.Value>
+                                            <model:FileUpdateType>Delete</model:FileUpdateType>
+                                        </DataTrigger.Value>
+                                        <Setter Property="TextElement.Foreground" Value="Red" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding UpdateType}">
+                                        <DataTrigger.Value>
+                                            <model:FileUpdateType>Modify</model:FileUpdateType>
+                                        </DataTrigger.Value>
+                                        <Setter Property="TextElement.Foreground" Value="Yellow" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding UpdateType}">
+                                        <DataTrigger.Value>
+                                            <model:FileUpdateType>Move</model:FileUpdateType>
+                                        </DataTrigger.Value>
+                                        <Setter Property="TextElement.Foreground" Value="Orange" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn
+                        Binding="{Binding Message}"
+                        CanUserResize="False"
+                        Header="信息"
+                        IsReadOnly="True" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <ui:SimpleStackPanel
+                Grid.Row="4"
+                Margin="8,0"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="共新增文件" />
+                    <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
+                    <Run Text="个（" />
+                    <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                    <Run Text="），修改文件" />
+                    <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
+                    <Run Text="个（" />
+                    <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                    <Run Text="），移动文件" />
+                    <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
+                    <Run Text="个，删除文件" />
+                    <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
+                    <Run Text="个" />
+                </TextBlock>
+
+                <Button
+                    HorizontalAlignment="Stretch"
+                    Click="SelectAllButton_Click"
+                    Content="全选"
+                    IsEnabled="{Binding CanEditConfigs}" />
+                <Button
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    Click="SelectNoneButton_Click"
+                    Content="全不选"
+                    IsEnabled="{Binding CanEditConfigs}" />
+            </ui:SimpleStackPanel>
+        </Grid>
+        <Grid
+            Grid.Row="99"
+            Grid.ColumnSpan="99"
+            Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="{Binding Message}"
+                TextTrimming="CharacterEllipsis"
+                ToolTip="{Binding Message}" />
+            <ProgressBar
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                IsIndeterminate="{Binding ProgressIndeterminate}"
+                Maximum="{Binding ProgressMax}"
+                Value="{Binding Progress}" />
+            <TextBlock
+                Grid.Column="4"
+                VerticalAlignment="Center"
+                Text="导出方式：" />
+            <ComboBox
+                Grid.Column="6"
+                Width="128"
+                ItemsSource="{Binding ExportModes}"
+                SelectedItem="{Binding ExportMode}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                <ComboBox.ToolTip>
+                    <TextBlock>
+                        <Run FontWeight="Bold">复制：</Run>
+                        <Run>将文件复制到导出目录中</Run>
+                        <LineBreak />
+                        <Run FontWeight="Bold">硬链接：</Run>
+                        <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
+                        <LineBreak />
+                        <Run FontWeight="Bold">硬链接优先：</Run>
+                        <Run>优先使用硬链接，若失败，则复制</Run>
+                        <LineBreak />
+                        <Run FontWeight="Bold">脚本：</Run>
+                        <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
+                    </TextBlock>
+                </ComboBox.ToolTip>
+            </ComboBox>
+            <Button
+                Grid.Column="8"
+                Width="128"
+                Click="StopButton_Click"
+                Content="停止"
+                IsEnabled="{Binding CanStop}" />
+            <Button
+                Grid.Column="10"
+                Width="128"
+                Click="ExportButton_Click"
+                Content="3. 生成补丁"
+                IsEnabled="{Binding CanProcess}" />
+        </Grid>
+    </Grid>
+</UserControl>

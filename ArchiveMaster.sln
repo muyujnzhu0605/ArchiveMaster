@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.PhotoA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.FileTools", "ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj", "{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.OfflineSync", "ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj", "{98187AB8-D1E4-4806-8CF4-A45EE7EAE33D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98187AB8-D1E4-4806-8CF4-A45EE7EAE33D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98187AB8-D1E4-4806-8CF4-A45EE7EAE33D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98187AB8-D1E4-4806-8CF4-A45EE7EAE33D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98187AB8-D1E4-4806-8CF4-A45EE7EAE33D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

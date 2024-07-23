@@ -5,6 +5,13 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class SimpleFileOrDirInfo : ObservableObject
     {
+        [ObservableProperty]
+        private string name;
+
+        [ObservableProperty]
+        private string path;
+
+        protected FileInfo FileInfo { get;private set; }
         public SimpleFileOrDirInfo()
         {
         }
@@ -12,14 +19,9 @@ namespace ArchiveMaster.ViewModels
         public SimpleFileOrDirInfo(string path)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(path);
-            Name = System.IO.Path.GetFileName(path);
-            Path = path;
+            FileInfo = new FileInfo(path);
+            Name = FileInfo.Name;
+            Path = FileInfo.FullName;
         }
-
-        [ObservableProperty]
-        private string name;
-
-        [ObservableProperty]
-        private string path;
     }
 }
