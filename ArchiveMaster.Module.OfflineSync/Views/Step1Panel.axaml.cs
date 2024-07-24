@@ -25,31 +25,6 @@ namespace ArchiveMaster.Views
 
         public Step1ViewModel ViewModel { get; }
 
-        private async void BrowseDirButton_Click(object sender, RoutedEventArgs e)
-        {
-            //var dialog = new OpenFolderDialog();
-            //dialog.Multiselect = true;
-            //if (dialog.ShowDialog() == true)
-            //{
-            //    var paths = dialog.FolderNames;
-            //    if (paths.Length > 0)
-            //    {
-            //        foreach (var path in paths)
-            //        {
-            //            try
-            //            {
-            //                ViewModel.AddSyncDir(path);
-            //            }
-            //            catch (Exception ex)
-            //            {
-            //                await CommonDialog.ShowErrorDialogAsync(ex.Message, null, "添加失败");
-            //            }
-            //        }
-            //    }
-            //}
-        }
-
-
         private void BrowseOutputFileButton_Click(object sender, RoutedEventArgs e)
         {
             GetObos1File();

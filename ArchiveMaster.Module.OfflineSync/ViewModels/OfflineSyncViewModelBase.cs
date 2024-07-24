@@ -1,7 +1,10 @@
 ﻿using ArchiveMaster.Enums;
+using ArchiveMaster.Messages;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
+using FzLib.Avalonia.Messages;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
@@ -43,16 +46,16 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private double progressMax;
-        
+
         public long AddedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Count() ?? 0;
 
-        
+
         public long AddedFileLength => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Sum(p => p.Length) ?? 0;
-     
-        
+
+
         public int CheckedFileCount => Files?.Where(p => p.IsChecked)?.Count() ?? 0;
 
-        
+
         public int DeletedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Delete && p.IsChecked)?.Count() ?? 0;
 
         public long ModifiedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Count() ?? 0;
@@ -116,6 +119,16 @@ namespace ArchiveMaster.ViewModels
         partial void OnProgressChanged(double value)
         {
             ProgressIndeterminate = false;
+        }
+
+        protected Task ShowErrorAsync(string title, Exception exception)
+        {
+            return WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
+            {
+                Type = CommonDialogMessage.CommonDialogType.Error,
+                Title = title,
+                Exception = exception
+            }).Task;
         }
     }
 }

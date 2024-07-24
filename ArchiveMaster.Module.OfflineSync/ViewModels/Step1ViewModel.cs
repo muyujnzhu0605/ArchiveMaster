@@ -1,6 +1,11 @@
 ﻿using ArchiveMaster.Configs;
+using ArchiveMaster.Messages;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
+using FzLib.Avalonia.Messages;
 using Mapster;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
@@ -24,10 +29,61 @@ namespace ArchiveMaster.ViewModels
             };
         }
 
+        [RelayCommand]
+        private async Task BrowseDirAsync()
+        {
+            var storageProvider = WeakReferenceMessenger.Default.Send(new GetStorageProviderMessage()).StorageProvider;
+            var files = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+            {
+                AllowMultiple = true,
+            });
+            if (files.Count > 0)
+            {
+                try
+                {
+                    foreach (var file in files)
+                    {
+                        var path = file.TryGetLocalPath();
+                        AddSyncDir(path);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ShowErrorAsync("加入失败", ex);
+                }
+            }
+        }
+        [RelayCommand]
+        private async Task InputDirAsync()
+        {
+            try
+            {
+                if ((await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
+                {
+                    Type = InputDialogMessage.InputDialogType.Text,
+                    Title = "输入目录",
+                    Message = "请输入欲加入的目录地址"
+                }).Task) is string result)
+                {
+                    AddSyncDir(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync("加入失败", ex);
+            }
+        }
+
         public Step1Config Config { get; } = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
-        public void AddSyncDir(string path)
+
+        private void AddSyncDir(string path)
         {
             DirectoryInfo newDirInfo = new DirectoryInfo(path);
+
+            if (!newDirInfo.Exists)
+            {
+                throw new FileNotFoundException("指定的目录不存在");
+            }
 
             // 检查新目录与现有目录是否相同
             foreach (string existingPath in SyncDirs)

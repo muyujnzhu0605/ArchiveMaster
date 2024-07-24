@@ -31,7 +31,7 @@ public partial class MainView : UserControl
         InitializeComponent();
         RegisterMessages();
     }
-    private static void InitializeModules()
+    private void InitializeModules()
     {
         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         string[] dllFiles = Directory.GetFiles(currentDirectory, "ArchiveMaster.Module.*.dll");
@@ -54,6 +54,7 @@ public partial class MainView : UserControl
                     IModuleInitializer moduleInitializer = (IModuleInitializer)Activator.CreateInstance(type);
                     moduleInitializer.RegisterConfigs();
                     moduleInitializer.RegisterViews();
+                    moduleInitializer.RegisterMessages(this);
                 }
 
                 //var s = AssetLoader.Open(new Uri($"avares://{assembly.GetName().Name}/Assets/archive.svg"));

@@ -2,6 +2,7 @@
 using ArchiveMaster.UI;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
+using Avalonia;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,10 @@ namespace ArchiveMaster
         {
             AppConfig.RegisterConfig<EncryptorConfig>(nameof(EncryptorConfig));
 
+        }
+
+        public void RegisterMessages(Visual visual)
+        {
         }
 
         public void RegisterViews()

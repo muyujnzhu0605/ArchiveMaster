@@ -1,9 +1,16 @@
 ﻿using ArchiveMaster.Configs;
+using ArchiveMaster.Messages;
 using ArchiveMaster.UI;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
+using Avalonia;
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Messaging;
+using FzLib.Avalonia.Dialogs;
+using FzLib.Avalonia.Messages;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +25,30 @@ namespace ArchiveMaster
         {
             AppConfig.RegisterConfig<OfflineSyncConfig>(nameof(OfflineSyncConfig));
 
+        }
+
+        public void RegisterMessages(Visual visual)
+        {
+            WeakReferenceMessenger.Default.Register<InputDialogMessage>(visual, async (_, m) =>
+            {
+                try
+                {
+                    object result = m.Type switch
+                    {
+                        InputDialogMessage.InputDialogType.Text =>await visual.ShowInputTextDialogAsync(m.Title, m.Message, m.DefaultValue as string, m.Watermark, m.validation),
+                        InputDialogMessage.InputDialogType.Integer => await visual.ShowInputNumberDialogAsync(m.Title, m.Message, (int)m.DefaultValue, m.Watermark),
+                        InputDialogMessage.InputDialogType.Float => await visual.ShowInputNumberDialogAsync(m.Title, m.Message, (double)m.DefaultValue, m.Watermark),
+                        InputDialogMessage.InputDialogType.Password => await visual.ShowInputPasswordDialogAsync(m.Title, m.Message, m.Watermark, m.validation),
+                        InputDialogMessage.InputDialogType.MultipleLinesText => await visual.ShowInputMultiLinesTextDialogAsync(m.Title, m.Message, 3, 10, m.DefaultValue as string, m.Watermark, m.validation),
+                        _ => throw new InvalidEnumArgumentException()
+                    };
+                    m.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    m.SetException(ex);
+                }
+            });
         }
 
         public void RegisterViews()
