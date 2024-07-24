@@ -6,14 +6,14 @@ using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel : OfflineSyncViewModelBase<SyncFileInfo>
-    {
-        [ObservableProperty]
-        private DeleteMode deleteMode = DeleteMode.MoveToDeletedFolder;
+    //public partial class Step3ViewModel : OfflineSyncViewModelBase<SyncFileInfo>
+    //{
+    //    [ObservableProperty]
+    //    private DeleteMode deleteMode = DeleteMode.MoveToDeletedFolder;
 
-        [ObservableProperty]
-        private string patchDir;
+    //    [ObservableProperty]
+    //    private string patchDir;
 
-        public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
-    }
+    //    public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
+    //}
 }

@@ -2,9 +2,9 @@
     x:Class="ArchiveMaster.Views.OfflineSyncPanelBase"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:ArchiveMaster.Configs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ArchiveMaster.Views"
-    xmlns:c="using:ArchiveMaster.Configs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="root"
     d:DesignHeight="450"
@@ -32,12 +32,16 @@
                 Text="配置文件" />
             <ComboBox
                 Grid.Row="2"
-                Width="128" />
+                Width="128"
+                ItemsSource="{Binding ConfigNames}"
+                SelectedItem="{Binding ConfigName}" />
             <Button
                 Grid.Column="2"
+                Command="{Binding AddConfigCommand}"
                 Content="&#xE109;" />
             <Button
                 Grid.Column="4"
+                Command="{Binding RemoveConfigCommand}"
                 Content="&#xE107;" />
         </Grid>
     </local:PanelBase.RightTopContent>

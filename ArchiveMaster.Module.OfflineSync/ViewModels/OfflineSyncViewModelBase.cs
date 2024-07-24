@@ -1,18 +1,22 @@
-﻿using ArchiveMaster.Enums;
+﻿using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Messages;
+using ArchiveMaster.UI.ViewModels;
 using ArchiveMaster.Utility;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
 using FzLib.Avalonia.Messages;
+using Mapster;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class OfflineSyncViewModelBase<T> : ObservableObject where T : FileInfoWithStatus
+    public abstract partial class OfflineSyncViewModelBase<T> : ObservableObject where T : FileInfoWithStatus
     {
         [ObservableProperty]
         private bool canAnalyze = true;
@@ -25,6 +29,14 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private bool canStop = false;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Config))]
+        private string configName = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName;
+
+        [ObservableProperty]
+        private ObservableCollection<string> configNames = new ObservableCollection<string>(
+            AppConfig.Instance.Get<OfflineSyncConfig>().ConfigCollection.Keys);
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(AddedFileLength),
@@ -46,7 +58,28 @@ namespace ArchiveMaster.ViewModels
         private bool progressIndeterminate;
 
         [ObservableProperty]
-        private double progressMax;
+        private double progressMax = 1;
+
+        public OfflineSyncViewModelBase()
+        {
+            Config.Adapt(this, Config.GetType(), GetType());
+            AppConfig.Instance.BeforeSaving += (s, e) =>
+            {
+                this.Adapt(Config, GetType(), Config.GetType());
+            };
+            Utility.MessageReceived += (s, e) =>
+            {
+                Message = e.Message;
+            };
+            Utility.ProgressUpdated += (s, e) =>
+            {
+                if (e.MaxValue != ProgressMax)
+                {
+                    ProgressMax = e.MaxValue;
+                }
+                Progress = e.Value;
+            };
+        }
 
         public long AddedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Count() ?? 0;
 
@@ -62,21 +95,8 @@ namespace ArchiveMaster.ViewModels
 
         public int MovedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Move && p.IsChecked)?.Count() ?? 0;
 
-        public void RegisterMessageAndProgressEvent(OfflineSyncUtilityBase utility)
-        {
-            utility.MessageReceived += (s, e) =>
-            {
-                Message = e.Message;
-            };
-            utility.ProgressUpdated += (s, e) =>
-            {
-                if (e.MaxValue != ProgressMax)
-                {
-                    ProgressMax = e.MaxValue;
-                }
-                Progress = e.Value;
-            };
-        }
+        protected abstract OfflineSyncStepConfigBase Config { get; }
+        protected abstract OfflineSyncUtilityBase Utility { get; }
         protected Task ShowErrorAsync(string title, Exception exception)
         {
             return WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
@@ -96,6 +116,33 @@ namespace ArchiveMaster.ViewModels
             Message = status is StatusType.Ready or StatusType.Analyzed ? "就绪" : "处理中";
             Progress = 0;
             ProgressIndeterminate = status is StatusType.Analyzing or StatusType.Processing or StatusType.Stopping;
+        }
+
+        [RelayCommand]
+        private async Task AddConfigAsync()
+        {
+            if (await this.SendMessage(new InputDialogMessage()
+            {
+                Type = InputDialogMessage.InputDialogType.Text,
+                Title = "新增配置",
+                DefaultValue = "新配置",
+                Validation = t =>
+                {
+                    if (string.IsNullOrWhiteSpace(t))
+                    {
+                        throw new Exception("配置名为空");
+                    }
+                    if (ConfigNames.Contains(t))
+                    {
+                        throw new Exception("配置名已存在");
+                    }
+                }
+            }).Task is string result)
+            {
+                ConfigNames.Add(result);
+                AppConfig.Instance.Get<OfflineSyncConfig>().ConfigCollection.Add(result, new SingleConfig());
+                ConfigName = result;
+            }
         }
 
         private void AddFileCheckedNotify(FileInfoWithStatus file)
@@ -133,6 +180,22 @@ namespace ArchiveMaster.ViewModels
             };
         }
 
+        partial void OnConfigNameChanged(string oldValue, string newValue)
+        {
+            if (!string.IsNullOrEmpty(oldValue))
+            {
+                this.Adapt(Config, GetType(), Config.GetType());
+            }
+            if (AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName != newValue)
+            {
+                AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName = newValue;
+            }
+            if (!string.IsNullOrEmpty(newValue))
+            {
+                Config.Adapt(this, Config.GetType(), GetType());
+            }
+        }
+
         partial void OnFilesChanged(ObservableCollection<T> value)
         {
             value.ForEach(p => AddFileCheckedNotify(p));
@@ -142,6 +205,23 @@ namespace ArchiveMaster.ViewModels
         partial void OnProgressChanged(double value)
         {
             ProgressIndeterminate = false;
+        }
+
+        [RelayCommand]
+        private void RemoveConfig()
+        {
+            var name = ConfigName;
+            ConfigNames.Remove(name);
+            AppConfig.Instance.Get<OfflineSyncConfig>().ConfigCollection.Remove(name);
+            if (ConfigNames.Count == 0)
+            {
+                ConfigNames.Add("默认");
+                ConfigName = "默认";
+            }
+            else
+            {
+                ConfigName = ConfigNames[0];
+            }
         }
     }
 }

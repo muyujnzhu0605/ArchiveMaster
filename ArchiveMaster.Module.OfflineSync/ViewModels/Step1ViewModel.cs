@@ -18,7 +18,6 @@ namespace ArchiveMaster.ViewModels
     public partial class Step1ViewModel : OfflineSyncViewModelBase<FileInfoWithStatus>
     {
         private readonly Step1Utility u = new Step1Utility();
-
         [ObservableProperty]
         private string outputFile;
 
@@ -27,17 +26,9 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<string> syncDirs = new ObservableCollection<string>();
-        public Step1ViewModel()
-        {
-            Config.Adapt(this);
-            AppConfig.Instance.BeforeSaving += (s, e) =>
-            {
-                this.Adapt(Config);
-            };
-            RegisterMessageAndProgressEvent(u);
-        }
-        public Step1Config Config { get; } = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
 
+        protected override Step1Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+        protected override OfflineSyncUtilityBase Utility => u;
         private void AddSyncDir(string path)
         {
             DirectoryInfo newDirInfo = new DirectoryInfo(path);

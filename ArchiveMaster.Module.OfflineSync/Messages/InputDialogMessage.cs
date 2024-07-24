@@ -22,6 +22,6 @@ namespace ArchiveMaster.Messages
         public string Title { get; init; }
         public InputDialogType Type { get; set; }
         public string Watermark { get; set; }
-        public Action<string> validation { get; set; }
+        public Action<string> Validation { get; set; }
     }
 }

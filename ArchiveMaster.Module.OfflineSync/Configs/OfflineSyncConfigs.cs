@@ -1,5 +1,4 @@
 ﻿using ArchiveMaster.Models;
-using ArchiveMaster.ViewModels;
 using FzLib.DataStorage.Serialization;
 using System;
 using System.Collections.Generic;
@@ -42,6 +41,6 @@ namespace ArchiveMaster.Configs
     {
         public Step1Config Step1 { get; set; } = new Step1Config();
         public Step2Config Step2 { get; set; } = new Step2Config();
-        //public Step3Config Step3 { get; set; } = new Step3Config();
+        public Step3Config Step3 { get; set; } = new Step3Config();
     }
 }
