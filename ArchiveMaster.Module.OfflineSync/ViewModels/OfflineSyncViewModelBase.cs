@@ -1,5 +1,6 @@
 ﻿using ArchiveMaster.Enums;
 using ArchiveMaster.Messages;
+using ArchiveMaster.Utility;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -49,12 +50,9 @@ namespace ArchiveMaster.ViewModels
 
         public long AddedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Count() ?? 0;
 
-
         public long AddedFileLength => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Sum(p => p.Length) ?? 0;
 
-
         public int CheckedFileCount => Files?.Where(p => p.IsChecked)?.Count() ?? 0;
-
 
         public int DeletedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Delete && p.IsChecked)?.Count() ?? 0;
 
@@ -64,7 +62,32 @@ namespace ArchiveMaster.ViewModels
 
         public int MovedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Move && p.IsChecked)?.Count() ?? 0;
 
-        public void UpdateStatus(StatusType status)
+        public void RegisterMessageAndProgressEvent(OfflineSyncUtilityBase utility)
+        {
+            utility.MessageReceived += (s, e) =>
+            {
+                Message = e.Message;
+            };
+            utility.ProgressUpdated += (s, e) =>
+            {
+                if (e.MaxValue != ProgressMax)
+                {
+                    ProgressMax = e.MaxValue;
+                }
+                Progress = e.Value;
+            };
+        }
+        protected Task ShowErrorAsync(string title, Exception exception)
+        {
+            return WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
+            {
+                Type = CommonDialogMessage.CommonDialogType.Error,
+                Title = title,
+                Exception = exception
+            }).Task;
+        }
+
+        protected void UpdateStatus(StatusType status)
         {
             CanStop = status is StatusType.Analyzing or StatusType.Processing;
             CanAnalyze = status is StatusType.Ready or StatusType.Analyzed;
@@ -119,16 +142,6 @@ namespace ArchiveMaster.ViewModels
         partial void OnProgressChanged(double value)
         {
             ProgressIndeterminate = false;
-        }
-
-        protected Task ShowErrorAsync(string title, Exception exception)
-        {
-            return WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
-            {
-                Type = CommonDialogMessage.CommonDialogType.Error,
-                Title = title,
-                Exception = exception
-            }).Task;
         }
     }
 }

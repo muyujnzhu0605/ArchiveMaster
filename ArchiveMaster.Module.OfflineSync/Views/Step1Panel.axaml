@@ -19,13 +19,15 @@
                 FileNames="{Binding OutputFile}"
                 IsEnabled="{Binding CanEditConfigs}"
                 Label="保存位置："
+                StringFileTypeFilter="异地快照文件;*.obos1;;"
                 Type="SaveFile" />
 
             <ListBox
                 x:Name="lvwSelectedDirs"
                 Grid.Row="2"
                 IsEnabled="{Binding CanEditConfigs}"
-                ItemsSource="{Binding SyncDirs}" />
+                ItemsSource="{Binding SyncDirs}"
+                SelectedItem="{Binding SelectedSyncDir}" />
             <StackPanel
                 Grid.Row="4"
                 IsEnabled="{Binding CanEditConfigs}"
@@ -40,11 +42,11 @@
                     Command="{Binding BrowseDirCommand}"
                     Content="浏览并添加.." />
                 <Button
-                    Click="RemoveSelectedSyncDirsButton_Click"
+                    Command="{Binding RemoveSelectedCommand}"
                     Content="移除选中项"
-                    IsEnabled="{Binding ElementName=lvwSelectedDirs, Path=SelectedItem, Converter={StaticResource NotNullConverter}}" />
+                    IsEnabled="{Binding SelectedSyncDir, Converter={StaticResource NotNullConverter}}" />
                 <Button
-                    Click="RemoveAllSyncDirsButton_Click"
+                    Command="{Binding RemoveAllCommand}"
                     Content="移除全部" />
             </StackPanel>
             <Grid
@@ -62,12 +64,12 @@
                     Value="{Binding Progress}" />
                 <Button
                     Grid.Column="4"
-                    Click="StopButton_Click"
+                    Command="{Binding StopCommand}"
                     Content="停止"
                     IsEnabled="{Binding CanStop}" />
                 <Button
                     Grid.Column="6"
-                    Click="ExportButton_Click"
+                    Command="{Binding ExportCommand}"
                     Content="导出快照"
                     IsEnabled="{Binding CanAnalyze}" />
             </Grid>

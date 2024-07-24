@@ -1,5 +1,8 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Messages;
+using ArchiveMaster.UI.ViewModels;
+using ArchiveMaster.Utility;
+using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,12 +17,16 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class Step1ViewModel : OfflineSyncViewModelBase<FileInfoWithStatus>
     {
+        private readonly Step1Utility u = new Step1Utility();
+
         [ObservableProperty]
         private string outputFile;
 
         [ObservableProperty]
-        private ObservableCollection<string> syncDirs = new ObservableCollection<string>();
+        private string selectedSyncDir;
 
+        [ObservableProperty]
+        private ObservableCollection<string> syncDirs = new ObservableCollection<string>();
         public Step1ViewModel()
         {
             Config.Adapt(this);
@@ -27,53 +34,8 @@ namespace ArchiveMaster.ViewModels
             {
                 this.Adapt(Config);
             };
+            RegisterMessageAndProgressEvent(u);
         }
-
-        [RelayCommand]
-        private async Task BrowseDirAsync()
-        {
-            var storageProvider = WeakReferenceMessenger.Default.Send(new GetStorageProviderMessage()).StorageProvider;
-            var files = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
-            {
-                AllowMultiple = true,
-            });
-            if (files.Count > 0)
-            {
-                try
-                {
-                    foreach (var file in files)
-                    {
-                        var path = file.TryGetLocalPath();
-                        AddSyncDir(path);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await ShowErrorAsync("加入失败", ex);
-                }
-            }
-        }
-        [RelayCommand]
-        private async Task InputDirAsync()
-        {
-            try
-            {
-                if ((await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
-                {
-                    Type = InputDialogMessage.InputDialogType.Text,
-                    Title = "输入目录",
-                    Message = "请输入欲加入的目录地址"
-                }).Task) is string result)
-                {
-                    AddSyncDir(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                await ShowErrorAsync("加入失败", ex);
-            }
-        }
-
         public Step1Config Config { get; } = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
 
         private void AddSyncDir(string path)
@@ -126,6 +88,129 @@ namespace ArchiveMaster.ViewModels
 
             SyncDirs.Add(path);
 
+        }
+
+        [RelayCommand]
+        private async Task BrowseDirAsync()
+        {
+            var storageProvider = WeakReferenceMessenger.Default.Send(new GetStorageProviderMessage()).StorageProvider;
+            var files = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+            {
+                AllowMultiple = true,
+            });
+            if (files.Count > 0)
+            {
+                try
+                {
+                    foreach (var file in files)
+                    {
+                        var path = file.TryGetLocalPath();
+                        AddSyncDir(path);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ShowErrorAsync("加入失败", ex);
+                }
+            }
+        }
+
+        [RelayCommand]
+        private async Task ExportAsync()
+        {
+            var dirs = SyncDirs.ToHashSet();
+            if (dirs.Count == 0)
+            {
+                await this.SendMessage(new CommonDialogMessage()
+                {
+                    Type = CommonDialogMessage.CommonDialogType.Error,
+                    Title = "目录为空",
+                    Message = "不存在任何目录"
+                }).Task;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(OutputFile))
+            {
+                var result = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+                {
+                    FileTypeChoices = [
+                                    new  FilePickerFileType("异地快照文件"){Patterns=["*.obos1"]}
+                          ],
+                });
+                if (result != null)
+                {
+                    OutputFile = result.TryGetLocalPath();
+                }
+            }
+
+            UpdateStatus(StatusType.Processing);
+            try
+            {
+                await Task.Run(() =>
+                {
+                    u.Enumerate(dirs, OutputFile);
+                });
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+            catch (Exception ex)
+            {
+                await this.SendMessage(new CommonDialogMessage()
+                {
+                    Type = CommonDialogMessage.CommonDialogType.Error,
+                    Title = "导出失败",
+                    Exception = ex
+                }).Task;
+            }
+            finally
+            {
+                UpdateStatus(StatusType.Ready);
+            }
+
+        }
+
+        [RelayCommand]
+        private async Task InputDirAsync()
+        {
+            try
+            {
+                if ((await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
+                {
+                    Type = InputDialogMessage.InputDialogType.Text,
+                    Title = "输入目录",
+                    Message = "请输入欲加入的目录地址"
+                }).Task) is string result)
+                {
+                    AddSyncDir(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync("加入失败", ex);
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveAll()
+        {
+            SyncDirs.Clear();
+        }
+
+        [RelayCommand]
+        private void RemoveSelected()
+        {
+            if (SelectedSyncDir != null)
+            {
+                SyncDirs.Remove(SelectedSyncDir);
+            }
+        }
+        private void Stop()
+        {
+            UpdateStatus(StatusType.Stopping);
+            u.Stop();
         }
     }
 }
