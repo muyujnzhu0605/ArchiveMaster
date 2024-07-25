@@ -13,22 +13,22 @@ namespace ArchiveMaster
 {
     public class ModuleInitializer : IModuleInitializer
     {
-        public string ModuleName { get; } = "文件（夹）工具";
+        public string ModuleName => "文件（夹）工具";
 
-        public void RegisterConfigs()
-        {
-            AppConfig.RegisterConfig<EncryptorConfig>(nameof(EncryptorConfig));
+        public IList<ConfigInfo> Configs => [new ConfigInfo(typeof(EncryptorConfig))];
 
-        }
+        public IList<ToolPanelInfo> Views =>
+        [
+            new ToolPanelInfo(typeof(EncryptorPanel), ModuleName, "文件加密解密", "使用AES加密方法，对文件进行加密或解密",
+                baseUrl + "encrypt.svg")
+        ];
+
+        public IList<Uri> StyleUris { get; }
 
         public void RegisterMessages(Visual visual)
         {
         }
 
-        public void RegisterViews()
-        {
-            string baseUrl = "avares://ArchiveMaster.Module.FileTools/Assets/";
-            ToolPanelInfo.Register<EncryptorPanel>(ModuleName, "文件加密解密", "使用AES加密方法，对文件进行加密或解密", baseUrl + "encrypt.svg");
-        }
+        private readonly string baseUrl = "avares://ArchiveMaster.Module.FileTools/Assets/";
     }
 }

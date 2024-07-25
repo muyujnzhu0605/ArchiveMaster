@@ -12,14 +12,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaXaml Remove="Views\Step2Panel.axaml" />
     <AvaloniaXaml Remove="Views\Step3Panel.axaml" />
+    <AvaloniaXaml Remove="Views\Step2Panel.axaml" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Views\MainWindow.xaml.cs" />
-    <Compile Remove="Views\Step2Panel.axaml.cs" />
     <Compile Remove="Views\Step3Panel.axaml.cs" />
+    <Compile Remove="Views\Step2Panel.axaml.cs" />
   </ItemGroup>
 
   <ItemGroup>

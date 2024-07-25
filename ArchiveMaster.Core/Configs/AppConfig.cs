@@ -20,18 +20,16 @@ namespace ArchiveMaster.Configs
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
             WriteIndented = true,
         };
+
         private static Dictionary<string, ConfigInfo> configs = new Dictionary<string, ConfigInfo>();
         private bool isLoaded = false;
         public event EventHandler BeforeSaving;
 
         public static AppConfig Instance { get; } = new AppConfig();
-        public static void RegisterConfig<T>(string key) where T : new()
+
+        public static void RegisterConfig(Type type, string key)
         {
-            configs.Add(key, new ConfigInfo()
-            {
-                Type = typeof(T),
-                Key = key,
-            });
+            configs.Add(key, new ConfigInfo(type: type, key: key));
         }
 
         public T Get<T>() where T : class
@@ -46,11 +44,13 @@ namespace ArchiveMaster.Configs
             {
                 Load();
             }
+
             if (configs.TryGetValue(key, out ConfigInfo config))
             {
                 config.Config ??= Activator.CreateInstance(config.Type);
                 return config.Config;
             }
+
             throw new Exception("找不到对应的配置");
         }
 
@@ -60,6 +60,7 @@ namespace ArchiveMaster.Configs
             {
                 return;
             }
+
             try
             {
                 if (File.Exists(configFile))
@@ -78,6 +79,7 @@ namespace ArchiveMaster.Configs
             catch (Exception ex)
             {
             }
+
             isLoaded = true;
         }
 
@@ -86,12 +88,12 @@ namespace ArchiveMaster.Configs
             BeforeSaving?.Invoke(this, EventArgs.Empty);
             try
             {
-                var json = JsonSerializer.Serialize(configs.Values.ToDictionary(p => p.Key, p => p.Config), jsonOptions);
+                var json = JsonSerializer.Serialize(configs.Values.ToDictionary(p => p.Key, p => p.Config),
+                    jsonOptions);
                 File.WriteAllText(configFile, json);
             }
             catch (Exception ex)
             {
-
             }
         }
 
@@ -107,10 +109,12 @@ namespace ArchiveMaster.Configs
             {
                 Load();
             }
+
             if (!configs.TryGetValue(key, out ConfigInfo config))
             {
                 throw new Exception("找不到对应的配置");
             }
+
             config.Config = value;
         }
     }

@@ -14,18 +14,27 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 
 namespace ArchiveMaster
 {
     public class ModuleInitializer : IModuleInitializer
     {
-        public string ModuleName { get; } = "异地备份离线同步";
+        private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
+        public string ModuleName => "异地备份离线同步";
 
-        public void RegisterConfigs()
-        {
-            AppConfig.RegisterConfig<OfflineSyncConfig>(nameof(OfflineSyncConfig));
+        public IList<ConfigInfo> Configs => [
+            new ConfigInfo(type: typeof(OfflineSyncConfig), key: nameof(OfflineSyncConfig))
+        ];
 
-        }
+        public IList<ToolPanelInfo> Views =>
+        [
+            new ToolPanelInfo(typeof(Step1Panel),ModuleName, "制作异地快照","在异地计算机创建所需要的目录快照", baseUrl + "encrypt.svg")
+        ];
+        public IList<Uri> StyleUris =>
+         [new Uri("avares://ArchiveMaster.Module.OfflineSync/Styles.axaml")];
+
 
         public void RegisterMessages(Visual visual)
         {
@@ -35,11 +44,17 @@ namespace ArchiveMaster
                 {
                     object result = m.Type switch
                     {
-                        InputDialogMessage.InputDialogType.Text =>await visual.ShowInputTextDialogAsync(m.Title, m.Message, m.DefaultValue as string, m.Watermark, m.Validation),
-                        InputDialogMessage.InputDialogType.Integer => await visual.ShowInputNumberDialogAsync(m.Title, m.Message, (int)m.DefaultValue, m.Watermark),
-                        InputDialogMessage.InputDialogType.Float => await visual.ShowInputNumberDialogAsync(m.Title, m.Message, (double)m.DefaultValue, m.Watermark),
-                        InputDialogMessage.InputDialogType.Password => await visual.ShowInputPasswordDialogAsync(m.Title, m.Message, m.Watermark, m.Validation),
-                        InputDialogMessage.InputDialogType.MultipleLinesText => await visual.ShowInputMultiLinesTextDialogAsync(m.Title, m.Message, 3, 10, m.DefaultValue as string, m.Watermark, m.Validation),
+                        InputDialogMessage.InputDialogType.Text => await visual.ShowInputTextDialogAsync(m.Title,
+                            m.Message, m.DefaultValue as string, m.Watermark, m.Validation),
+                        InputDialogMessage.InputDialogType.Integer => await visual.ShowInputNumberDialogAsync(m.Title,
+                            m.Message, (int)m.DefaultValue, m.Watermark),
+                        InputDialogMessage.InputDialogType.Float => await visual.ShowInputNumberDialogAsync(m.Title,
+                            m.Message, (double)m.DefaultValue, m.Watermark),
+                        InputDialogMessage.InputDialogType.Password => await visual.ShowInputPasswordDialogAsync(
+                            m.Title, m.Message, m.Watermark, m.Validation),
+                        InputDialogMessage.InputDialogType.MultipleLinesText => await
+                            visual.ShowInputMultiLinesTextDialogAsync(m.Title, m.Message, 3, 10,
+                                m.DefaultValue as string, m.Watermark, m.Validation),
                         _ => throw new InvalidEnumArgumentException()
                     };
                     m.SetResult(result);
@@ -51,10 +66,5 @@ namespace ArchiveMaster
             });
         }
 
-        public void RegisterViews()
-        {
-            string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
-            ToolPanelInfo.Register<Step1Panel>(ModuleName, "制作异地快照", "在异地计算机创建所需要的目录快照", baseUrl + "encrypt.svg");
-        }
     }
 }

@@ -1,50 +1,33 @@
-﻿<UserControl
+﻿<views:OfflineSyncPanelBase
     x:Class="ArchiveMaster.Views.Step2Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:model="clr-namespace:OffsiteBackupOfflineSync.Model;assembly=OffsiteBackupOfflineSync.Core"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:views="clr-namespace:ArchiveMaster.Views"
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="8" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="16" />
-            <ColumnDefinition Width="2*" />
-        </Grid.ColumnDefinitions>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="8" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <ui:SimpleStackPanel
+    <Grid RowDefinitions="*,8,Auto" ColumnDefinitions="*,16,2*">
+<!-- <Grid.Styles> -->
+<!--     <Style -->
+<!--         x:Key="DataGridCheckBoxColumnTextWrappingStyle" -->
+<!--         TargetType="{x:Type TextBlock}"> -->
+<!--         <Setter Property="TextWrapping" Value="Wrap" /> -->
+<!--         <Setter Property="VerticalAlignment" Value="Center" /> -->
+<!--         <Setter Property="HorizontalAlignment" Value="Left" /> -->
+<!--         <Setter Property="Margin" Value="8,4" /> -->
+<!--     </Style> -->
+<!-- </Grid.Styles> -->
+        <Grid RowDefinitions="Auto,8,*">
+            <StackPanel
                 Margin="8"
                 IsEnabled="{Binding CanEditConfigs}"
                 Spacing="8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="96" />
-                        <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="8" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <Grid ColumnDefinitions="96,8,*,8,Auto" RowDefinitions="Auto,8,Auto">
                     <TextBlock
                         VerticalAlignment="Center"
                         Text="异地快照文件：" />
@@ -55,7 +38,6 @@
                         TextWrapping="Wrap" />
                     <Button
                         Grid.Column="4"
-                        Click="BrowseOffsiteSnapshotButton_Click"
                         Content="浏览.." />
 
                     <TextBlock
@@ -65,28 +47,26 @@
                     <TextBox
                         Grid.Row="2"
                         Grid.Column="2"
-                        ui:ControlHelper.PlaceholderText="在选择的目录中搜索需要同步的目录；一行一项"
+                        
+                       Watermark="在选择的目录中搜索需要同步的目录；一行一项"
                         AcceptsReturn="True"
                         MaxLines="3"
                         Text="{Binding LocalDir}" />
                     <Button
                         Grid.Row="2"
                         Grid.Column="4"
-                        Click="BrowseLocalDirButton_Click"
                         Content="添加.." />
 
                 </Grid>
                 <Grid HorizontalAlignment="Right">
                     <Button
                         Width="128"
-                        Click="MatchDirsButton_Click"
                         Content="1. 匹配目录" />
                 </Grid>
-            </ui:SimpleStackPanel>
+            </StackPanel>
             <DataGrid
                 Grid.Row="2"
                 AutoGenerateColumns="False"
-                CanUserAddRows="False"
                 CanUserReorderColumns="True"
                 ItemsSource="{Binding MatchingDirs}">
                 <DataGrid.Columns>
@@ -108,7 +88,7 @@
                 <RowDefinition Height="8" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <ui:SimpleStackPanel
+            <StackPanel
                 Margin="8"
                 IsEnabled="{Binding CanEditConfigs}"
                 Spacing="8">
@@ -132,7 +112,6 @@
                     <Button
                         Grid.Row="4"
                         Grid.Column="4"
-                        Click="BrowsePatchDirButton_Click"
                         Content="浏览.." />
                 </Grid>
                 <Grid>
@@ -148,11 +127,11 @@
                         Text="黑名单：" />
                     <TextBox
                         Grid.Column="2"
-                        ui:ControlHelper.PlaceholderText="可以是文件名，也可以是完整路径；一行一项"
+                      Watermark="可以是文件名，也可以是完整路径；一行一项"
                         AcceptsReturn="True"
                         MaxLines="5"
                         Text="{Binding BlackList}"
-                        VerticalScrollBarVisibility="Auto" />
+                        />
                     <CheckBox
                         Grid.Column="4"
                         VerticalAlignment="Center"
@@ -162,14 +141,12 @@
                 <Grid HorizontalAlignment="Right">
                     <Button
                         Width="128"
-                        Click="SearchChangeButton_Click"
                         Content="2. 查找更改" />
                 </Grid>
-            </ui:SimpleStackPanel>
+            </StackPanel>
             <DataGrid
                 Grid.Row="2"
                 AutoGenerateColumns="False"
-                CanUserAddRows="False"
                 CanUserReorderColumns="True"
                 ItemsSource="{Binding Files}">
                 <DataGrid.Columns>
@@ -198,17 +175,8 @@
                                     VerticalAlignment="Center"
                                     Foreground="Green"
                                     Text="●"
-                                    Visibility="Collapsed" />
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding Complete}">
-                                        <DataTrigger.Value>
-                                            <sys:Boolean>True</sys:Boolean>
-                                        </DataTrigger.Value>
-                                        <DataTrigger.Setters>
-                                            <Setter TargetName="e" Property="Visibility" Value="Visible" />
-                                        </DataTrigger.Setters>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
+                                    IsVisible="{Binding Complete}"/>
+                              
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -246,33 +214,26 @@
                                 <TextBlock
                                     Margin="16,0"
                                     VerticalAlignment="Center"
-                                    Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}" />
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Add</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Green" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Delete</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Red" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Modify</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Yellow" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Move</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Orange" />
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
+                                    Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}">
+                                    <TextBlock.Styles>
+                                        <Style Selector="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UpdateType}" Value="{x:Static model:FileUpdateType.Add}">
+                                                    <Setter Property="Foreground" Value="Green"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding UpdateType}" Value="{x:Static model:FileUpdateType.Delete}">
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding UpdateType}" Value="{x:Static model:FileUpdateType.Modify}">
+                                                    <Setter Property="Foreground" Value="Yellow"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding UpdateType}" Value="{x:Static model:FileUpdateType.Move}">
+                                                    <Setter Property="Foreground" Value="Orange"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Styles>
+                                </TextBlock>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -393,4 +354,4 @@
                 IsEnabled="{Binding CanProcess}" />
         </Grid>
     </Grid>
-</UserControl>
+</views:OfflineSyncPanelBase>
