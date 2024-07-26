@@ -30,7 +30,9 @@ namespace ArchiveMaster
 
         public IList<ToolPanelInfo> Views =>
         [
-            new ToolPanelInfo(typeof(Step1Panel),ModuleName, "制作异地快照","在异地计算机创建所需要的目录快照", baseUrl + "encrypt.svg")
+            new ToolPanelInfo(typeof(Step1Panel),ModuleName, "1.制作异地快照","在异地计算机创建所需要的目录快照", baseUrl + "encrypt.svg"),
+            new ToolPanelInfo(typeof(Step2Panel),ModuleName, "2.本地生成补丁","在本地计算机生成与异地的差异文件的补丁包", baseUrl + "encrypt.svg"),
+            new ToolPanelInfo(typeof(Step1Panel),ModuleName, "3.异地同步","在异地应用补丁包，实现数据同步", baseUrl + "encrypt.svg")
         ];
         public IList<Uri> StyleUris =>
          [new Uri("avares://ArchiveMaster.Module.OfflineSync/Styles.axaml")];
