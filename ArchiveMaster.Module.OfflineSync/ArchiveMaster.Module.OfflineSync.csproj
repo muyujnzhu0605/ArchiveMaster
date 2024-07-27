@@ -32,11 +32,6 @@
   <ItemGroup>
     <Folder Include="Assets\" />
   </ItemGroup>
-  <ItemGroup>
-    <AvaloniaXaml Remove="Views\Step3Panel.axaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Views\Step3Panel.axaml.cs" />
-  </ItemGroup>
+
  
 </Project>

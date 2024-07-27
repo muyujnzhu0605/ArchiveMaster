@@ -17,7 +17,6 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class Step1ViewModel : OfflineSyncViewModelBase<FileInfoWithStatus>
     {
-        private readonly Step1Utility u = new Step1Utility();
         [ObservableProperty]
         private string outputFile;
 
@@ -27,8 +26,8 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> syncDirs = new ObservableCollection<string>();
 
-        protected override Step1Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
-        protected override OfflineSyncUtilityBase Utility => u;
+        protected override OfflineSyncStepConfigBase Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+        protected override OfflineSyncUtilityBase Utility => new Step1Utility();
         private void AddSyncDir(string path)
         {
             DirectoryInfo newDirInfo = new DirectoryInfo(path);
@@ -126,7 +125,7 @@ namespace ArchiveMaster.ViewModels
                 var result = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
                 {
                     FileTypeChoices = [
-                                    new  FilePickerFileType("异地快照文件"){Patterns=["*.obos1"]}
+                                    new  FilePickerFileType("异地快照文件"){Patterns=["*.os1"]}
                           ],
                 });
                 if (result != null)
@@ -140,7 +139,7 @@ namespace ArchiveMaster.ViewModels
             {
                 await Task.Run(() =>
                 {
-                    u.Enumerate(dirs, OutputFile);
+                    (Utility as Step1Utility).Enumerate(dirs, OutputFile);
                 });
             }
             catch (OperationCanceledException)
@@ -201,7 +200,7 @@ namespace ArchiveMaster.ViewModels
         private void Stop()
         {
             UpdateStatus(StatusType.Stopping);
-            u.Stop();
+            (Utility as Step1Utility).Stop();
         }
     }
 }

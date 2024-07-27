@@ -3,7 +3,7 @@ using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.Configs
 {
-    public partial class Step2Config : OfflineSyncStepConfigBase
+    public class Step2Config : OfflineSyncStepConfigBase
     {
         public string BlackList { get; set; }
         public bool BlackListUseRegex { get; set; }

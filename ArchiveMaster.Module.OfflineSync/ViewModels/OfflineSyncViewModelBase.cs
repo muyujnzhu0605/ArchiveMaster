@@ -12,6 +12,7 @@ using FzLib.Avalonia.Messages;
 using Mapster;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace ArchiveMaster.ViewModels
@@ -62,6 +63,8 @@ namespace ArchiveMaster.ViewModels
 
         public OfflineSyncViewModelBase()
         {
+            Debug.Assert(Config != null, nameof(Config) + " != null");
+            Debug.Assert(Utility != null, nameof(Utility) + " != null");
             Config.Adapt(this, Config.GetType(), GetType());
             AppConfig.Instance.BeforeSaving += (s, e) =>
             {
@@ -213,6 +216,26 @@ namespace ArchiveMaster.ViewModels
             {
                 ConfigName = ConfigNames[0];
             }
+        }
+        
+        
+        [RelayCommand]
+        private void SelectAll()
+        {
+            Files?.ForEach(p => p.IsChecked = true);
+        }
+
+        [RelayCommand]
+        private void SelectNone()
+        {
+            Files?.ForEach(p => p.IsChecked = false);
+        }
+
+        [RelayCommand]
+        private void Stop()
+        {
+            UpdateStatus(StatusType.Stopping);
+            Utility.Stop();
         }
     }
 }

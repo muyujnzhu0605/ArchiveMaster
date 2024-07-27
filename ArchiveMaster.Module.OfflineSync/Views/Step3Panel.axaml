@@ -1,4 +1,4 @@
-﻿<UserControl
+﻿<v:OfflineSyncPanelBase
     x:Class="ArchiveMaster.Views.Step3Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,229 +7,79 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="clr-namespace:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:Step3ViewModel"
     mc:Ignorable="d">
-    <Grid RowDefinitions="Auto,8,*,8,Auto">
-        <StackPanel
-            Margin="8"
-            IsEnabled="{Binding CanEditConfigs}"
-            Spacing="8">
-
-
-            <ct:FilePickerTextBox
-                ButtonContent="浏览.."
-                FileNames="{Binding PatchDir}"
-                Label="本地补丁目录："
-                Type="OpenFolder" />
-
-            <Button
-                HorizontalAlignment="Right"
-                Classes="Long"
-                Click="AnalyzeButton_Click"
-                Content="1. 分析" />
-        </StackPanel>
-        <Grid
-            Grid.Row="2"
-            RowDefinitions="*,8,Auto">
-            <DataGrid
-                AutoGenerateColumns="False"
-                CanUserReorderColumns="True"
-                ItemsSource="{Binding Files}">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn
-                        Width="36"
-                        CanUserReorder="False"
-                        CanUserResize="False"
-                        CanUserSort="False">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="8,0"
-                                    IsChecked="{Binding Checked, UpdateSourceTrigger=PropertyChanged}"
-                                    IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn
-                        CanUserResize="False"
-                        Header="完成">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    x:Name="e"
-                                    Margin="16,0"
-                                    VerticalAlignment="Center"
-                                    Foreground="Green"
-                                    Text="●"
-                                    Visibility="Collapsed" />
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding Complete}">
-                                        <DataTrigger.Value>
-                                            <sys:Boolean>True</sys:Boolean>
-                                        </DataTrigger.Value>
-                                        <DataTrigger.Setters>
-                                            <Setter TargetName="e" Property="Visibility" Value="Visible" />
-                                        </DataTrigger.Setters>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn
-                        Width="200"
-                        Binding="{Binding Name}"
-                        ElementStyle="{StaticResource DataGridCheckBoxColumnTextWrappingStyle}"
-                        Header="文件名"
-                        IsReadOnly="True" />
-
-                    <DataGridTextColumn
-                        Width="400"
-                        Binding="{Binding ., Converter={StaticResource SyncFilePathConverter}}"
-                        ElementStyle="{StaticResource DataGridCheckBoxColumnTextWrappingStyle}"
-                        Header="路径"
-                        IsReadOnly="True" />
-
-                    <DataGridTextColumn
-                        Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                        CanUserResize="False"
-                        Header="修改时间"
-                        IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Binding="{Binding Length, Converter={StaticResource FileLength2StringConverter}}"
-                        CanUserResize="False"
-                        Header="大小"
-                        IsReadOnly="True" />
-
-                    <DataGridTemplateColumn
-                        CanUserResize="False"
-                        Header="更新类型"
-                        SortMemberPath="UpdateType">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    Margin="16,0"
-                                    VerticalAlignment="Center"
-                                    Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}" >
-                                    <Interaction.Behaviors>
-                                        <DataTriggerBehavior Binding="{}"></DataTriggerBehavior>
-                                    </Interaction.Behaviors>
-                                    
-                                </TextBlock>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Add</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Green" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Delete</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Red" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Modify</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Yellow" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding UpdateType}">
-                                        <DataTrigger.Value>
-                                            <model:FileUpdateType>Move</model:FileUpdateType>
-                                        </DataTrigger.Value>
-                                        <Setter Property="TextElement.Foreground" Value="Orange" />
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn
-                        Binding="{Binding Message}"
-                        CanUserResize="False"
-                        Header="信息"
-                        IsReadOnly="True" />
-                </DataGrid.Columns>
-            </DataGrid>
-            <ui:SimpleStackPanel
-                Grid.Row="2"
-                Margin="8,0"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal"
+    <v:OfflineSyncPanelBase.PanelContent>
+        <Grid RowDefinitions="Auto,8,*,8,Auto">
+            <StackPanel
+                Margin="8"
+                IsEnabled="{Binding CanEditConfigs}"
                 Spacing="8">
-                <TextBlock VerticalAlignment="Center">
-                    <Run Text="共新增文件" />
-                    <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
-                    <Run Text="个（" />
-                    <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-                    <Run Text="），修改文件" />
-                    <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
-                    <Run Text="个（" />
-                    <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-                    <Run Text="），移动文件" />
-                    <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
-                    <Run Text="个，删除文件" />
-                    <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
-                    <Run Text="个" />
-                </TextBlock>
+
+
+                <ct:FilePickerTextBox
+                    ButtonContent="浏览.."
+                    FileNames="{Binding PatchDir}"
+                    Label="本地补丁目录："
+                    Type="OpenFolder" />
+
                 <Button
-                    HorizontalAlignment="Stretch"
-                    Click="SelectAllButton_Click"
-                    Content="全选"
-                    IsEnabled="{Binding CanEditConfigs}" />
-                <Button
+                    HorizontalAlignment="Right"
+                    Classes="Long"
+                    Command="{Binding AnalyzeCommand}"
+                    Content="1. 分析" />
+            </StackPanel>
+            <v:SyncFilesList Grid.Row="2" />
+            <Grid
+                Grid.Row="99"
+                Margin="8"
+                ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="{Binding Message}"
+                    TextTrimming="CharacterEllipsis"
+                    ToolTip.Tip="{Binding Message}" />
+                <ProgressBar
                     Grid.Column="2"
-                    HorizontalAlignment="Stretch"
-                    Click="SelectNoneButton_Click"
-                    Content="全不选"
-                    IsEnabled="{Binding CanEditConfigs}" />
-            </ui:SimpleStackPanel>
+                    VerticalAlignment="Center"
+                    IsIndeterminate="{Binding ProgressIndeterminate}"
+                    Maximum="{Binding ProgressMax}"
+                    Value="{Binding Progress}" />
+                <TextBlock
+                    Grid.Column="4"
+                    VerticalAlignment="Center"
+                    Text="被替换和删除的文件：" />
+                <ComboBox
+                    Grid.Column="6"
+                    Width="160"
+                    ItemsSource="{Binding DeleteModes}"
+                    SelectedItem="{Binding DeleteMode}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button
+                    Grid.Column="8"
+                    Classes="Long"
+                    Command="{Binding StopCommand}"
+                    Content="停止"
+                    IsEnabled="{Binding CanStop}" />
+                <Button
+                    Grid.Column="10"
+                    Width="128"
+                    Classes="Long"
+                    Command="{Binding UpdateCommand}"
+                    Content="2. 更新"
+                    IsEnabled="{Binding CanProcess}" />
+            </Grid>
         </Grid>
-        <Grid
-            Grid.Row="99"
-            Margin="8" ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto">
-            <TextBlock
-                VerticalAlignment="Center"
-                Text="{Binding Message}"
-                TextTrimming="CharacterEllipsis"
-                ToolTip="{Binding Message}" />
-            <ProgressBar
-                Grid.Column="2"
-                VerticalAlignment="Center"
-                IsIndeterminate="{Binding ProgressIndeterminate}"
-                Maximum="{Binding ProgressMax}"
-                Value="{Binding Progress}" />
-            <TextBlock
-                Grid.Column="4"
-                VerticalAlignment="Center"
-                Text="被替换和删除的文件：" />
-            <ComboBox
-                Grid.Column="6"
-                Width="160"
-                ItemsSource="{Binding DeleteModes}"
-                SelectedItem="{Binding DeleteMode}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Button
-                Grid.Column="8"
-                Width="128"
-                Click="StopButton_Click"
-                Content="停止"
-                IsEnabled="{Binding CanStop}" />
-            <Button
-                Grid.Column="10"
-                Width="128"
-                Click="UpdateButton_Click"
-                Content="2. 更新"
-                IsEnabled="{Binding CanProcess}" />
-        </Grid>
-    </Grid>
-</UserControl>
+    </v:OfflineSyncPanelBase.PanelContent>
+</v:OfflineSyncPanelBase>

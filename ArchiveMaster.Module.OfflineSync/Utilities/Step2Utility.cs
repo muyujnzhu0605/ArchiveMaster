@@ -203,7 +203,7 @@ namespace ArchiveMaster.Utility
                 LocalDirectories = LocalDirectories
             };
 
-            WriteToZip(model, Path.Combine(outputDir, "file.obos2"));
+            WriteToZip(model, Path.Combine(outputDir, "file.os2"));
             return allOk;
         }
 

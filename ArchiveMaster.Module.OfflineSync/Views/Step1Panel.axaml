@@ -22,7 +22,7 @@
                 FileNames="{Binding OutputFile}"
                 IsEnabled="{Binding CanEditConfigs}"
                 Label="保存位置："
-                StringFileTypeFilter="异地快照文件;*.obos1;;"
+                StringFileTypeFilter="异地快照文件;*.os1;;"
                 Type="SaveFile" />
 
             <ListBox

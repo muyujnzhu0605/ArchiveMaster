@@ -19,17 +19,14 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class Step2ViewModel : OfflineSyncViewModelBase<SyncFileInfo>
     {
-        [ObservableProperty] 
-        public ExportMode exportMode;
-
-
         [ObservableProperty]
         public string blackList;
-
 
         [ObservableProperty]
         public bool blackListUseRegex;
 
+        [ObservableProperty]
+        public ExportMode exportMode;
         [ObservableProperty]
         private string localDir;
 
@@ -39,9 +36,11 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private string offsiteSnapshot;
 
-        [ObservableProperty] private string patchDir;
+        [ObservableProperty] 
+        private string patchDir;
+        Step1Model step1 = null;
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        protected override Step2Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
+        protected override OfflineSyncStepConfigBase Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
         protected override Step2Utility Utility { get; } = new Step2Utility();
 
         [RelayCommand]
@@ -75,7 +74,7 @@ namespace ArchiveMaster.ViewModels
             {
                 FileTypeFilter =
                 [
-                    new FilePickerFileType("异地备份快照") { Patterns = ["*.obos1"] }
+                    new FilePickerFileType("异地备份快照") { Patterns = ["*.os1"] }
                 ]
             });
 
@@ -191,9 +190,6 @@ namespace ArchiveMaster.ViewModels
         {
             MatchingDirs = null;
         }
-
-        Step1Model step1 = null;
-
         [RelayCommand]
         private async Task SearchChangeAsync()
         {
@@ -239,23 +235,5 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        [RelayCommand]
-        private void SelectAll()
-        {
-            Files?.ForEach(p => p.IsChecked = true);
-        }
-
-        [RelayCommand]
-        private void SelectNone()
-        {
-            Files?.ForEach(p => p.IsChecked = false);
-        }
-
-        [RelayCommand]
-        private void Stop()
-        {
-            UpdateStatus(StatusType.Stopping);
-            Utility.Stop();
-        }
     }
 }

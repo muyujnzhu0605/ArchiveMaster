@@ -80,7 +80,12 @@ namespace ArchiveMaster.Utility
         {
             stopping = false;
             this.patchDir = patchDir;
-            var step2 = ReadFromZip<Step2Model>(Path.Combine(patchDir, "file.obos2"));
+            var patchFile = Path.Combine(patchDir, "file.os2");
+            if (!File.Exists(patchFile))
+            {
+                throw new FileNotFoundException("目录中不存在os2文件");
+            }
+            var step2 = ReadFromZip<Step2Model>(patchFile);
 
             UpdateFiles = step2.Files;
             LocalDirectories = step2.LocalDirectories;
