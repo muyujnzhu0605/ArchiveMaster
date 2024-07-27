@@ -97,16 +97,7 @@ namespace ArchiveMaster.ViewModels
 
         protected abstract OfflineSyncStepConfigBase Config { get; }
         protected abstract OfflineSyncUtilityBase Utility { get; }
-        protected Task ShowErrorAsync(string title, Exception exception)
-        {
-            return WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
-            {
-                Type = CommonDialogMessage.CommonDialogType.Error,
-                Title = title,
-                Exception = exception
-            }).Task;
-        }
-
+ 
         protected void UpdateStatus(StatusType status)
         {
             CanStop = status is StatusType.Analyzing or StatusType.Processing;

@@ -139,14 +139,10 @@ namespace ArchiveMaster.Utilities
                 {
                     string relativePath = Path.GetRelativePath(GetSourceDir(), file.Path);
                     string encryptedFileName = Convert.ToBase64String(aes.Encrypt(Encoding.Default.GetBytes(relativePath)));
-                    string guid;
-                    do
-                    {
-                        guid = Guid.NewGuid().ToString("N")[..8];
-                    } while (longNames.ContainsKey(guid));
-                    longNames.Add(guid, encryptedFileName);
-                    file.TargetName = guid;
-                    file.TargetPath = Path.Combine(GetDistDir(), guid);
+                    string hash = Hash(encryptedFileName);
+                    longNames.Add(hash, encryptedFileName);
+                    file.TargetName = hash;
+                    file.TargetPath = Path.Combine(GetDistDir(), hash);
                 }
                 else
                 {
@@ -179,6 +175,10 @@ namespace ArchiveMaster.Utilities
             }
             file.TargetRelativePath = Path.GetRelativePath(GetDistDir(), file.TargetPath);
         }
+        private static string Hash(string input)
+        {
+            return Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(input)));
+        }
 
         public override async Task InitializeAsync()
         {
@@ -193,7 +193,11 @@ namespace ArchiveMaster.Utilities
             await Task.Run(() =>
             {
                 NotifyProgressUpdate(0, -1, "正在搜索文件");
-                foreach (var file in Directory.EnumerateFiles(sourceDir, "*", SearchOption.AllDirectories))
+                foreach (var file in Directory.EnumerateFiles(sourceDir, "*", new EnumerationOptions()
+                {
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = true,
+                }))
                 {
 
                     var isEncrypted = IsEncryptedFile(file);

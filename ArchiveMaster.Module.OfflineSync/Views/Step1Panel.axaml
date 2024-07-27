@@ -6,15 +6,17 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:Step1ViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
         <Grid
             Margin="8"
             RowDefinitions="Auto,8,*,8,Auto,8,Auto">
-        
+
             <ct:FilePickerTextBox
                 ButtonContent="浏览.."
                 FileNames="{Binding OutputFile}"
@@ -34,26 +36,30 @@
                 IsEnabled="{Binding CanEditConfigs}"
                 Orientation="Horizontal"
                 Spacing="8">
-                <Button Classes="Middle"
-                        Grid.Column="4"
-                        Command="{Binding InputDirCommand}"
-                        Content="输入并添加.." />
-                <Button Classes="Middle"
-                        Grid.Column="4"
-                        Command="{Binding BrowseDirCommand}"
-                        Content="浏览并添加.." />
-                <Button Classes="Middle"
-                        Command="{Binding RemoveSelectedCommand}"
-                        Content="移除选中项"
-                        IsEnabled="{Binding SelectedSyncDir, Converter={StaticResource NotNullConverter}}" />
-                <Button Classes="Middle"
-                        Command="{Binding RemoveAllCommand}"
-                        Content="移除全部" />
+                <Button
+                    Grid.Column="4"
+                    Classes="Middle"
+                    Command="{Binding InputDirCommand}"
+                    Content="输入并添加.." />
+                <Button
+                    Grid.Column="4"
+                    Classes="Middle"
+                    Command="{Binding BrowseDirCommand}"
+                    Content="浏览并添加.." />
+                <Button
+                    Classes="Middle"
+                    Command="{Binding RemoveSelectedCommand}"
+                    Content="移除选中项"
+                    IsEnabled="{Binding SelectedSyncDir, Converter={StaticResource NotNullConverter}}" />
+                <Button
+                    Classes="Middle"
+                    Command="{Binding RemoveAllCommand}"
+                    Content="移除全部" />
             </StackPanel>
             <Grid
                 Grid.Row="99"
                 ColumnDefinitions="*,8,*,8,Auto,8,Auto">
-              
+
                 <TextBlock
                     VerticalAlignment="Center"
                     Text="{Binding Message}"
@@ -64,16 +70,18 @@
                     IsIndeterminate="{Binding ProgressIndeterminate}"
                     Maximum="{Binding ProgressMax}"
                     Value="{Binding Progress}" />
-                <Button Classes="Long"
-                        Grid.Column="4"
-                        Command="{Binding StopCommand}"
-                        Content="停止"
-                        IsEnabled="{Binding CanStop}" />
-                <Button Classes="Long"
-                        Grid.Column="6"
-                        Command="{Binding ExportCommand}"
-                        Content="导出快照"
-                        IsEnabled="{Binding CanAnalyze}" />
+                <Button
+                    Grid.Column="4"
+                    Classes="Long"
+                    Command="{Binding StopCommand}"
+                    Content="停止"
+                    IsEnabled="{Binding CanStop}" />
+                <Button
+                    Grid.Column="6"
+                    Classes="Long"
+                    Command="{Binding ExportCommand}"
+                    Content="导出快照"
+                    IsEnabled="{Binding CanAnalyze}" />
             </Grid>
         </Grid>
     </v:PanelBase.PanelContent>

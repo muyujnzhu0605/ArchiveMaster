@@ -101,7 +101,7 @@ namespace ArchiveMaster.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    await ShowErrorAsync("加入失败", ex);
+                    await this.ShowErrorAsync("加入失败", ex);
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace ArchiveMaster.ViewModels
             }
             catch (Exception ex)
             {
-                await ShowErrorAsync("加入失败", ex);
+                await this.ShowErrorAsync("加入失败", ex);
             }
         }
 

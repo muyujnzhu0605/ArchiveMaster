@@ -1,307 +1,166 @@
 ﻿<v:OfflineSyncPanelBase
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
     x:Class="ArchiveMaster.Views.Step2Panel"
+    x:DataType="vm:Step2ViewModel"
+    x:Name="root"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="clr-namespace:ArchiveMaster.Views"
-    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
-    xmlns:c="clr-namespace:ArchiveMaster.Converters"
-    x:Name="root"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <v:OfflineSyncPanelBase.Styles>
         <Style Selector="TextBox">
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
         </Style>
     </v:OfflineSyncPanelBase.Styles>
     <v:OfflineSyncPanelBase.Resources>
-        <c:SyncFilePathConverter x:Key="SyncFilePathConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="../Resources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </v:OfflineSyncPanelBase.Resources>
     <v:OfflineSyncPanelBase.PanelContent>
-        <Grid RowDefinitions="*,8,Auto" ColumnDefinitions="*,16,2*">
-
+        <Grid ColumnDefinitions="*,16,2*" RowDefinitions="*,8,Auto">
             <Grid RowDefinitions="Auto,8,*">
                 <StackPanel
-                    Margin="8"
                     IsEnabled="{Binding CanEditConfigs}"
+                    Margin="8"
                     Spacing="8">
                     <Grid ColumnDefinitions="96,8,*,8,Auto" RowDefinitions="Auto,8,Auto">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Text="异地快照文件：" />
+                        <TextBlock Text="异地快照文件：" VerticalAlignment="Center" />
                         <TextBox
                             Grid.Column="2"
                             MaxLines="3"
                             Text="{Binding OffsiteSnapshot}"
                             TextWrapping="Wrap" />
                         <Button
-                            Command="{Binding BrowseOffsiteSnapshotCommand}"
-                            Grid.Column="4"
                             Classes="Middle"
-                            Content="浏览.." />
+                            Command="{Binding BrowseOffsiteSnapshotCommand}"
+                            Content="浏览.."
+                            Grid.Column="4" />
 
                         <TextBlock
                             Grid.Row="2"
-                            VerticalAlignment="Center"
-                            Text="本地搜索目录：" />
+                            Text="本地搜索目录："
+                            VerticalAlignment="Center" />
                         <TextBox
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Watermark="在选择的目录中搜索需要同步的目录；一行一项"
                             AcceptsReturn="True"
-                            MaxLines="3"
-                            Text="{Binding LocalDir}" />
-                        <Button
+                            Grid.Column="2"
                             Grid.Row="2"
-                            Grid.Column="4"
+                            MaxLines="3"
+                            Text="{Binding LocalDir}"
+                            Watermark="在选择的目录中搜索需要同步的目录；一行一项" />
+                        <Button
                             Classes="Middle"
                             Command="{Binding BrowseLocalDirCommand}"
-                            Content="添加.." />
+                            Content="添加.."
+                            Grid.Column="4"
+                            Grid.Row="2" />
 
                     </Grid>
-                    <Button HorizontalAlignment="Right"
-                            Classes="Long"
-                            Command="{Binding MatchDirsCommand}"
-                            Content="1. 匹配目录" />
+                    <Button
+                        Classes="Long"
+                        Command="{Binding MatchDirsCommand}"
+                        Content="1. 匹配目录"
+                        HorizontalAlignment="Right" />
                 </StackPanel>
                 <DataGrid
-                    Grid.Row="2"
                     AutoGenerateColumns="False"
                     CanUserReorderColumns="True"
+                    Grid.Row="2"
                     ItemsSource="{Binding MatchingDirs}">
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Binding="{Binding OffsiteDir}"
                             Header="异地目录"
                             IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding LocalDir}"
-                            Header="本地目录" />
+                        <DataGridTextColumn Binding="{Binding LocalDir}" Header="本地目录" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
-            <Grid Grid.Column="2" RowDefinitions="Auto,8,*,8,Auto">
+            <Grid Grid.Column="2" RowDefinitions="Auto,8,*">
                 <StackPanel
-                    Margin="8"
                     IsEnabled="{Binding CanEditConfigs}"
+                    Margin="8"
                     Spacing="8">
                     <Grid ColumnDefinitions="96,8,*,8,Auto">
                         <TextBlock
                             Grid.Row="4"
-                            VerticalAlignment="Center"
-                            Text="导出补丁目录：" />
+                            Text="导出补丁目录："
+                            VerticalAlignment="Center" />
                         <TextBox
-                            Grid.Row="4"
                             Grid.Column="2"
+                            Grid.Row="4"
                             Text="{Binding PatchDir}" />
-                        <Button x:Name="btnBrowse"
-                                Grid.Row="4"
-                                Grid.Column="4"
-                                Command="{Binding BrowsePatchDirCommand}"
-                                Classes="Middle"
-                                Content="浏览.." />
+                        <Button
+                            Classes="Middle"
+                            Command="{Binding BrowsePatchDirCommand}"
+                            Content="浏览.."
+                            Grid.Column="4"
+                            Grid.Row="4"
+                            x:Name="btnBrowse" />
                     </Grid>
                     <Grid ColumnDefinitions="96,8,*,8,Auto">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Text="黑名单：" />
+                        <TextBlock Text="黑名单：" VerticalAlignment="Center" />
                         <TextBox
-                            Grid.Column="2"
-                            Watermark="可以是文件名，也可以是完整路径；一行一项"
                             AcceptsReturn="True"
+                            Grid.Column="2"
                             MaxLines="5"
-                            Text="{Binding BlackList}" />
+                            Text="{Binding BlackList}"
+                            Watermark="可以是文件名，也可以是完整路径；一行一项" />
                         <CheckBox
-                            Grid.Column="4"
-                            VerticalAlignment="Center"
-                            Content="正则"
                             Classes="Middle"
+                            Content="正则"
+                            Grid.Column="4"
                             Height="{Binding #btnBrowse.Bounds.Height}"
-                            IsChecked="{Binding BlackListUseRegex}" />
+                            IsChecked="{Binding BlackListUseRegex}"
+                            VerticalAlignment="Center" />
                     </Grid>
-                    <Button HorizontalAlignment="Right"
-                            Classes="Long"
-                            Content="2. 查找更改" />
-                </StackPanel>
-                <DataGrid
-                    Grid.Row="2"
-                    AutoGenerateColumns="False"
-                    CanUserReorderColumns="True" CanUserResizeColumns="True"
-                    ItemsSource="{Binding Files}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn
-                            Width="36"
-                            CanUserReorder="False"
-                            CanUserResize="False"
-                            CanUserSort="False">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="{x:Type vm:SyncFileInfo}">
-                                    <CheckBox
-                                        Margin="8,0"
-                                        IsChecked="{Binding IsChecked}"
-                                        IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn
-                            CanUserResize="False"
-                            Header="完成">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Margin="16,0"
-                                        VerticalAlignment="Center"
-                                        Foreground="Green"
-                                        Text="●"
-                                        IsVisible="{Binding Complete}" />
-
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTextColumn
-                            Width="200"
-                            Binding="{Binding Name}"
-                            Header="文件名"
-                            IsReadOnly="True" />
-                        <DataGridTemplateColumn
-                            Width="200"
-                            Header="文件路径">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Left"
-                                        TextWrapping="Wrap"
-                                        Margin="8,4"
-                                        Text="{Binding ., Converter={StaticResource SyncFilePathConverter}}" />
-
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTextColumn
-                            Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                            CanUserResize="False"
-                            Header="修改时间"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding Length, Converter={StaticResource FileLength2StringConverter}}"
-                            CanUserResize="False"
-                            Header="大小"
-                            IsReadOnly="True" />
-
-                        <DataGridTemplateColumn
-                            CanUserResize="False"
-                            Header="更新类型"
-                            SortMemberPath="UpdateType">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock
-                                        Margin="16,0"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}">
-                                        <Interaction.Behaviors>
-                                            <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                                 Value="{x:Static enums:FileUpdateType.Add}">
-                                                <ChangePropertyAction PropertyName="Foreground" Value="Green" />
-                                            </DataTriggerBehavior>
-                                            <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                                 Value="{x:Static enums:FileUpdateType.Delete}">
-                                                <ChangePropertyAction PropertyName="Foreground" Value="Red" />
-                                            </DataTriggerBehavior>
-                                            <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                                 Value="{x:Static enums:FileUpdateType.Modify}">
-                                                <ChangePropertyAction PropertyName="Foreground" Value="Yellow" />
-                                            </DataTriggerBehavior>
-                                            <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                                 Value="{x:Static enums:FileUpdateType.Move}">
-                                                <ChangePropertyAction PropertyName="Foreground" Value="Orange" />
-                                            </DataTriggerBehavior>
-                                        </Interaction.Behaviors>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn
-                            Binding="{Binding Message}"
-                            CanUserResize="False"
-                            Header="信息"
-                            IsReadOnly="True" />
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <StackPanel
-                    Grid.Row="4"
-                    Margin="8,0"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal"
-                    Spacing="8">
-                    <TextBlock VerticalAlignment="Center">
-                        <Run Text="共新增文件" />
-                        <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
-                        <Run Text="个（" />
-                        <Run
-                            Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-                        <Run Text="），修改文件" />
-                        <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
-                        <Run Text="个（" />
-                        <Run
-                            Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-                        <Run Text="），移动文件" />
-                        <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
-                        <Run Text="个，删除文件" />
-                        <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
-                        <Run Text="个" />
-                    </TextBlock>
-
                     <Button
-                        HorizontalAlignment="Stretch"
-                        Content="全选"
-                        Classes="Middle"
-                        IsEnabled="{Binding CanEditConfigs}" />
-                    <Button
-                        Grid.Column="2"
-                        Classes="Middle"
-                        HorizontalAlignment="Stretch"
-                        Content="全不选"
-                        IsEnabled="{Binding CanEditConfigs}" />
+                        Classes="Long"
+                        Command="{Binding SearchChangeCommand}"
+                        Content="2. 查找更改"
+                        HorizontalAlignment="Right" />
                 </StackPanel>
+                <v:SyncFilesList Grid.Row="2" />
+
             </Grid>
             <Grid
-                Grid.Row="99"
+                ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto"
                 Grid.ColumnSpan="99"
-                Margin="8" ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto">
+                Grid.Row="99"
+                Margin="8">
                 <TextBlock
-                    VerticalAlignment="Center"
                     Text="{Binding Message}"
                     TextTrimming="CharacterEllipsis"
-                    ToolTip.Tip="{Binding Message}" />
+                    ToolTip.Tip="{Binding Message}"
+                    VerticalAlignment="Center" />
                 <ProgressBar
                     Grid.Column="2"
-                    VerticalAlignment="Center"
                     IsIndeterminate="{Binding ProgressIndeterminate}"
                     Maximum="{Binding ProgressMax}"
-                    Value="{Binding Progress}" />
+                    Value="{Binding Progress}"
+                    VerticalAlignment="Center" />
                 <TextBlock
                     Grid.Column="4"
-                    VerticalAlignment="Center"
-                    Text="导出方式：" />
+                    Text="导出方式："
+                    VerticalAlignment="Center" />
                 <ComboBox
                     Grid.Column="6"
-                    Width="128"
                     ItemsSource="{Binding ExportModes}"
-                    SelectedItem="{Binding ExportMode}">
+                    SelectedItem="{Binding ExportMode}"
+                    Width="128">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                            <TextBlock Text="{Binding ., Converter={StaticResource DescriptionConverter}}" VerticalAlignment="Center" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                     <ToolTip.Tip>
@@ -321,15 +180,16 @@
                     </ToolTip.Tip>
                 </ComboBox>
                 <Button
-                    Grid.Column="8"
-                    Content="停止"
                     Classes="Long"
+                    Command="{Binding StopCommand}"
+                    Content="停止"
+                    Grid.Column="8"
                     IsEnabled="{Binding CanStop}" />
                 <Button
-                    Grid.Column="10"
                     Classes="Long"
                     Command="{Binding ExportCommand}"
                     Content="3. 生成补丁"
+                    Grid.Column="10"
                     IsEnabled="{Binding CanProcess}" />
             </Grid>
         </Grid>

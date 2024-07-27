@@ -2,66 +2,38 @@
     x:Class="ArchiveMaster.Views.Step3Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:OffsiteBackupOfflineSync"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:model="clr-namespace:OffsiteBackupOfflineSync.Model;assembly=OffsiteBackupOfflineSync.Core"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="8" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="8" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <ui:SimpleStackPanel
+    <Grid RowDefinitions="Auto,8,*,8,Auto">
+        <StackPanel
             Margin="8"
             IsEnabled="{Binding CanEditConfigs}"
             Spacing="8">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="108" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="8" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Text="本地补丁目录：" />
-                <TextBox
-                    Grid.Column="2"
-                    Text="{Binding PatchDir}" />
-                <Button
-                    Grid.Column="4"
-                    Click="BrowsePatchDirButton_Click"
-                    Content="浏览.." />
 
-            </Grid>
-            <Grid HorizontalAlignment="Right">
-                <Button
-                    Width="128"
-                    Click="AnalyzeButton_Click"
-                    Content="1. 分析" />
-            </Grid>
-        </ui:SimpleStackPanel>
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="8" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+
+            <ct:FilePickerTextBox
+                ButtonContent="浏览.."
+                FileNames="{Binding PatchDir}"
+                Label="本地补丁目录："
+                Type="OpenFolder" />
+
+            <Button
+                HorizontalAlignment="Right"
+                Classes="Long"
+                Click="AnalyzeButton_Click"
+                Content="1. 分析" />
+        </StackPanel>
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="*,8,Auto">
             <DataGrid
                 AutoGenerateColumns="False"
-                CanUserAddRows="False"
                 CanUserReorderColumns="True"
                 ItemsSource="{Binding Files}">
                 <DataGrid.Columns>
@@ -139,7 +111,12 @@
                                 <TextBlock
                                     Margin="16,0"
                                     VerticalAlignment="Center"
-                                    Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}" />
+                                    Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}" >
+                                    <Interaction.Behaviors>
+                                        <DataTriggerBehavior Binding="{}"></DataTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                    
+                                </TextBlock>
                                 <DataTemplate.Triggers>
                                     <DataTrigger Binding="{Binding UpdateType}">
                                         <DataTrigger.Value>
@@ -212,20 +189,7 @@
         </Grid>
         <Grid
             Grid.Row="99"
-            Margin="8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+            Margin="8" ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto">
             <TextBlock
                 VerticalAlignment="Center"
                 Text="{Binding Message}"

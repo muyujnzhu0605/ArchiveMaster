@@ -10,20 +10,6 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <AvaloniaXaml Remove="Views\Step3Panel.axaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Views\MainWindow.xaml.cs" />
-    <Compile Remove="Views\Step3Panel.axaml.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Views\MainWindow.xaml" />
-  </ItemGroup>
-
   
   <ItemGroup>
     <PackageReference Include="Avalonia" />
@@ -45,6 +31,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\" />
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaXaml Remove="Views\Step3Panel.axaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Views\Step3Panel.axaml.cs" />
   </ItemGroup>
  
 </Project>
