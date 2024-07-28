@@ -6,7 +6,7 @@ namespace ArchiveMaster.Views
 {
     public partial class OfflineSyncPanelBase : PanelBase
     {
-        public OfflineSyncPanelBase()
+        protected OfflineSyncPanelBase()
         {
             InitializeComponent();
         }

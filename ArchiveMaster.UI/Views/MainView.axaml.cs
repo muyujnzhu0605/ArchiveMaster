@@ -33,6 +33,9 @@ public partial class MainView : UserControl
         InitializeComponent();
         RegisterMessages();
     }
+
+    private List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
+
     private void InitializeModules()
     {
         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -70,28 +73,27 @@ public partial class MainView : UserControl
 
                     if (moduleInitializer.Views != null)
                     {
-                        foreach (var view in moduleInitializer.Views)
-                        {
-                            view.Register();
-                        }
-                    }
-
-                    if (moduleInitializer.StyleUris != null)
-                    {
-                        foreach (var style in moduleInitializer.StyleUris)
-                        {
-                            var styles = AvaloniaXamlLoader.Load(style) as Styles;
-                            Application.Current.Styles.Add(styles);
-                        }
+                        views.Add(moduleInitializer.Views);
                     }
 
                     moduleInitializer.RegisterMessages(this);
                 }
-
             }
             catch (Exception ex)
             {
                 throw new Exception($"加载程序集 {dllFile} 时出错: {ex.Message}");
+            }
+        }
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == DataContextProperty)
+        {
+            foreach (var view in views)
+            {
+                (DataContext as MainViewModel)?.PanelGroups.Add(view);
             }
         }
     }

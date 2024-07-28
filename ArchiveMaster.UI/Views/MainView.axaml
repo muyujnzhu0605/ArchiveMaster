@@ -55,11 +55,39 @@
                         <StackPanel
                             Orientation="Vertical"
                             Spacing="8">
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                FontSize="20"
-                                FontWeight="Bold"
-                                Text="{Binding GroupName}" />
+                            <Grid ColumnDefinitions="*,Auto,*">
+                                <TextBlock
+                                    Grid.Column="1"
+                                    FontSize="20"
+                                    FontWeight="Bold"
+                                    Text="{Binding GroupName}" />
+                                <Button
+                                    Grid.Column="2"
+                                    Margin="8,0,0,0"
+                                    Padding="4"
+                                    HorizontalAlignment="Left"
+                                    Background="Transparent"
+                                    IsVisible="{Binding MenuItems, Converter={StaticResource CountMoreThanZeroConverter}}">
+                                    <TextBlock
+                                        FontFamily="{StaticResource IconFont}"
+                                        FontSize="16"
+                                        Text="&#xE10C;" />
+                                    <Button.Flyout>
+                                        <MenuFlyout ItemsSource="{Binding MenuItems}">
+                                            <MenuFlyout.ItemContainerTheme>
+                                                <ControlTheme
+                                                    BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                    TargetType="MenuItem">
+
+                                                    <Setter Property="Header" Value="{Binding Header}" />
+                                                    <Setter Property="Command" Value="{Binding Command}" />
+
+                                                </ControlTheme>
+                                            </MenuFlyout.ItemContainerTheme>
+                                        </MenuFlyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </Grid>
                             <Border
                                 MaxWidth="240"
                                 BorderBrush="{DynamicResource Foreground3}"

@@ -23,7 +23,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private object mainContent;
 
-    public List<ToolPanelGroupInfo> PanelGroups { get; } = ToolPanelInfo.Groups;
+    [ObservableProperty] 
+    private ObservableCollection<ToolPanelGroupInfo> panelGroups=new ObservableCollection<ToolPanelGroupInfo>();
 
     [ObservableProperty]
     private bool isToolOpened;

@@ -1,11 +1,7 @@
 ﻿<v:OfflineSyncPanelBase
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d"
     x:Class="ArchiveMaster.Views.Step2Panel"
-    x:DataType="vm:Step2ViewModel"
-    x:Name="root"
     xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
@@ -14,8 +10,13 @@
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="clr-namespace:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:Step2ViewModel"
+    mc:Ignorable="d">
     <v:OfflineSyncPanelBase.Styles>
+        <StyleInclude Source="../Styles.axaml" />
         <Style Selector="TextBox">
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
         </Style>
@@ -28,139 +29,153 @@
         </ResourceDictionary>
     </v:OfflineSyncPanelBase.Resources>
     <v:OfflineSyncPanelBase.PanelContent>
-        <Grid ColumnDefinitions="*,16,2*" RowDefinitions="*,8,Auto">
+        <Grid
+            ColumnDefinitions="*,16,2*"
+            RowDefinitions="*,8,Auto">
             <Grid RowDefinitions="Auto,8,*">
                 <StackPanel
-                    IsEnabled="{Binding CanEditConfigs}"
                     Margin="8"
+                    IsEnabled="{Binding CanEditConfigs}"
                     Spacing="8">
-                    <Grid ColumnDefinitions="96,8,*,8,Auto" RowDefinitions="Auto,8,Auto">
-                        <TextBlock Text="异地快照文件：" VerticalAlignment="Center" />
+                    <Grid
+                        ColumnDefinitions="96,8,*,8,Auto"
+                        RowDefinitions="Auto,8,Auto">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="异地快照文件：" />
                         <TextBox
                             Grid.Column="2"
                             MaxLines="3"
                             Text="{Binding OffsiteSnapshot}"
                             TextWrapping="Wrap" />
                         <Button
+                            Grid.Column="4"
                             Classes="Middle"
                             Command="{Binding BrowseOffsiteSnapshotCommand}"
-                            Content="浏览.."
-                            Grid.Column="4" />
+                            Content="浏览.." />
 
                         <TextBlock
                             Grid.Row="2"
-                            Text="本地搜索目录："
-                            VerticalAlignment="Center" />
+                            VerticalAlignment="Center"
+                            Text="本地搜索目录：" />
                         <TextBox
-                            AcceptsReturn="True"
-                            Grid.Column="2"
                             Grid.Row="2"
+                            Grid.Column="2"
+                            AcceptsReturn="True"
                             MaxLines="3"
                             Text="{Binding LocalDir}"
                             Watermark="在选择的目录中搜索需要同步的目录；一行一项" />
                         <Button
+                            Grid.Row="2"
+                            Grid.Column="4"
                             Classes="Middle"
                             Command="{Binding BrowseLocalDirCommand}"
-                            Content="添加.."
-                            Grid.Column="4"
-                            Grid.Row="2" />
+                            Content="添加.." />
 
                     </Grid>
                     <Button
+                        HorizontalAlignment="Right"
                         Classes="Long"
                         Command="{Binding MatchDirsCommand}"
-                        Content="1. 匹配目录"
-                        HorizontalAlignment="Right" />
+                        Content="1. 匹配目录" />
                 </StackPanel>
                 <DataGrid
+                    Grid.Row="2"
                     AutoGenerateColumns="False"
                     CanUserReorderColumns="True"
-                    Grid.Row="2"
                     ItemsSource="{Binding MatchingDirs}">
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Binding="{Binding OffsiteDir}"
                             Header="异地目录"
                             IsReadOnly="True" />
-                        <DataGridTextColumn Binding="{Binding LocalDir}" Header="本地目录" />
+                        <DataGridTextColumn
+                            Binding="{Binding LocalDir}"
+                            Header="本地目录" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
-            <Grid Grid.Column="2" RowDefinitions="Auto,8,*">
+            <Grid
+                Grid.Column="2"
+                RowDefinitions="Auto,8,*">
                 <StackPanel
-                    IsEnabled="{Binding CanEditConfigs}"
                     Margin="8"
+                    IsEnabled="{Binding CanEditConfigs}"
                     Spacing="8">
                     <Grid ColumnDefinitions="96,8,*,8,Auto">
                         <TextBlock
                             Grid.Row="4"
-                            Text="导出补丁目录："
-                            VerticalAlignment="Center" />
+                            VerticalAlignment="Center"
+                            Text="导出补丁目录：" />
                         <TextBox
-                            Grid.Column="2"
                             Grid.Row="4"
+                            Grid.Column="2"
                             Text="{Binding PatchDir}" />
                         <Button
+                            x:Name="btnBrowse"
+                            Grid.Row="4"
+                            Grid.Column="4"
                             Classes="Middle"
                             Command="{Binding BrowsePatchDirCommand}"
-                            Content="浏览.."
-                            Grid.Column="4"
-                            Grid.Row="4"
-                            x:Name="btnBrowse" />
+                            Content="浏览.." />
                     </Grid>
                     <Grid ColumnDefinitions="96,8,*,8,Auto">
-                        <TextBlock Text="黑名单：" VerticalAlignment="Center" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="黑名单：" />
                         <TextBox
-                            AcceptsReturn="True"
                             Grid.Column="2"
+                            AcceptsReturn="True"
                             MaxLines="5"
                             Text="{Binding BlackList}"
                             Watermark="可以是文件名，也可以是完整路径；一行一项" />
                         <CheckBox
-                            Classes="Middle"
-                            Content="正则"
                             Grid.Column="4"
                             Height="{Binding #btnBrowse.Bounds.Height}"
-                            IsChecked="{Binding BlackListUseRegex}"
-                            VerticalAlignment="Center" />
+                            VerticalAlignment="Center"
+                            Classes="Middle"
+                            Content="正则"
+                            IsChecked="{Binding BlackListUseRegex}" />
                     </Grid>
                     <Button
+                        HorizontalAlignment="Right"
                         Classes="Long"
                         Command="{Binding SearchChangeCommand}"
-                        Content="2. 查找更改"
-                        HorizontalAlignment="Right" />
+                        Content="2. 查找更改" />
                 </StackPanel>
                 <v:SyncFilesList Grid.Row="2" />
 
             </Grid>
             <Grid
-                ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto"
-                Grid.ColumnSpan="99"
                 Grid.Row="99"
-                Margin="8">
+                Grid.ColumnSpan="99"
+                Margin="8"
+                ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto">
                 <TextBlock
+                    VerticalAlignment="Center"
                     Text="{Binding Message}"
                     TextTrimming="CharacterEllipsis"
-                    ToolTip.Tip="{Binding Message}"
-                    VerticalAlignment="Center" />
+                    ToolTip.Tip="{Binding Message}" />
                 <ProgressBar
                     Grid.Column="2"
+                    VerticalAlignment="Center"
                     IsIndeterminate="{Binding ProgressIndeterminate}"
                     Maximum="{Binding ProgressMax}"
-                    Value="{Binding Progress}"
-                    VerticalAlignment="Center" />
+                    Value="{Binding Progress}" />
                 <TextBlock
                     Grid.Column="4"
-                    Text="导出方式："
-                    VerticalAlignment="Center" />
+                    VerticalAlignment="Center"
+                    Text="导出方式：" />
                 <ComboBox
                     Grid.Column="6"
+                    Width="128"
                     ItemsSource="{Binding ExportModes}"
-                    SelectedItem="{Binding ExportMode}"
-                    Width="128">
+                    SelectedItem="{Binding ExportMode}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding ., Converter={StaticResource DescriptionConverter}}" VerticalAlignment="Center" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                     <ToolTip.Tip>
@@ -180,16 +195,16 @@
                     </ToolTip.Tip>
                 </ComboBox>
                 <Button
+                    Grid.Column="8"
                     Classes="Long"
                     Command="{Binding StopCommand}"
                     Content="停止"
-                    Grid.Column="8"
                     IsEnabled="{Binding CanStop}" />
                 <Button
+                    Grid.Column="10"
                     Classes="Long"
                     Command="{Binding ExportCommand}"
                     Content="3. 生成补丁"
-                    Grid.Column="10"
                     IsEnabled="{Binding CanProcess}" />
             </Grid>
         </Grid>

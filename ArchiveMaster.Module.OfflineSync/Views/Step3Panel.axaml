@@ -13,6 +13,9 @@
     d:DesignWidth="800"
     x:DataType="vm:Step3ViewModel"
     mc:Ignorable="d">
+    <v:OfflineSyncPanelBase.Styles>
+        <StyleInclude Source="../Styles.axaml" />
+    </v:OfflineSyncPanelBase.Styles>
     <v:OfflineSyncPanelBase.PanelContent>
         <Grid RowDefinitions="Auto,8,*,8,Auto">
             <StackPanel

@@ -20,13 +20,13 @@ namespace ArchiveMaster.ViewModels
     public partial class Step2ViewModel : OfflineSyncViewModelBase<SyncFileInfo>
     {
         [ObservableProperty]
-        public string blackList;
+        private string blackList;
 
         [ObservableProperty]
-        public bool blackListUseRegex;
+        private bool blackListUseRegex;
 
         [ObservableProperty]
-        public ExportMode exportMode;
+        private ExportMode exportMode;
         [ObservableProperty]
         private string localDir;
 

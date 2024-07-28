@@ -14,7 +14,10 @@ namespace ArchiveMaster.Configs
     {
         public static readonly int MaxTimeTolerance = 3;
 
-        public Dictionary<string, SingleConfig> ConfigCollection { get; set; } = new Dictionary<string, SingleConfig>();
+        public Dictionary<string, SingleConfig> ConfigCollection { get; set; } = new Dictionary<string, SingleConfig>()
+        {
+            ["默认"]=new SingleConfig()
+        };
         
         [JsonIgnore]
         public SingleConfig CurrentConfig

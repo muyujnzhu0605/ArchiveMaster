@@ -15,7 +15,6 @@ namespace ArchiveMaster.Views
         {
             ViewModel = new Step2ViewModel();
             DataContext = ViewModel;
-            ViewModel.Files.Add(new SyncFileInfo(new FileInfo(@"C:\Users\autod\Documents\Apps\自写软件\FrpGUI\config.json"),@"C:\Users\autod\"){UpdateType = FileUpdateType.Add});
             InitializeComponent();
         }
 

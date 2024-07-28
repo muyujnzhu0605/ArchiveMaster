@@ -17,13 +17,15 @@ namespace ArchiveMaster
 
         public IList<ConfigInfo> Configs => [new ConfigInfo(typeof(EncryptorConfig))];
 
-        public IList<ToolPanelInfo> Views =>
-        [
-            new ToolPanelInfo(typeof(EncryptorPanel), ModuleName, "文件加密解密", "使用AES加密方法，对文件进行加密或解密",
-                baseUrl + "encrypt.svg")
-        ];
-
-        public IList<Uri> StyleUris { get; }
+        public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
+        {
+            Panels =
+            {
+                new ToolPanelInfo(typeof(EncryptorPanel),  "文件加密解密", "使用AES加密方法，对文件进行加密或解密", baseUrl + "encrypt.svg")
+            },
+            GroupName = ModuleName
+        };
+        
 
         public void RegisterMessages(Visual visual)
         {
