@@ -1,76 +1,79 @@
 <UserControl
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d"
     x:Class="ArchiveMaster.Views.SyncFilesList"
     xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
-     x:Name="root"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <c:SyncFilePathConverter x:Key="SyncFilePathConverter" />
     </UserControl.Resources>
-    <Grid RowDefinitions="*,8,Auto">
-        
+    <Grid RowDefinitions="*,8,Auto,8,Auto">
+
         <DataGrid
+            x:Name="dg"
             AutoGenerateColumns="False"
             CanUserReorderColumns="True"
             CanUserResizeColumns="True"
             ItemsSource="{Binding Files}">
             <DataGrid.Columns>
-             
+
                 <DataGridTemplateColumn
+                    Width="36"
                     CanUserReorder="False"
                     CanUserResize="False"
-                    CanUserSort="False"
-                    Width="36">
+                    CanUserSort="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="{x:Type vm:SyncFileInfo}">
                             <CheckBox
+                                Margin="8,0"
                                 IsChecked="{Binding IsChecked}"
-                                IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
-                                Margin="8,0" />
+                                IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn CanUserResize="False" Header="完成">
+                <DataGridTemplateColumn
+                    CanUserResize="False"
+                    Header="完成">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock
+                                Margin="16,0"
+                                VerticalAlignment="Center"
                                 Foreground="Green"
                                 IsVisible="{Binding Complete}"
-                                Margin="16,0"
-                                Text="●"
-                                VerticalAlignment="Center" />
+                                Text="●" />
 
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn
+                    Width="200"
                     Binding="{Binding Name}"
                     Header="文件名"
-                    IsReadOnly="True"
-                    Width="200" />
+                    IsReadOnly="True" />
                 <DataGridTextColumn
+                    Width="200"
                     Binding="{Binding ., Converter={StaticResource SyncFilePathConverter}}"
                     Header="文件路径"
-                    IsReadOnly="True"
-                    Width="200" />
+                    IsReadOnly="True" />
                 <!-- <DataGridTemplateColumn Header="文件路径" Width="200"> -->
                 <!--     <DataGridTemplateColumn.CellTemplate> -->
                 <!--         <DataTemplate> -->
-                <!--             <TextBlock -->
-                <!--                 HorizontalAlignment="Left" -->
-                <!--                 Margin="8,4" -->
-                <!--                 Text="{Binding ., Converter={StaticResource SyncFilePathConverter}}" -->
-                <!--                 TextWrapping="Wrap" -->
-                <!--                 VerticalAlignment="Center" /> -->
-                <!-- -->
+                <!--  <TextBlock  -->
+                <!--  HorizontalAlignment="Left"  -->
+                <!--  Margin="8,4"  -->
+                <!--  Text="{Binding ., Converter={StaticResource SyncFilePathConverter}}"  -->
+                <!--  TextWrapping="Wrap"  -->
+                <!--  VerticalAlignment="Center" />  -->
+                <!--    -->
                 <!--         </DataTemplate> -->
                 <!--     </DataGridTemplateColumn.CellTemplate> -->
                 <!-- </DataGridTemplateColumn> -->
@@ -94,24 +97,36 @@
                         <DataTemplate>
                             <TextBlock
                                 Margin="16,0"
-                                Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}"
-                                VerticalAlignment="Center">
+                                VerticalAlignment="Center"
+                                Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}">
                                 <Interaction.Behaviors>
-                                    <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                         Value="{x:Static enums:FileUpdateType.Add}">
-                                        <ChangePropertyAction PropertyName="Foreground" Value="Green" />
+                                    <DataTriggerBehavior
+                                        Binding="{Binding UpdateType}"
+                                        Value="{x:Static enums:FileUpdateType.Add}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Green" />
                                     </DataTriggerBehavior>
-                                    <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                         Value="{x:Static enums:FileUpdateType.Delete}">
-                                        <ChangePropertyAction PropertyName="Foreground" Value="Red" />
+                                    <DataTriggerBehavior
+                                        Binding="{Binding UpdateType}"
+                                        Value="{x:Static enums:FileUpdateType.Delete}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Red" />
                                     </DataTriggerBehavior>
-                                    <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                         Value="{x:Static enums:FileUpdateType.Modify}">
-                                        <ChangePropertyAction PropertyName="Foreground" Value="Yellow" />
+                                    <DataTriggerBehavior
+                                        Binding="{Binding UpdateType}"
+                                        Value="{x:Static enums:FileUpdateType.Modify}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Yellow" />
                                     </DataTriggerBehavior>
-                                    <DataTriggerBehavior Binding="{Binding UpdateType}"
-                                                         Value="{x:Static enums:FileUpdateType.Move}">
-                                        <ChangePropertyAction PropertyName="Foreground" Value="Orange" />
+                                    <DataTriggerBehavior
+                                        Binding="{Binding UpdateType}"
+                                        Value="{x:Static enums:FileUpdateType.Move}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Orange" />
                                     </DataTriggerBehavior>
                                 </Interaction.Behaviors>
                             </TextBlock>
@@ -126,20 +141,42 @@
             </DataGrid.Columns>
         </DataGrid>
         <Grid
-            ColumnDefinitions="Auto,*,Auto,8,Auto"
             Grid.Row="2"
-            Margin="8,0">
+            Margin="8,0"
+            ColumnDefinitions="Auto,8,*">
+            <TextBlock
+                FontWeight="Bold"
+                Text="选中的文件：" />
+            <TextBlock
+                Grid.Column="2"
+                IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"
+                TextWrapping="Wrap">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0}{1}{2}">
+                        <Binding Path="#dg.SelectedItem.TopDirectory" />
+                        <Binding Path="DirectorySeparatorChar" />
+                        <Binding Path="#dg.SelectedItem.Path" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <TextBlock
+                Grid.Column="2"
+                IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
+                Text="（无）" />
+        </Grid>
+        <Grid
+            Grid.Row="4"
+            Margin="8,0"
+            ColumnDefinitions="Auto,*,Auto,8,Auto">
             <TextBlock VerticalAlignment="Center">
                 <Run Text="共新增文件" />
                 <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
                 <Run Text="个（" />
-                <Run
-                    Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
                 <Run Text="），修改文件" />
                 <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
                 <Run Text="个（" />
-                <Run
-                    Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
                 <Run Text="），移动文件" />
                 <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
                 <Run Text="个，删除文件" />
@@ -148,19 +185,19 @@
             </TextBlock>
 
             <Button
+                Grid.Column="2"
+                HorizontalAlignment="Stretch"
                 Classes="Middle"
                 Command="{Binding SelectAllCommand}"
                 Content="全选"
-                Grid.Column="2"
-                HorizontalAlignment="Stretch"
                 IsEnabled="{Binding CanEditConfigs}" />
 
             <Button
+                Grid.Column="4"
+                HorizontalAlignment="Stretch"
                 Classes="Middle"
                 Command="{Binding SelectNoneCommand}"
                 Content="全不选"
-                Grid.Column="4"
-                HorizontalAlignment="Stretch"
                 IsEnabled="{Binding CanEditConfigs}" />
         </Grid>
     </Grid>

@@ -92,6 +92,7 @@ namespace ArchiveMaster.ViewModels
 
         public int DeletedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Delete && p.IsChecked)?.Count() ?? 0;
 
+        public char DirectorySeparatorChar => Path.DirectorySeparatorChar;
         public long ModifiedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Count() ?? 0;
 
         public long ModifiedFileLength => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Sum(p => p.Length) ?? 0;
@@ -100,7 +101,7 @@ namespace ArchiveMaster.ViewModels
 
         protected abstract OfflineSyncStepConfigBase Config { get; }
         protected abstract OfflineSyncUtilityBase Utility { get; }
- 
+
         protected void UpdateStatus(StatusType status)
         {
             CanStop = status is StatusType.Analyzing or StatusType.Processing;
@@ -217,8 +218,6 @@ namespace ArchiveMaster.ViewModels
                 ConfigName = ConfigNames[0];
             }
         }
-        
-        
         [RelayCommand]
         private void SelectAll()
         {

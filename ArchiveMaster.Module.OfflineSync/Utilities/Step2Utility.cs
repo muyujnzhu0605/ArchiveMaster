@@ -234,6 +234,10 @@ namespace ArchiveMaster.Utility
             {
                 throw new ArgumentException("异地顶级目录存在重复", nameof(localAndOffsiteDirs));
             }
+            if(localAndOffsiteDirs.Any(p=>string.IsNullOrEmpty(p.OffsiteDir) || string.IsNullOrEmpty(p.LocalDir)))
+            {
+                throw new ArgumentException("目录匹配未完成");
+            }
             foreach (var file in offsiteTopDir2Files)
             {
                 if (!offsiteTopDirs.Contains(file.Key))
