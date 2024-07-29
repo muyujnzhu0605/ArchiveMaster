@@ -17,17 +17,17 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class Step1ViewModel : OfflineSyncViewModelBase<FileInfoWithStatus>
     {
-        [ObservableProperty]
-        private string outputFile;
+        [ObservableProperty] private string outputFile;
 
-        [ObservableProperty]
-        private string selectedSyncDir;
+        [ObservableProperty] private string selectedSyncDir;
 
-        [ObservableProperty]
-        private ObservableCollection<string> syncDirs = new ObservableCollection<string>();
+        [ObservableProperty] private ObservableCollection<string> syncDirs;
 
-        protected override OfflineSyncStepConfigBase Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+        protected override OfflineSyncStepConfigBase Config =>
+            AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+
         protected override OfflineSyncUtilityBase Utility => new Step1Utility();
+
         private void AddSyncDir(string path)
         {
             DirectoryInfo newDirInfo = new DirectoryInfo(path);
@@ -35,6 +35,11 @@ namespace ArchiveMaster.ViewModels
             if (!newDirInfo.Exists)
             {
                 throw new FileNotFoundException("指定的目录不存在");
+            }
+
+            if (SyncDirs == null)
+            {
+                SyncDirs = new ObservableCollection<string>();
             }
 
             // 检查新目录与现有目录是否相同
@@ -61,6 +66,7 @@ namespace ArchiveMaster.ViewModels
                     {
                         throw new InvalidOperationException($"新目录 '{path}' 是现有目录 '{existingPath}' 的子目录，不能添加。");
                     }
+
                     temp = temp.Parent;
                 }
 
@@ -72,12 +78,12 @@ namespace ArchiveMaster.ViewModels
                     {
                         throw new InvalidOperationException($"新目录 '{path}' 是现有目录 '{existingPath}' 的父目录，不能添加。");
                     }
+
                     temp = temp.Parent;
                 }
             }
 
             SyncDirs.Add(path);
-
         }
 
         [RelayCommand]
@@ -122,12 +128,14 @@ namespace ArchiveMaster.ViewModels
 
             if (string.IsNullOrWhiteSpace(OutputFile))
             {
-                var result = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
-                {
-                    FileTypeChoices = [
-                                    new  FilePickerFileType("异地快照文件"){Patterns=["*.os1"]}
-                          ],
-                });
+                var result = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider
+                    .SaveFilePickerAsync(new FilePickerSaveOptions()
+                    {
+                        FileTypeChoices =
+                        [
+                            new FilePickerFileType("异地快照文件") { Patterns = ["*.os1"] }
+                        ],
+                    });
                 if (result != null)
                 {
                     OutputFile = result.TryGetLocalPath();
@@ -137,14 +145,10 @@ namespace ArchiveMaster.ViewModels
             UpdateStatus(StatusType.Processing);
             try
             {
-                await Task.Run(() =>
-                {
-                    (Utility as Step1Utility).Enumerate(dirs, OutputFile);
-                });
+                await Task.Run(() => { (Utility as Step1Utility).Enumerate(dirs, OutputFile); });
             }
             catch (OperationCanceledException)
             {
-
             }
             catch (Exception ex)
             {
@@ -159,7 +163,6 @@ namespace ArchiveMaster.ViewModels
             {
                 UpdateStatus(StatusType.Ready);
             }
-
         }
 
         [RelayCommand]
@@ -168,11 +171,11 @@ namespace ArchiveMaster.ViewModels
             try
             {
                 if ((await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
-                {
-                    Type = InputDialogMessage.InputDialogType.Text,
-                    Title = "输入目录",
-                    Message = "请输入欲加入的目录地址"
-                }).Task) is string result)
+                    {
+                        Type = InputDialogMessage.InputDialogType.Text,
+                        Title = "输入目录",
+                        Message = "请输入欲加入的目录地址"
+                    }).Task) is string result)
                 {
                     AddSyncDir(result);
                 }
@@ -197,6 +200,7 @@ namespace ArchiveMaster.ViewModels
                 SyncDirs.Remove(SelectedSyncDir);
             }
         }
+
         private void Stop()
         {
             UpdateStatus(StatusType.Stopping);
