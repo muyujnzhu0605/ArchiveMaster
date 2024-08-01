@@ -84,7 +84,7 @@ namespace ArchiveMaster.Utilities
             }, token);
         }
 
-        public override Task InitializeAsync()
+        public override Task InitializeAsync(CancellationToken token)
         {
             CompressFiles = new SlimmingFilesInfo(Config.SourceDir);
             CopyFiles = new SlimmingFilesInfo(Config.SourceDir);
@@ -93,13 +93,13 @@ namespace ArchiveMaster.Utilities
 
             return Task.Run(() =>
             {
-                SearchCopyingAndCompressingFiles();
+                SearchCopyingAndCompressingFiles(token);
 
-                SearchDeletingFiles();
-            });
+                SearchDeletingFiles(token);
+            }, token);
         }
 
-        private void SearchDeletingFiles()
+        private void SearchDeletingFiles(CancellationToken token)
         {
             if (!Directory.Exists(Config.DistDir))
             {
@@ -116,6 +116,7 @@ namespace ArchiveMaster.Utilities
             .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories)
              .Where(p => !rBlack.IsMatch(p)))
             {
+                token.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
                 {
                     DeleteFiles.Add(new FileInfo(file));
@@ -134,7 +135,7 @@ namespace ArchiveMaster.Utilities
             }
         }
 
-        private void SearchCopyingAndCompressingFiles()
+        private void SearchCopyingAndCompressingFiles(CancellationToken token)
         {
             NotifyProgressUpdate(1, -1, "正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
@@ -143,6 +144,7 @@ namespace ArchiveMaster.Utilities
             int index = 0;
             foreach (var file in files)
             {
+                token.ThrowIfCancellationRequested();
                 index++;
                 NotifyProgressUpdate(files.Count, index, $"正在查找文件 ({index}/{files.Count})");
 

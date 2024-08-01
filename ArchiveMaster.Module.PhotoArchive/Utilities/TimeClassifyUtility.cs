@@ -1,6 +1,5 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
-using ArchiveMaster.ViewModels.FileSystemViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +13,7 @@ namespace ArchiveMaster.Utilities
 {
     public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase
     {
-        public TimeClassifyConfig Config { get; init; } = config;
+        private TimeClassifyConfig Config { get;  } = config;
         public List<SimpleDirInfo> TargetDirs { get; set; }
 
         public override async Task ExecuteAsync(CancellationToken token)
@@ -52,19 +51,20 @@ namespace ArchiveMaster.Utilities
             }, token);
         }
 
-        public override async Task InitializeAsync()
+        public override async Task InitializeAsync(CancellationToken token)
         {
             List<SimpleFileInfo> files = null;
             List<SimpleDirInfo> subDirs = null;
             List<SimpleDirInfo> targetDirs = new List<SimpleDirInfo>();
 
-            await Task.Run((Action)(() =>
+            await Task.Run(() =>
             {
                 NotifyProgressUpdate(0, -1, "正在搜索文件");
                 files = Directory.EnumerateFiles(Config.Dir)
                     .Select(p => new SimpleFileInfo(p))
                     .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
                     .ToList();
+                token.ThrowIfCancellationRequested();
                 subDirs = Directory.EnumerateDirectories(Config.Dir)
                     .Select(p => new SimpleDirInfo(p))
                     .Where(p => p.FilesCount > 0)
@@ -74,6 +74,7 @@ namespace ArchiveMaster.Utilities
                 {
                     throw new Exception("目录为空");
                 }
+                token.ThrowIfCancellationRequested();
 
                 NotifyProgressUpdate(0, -1, "正在分配目录");
                 DateTime time = DateTime.MinValue;
@@ -81,6 +82,7 @@ namespace ArchiveMaster.Utilities
                 int dirsIndex = 0;
                 while (filesIndex < files.Count || dirsIndex < subDirs.Count)
                 {
+                    token.ThrowIfCancellationRequested();
                     var file = filesIndex < files.Count ? files[filesIndex] : null;
                     var dir = dirsIndex < subDirs.Count ? subDirs[dirsIndex] : null;
                     //没有未处理目录，或文件的时间早于目录中最早文件的时间
@@ -112,39 +114,28 @@ namespace ArchiveMaster.Utilities
                         throw new NotImplementedException();
                     }
                 }
-            }));
+            }, token);
 
             foreach (var dir in targetDirs)
             {
+                token.ThrowIfCancellationRequested();
                 dir.EarliestTime = dir.Subs.Select(p =>
                 {
-                    if (p is SimpleDirInfo d)
+                    return p switch
                     {
-                        return d.EarliestTime;
-                    }
-                    else if (p is SimpleFileInfo f)
-                    {
-                        return f.Time;
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                        SimpleDirInfo d => d.EarliestTime,
+                        SimpleFileInfo f => f.Time,
+                        _ => throw new NotImplementedException()
+                    };
                 }).Min();
                 dir.LatestTime = dir.Subs.Select(p =>
                 {
-                    if (p is SimpleDirInfo d)
+                    return p switch
                     {
-                        return d.EarliestTime;
-                    }
-                    else if (p is SimpleFileInfo f)
-                    {
-                        return f.Time;
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                        SimpleDirInfo d => d.EarliestTime,
+                        SimpleFileInfo f => f.Time,
+                        _ => throw new NotImplementedException()
+                    };
                 }).Max();
                 dir.Name = $"{dir.EarliestTime:yyyy-MM-dd HH:mm:ss} ~ {dir.LatestTime:yyyy-MM-dd HH:mm:ss}";
             }

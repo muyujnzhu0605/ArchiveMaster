@@ -1,6 +1,5 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
-using ArchiveMaster.ViewModels.FileSystemViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,9 +10,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 namespace ArchiveMaster.Utilities
 {
-
     public class EncryptorUtility(EncryptorConfig config) : TwoStepUtilityBase
     {
         public const string EncryptedFileExtension = ".ept";
@@ -42,18 +41,19 @@ namespace ArchiveMaster.Utilities
                 string baseMessage = null;
                 var files = ProcessingFiles.Where(p => p.IsEnable).ToList();
                 int count = files.Count;
-                var progressReport = new AesExtension.RefreshFileProgress((string source, string target, long max, long value) =>
-                {
-                    NotifyProgressUpdate(count, index, baseMessage +
-                        $"（{index}/{count}），当前文件：{Path.GetFileName(source)}（{1.0 * value / 1024 / 1024:0}MB/{1.0 * max / 1024 / 1024:0}MB）");
-                });
+                var progressReport = new AesExtension.RefreshFileProgress(
+                    (string source, string target, long max, long value) =>
+                    {
+                        NotifyProgressUpdate(count, index, baseMessage +
+                                                           $"（{index}/{count}），当前文件：{Path.GetFileName(source)}（{1.0 * value / 1024 / 1024:0}MB/{1.0 * max / 1024 / 1024:0}MB）");
+                    });
 
                 foreach (var file in files)
                 {
                     token.ThrowIfCancellationRequested();
                     baseMessage = isEncrypting ? "正在加密文件" : "正在解密文件";
                     NotifyProgressUpdate(count, index++, baseMessage +
-                        $"（{index}/{count}），当前文件：{file.Name}（0MB/{1.0 * new FileInfo(file.Path).Length / 1024 / 1024:0}）");
+                                                         $"（{index}/{count}），当前文件：{file.Name}（0MB/{1.0 * new FileInfo(file.Path).Length / 1024 / 1024:0}）");
 
                     try
                     {
@@ -61,14 +61,17 @@ namespace ArchiveMaster.Utilities
                         if (isEncrypting)
                         {
                             aes.GenerateIV();
-                            aes.EncryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles, progressReport);
+                            aes.EncryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
+                                progressReport);
                             file.IsFileNameEncrypted = Config.EncryptFileNames;
                         }
                         else
                         {
-                            aes.DecryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles, progressReport);
+                            aes.DecryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
+                                progressReport);
                             file.IsFileNameEncrypted = false;
                         }
+
                         file.IsEncrypted = isEncrypting;
                         File.SetLastWriteTime(file.TargetPath, File.GetLastWriteTime(file.Path));
 
@@ -78,6 +81,7 @@ namespace ArchiveMaster.Utilities
                             {
                                 File.SetAttributes(file.Path, FileAttributes.Normal);
                             }
+
                             File.Delete(file.Path);
                         }
                     }
@@ -94,6 +98,7 @@ namespace ArchiveMaster.Utilities
                     {
                         fs.WriteLine($"{kv.Key}\t{kv.Value}");
                     }
+
                     fs.Close();
                 }
             }, token);
@@ -112,6 +117,7 @@ namespace ArchiveMaster.Utilities
                     {
                         throw new Exception("目录结构文件不存在");
                     }
+
                     foreach (var line in File.ReadLines(fileListFile))
                     {
                         var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
@@ -119,6 +125,7 @@ namespace ArchiveMaster.Utilities
                         {
                             throw new Exception("目录结构文件内容不符合规范");
                         }
+
                         dirStructureDic.Add(parts[0], parts[1]);
                     }
                 }
@@ -138,7 +145,8 @@ namespace ArchiveMaster.Utilities
                 if (isEncrypting)
                 {
                     string relativePath = Path.GetRelativePath(GetSourceDir(), file.Path);
-                    string encryptedFileName = Convert.ToBase64String(aes.Encrypt(Encoding.Default.GetBytes(relativePath)));
+                    string encryptedFileName =
+                        Convert.ToBase64String(aes.Encrypt(Encoding.Default.GetBytes(relativePath)));
                     string hash = Hash(encryptedFileName);
                     longNames.Add(hash, encryptedFileName);
                     file.TargetName = hash;
@@ -150,7 +158,9 @@ namespace ArchiveMaster.Utilities
                     {
                         throw new Exception("在文件名字典文件中没有找到对应文件的原文件名");
                     }
-                    string rawRelativePath = Encoding.Default.GetString(aes.Decrypt(Convert.FromBase64String(encryptedFileName)));
+
+                    string rawRelativePath =
+                        Encoding.Default.GetString(aes.Decrypt(Convert.FromBase64String(encryptedFileName)));
                     file.TargetName = Path.GetFileName(rawRelativePath);
                     file.TargetPath = Path.Combine(GetDistDir(), rawRelativePath);
                 }
@@ -158,29 +168,33 @@ namespace ArchiveMaster.Utilities
             else
             {
                 string targetName = isEncrypting
-                      ? (Config.EncryptFileNames ? EncryptFileName(file.Name) : $"{file.Name}{EncryptedFileExtension}")
-                      : DecryptFileName(file.Name);
+                    ? (Config.EncryptFileNames ? EncryptFileName(file.Name) : $"{file.Name}{EncryptedFileExtension}")
+                    : DecryptFileName(file.Name);
 
                 string relativeDir = Path.GetDirectoryName(Path.GetRelativePath(GetSourceDir(), file.Path));
                 if (isEncrypting && Config.EncryptFolderNames)
                 {
                     relativeDir = EncryptFoldersNames(relativeDir);
                 }
-                else if (!isEncrypting && relativeDir.EndsWith(EncryptedFileExtension, StringComparison.InvariantCultureIgnoreCase))
+                else if (!isEncrypting &&
+                         relativeDir.EndsWith(EncryptedFileExtension, StringComparison.InvariantCultureIgnoreCase))
                 {
                     relativeDir = DecryptFoldersNames(relativeDir);
                 }
+
                 file.TargetPath = Path.Combine(GetDistDir(), relativeDir, targetName);
                 file.TargetName = targetName;
             }
+
             file.TargetRelativePath = Path.GetRelativePath(GetDistDir(), file.TargetPath);
         }
+
         private static string Hash(string input)
         {
             return Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(input)));
         }
 
-        public override async Task InitializeAsync()
+        public override async Task InitializeAsync(CancellationToken token)
         {
             List<EncryptorFileInfo> files = new List<EncryptorFileInfo>();
 
@@ -194,12 +208,12 @@ namespace ArchiveMaster.Utilities
             {
                 NotifyProgressUpdate(0, -1, "正在搜索文件");
                 foreach (var file in Directory.EnumerateFiles(sourceDir, "*", new EnumerationOptions()
+                         {
+                             IgnoreInaccessible = true,
+                             RecurseSubdirectories = true,
+                         }))
                 {
-                    IgnoreInaccessible = true,
-                    RecurseSubdirectories = true,
-                }))
-                {
-
+                    token.ThrowIfCancellationRequested();
                     var isEncrypted = IsEncryptedFile(file);
                     var fileM = new EncryptorFileInfo(file)
                     {
@@ -212,7 +226,7 @@ namespace ArchiveMaster.Utilities
                         files.Add(fileM);
                     }
                 }
-            });
+            }, token);
 
             ProcessingFiles = files;
         }
@@ -225,8 +239,8 @@ namespace ArchiveMaster.Utilities
             }
 
             string safeString = base64.Replace('+', '-')
-                                      .Replace('/', '_')
-                                      .Replace('=', '~');
+                .Replace('/', '_')
+                .Replace('=', '~');
 
             return safeString;
         }
@@ -239,8 +253,8 @@ namespace ArchiveMaster.Utilities
             }
 
             string base64 = safeString.Replace('-', '+')
-                                      .Replace('_', '/')
-                                      .Replace('~', '=');
+                .Replace('_', '/')
+                .Replace('~', '=');
 
             return base64;
         }
@@ -251,6 +265,7 @@ namespace ArchiveMaster.Utilities
             {
                 return true;
             }
+
             return false;
         }
 
@@ -261,6 +276,7 @@ namespace ArchiveMaster.Utilities
             {
                 throw new ArgumentException("文件未被加密");
             }
+
             string base64 = FileNameSafeStringToBase64(Path.GetFileNameWithoutExtension(fileName));
             Span<byte> buffer = new Span<byte>(new byte[base64.Length]);
             return Convert.TryFromBase64String(base64, buffer, out _);
@@ -288,6 +304,7 @@ namespace ArchiveMaster.Utilities
                 bytes = aes.Decrypt(bytes);
                 return Encoding.Default.GetString(bytes);
             }
+
             return fileName;
         }
 
@@ -330,6 +347,7 @@ namespace ArchiveMaster.Utilities
             {
                 return Config.EncryptedDir;
             }
+
             return Config.RawDir;
         }
 
@@ -339,6 +357,7 @@ namespace ArchiveMaster.Utilities
             {
                 return Config.RawDir;
             }
+
             return Config.EncryptedDir;
         }
 
@@ -355,6 +374,7 @@ namespace ArchiveMaster.Utilities
             {
                 parts[i] = EncryptFileName(parts[i]);
             }
+
             return string.Join(Path.DirectorySeparatorChar, parts);
         }
 
@@ -365,14 +385,17 @@ namespace ArchiveMaster.Utilities
             {
                 parts[i] = DecryptFileName(parts[i]);
             }
+
             return string.Join(Path.DirectorySeparatorChar, parts);
         }
+
         private void EncryptFolders(string dir, bool includeSelf = true)
         {
             foreach (var subDir in Directory.EnumerateDirectories(dir))
             {
                 EncryptFolders(subDir);
             }
+
             if (includeSelf)
             {
                 string newName = EncryptFileName(Path.GetFileName(dir));

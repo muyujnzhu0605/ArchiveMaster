@@ -8,6 +8,16 @@ namespace ArchiveMaster.Utilities
     {
         public abstract Task ExecuteAsync(CancellationToken token);
 
-        public abstract Task InitializeAsync();
+        public abstract Task InitializeAsync(CancellationToken token);
+
+        public Task InitializeAsync()
+        {
+            return InitializeAsync(CancellationToken.None);
+        }
+        
+        public Task ExecuteAsync()
+        {
+            return ExecuteAsync(CancellationToken.None);
+        }
     }
 }

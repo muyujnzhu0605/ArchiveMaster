@@ -20,7 +20,7 @@ namespace ArchiveMaster.Utilities
 
         private int progress = 0;
         private Regex rRepairTime;
-        public RepairModifiedTimeConfig Config { get; set; } = config;
+        private RepairModifiedTimeConfig Config { get;  } = config;
         public List<string> ErrorFilesAndMessages { get; private set; }
         public List<string> UpdatingFilesAndMessages { get; private set; }
 
@@ -44,9 +44,9 @@ namespace ArchiveMaster.Utilities
                         ErrorFilesAndMessages.Add($"{file.FullName}：{ex.Message}");
                     }
                 }
-            });
+            }, token);
         }
-        public override async Task InitializeAsync()
+        public override async Task InitializeAsync(CancellationToken token)
         {
             fileExifTimes = new ConcurrentDictionary<FileInfo, DateTime>();
             errorFiles = new ConcurrentDictionary<FileInfo, string>();
@@ -65,10 +65,12 @@ namespace ArchiveMaster.Utilities
                 {
                     files.ForEach(Check);
                 }
-            });
+            }, token);
+            token.ThrowIfCancellationRequested();
             ErrorFilesAndMessages = errorFiles
                 .Select(p => $"{Path.GetRelativePath(Config.Dir, p.Key.FullName)}：{p.Value}")
                 .ToList();
+            token.ThrowIfCancellationRequested();
             UpdatingFilesAndMessages = fileExifTimes
                 .Select(p => $"{Path.GetRelativePath(Config.Dir, p.Key.FullName)}    {p.Key.LastWriteTime} => {p.Value}")
                 .ToList();

@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Messages;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
-using ArchiveMaster.ViewModels.FileSystemViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

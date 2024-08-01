@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
-using ArchiveMaster.ViewModels.FileSystemViewModels;
 using System;
 using System.Collections.Generic;
 using System.Threading;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ArchiveMaster.ViewModels.FileSystemViewModels
+namespace ArchiveMaster.ViewModels
 {
     public partial class SimpleDirInfo : SimpleFileOrDirInfo
     {
