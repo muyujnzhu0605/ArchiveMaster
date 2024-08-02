@@ -14,7 +14,7 @@
     <UserControl.Resources>
         <c:SyncFilePathConverter x:Key="SyncFilePathConverter" />
     </UserControl.Resources>
-    <Grid RowDefinitions="*,8,Auto,8,Auto">
+    <Grid RowDefinitions="*,8,Auto">
 
         <DataGrid
             x:Name="dg"
@@ -22,8 +22,23 @@
             CanUserReorderColumns="True"
             CanUserResizeColumns="True"
             ItemsSource="{Binding Files}">
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <TextBlock
+                        Margin="8"
+                        IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"
+                        TextWrapping="Wrap">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0}{1}{2}">
+                                <Binding Path="TopDirectory" />
+                                <Binding Path="#root.DataContext.DirectorySeparatorChar" />
+                                <Binding Path="Path" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
             <DataGrid.Columns>
-
                 <DataGridTemplateColumn
                     Width="36"
                     CanUserReorder="False"
@@ -140,32 +155,9 @@
                     IsReadOnly="True" />
             </DataGrid.Columns>
         </DataGrid>
+
         <Grid
             Grid.Row="2"
-            Margin="8,0"
-            ColumnDefinitions="Auto,8,*">
-            <TextBlock
-                FontWeight="Bold"
-                Text="选中的文件：" />
-            <TextBlock
-                Grid.Column="2"
-                IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"
-                TextWrapping="Wrap">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}{0}{1}{2}">
-                        <Binding Path="#dg.SelectedItem.TopDirectory" />
-                        <Binding Path="DirectorySeparatorChar" />
-                        <Binding Path="#dg.SelectedItem.Path" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-            <TextBlock
-                Grid.Column="2"
-                IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
-                Text="（无）" />
-        </Grid>
-        <Grid
-            Grid.Row="4"
             Margin="8,0"
             ColumnDefinitions="Auto,*,Auto,8,Auto">
             <TextBlock VerticalAlignment="Center">

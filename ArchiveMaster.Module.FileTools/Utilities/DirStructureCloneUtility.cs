@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
-using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia.Controls.Platform;
 using Microsoft.Win32.SafeHandles;
 

@@ -1,6 +1,6 @@
 namespace ArchiveMaster.Configs;
 
-public class FilesLocationRepairerConfig : ConfigBase
+public class DirStructureSyncConfig : ConfigBase
 {
     public string TemplateDir { get; set; }
     public string SourceDir { get; set; }

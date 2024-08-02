@@ -9,19 +9,18 @@ using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
-using ArchiveMaster.ViewModels.FileSystem;
 
 namespace OffsiteBackupOfflineSync.Utility
 {
-    public class FilesLocationRepairerUtility : TwoStepUtilityBase
+    public class DirStructureSyncUtility(DirStructureSyncConfig config) : TwoStepUtilityBase
     {
-        public FilesLocationRepairerConfig Config { get; set; }
-        IList<DirStructureRebuildFile> Files = new List<DirStructureRebuildFile>();
+        public DirStructureSyncConfig Config { get; } = config;
+        public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();
         private readonly Dictionary<DateTime, object> modifiedTime2Template = new Dictionary<DateTime, object>();
         private readonly Dictionary<string, object> name2Template = new Dictionary<string, object>();
-        public List<DirStructureRebuildFile> RightPositionFiles { get; private set; }
-        public List<DirStructureRebuildFile> WrongPositionFiles { get; private set; }
+        public List<MatchingFileInfo> RightPositionFiles { get; private set; }
+        public List<MatchingFileInfo> WrongPositionFiles { get; private set; }
 
         public override async Task InitializeAsync(CancellationToken token)
         {
@@ -30,10 +29,9 @@ namespace OffsiteBackupOfflineSync.Utility
                 throw new ArgumentException("至少需要有一个比较类型");
             }
 
-            Files.Clear();
-            List<DirStructureRebuildFile> rightPositionFiles = new List<DirStructureRebuildFile>();
-            List<DirStructureRebuildFile> wrongPositionFiles = new List<DirStructureRebuildFile>();
-            
+            List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
+            List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
+
             await Task.Run(() =>
             {
                 BlackListUtility.InitializeBlackList(Config.BlackList, Config.BlackListUseRegex, out string[] blacks,
@@ -43,7 +41,7 @@ namespace OffsiteBackupOfflineSync.Utility
                 List<FileInfo> notMatchedFiles = new List<FileInfo>();
                 List<FileInfo> matchedFiles = new List<FileInfo>();
 
-                List<DirStructureRebuildFile> tempFiles = new List<DirStructureRebuildFile>();
+                List<MatchingFileInfo> tempFiles = new List<MatchingFileInfo>();
 
 
                 //分析模板目录，创建由属性指向文件的字典
@@ -72,8 +70,9 @@ namespace OffsiteBackupOfflineSync.Utility
                     {
                         continue;
                     }
-    
-                    NotifyProgressUpdate(sourceFiles.Count,index, $"正在分析源文件：{sourceFile.FullName}（{index}/{sourceFiles.Count}）");
+
+                    NotifyProgressUpdate(sourceFiles.Count, index,
+                        $"正在分析源文件：{sourceFile.FullName}（{index}/{sourceFiles.Count}）");
                     sourceFileCount++;
                     matchedFiles.Clear();
                     tempFiles.Clear();
@@ -104,7 +103,7 @@ namespace OffsiteBackupOfflineSync.Utility
                         };
 
                         //创建模型
-                        var goHomeFile = new DirStructureRebuildFile() //源文件
+                        var goHomeFile = new MatchingFileInfo() //源文件
                         {
                             Path = Path.GetRelativePath(Config.SourceDir, sourceFile.FullName),
                             Name = sourceFile.Name,
@@ -206,7 +205,6 @@ namespace OffsiteBackupOfflineSync.Utility
                         }
                     }
                 }
-
             }, token);
             RightPositionFiles = rightPositionFiles;
             WrongPositionFiles = wrongPositionFiles;
@@ -278,8 +276,13 @@ namespace OffsiteBackupOfflineSync.Utility
 
         public override async Task ExecuteAsync(CancellationToken token)
         {
+            if (ExecutingFiles == null)
+            {
+                throw new NullReferenceException($"{nameof(ExecutingFiles)}为空");
+            }
+
             string copyMoveText = Config.Copy ? "复制" : "移动";
-            IEnumerable<DirStructureRebuildFile> files = Files;
+            IEnumerable<MatchingFileInfo> files = ExecutingFiles;
             long count = files.Sum(p => p.Length);
             long progress = 0;
             if (!Config.Copy)
@@ -289,7 +292,7 @@ namespace OffsiteBackupOfflineSync.Utility
 
             await Task.Run(() =>
             {
-                foreach (var file in Files)
+                foreach (var file in files)
                 {
                     token.ThrowIfCancellationRequested();
                     try
@@ -322,6 +325,5 @@ namespace OffsiteBackupOfflineSync.Utility
                 }
             }, token);
         }
-        
     }
 }

@@ -13,19 +13,27 @@ namespace ArchiveMaster
 {
     public class ModuleInitializer : IModuleInitializer
     {
-        public string ModuleName => "文件（夹）工具";
+        public string ModuleName => "文件目录工具";
 
-        public IList<ConfigInfo> Configs => [new ConfigInfo(typeof(EncryptorConfig))];
+        public IList<ConfigInfo> Configs =>
+        [
+            new ConfigInfo(typeof(EncryptorConfig)),
+            new ConfigInfo(typeof(DirStructureSyncConfig))
+        ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(EncryptorPanel),  "文件加密解密", "使用AES加密方法，对文件进行加密或解密", baseUrl + "encrypt.svg")
+                new ToolPanelInfo(typeof(EncryptorPanel), "文件加密解密", "使用AES加密方法，对文件进行加密或解密", baseUrl + "encrypt.svg"),
+                new ToolPanelInfo(typeof(DirStructureSyncPanel), "目录结构同步", "以一个目录为模板，将另一个目录中的文件同步到与模板内相同文件一直的位置",
+                    baseUrl + "sync.svg"),
+                new ToolPanelInfo(typeof(DirStructureSyncPanel), "目录结构克隆", "以一个目录为模板，生成一个新的目录，目录中文件与模板一致，但大小为0",
+                    baseUrl + "directory.svg"),
             },
             GroupName = ModuleName
         };
-        
+
 
         public void RegisterMessages(Visual visual)
         {
