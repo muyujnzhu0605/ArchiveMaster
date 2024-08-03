@@ -32,7 +32,9 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid Grid.Row="2" RowDefinitions="*,8,Auto">
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="*,8,Auto">
             <DataGrid
                 AutoGenerateColumns="False"
                 CanUserReorderColumns="True"

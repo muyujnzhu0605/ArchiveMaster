@@ -1,0 +1,237 @@
+﻿<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PackingPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:bh="using:ArchiveMaster.Behaviours"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:local="clr-namespace:DiscArchivingTool"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <StackPanel
+            Margin="8"
+            Spacing="8">
+            <StackPanel.Styles>
+                <Style Selector="ctrl|FormItem">
+                    <Setter Property="LabelWidth" Value="84" />
+                </Style>
+            </StackPanel.Styles>
+            <ctrl:FormItem Label="源目录：">
+                <ctrl:FilePickerTextBox
+                    FileNames="{Binding Config.SourceDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="导出目录：">
+                <ctrl:FilePickerTextBox
+                    FileNames="{Binding Config.TargetDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="选项：">
+                <Grid ColumnDefinitions="64,8,1.5*,16,Auto,8,0.7*,16,Auto,8,*,16,Auto,8,*,8,Auto">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="起始日期：" />
+
+                    <TextBox
+                        Grid.Column="2"
+                        Text="{Binding Config.EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                    <TextBlock
+                        Grid.Column="4"
+                        VerticalAlignment="Center"
+                        Text="导出方式：" />
+                    <ComboBox
+                        Grid.Column="6"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding PackingTypes}"
+                        SelectedItem="{Binding Config.PackingType}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock
+                        Grid.Column="8"
+                        VerticalAlignment="Center"
+                        Text="最大盘数：" />
+                    <NumericUpDown
+                        Grid.Column="10"
+                        HorizontalAlignment="Stretch"
+                        FormatString="0"
+                        Increment="1"
+                        Maximum="10000"
+                        Minimum="1"
+                        Value="{Binding Config.MaxDiscCount}" />
+
+                    <TextBlock
+                        Grid.Column="12"
+                        VerticalAlignment="Center"
+                        Text="单盘容量（MB）：" />
+                    <NumericUpDown
+                        x:Name="numDiscSize"
+                        Grid.Column="14"
+                        HorizontalAlignment="Stretch"
+                        FormatString="0"
+                        Increment="100"
+                        Maximum="1000000"
+                        Minimum="100"
+                        Value="{Binding Config.DiscSizeMB}" />
+                    <Button
+                        Grid.Column="16"
+                        Padding="27,6"
+                        Content="预设">
+                        <Button.Flyout>
+                            <MenuFlyout ItemsSource="{Binding DiscSizes}">
+                                <MenuFlyout.ItemContainerTheme>
+                                    <ControlTheme
+                                        BasedOn="{StaticResource {x:Type MenuItem}}"
+                                        TargetType="MenuItem">
+                                        <Setter Property="Header" Value="{Binding .}" />
+                                        <Setter Property="Command" Value="{Binding #root.DataContext.SetDiscSizeCommand}" />
+                                        <Setter Property="CommandParameter" Value="{Binding .}" />
+                                    </ControlTheme>
+                                </MenuFlyout.ItemContainerTheme>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+            </ctrl:FormItem>
+
+            <ctrl:FormItem Label="黑名单：">
+                <Grid ColumnDefinitions="*,8,Auto">
+                    <TextBox
+                        AcceptsReturn="True"
+                        MaxLines="5"
+                        MinLines="3"
+                        Text="{Binding Config.BlackList}"
+                        Watermark="可以是文件名，也可以是完整路径；一行一项" />
+                    <CheckBox
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Content="使用正则表达式"
+                        IsChecked="{Binding Config.BlackListUseRegex}" />
+                </Grid>
+            </ctrl:FormItem>
+
+        </StackPanel>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="360,8,*"
+            RowDefinitions="*,8,Auto">
+            <GridSplitter
+                Grid.RowSpan="99"
+                Grid.Column="1"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="Transparent" />
+            <gb:GroupBox Header="文件包">
+                <ListBox
+                    x:Name="lvwPackages"
+                    ItemsSource="{Binding DiscFilePackages}"
+                    SelectedItem="{Binding SelectedPackage}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid RowDefinitions="Auto,4,Auto">
+                                <Grid ColumnDefinitions="*,8,*,8,*">
+                                    <CheckBox
+                                        Content="{Binding Index}"
+                                        FontWeight="Bold"
+                                        IsChecked="{Binding IsChecked}" />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center">
+                                        <Run>共</Run>
+                                        <Run Text="{Binding Files.Count, Mode=OneWay}" />
+                                        <Run>个文件</Run>
+                                    </TextBlock>
+                                    <TextBlock
+                                        Grid.Column="4"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding TotalSize, Converter={StaticResource FileLength2StringConverter}}" />
+
+                                </Grid>
+
+                                <TextBlock
+                                    Width="165"
+                                    Text="{Binding EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                <TextBlock
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding LatestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                            </Grid>
+
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <Interaction.Behaviors>
+                        <DataTriggerBehavior Binding="{Binding Index}">
+                            <DataTriggerBehavior.Value>
+                                <sys:Int32>-1</sys:Int32>
+                            </DataTriggerBehavior.Value>
+                            <DataTriggerBehavior.Actions>
+                                <ChangePropertyAction
+                                    PropertyName="ItemTemplate"
+                                    TargetObject="lvwPackages">
+                                    <ChangePropertyAction.Value>
+                                        <DataTemplate>
+                                            <TextBlock FontWeight="Bold">大于光盘容量的文件</TextBlock>
+                                        </DataTemplate>
+                                    </ChangePropertyAction.Value>
+                                </ChangePropertyAction>
+                            </DataTriggerBehavior.Actions>
+                        </DataTriggerBehavior>
+                    </Interaction.Behaviors>
+                </ListBox>
+            </gb:GroupBox>
+            <gb:GroupBox
+                Grid.RowSpan="99"
+                Grid.Column="2"
+                Header="文件包中的文件">
+                <DataGrid
+                    CanUserReorderColumns="False"
+                    CanUserResizeColumns="False"
+                    CanUserSortColumns="False"
+                    ItemsSource="{Binding SelectedPackage.Files}">
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn
+                            Binding="{Binding Path}"
+                            Header="文件路径" />
+                        <DataGridTextColumn
+                            Binding="{Binding Length, Converter={StaticResource FileLength2StringConverter}}"
+                            Header="文件大小" />
+                        <DataGridTextColumn
+                            Binding="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
+                            Header="修改时间" />
+                    </DataGrid.Columns>
+
+                </DataGrid>
+            </gb:GroupBox>
+
+            <Grid
+                Grid.Row="2"
+                HorizontalAlignment="Left"
+                ColumnDefinitions="Auto,8,Auto">
+                <Button
+                    Classes="Middle"
+                    Content="全选" />
+                <Button
+                    Grid.Column="2"
+                    Classes="Middle"
+                    Content="全不选" />
+            </Grid>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+
+
+</v:TwoStepPanelBase>

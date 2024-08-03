@@ -51,7 +51,7 @@ namespace ArchiveMaster.Configs
                 return config.Config;
             }
 
-            throw new Exception("找不到对应的配置");
+            throw new Exception($"找不到对应的配置：{key}");
         }
 
         public void Load()

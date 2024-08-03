@@ -1,6 +1,8 @@
-﻿namespace ArchiveMaster.Configs
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace ArchiveMaster.Configs
 {
-    public class ConfigBase
+    public abstract class ConfigBase:ObservableObject
     {
     }
 }

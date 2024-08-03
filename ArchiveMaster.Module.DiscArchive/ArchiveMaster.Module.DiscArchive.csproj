@@ -33,6 +33,13 @@
   
   <ItemGroup>
     <Folder Include="Converters\" />
-    <Folder Include="Views\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <AvaloniaXaml Remove="Views\RebuildPanel.axaml" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Views\RebuildPanel.axaml.cs" />
   </ItemGroup>
 </Project>
