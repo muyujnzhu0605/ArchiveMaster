@@ -92,6 +92,7 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase
 
 
         u = new DirStructureSyncUtility(Config);
+        u.ProgressUpdate += Utility_ProgressUpdate;
         await u.InitializeAsync();
         UpdateList();
     }
@@ -99,6 +100,7 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase
     protected override async Task ExecuteImplAsync(CancellationToken token)
     {
         await u.ExecuteAsync(token);
+        u.ProgressUpdate -= Utility_ProgressUpdate;
     }
 
     [RelayCommand]
