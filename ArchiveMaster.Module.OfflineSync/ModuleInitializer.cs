@@ -26,6 +26,7 @@ namespace ArchiveMaster
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
         public string ModuleName => "异地备份离线同步";
+        public int Order => 3;
 
         public IList<ConfigInfo> Configs =>
         [

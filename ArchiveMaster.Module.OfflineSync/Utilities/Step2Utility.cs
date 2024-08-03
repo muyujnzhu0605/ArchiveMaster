@@ -240,8 +240,7 @@ namespace ArchiveMaster.Utility
             this.localAndOffsiteDirs = localAndOffsiteDirs;
 
             InvokeMessageReceivedEvent($"正在初始化");
-            BlackListUtility.InitializeBlackList(blackList, blackListUseRegex, out string[] blacks,
-                out Regex[] blackRegexs);
+           var blacks=new  BlackListUtility(blackList, blackListUseRegex);
             //将异地文件根据顶级目录
             var offsiteTopDir2Files =
                 offsite.Files.GroupBy(p => p.TopDirectory).ToDictionary(p => p.Key, p => p.ToList());
@@ -316,8 +315,7 @@ namespace ArchiveMaster.Utility
                             ex);
                     }
 #endif
-                    if (BlackListUtility.IsInBlackList(file.Name, file.FullName, blacks, blackRegexs,
-                            blackListUseRegex))
+                    if (blacks.IsInBlackList(file))
                     {
                         continue;
                     }
@@ -428,8 +426,7 @@ namespace ArchiveMaster.Utility
                 foreach (var file in offsiteTopDir2Files[offsiteTopDirectory])
                 {
                     var offsitePathWithTopDir = Path.Combine(Path.GetFileName(file.TopDirectory), file.Path);
-                    if (BlackListUtility.IsInBlackList(file.Name, offsitePathWithTopDir, blacks, blackRegexs,
-                            blackListUseRegex))
+                    if (blacks.IsInBlackList(file))
                     {
                         continue;
                     }

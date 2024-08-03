@@ -13,5 +13,11 @@
         {
             ProgressUpdate?.Invoke(this, new ProgressUpdateEventArgs<int>(maximum, current, message));
         }
+
+        protected void NotifyProgressUpdate(long maximum, long current, string message)
+        {
+            ProgressUpdate?.Invoke(this,
+                new ProgressUpdateEventArgs<int>(10000, (int)(10000.0 / maximum * current), message));
+        }
     }
 }

@@ -1,5 +1,5 @@
 ﻿try {
-    $c = $true
+    $c = $false
     $s = $true
     if (-not (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
         throw "未安装.NET SDK"
@@ -19,21 +19,16 @@
     Write-Output "正在发布win-x64"
     
     foreach ($module in $moduleDirectories) {
-        dotnet publish $module.FullName -r win-x64 -c Release -o Publish/win-x64/temp
+        dotnet publish $module.FullName -r win-x64 -c Release -o Publish/win-x64
     }
-    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o Publish/win-x64 --self-contained $c /p:PublishSingleFile=$s 
-    Copy-Item Publish/win-x64/temp/ArchiveMaster.Module.* Publish/win-x64
-    Remove-Item -r Publish/win-x64/temp
+    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o Publish/win-x64 --self-contained $c 
 
     Write-Output "正在发布linux-x64"
         
     foreach ($module in $moduleDirectories) {
-        dotnet publish $module.FullName -r linux-x64 -c Release -o Publish/linux-x64/temp
+        dotnet publish $module.FullName -r linux-x64 -c Release -o Publish/linux-x64
     }
-    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o Publish/linux-x64 --self-contained $c /p:PublishSingleFile=$s
-    Copy-Item Publish/linux-x64/temp/ArchiveMaster.Module.* Publish/linux-x64
-    Remove-Item -r Publish/linux-x64/temp
-    Remove-Item -r ./*/obj/
+    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o Publish/linux-x64 --self-contained $c
    
     Write-Output "操作完成"
 

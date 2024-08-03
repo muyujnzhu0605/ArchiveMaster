@@ -14,6 +14,8 @@ namespace ArchiveMaster
     public class ModuleInitializer : IModuleInitializer
     {
         public string ModuleName => "照片工具";
+        
+        public int Order => 2;
 
         public void RegisterStyles()
         {

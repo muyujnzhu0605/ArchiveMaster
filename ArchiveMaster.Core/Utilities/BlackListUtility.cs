@@ -1,45 +1,80 @@
 using System.Text.RegularExpressions;
+using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities;
 
-public static class BlackListUtility
+public class BlackListUtility
 {
-    public static void InitializeBlackList(string blackList, bool blackListUseRegex, out string[] blackStrings,
-        out Regex[] blackRegexs)
+    private readonly string blackList;
+    private readonly bool blackListUseRegex;
+    private readonly string[] blackStrings;
+    private readonly Regex[] blackRegexs;
+
+    public BlackListUtility(string blackList, bool blackListUseRegex)
     {
+        this.blackList = blackList;
+        this.blackListUseRegex = blackListUseRegex;
         blackStrings = blackList?.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries) ??
                        Array.Empty<string>();
         blackRegexs = null;
-        if (blackListUseRegex)
+        if (!blackListUseRegex)
         {
-            try
-            {
-                blackRegexs = blackStrings.Select(p => new Regex(p, RegexOptions.IgnoreCase)).ToArray();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("黑名单正则解析失败", ex);
-            }
+            return;
+        }
+
+        try
+        {
+            blackRegexs = blackStrings.Select(p => new Regex(p, RegexOptions.IgnoreCase)).ToArray();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("黑名单正则解析失败", ex);
         }
     }
 
-    /// <summary>
-    /// 文件是否在黑名单中
-    /// </summary>
-    /// <param name="name">文件名</param>
-    /// <param name="path">文件路径</param>
-    /// <param name="blackList">黑名单列表</param>
-    /// <param name="blackRegexs">黑名单正则列表</param>
-    /// <param name="blackListUseRegex">是否启用正则</param>
-    /// <returns></returns>
-    public static bool IsInBlackList(string name, string path, IList<string> blackList, IList<Regex> blackRegexs,
-        bool blackListUseRegex)
+
+    public bool IsNotInBlackList(FileInfo file)
     {
-        for (int i = 0; i < blackList.Count; i++)
+        return !IsInBlackList(file);
+    }
+
+    public bool IsNotInBlackList(SimpleFileInfo file)
+    {
+        return !IsInBlackList(file);
+    }
+
+    public bool IsInBlackList(FileInfo file)
+    {
+        return IsInBlackList(file.Name, file.FullName);
+    }
+
+    public bool IsInBlackList(SimpleFileInfo file)
+    {
+        return IsInBlackList(file.Name, file.Path);
+    }
+
+    public bool IsNotInBlackList(string path)
+    {
+        return !IsInBlackList(path);
+    }
+
+    public bool IsInBlackList(string path)
+    {
+        return IsInBlackList(Path.GetFileName(path), path);
+    }
+
+    public bool IsNotInBlackList(string name, string path)
+    {
+        return !IsInBlackList(name, path);
+    }
+
+    public bool IsInBlackList(string name, string path)
+    {
+        for (int i = 0; i < blackStrings.Length; i++)
         {
             if (blackListUseRegex) //正则
             {
-                if (blackList[i].Contains('\\') || blackList[i].Contains('/')) //目录
+                if (blackStrings[i].Contains('\\') || blackStrings[i].Contains('/')) //目录
                 {
                     path = path.Replace("\\", "/");
                     if (blackRegexs[i].IsMatch(path))
@@ -57,7 +92,7 @@ public static class BlackListUtility
             }
             else
             {
-                if (blackList[i].Contains('\\') || blackList[i].Contains('/')) //目录
+                if (blackStrings[i].Contains('\\') || blackStrings[i].Contains('/')) //目录
                 {
                     path = path.Replace("\\", "/");
                     if (path.Contains(blackList[i]))

@@ -21,5 +21,6 @@
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.PhotoArchive\ArchiveMaster.Module.PhotoArchive.csproj" />
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
     <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj" />
+    <ProjectReference Condition="'$(Configuration)' == 'Debug'" Include="..\ArchiveMaster.Module.DiscArchive\ArchiveMaster.Module.DiscArchive.csproj" />
   </ItemGroup>
 </Project>

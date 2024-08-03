@@ -15,6 +15,8 @@ namespace ArchiveMaster
     {
         public string ModuleName => "文件目录工具";
 
+        public int Order => 1;
+
         public IList<ConfigInfo> Configs =>
         [
             new ConfigInfo(typeof(EncryptorConfig)),

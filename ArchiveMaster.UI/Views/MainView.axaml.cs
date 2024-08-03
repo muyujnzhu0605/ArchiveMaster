@@ -41,6 +41,7 @@ public partial class MainView : UserControl
         string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         string[] dllFiles = Directory.GetFiles(currentDirectory, "ArchiveMaster.Module.*.dll");
 
+        List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
         foreach (string dllFile in dllFiles)
         {
             try
@@ -73,7 +74,7 @@ public partial class MainView : UserControl
 
                     if (moduleInitializer.Views != null)
                     {
-                        views.Add(moduleInitializer.Views);
+                        viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
                     }
 
                     moduleInitializer.RegisterMessages(this);
@@ -84,6 +85,8 @@ public partial class MainView : UserControl
                 throw new Exception($"加载程序集 {dllFile} 时出错: {ex.Message}");
             }
         }
+
+        views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

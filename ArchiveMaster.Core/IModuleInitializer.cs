@@ -10,5 +10,6 @@ namespace ArchiveMaster.UI
         public ToolPanelGroupInfo Views { get; }
         public void RegisterMessages(Visual visual);
         public string ModuleName { get; }
+        public int Order { get; }
     }
 }

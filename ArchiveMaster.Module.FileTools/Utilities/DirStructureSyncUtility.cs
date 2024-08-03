@@ -34,9 +34,7 @@ namespace OffsiteBackupOfflineSync.Utility
 
             await Task.Run(() =>
             {
-                BlackListUtility.InitializeBlackList(Config.BlackList, Config.BlackListUseRegex, out string[] blacks,
-                    out Regex[] blackRegexs);
-                int sourceFileCount = 0;
+                var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
 
                 List<FileInfo> notMatchedFiles = new List<FileInfo>();
                 List<FileInfo> matchedFiles = new List<FileInfo>();
@@ -65,15 +63,13 @@ namespace OffsiteBackupOfflineSync.Utility
                     token.ThrowIfCancellationRequested();
                     index++;
                     //黑名单检测
-                    if (BlackListUtility.IsInBlackList(sourceFile.Name, sourceFile.FullName, blacks, blackRegexs,
-                            Config.BlackListUseRegex))
+                    if (blacks.IsInBlackList(sourceFile))
                     {
                         continue;
                     }
 
                     NotifyProgressUpdate(sourceFiles.Count, index,
                         $"正在分析源文件：{sourceFile.FullName}（{index}/{sourceFiles.Count}）");
-                    sourceFileCount++;
                     matchedFiles.Clear();
                     tempFiles.Clear();
 
@@ -298,7 +294,7 @@ namespace OffsiteBackupOfflineSync.Utility
                     try
                     {
                         progress += file.Length;
-                        NotifyProgressUpdate(1000, (int)(1000.0 / count * progress),
+                        NotifyProgressUpdate(count, progress,
                             $"正在{copyMoveText}：{file.Path}（{progress}/{count}）");
                         string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
                         string destFileDir = Path.GetDirectoryName(destFile);
