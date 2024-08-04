@@ -12,52 +12,58 @@
     <local:PanelBase.PanelContent>
         <Grid
             Margin="8"
-            RowDefinitions="0,0,Auto,8,Auto,8,*,8,Auto,8,Auto,8,Auto">
+            RowDefinitions="Auto,8,Auto,8,*,8,Auto">
 
             <ContentControl
-                Grid.Row="2"
                 Content="{Binding #root.ConfigsContent}"
                 IsEnabled="{Binding CanInitialize}" />
             <StackPanel
-                Grid.Row="4"
-                HorizontalAlignment="Center"
+                Grid.Row="2"
+                HorizontalAlignment="Right"
                 Orientation="Horizontal"
                 Spacing="8">
                 <Button
+                    Classes="Long"
                     Command="{Binding InitializeCommand}"
                     Content="初始化" />
                 <Button
+                    Classes="Long"
                     Command="{Binding ResetCommand}"
                     Content="重置" />
             </StackPanel>
             <ContentControl
-                Grid.Row="6"
+                Grid.Row="4"
                 Content="{Binding ElementName=root, Path=ResultsContent}" />
-            <StackPanel
-                Grid.Row="8"
-                HorizontalAlignment="Center"
-                IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}"
-                Orientation="Horizontal"
-                Spacing="8">
+            <Grid
+                Grid.Row="6"
+                ColumnDefinitions="*,8,*,16,Auto,8,Auto"
+                IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}">
+
+
+                <TextBlock
+                    Text="{Binding Message}"
+                    TextTrimming="CharacterEllipsis" />
+
+                <ProgressBar
+                    Grid.Column="2"
+                    IsIndeterminate="{Binding ProgressIndeterminate}"
+                    Maximum="1"
+                    Minimum="0"
+                    Value="{Binding Progress}" />
+
                 <Button
+                    Grid.Column="4"
+                    Classes="Long"
                     Command="{Binding ExecuteCommand}"
                     Content="执行" />
                 <Button
+                    Grid.Column="6"
+                    Classes="Long"
                     Command="{Binding CancelExecuteCommand}"
                     Content="取消"
                     IsEnabled="{Binding ExecuteCommand.CanBeCanceled}" />
-            </StackPanel>
+            </Grid>
 
-            <ProgressBar
-                Grid.Row="10"
-                IsIndeterminate="{Binding ProgressIndeterminate}"
-                Maximum="1"
-                Minimum="0"
-                Value="{Binding Progress}" />
-
-            <TextBlock
-                Grid.Row="12"
-                Text="{Binding Message}" />
         </Grid>
     </local:PanelBase.PanelContent>
 </local:PanelBase>

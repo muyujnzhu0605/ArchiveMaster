@@ -9,7 +9,7 @@ namespace ArchiveMaster.Utilities
 {
     public class PackingUtility(PackingConfig config) : DiscUtilityBase
     {
-        public PackingConfig Config { get; } = config;
+        public override PackingConfig Config { get; } = config;
 
         /// <summary>
         /// 根据时间顺序从早到晚排序后的文件

@@ -1,16 +1,30 @@
 ﻿using ArchiveMaster.Model;
 using ArchiveMaster.Enums;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public class Step2Config : OfflineSyncStepConfigBase
+    public partial class Step2Config : ConfigBase
     {
-        public string BlackList { get; set; }
-        public bool BlackListUseRegex { get; set; }
-        public ExportMode ExportMode { get; set; } = ExportMode.Copy;
-        public string LocalDir { get; set; }
-        public string PatchDir { get; set; }
-        public string OffsiteSnapshot { get; set; }
-        public List<LocalAndOffsiteDir> MatchingDirs { get; set; }
+        [ObservableProperty]
+        private string blackList;
+
+        [ObservableProperty]
+        private bool blackListUseRegex;
+
+        [ObservableProperty]
+        private ExportMode exportMode = ExportMode.Copy;
+
+        [ObservableProperty]
+        private string localDir;
+
+        [ObservableProperty]
+        private string patchDir;
+
+        [ObservableProperty]
+        private string offsiteSnapshot;
+
+        [ObservableProperty]
+        private List<LocalAndOffsiteDir> matchingDirs;
     }
 }

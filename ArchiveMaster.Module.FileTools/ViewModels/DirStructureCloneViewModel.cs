@@ -5,59 +5,40 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DirStructureCloneViewModel : TwoStepViewModelBase
+public partial class DirStructureCloneViewModel : TwoStepViewModelBase<DirStructureCloneUtility>
 {
-    public DirStructureCloneViewModel()
-    {
-        TargetDir = Config.TargetDir;
-        SourceDir = Config.SourceDir;
-    }
-    [ObservableProperty]
-    private string targetDir;
-
-    [ObservableProperty]
-    private string sourceDir;
-
     [ObservableProperty]
     private ObservableCollection<FileInfoWithStatus> files;
+    public override DirStructureCloneConfig Config { get; } = AppConfig.Instance.Get<DirStructureCloneConfig>();
 
-    private DirStructureCloneUtility u;
-    public DirStructureCloneConfig Config { get; } = AppConfig.Instance.Get<DirStructureCloneConfig>();
-
-    protected override async Task ExecuteImplAsync(CancellationToken token)
+    protected override Task OnInitializingAsync()
     {
-        await u.ExecuteAsync(token);
-        u.ProgressUpdate -= Utility_ProgressUpdate;
-    }
-
-    protected override async Task InitializeImplAsync()
-    {
-        if (string.IsNullOrEmpty(SourceDir))
+        if (string.IsNullOrEmpty(Config.SourceDir))
         {
             throw new Exception("源目录为空");
         }
 
-        if (!Directory.Exists(SourceDir))
+        if (!Directory.Exists(Config.SourceDir))
         {
             throw new Exception("源目录不存在");
         }
 
-        if (string.IsNullOrEmpty(TargetDir))
+        if (string.IsNullOrEmpty(Config.TargetDir))
         {
             throw new Exception("目标目录为空");
         }
 
+        return base.OnInitializingAsync();
+    }
 
-        Config.SourceDir = SourceDir;
-        Config.TargetDir = TargetDir;
-        u = new DirStructureCloneUtility(Config);
-        u.ProgressUpdate += Utility_ProgressUpdate;
-        await u.InitializeAsync();
-        Files = new ObservableCollection<FileInfoWithStatus>(u.Files);
+    protected override Task OnInitializedAsync()
+    {
+        Files = new ObservableCollection<FileInfoWithStatus>(Utility.Files);
+        return base.OnInitializedAsync();
     }
 
 
-    protected override void ResetImpl()
+    protected override void OnReset()
     {
         Files = null;
     }

@@ -21,7 +21,7 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty] private string patchDir;
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
-        protected override OfflineSyncStepConfigBase Config =>
+        protected override ConfigBase Config =>
             AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step3;
 
         protected override Step3Utility Utility { get; } = new Step3Utility();

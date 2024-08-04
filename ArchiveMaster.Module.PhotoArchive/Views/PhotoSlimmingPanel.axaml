@@ -18,7 +18,7 @@
             <ListBox
                 DisplayMemberBinding="{Binding Name}"
                 ItemsSource="{Binding Configs}"
-                SelectedItem="{Binding Config}" />
+                SelectedItem="{Binding SelectedConfig}" />
             <Grid
                 Grid.Column="2"
                 VerticalAlignment="Center"

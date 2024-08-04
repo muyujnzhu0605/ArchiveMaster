@@ -16,28 +16,13 @@ using FzLib.Avalonia.Messages;
 
 namespace DiscArchivingTool;
 
-public partial class PackingPanelViewModel : TwoStepViewModelBase
+public partial class PackingPanelViewModel : TwoStepViewModelBase<PackingUtility>
 {
-    public PackingPanelViewModel()
-    {
-        DiscSizeMB = Config.DiscSizeMB;
-    }
-
     [ObservableProperty]
     private List<DiscFilePackage> discFilePackages;
 
     [ObservableProperty]
     private DateTime earliestDateTime = new DateTime(1, 1, 1);
-
-    [ObservableProperty]
-    private int discSizeMB;
-    
-    
-
-    partial void OnDiscSizeMBChanged(int value)
-    {
-        Config.DiscSizeMB = value;
-    }
 
     [ObservableProperty]
     private DiscFilePackage selectedPackage;
@@ -48,15 +33,13 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase
     private void SetDiscSize(int size)
     {
         Config.DiscSizeMB = size;
-        this.Notify(nameof(Config));
     }
 
     public IEnumerable PackingTypes => Enum.GetValues(typeof(PackingType));
 
-    public PackingConfig Config { get; } = AppConfig.Instance.Get<PackingConfig>();
-    private PackingUtility u;
+    public override PackingConfig Config { get; } = AppConfig.Instance.Get<PackingConfig>();
 
-    protected override async Task InitializeImplAsync()
+    protected override Task OnInitializingAsync()
     {
         if (string.IsNullOrWhiteSpace(Config.SourceDir))
         {
@@ -78,27 +61,26 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase
             throw new Exception("盘片数量应大于等于1盘");
         }
 
-        // Config.SourceDir = SourceDir;
-        // Config.TargetDir = TargetDir;
+        return base.OnInitializingAsync();
+    }
 
-        u = new PackingUtility(Config);
-        u.ProgressUpdate += Utility_ProgressUpdate;
-        await u.InitializeAsync();
-
-        var pkgs = u.Packages.DiscFilePackages;
-        if (u.Packages.SizeOutOfRangeFiles.Count > 0)
+    protected override Task OnInitializedAsync()
+    {
+        var pkgs = Utility.Packages.DiscFilePackages;
+        if (Utility.Packages.SizeOutOfRangeFiles.Count > 0)
         {
             pkgs.Add(new DiscFilePackage()
             {
                 Index = -1
             });
-            pkgs[^1].Files.AddRange(u.Packages.SizeOutOfRangeFiles);
+            pkgs[^1].Files.AddRange(Utility.Packages.SizeOutOfRangeFiles);
         }
 
         DiscFilePackages = pkgs;
+        return base.OnInitializedAsync();
     }
 
-    protected override async Task ExecuteImplAsync(CancellationToken token)
+    protected override async Task OnExecutingAsync()
     {
         if (!DiscFilePackages.Any(p => p.IsChecked))
         {
@@ -117,7 +99,8 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase
             {
                 try
                 {
-                    foreach (var index in u.Packages.DiscFilePackages.Where(p => p.IsChecked).Select(p => p.Index))
+                    foreach (var index in Utility.Packages.DiscFilePackages.Where(p => p.IsChecked)
+                                 .Select(p => p.Index))
                     {
                         var dir = Path.Combine(Config.TargetDir, index.ToString());
                         if (Directory.Exists(dir))
@@ -133,15 +116,12 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase
             }
             else
             {
-                return;
+                throw new OperationCanceledException();
             }
         }
-
-        await u.ExecuteAsync(token);
-        u.ProgressUpdate -= Utility_ProgressUpdate;
     }
 
-    protected override void ResetImpl()
+    protected override void OnReset()
     {
         DiscFilePackages = null;
     }

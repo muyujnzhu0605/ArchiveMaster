@@ -11,14 +11,9 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RepairModifiedTimeViewModel : TwoStepViewModelBase
+public partial class RepairModifiedTimeViewModel : TwoStepViewModelBase<RepairModifiedTimeUtility>
 {
-    private RepairModifiedTimeUtility utility;
-
-    public RepairModifiedTimeConfig Config { get; set; } = AppConfig.Instance.Get<RepairModifiedTimeConfig>();
-
-    [ObservableProperty]
-    private string dir;
+    public override RepairModifiedTimeConfig Config { get; } = AppConfig.Instance.Get<RepairModifiedTimeConfig>();
 
     [ObservableProperty]
     private List<string> updatingFiles;
@@ -26,29 +21,14 @@ public partial class RepairModifiedTimeViewModel : TwoStepViewModelBase
     [ObservableProperty]
     private List<string> errorFiles;
 
-    protected override async Task InitializeImplAsync()
+    protected override Task OnInitializedAsync()
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(Dir);
-        Config.Dir = Dir;
-        utility = new RepairModifiedTimeUtility(Config);
-        utility.ProgressUpdate += Utility_ProgressUpdate;
-        await utility.InitializeAsync();
-        UpdatingFiles = utility.UpdatingFilesAndMessages;
-        ErrorFiles = utility.ErrorFilesAndMessages;
+        UpdatingFiles = Utility.UpdatingFilesAndMessages;
+        ErrorFiles = Utility.ErrorFilesAndMessages;
+        return base.OnInitializedAsync();
     }
 
-    protected override async Task ExecuteImplAsync(CancellationToken token)
-    {
-        ArgumentNullException.ThrowIfNull(utility, nameof(utility));
-        await utility.ExecuteAsync(token);
-        UpdatingFiles = null;
-        ErrorFiles = utility.ErrorFilesAndMessages;
-        utility.ProgressUpdate -= Utility_ProgressUpdate;
-        utility = null;
-        Message = "完成";
-    }
-
-    protected override void ResetImpl()
+    protected override void OnReset()
     {
         UpdatingFiles = new List<string>();
         ErrorFiles = new List<string>();

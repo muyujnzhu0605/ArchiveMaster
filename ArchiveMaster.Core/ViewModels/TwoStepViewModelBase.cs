@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class TwoStepViewModelBase : ObservableObject
+public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase where TUtility : TwoStepUtilityBase
 {
-
     [ObservableProperty]
     private bool canExecute = false;
 
@@ -31,19 +30,51 @@ public abstract partial class TwoStepViewModelBase : ObservableObject
     [ObservableProperty]
     private string message;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
-    public bool ProgressIndeterminate => this.Progress < 0;
+    protected override TUtility Utility => base.Utility as TUtility;
 
-    protected abstract Task ExecuteImplAsync(CancellationToken token);
+    public bool ProgressIndeterminate => Progress < 0;
 
-    protected abstract Task InitializeImplAsync();
+    protected virtual void OnReset()
+    {
+    }
 
-    protected abstract void ResetImpl();
+    protected virtual Task OnInitializingAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-    protected void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs<int> e)
+    protected virtual Task OnInitializedAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task OnExecutingAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task OnExecutedAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected override T CreateUtility<T>()
+    {
+        var utility = base.CreateUtility<T>();
+        Utility.ProgressUpdate += Utility_ProgressUpdate;
+        return utility;
+    }
+
+    protected override void DisposeUtility()
+    {
+        Utility.ProgressUpdate -= Utility_ProgressUpdate;
+        base.DisposeUtility();
+    }
+
+    private void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs<int> e)
     {
         Progress = 1.0 * e.Current / e.Maximum;
         Message = e.Message;
@@ -62,9 +93,25 @@ public abstract partial class TwoStepViewModelBase : ObservableObject
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanExecute))]
     private async Task ExecuteAsync(CancellationToken token)
     {
+        if (Utility == null)
+        {
+            throw new NullReferenceException($"{nameof(Utility)}为空");
+        }
+
+        if (Utility is not TwoStepUtilityBase t)
+        {
+            throw new ArgumentException($"{nameof(Utility)}不是{nameof(TwoStepUtilityBase)}的子类");
+        }
+
+
         CanExecute = false;
 
-        await TryRunAsync(() => ExecuteImplAsync(token), "执行失败");
+        await TryRunAsync(async () =>
+        {
+            await OnExecutingAsync();
+            await t.ExecuteAsync(token);
+            await OnExecutedAsync();
+        }, "执行失败");
     }
 
 
@@ -75,7 +122,14 @@ public abstract partial class TwoStepViewModelBase : ObservableObject
         InitializeCommand.NotifyCanExecuteChanged();
         CanReset = false;
         ResetCommand.NotifyCanExecuteChanged();
-        if (await TryRunAsync(InitializeImplAsync, "初始化失败"))
+
+        if (await TryRunAsync(async () =>
+            {
+                await OnInitializingAsync();
+                var u = CreateUtility<TUtility>();
+                await u.InitializeAsync();
+                await OnInitializedAsync();
+            }, "初始化失败"))
         {
             CanExecute = true;
             CanReset = true;
@@ -86,6 +140,7 @@ public abstract partial class TwoStepViewModelBase : ObservableObject
             CanReset = false;
             CanInitialize = true;
         }
+
         ExecuteCommand.NotifyCanExecuteChanged();
         ResetCommand.NotifyCanExecuteChanged();
         InitializeCommand.NotifyCanExecuteChanged();
@@ -103,7 +158,8 @@ public abstract partial class TwoStepViewModelBase : ObservableObject
         ExecuteCommand.NotifyCanExecuteChanged();
         InitializeCommand.NotifyCanExecuteChanged();
 
-        ResetImpl();
+        OnReset();
+        DisposeUtility();
     }
 
     private async Task<bool> TryRunAsync(Func<Task> action, string errorTitle)

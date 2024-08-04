@@ -40,7 +40,7 @@ namespace ArchiveMaster.ViewModels
         private string patchDir;
         Step1Model step1 = null;
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        protected override OfflineSyncStepConfigBase Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
+        protected override ConfigBase Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
         protected override Step2Utility Utility { get; } = new Step2Utility();
 
         [RelayCommand]

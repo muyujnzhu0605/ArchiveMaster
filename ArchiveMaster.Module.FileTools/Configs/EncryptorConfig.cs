@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Security.Cryptography;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public class EncryptorConfig : ConfigBase
+    public partial class EncryptorConfig : ConfigBase
     {
         public enum EncryptorTaskType
         {
@@ -11,28 +12,40 @@ namespace ArchiveMaster.Configs
             Decrypt,
         }
 
-        public CipherMode CipherMode { get; set; } = CipherMode.CBC;
+        [ObservableProperty]
+        private CipherMode cipherMode = CipherMode.CBC;
 
-        public bool DeleteSourceFiles { get; set; }
+        [ObservableProperty]
+        private bool deleteSourceFiles;
 
-        public string EncryptedDir { get; set; }
+        [ObservableProperty]
+        private string encryptedDir;
 
-        public bool EncryptDirectoryStructure { get; set; }
+        [ObservableProperty]
+        private bool encryptDirectoryStructure;
 
-        public bool EncryptFileNames { get; set; }
+        [ObservableProperty]
+        private bool encryptFileNames;
 
-        public bool EncryptFolderNames { get; set; }
+        [ObservableProperty]
+        private bool encryptFolderNames;
 
-        public bool OverwriteExistedFiles { get; set; }
+        [ObservableProperty]
+        private bool overwriteExistedFiles;
 
-        public PaddingMode PaddingMode { get; set; } = PaddingMode.PKCS7;
+        [ObservableProperty]
+        private PaddingMode paddingMode = PaddingMode.PKCS7;
 
-        public string Password { get; set; }
+        [ObservableProperty]
+        private string password;
 
-        public string RawDir { get; set; }
+        [ObservableProperty]
+        private string rawDir;
 
-        public bool RememberPassword { get; set; }
+        [ObservableProperty]
+        private bool rememberPassword;
 
-        public EncryptorTaskType Type { get; set; } = EncryptorTaskType.Encrypt;
+        [ObservableProperty]
+        private EncryptorTaskType type = EncryptorTaskType.Encrypt;
     }
 }

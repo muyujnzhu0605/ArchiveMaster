@@ -1,8 +1,13 @@
-﻿namespace ArchiveMaster.Configs
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace ArchiveMaster.Configs
 {
-    public class Step1Config : OfflineSyncStepConfigBase
+    public partial class Step1Config : ConfigBase
     {
-        public string OutputFile { get; set; }
-        public List<string> SyncDirs { get; set; }
+        [ObservableProperty]
+        private string outputFile;
+
+        [ObservableProperty]
+        private List<string> syncDirs;
     }
 }

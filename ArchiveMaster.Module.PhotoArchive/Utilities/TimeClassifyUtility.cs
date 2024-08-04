@@ -13,7 +13,7 @@ namespace ArchiveMaster.Utilities
 {
     public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase
     {
-        private TimeClassifyConfig Config { get;  } = config;
+        public override TimeClassifyConfig Config { get;  } = config;
         public List<SimpleDirInfo> TargetDirs { get; set; }
 
         public override async Task ExecuteAsync(CancellationToken token)

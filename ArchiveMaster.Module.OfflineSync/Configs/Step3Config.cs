@@ -1,11 +1,14 @@
 ﻿using ArchiveMaster.Enums;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public class Step3Config : OfflineSyncStepConfigBase
+    public partial class Step3Config : ConfigBase
     {
-        public DeleteMode DeleteMode { get; set; } = DeleteMode.MoveToDeletedFolder;
+        [ObservableProperty]
+        private DeleteMode deleteMode = DeleteMode.MoveToDeletedFolder;
 
-        public string PatchDir { get; set; }
+        [ObservableProperty]
+        private string patchDir;
     }
 }

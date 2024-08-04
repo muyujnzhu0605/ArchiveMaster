@@ -111,7 +111,6 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <StackPanel
             Margin="8"
-            IsEnabled="{Binding CanEditConfigs}"
             Spacing="8">
             <StackPanel.Styles>
                 <Style Selector="ctrl|FormItem">
@@ -120,17 +119,17 @@
             </StackPanel.Styles>
             <ctrl:FormItem Label="模板目录：">
                 <ctrl:FilePickerTextBox
-                    FileNames="{Binding TemplateDir}"
+                    FileNames="{Binding Config.TemplateDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="源目录：">
                 <ctrl:FilePickerTextBox
-                    FileNames="{Binding SourceDir}"
+                    FileNames="{Binding Config.SourceDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="目标目录：">
                 <ctrl:FilePickerTextBox
-                    FileNames="{Binding TargetDir}"
+                    FileNames="{Binding Config.TargetDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="黑名单：">

@@ -17,14 +17,13 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <StackPanel
             Margin="8"
-            IsEnabled="{Binding CanEditConfigs}"
             Spacing="8">
             <ctrl:FilePickerTextBox
-                FileNames="{Binding SourceDir}"
+                FileNames="{Binding Config.SourceDir}"
                 Label="模板目录："
                 Type="OpenFolder" />
             <ctrl:FilePickerTextBox
-                FileNames="{Binding TargetDir}"
+                FileNames="{Binding Config.TargetDir}"
                 Label="目标目录："
                 Type="OpenFolder" />
 

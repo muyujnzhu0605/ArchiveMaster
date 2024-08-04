@@ -23,18 +23,21 @@ namespace ArchiveMaster.Utilities
         private readonly Regex rWhite;
         private ConcurrentBag<string> errorMessages;
         private int progress = 0;
+
         public PhotoSlimmingUtility(PhotoSlimmingConfig config)
         {
             Config = config;
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
             rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
             rBlack = new Regex(Config.BlackList);
-            rWhite = new Regex(string.IsNullOrWhiteSpace(Config.WhiteList) ? ".*" : Config.WhiteList, RegexOptions.IgnoreCase);
-            
+            rWhite = new Regex(string.IsNullOrWhiteSpace(Config.WhiteList) ? ".*" : Config.WhiteList,
+                RegexOptions.IgnoreCase);
+
             if (!config.FolderNameTemplate.Contains(PhotoSlimmingConfig.FolderNamePlaceholder))
             {
                 throw new Exception("文件夹名模板不包含文件夹名占位符");
             }
+
             if (!config.FileNameTemplate.Contains(PhotoSlimmingConfig.FileNamePlaceholder))
             {
                 throw new Exception("文件夹名模板不包含文件夹名占位符");
@@ -50,7 +53,7 @@ namespace ArchiveMaster.Utilities
 
         public SlimmingFilesInfo CompressFiles { get; private set; }
 
-        public PhotoSlimmingConfig Config { get; set; }
+        public override PhotoSlimmingConfig Config { get; }
 
         public SlimmingFilesInfo CopyFiles { get; private set; }
 
@@ -69,6 +72,7 @@ namespace ArchiveMaster.Utilities
                         Directory.Delete(Config.DistDir, true);
                     }
                 }
+
                 if (!Directory.Exists(Config.DistDir))
                 {
                     Directory.CreateDirectory(Config.DistDir);
@@ -105,16 +109,17 @@ namespace ArchiveMaster.Utilities
             {
                 return;
             }
+
             NotifyProgressUpdate(1, -1, "正在筛选需要删除的文件");
             var desiredDistFiles = CopyFiles.SkippedFiles
-            .Select(file => GetDistPath(file.FullName, null, out _))
-             .Concat(CompressFiles.SkippedFiles
-                .Select(file => GetDistPath(file.FullName, Config.OutputFormat, out _)))
-             .ToHashSet();
+                .Select(file => GetDistPath(file.FullName, null, out _))
+                .Concat(CompressFiles.SkippedFiles
+                    .Select(file => GetDistPath(file.FullName, Config.OutputFormat, out _)))
+                .ToHashSet();
 
             foreach (var file in Directory
-            .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories)
-             .Where(p => !rBlack.IsMatch(p)))
+                         .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories)
+                         .Where(p => !rBlack.IsMatch(p)))
             {
                 token.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
@@ -124,11 +129,11 @@ namespace ArchiveMaster.Utilities
             }
 
             NotifyProgressUpdate(1, -1, "正在需要删除的文件夹");
-            var desiredDistFolders= desiredDistFiles.Select(Path.GetDirectoryName).ToHashSet();
+            var desiredDistFolders = desiredDistFiles.Select(Path.GetDirectoryName).ToHashSet();
 
             foreach (var dir in Directory.EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories))
             {
-                if(!desiredDistFolders.Contains(dir))
+                if (!desiredDistFolders.Contains(dir))
                 {
                     DeleteFiles.Add(new FileInfo(dir));
                 }
@@ -176,7 +181,6 @@ namespace ArchiveMaster.Utilities
                         CopyFiles.AddSkipped(file);
                     }
                 }
-
             }
         }
 
@@ -202,12 +206,12 @@ namespace ArchiveMaster.Utilities
                 }
                 finally
                 {
-                    int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count + DeleteFiles.ProcessingFiles.Count;
+                    int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count +
+                                     DeleteFiles.ProcessingFiles.Count;
                     Interlocked.Increment(ref progress);
                     NotifyProgressUpdate(totalCount, progress, $"正在删除 ({progress} / {totalCount})");
                 }
             }
-
         }
 
         private void Compress(CancellationToken token)
@@ -243,11 +247,13 @@ namespace ArchiveMaster.Utilities
             {
                 File.Delete(distPath);
             }
+
             string dir = Path.GetDirectoryName(distPath)!;
             if (!Directory.Exists(dir))
             {
                 Directory.CreateDirectory(dir);
             }
+
             Console.OutputEncoding = System.Text.Encoding.Unicode;
             try
             {
@@ -266,11 +272,14 @@ namespace ArchiveMaster.Utilities
                         {
                             (width, height) = (height, width);
                         }
+
                         image.AdaptiveResize(width, height);
                     }
+
                     image.Quality = Config.Quality;
                     image.Write(distPath);
                 }
+
                 File.SetLastWriteTime(distPath, file.LastWriteTime);
 
                 FileInfo distFile = new FileInfo(distPath);
@@ -278,7 +287,6 @@ namespace ArchiveMaster.Utilities
                 {
                     file.CopyTo(distPath, true);
                 }
-
             }
             catch (Exception ex)
             {
@@ -286,7 +294,8 @@ namespace ArchiveMaster.Utilities
             }
             finally
             {
-                int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count + DeleteFiles.ProcessingFiles.Count;
+                int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count +
+                                 DeleteFiles.ProcessingFiles.Count;
                 Interlocked.Increment(ref progress);
                 NotifyProgressUpdate(totalCount, progress, $"正在压缩 ({progress} / {totalCount})");
             }
@@ -302,11 +311,13 @@ namespace ArchiveMaster.Utilities
                 {
                     File.Delete(distPath);
                 }
+
                 string dir = Path.GetDirectoryName(distPath)!;
                 if (!Directory.Exists(dir))
                 {
                     Directory.CreateDirectory(dir);
                 }
+
                 try
                 {
                     file.CopyTo(distPath);
@@ -317,7 +328,8 @@ namespace ArchiveMaster.Utilities
                 }
                 finally
                 {
-                    int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count + DeleteFiles.ProcessingFiles.Count;
+                    int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count +
+                                     DeleteFiles.ProcessingFiles.Count;
                     Interlocked.Increment(ref progress);
                     NotifyProgressUpdate(totalCount, progress, $"正在复制 ({progress} / {totalCount})");
                 }
@@ -338,8 +350,10 @@ namespace ArchiveMaster.Utilities
 
             if (Config.FileNameTemplate != PhotoSlimmingConfig.FileNamePlaceholder)
             {
-                fileNameWithoutExtension = Config.FileNameTemplate.Replace(PhotoSlimmingConfig.FileNamePlaceholder, fileNameWithoutExtension);
+                fileNameWithoutExtension = Config.FileNameTemplate.Replace(PhotoSlimmingConfig.FileNamePlaceholder,
+                    fileNameWithoutExtension);
             }
+
             if (!string.IsNullOrEmpty(newExtension))
             {
                 extension = $".{newExtension}";
@@ -351,14 +365,15 @@ namespace ArchiveMaster.Utilities
             {
                 string[] dirParts = subDir.Split(splitter);
                 subDir = string.Join(splitter, dirParts[..Config.DeepestLevel]);
-                fileNameWithoutExtension = $"{string.Join('-', dirParts[Config.DeepestLevel..])}-{fileNameWithoutExtension}";
+                fileNameWithoutExtension =
+                    $"{string.Join('-', dirParts[Config.DeepestLevel..])}-{fileNameWithoutExtension}";
             }
 
             if (Config.FolderNameTemplate != PhotoSlimmingConfig.FolderNamePlaceholder && subDir.Length > 0)
             {
                 string[] dirParts = subDir.Split(splitter);
                 subDir = Path.Combine(dirParts.Select(p =>
-                Config.FolderNameTemplate.Replace(PhotoSlimmingConfig.FolderNamePlaceholder, p))
+                        Config.FolderNameTemplate.Replace(PhotoSlimmingConfig.FolderNamePlaceholder, p))
                     .ToArray());
             }
 
@@ -373,21 +388,23 @@ namespace ArchiveMaster.Utilities
             {
                 return true;
             }
+
             if (!Config.SkipIfExist)
             {
                 return true;
             }
 
 
-            var distFile = new FileInfo(GetDistPath(file.FullName, type is TaskType.Copy ? null : Config.OutputFormat, out _));
+            var distFile =
+                new FileInfo(GetDistPath(file.FullName, type is TaskType.Copy ? null : Config.OutputFormat, out _));
 
-            if (distFile.Exists && (type is TaskType.Compress || file.Length == distFile.Length && file.LastWriteTime == distFile.LastWriteTime))
+            if (distFile.Exists && (type is TaskType.Compress ||
+                                    file.Length == distFile.Length && file.LastWriteTime == distFile.LastWriteTime))
             {
                 return false;
             }
 
             return true;
-
         }
     }
 }

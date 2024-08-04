@@ -1,7 +1,12 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace ArchiveMaster.Configs;
 
-public class DirStructureCloneConfig
+public partial class DirStructureCloneConfig:ConfigBase
 {
-    public string SourceDir { get; set; }
-    public string TargetDir { get; set; }
+    [ObservableProperty]
+    private string sourceDir;
+
+    [ObservableProperty]
+    private string targetDir;
 }

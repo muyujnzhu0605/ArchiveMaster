@@ -1,8 +1,13 @@
-﻿namespace ArchiveMaster.Configs
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace ArchiveMaster.Configs
 {
-    public class UselessJpgCleanerConfig : ConfigBase
+    public partial class UselessJpgCleanerConfig : ConfigBase
     {
-        public string Dir { get; set; }
-        public string RawExtension { get; set; } = "DNG";
+        [ObservableProperty]
+        private string dir;
+
+        [ObservableProperty]
+        private string rawExtension = "DNG";
     }
 }

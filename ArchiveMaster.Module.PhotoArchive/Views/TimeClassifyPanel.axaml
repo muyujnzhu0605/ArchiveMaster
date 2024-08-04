@@ -16,7 +16,7 @@
             Orientation="Vertical"
             Spacing="8">
             <ct:FilePickerTextBox
-                FileNames="{Binding Dir}"
+                FileNames="{Binding Config.Dir}"
                 Label="目录："
                 Type="OpenFolder" />
             <StackPanel

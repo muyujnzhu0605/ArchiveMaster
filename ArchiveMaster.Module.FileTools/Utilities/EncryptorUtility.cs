@@ -17,7 +17,7 @@ namespace ArchiveMaster.Utilities
     {
         public const string EncryptedFileExtension = ".ept";
         public const string DirectoryStructureFile = "$files$.txt";
-        public EncryptorConfig Config { get; init; } = config;
+        public override EncryptorConfig Config { get; } = config;
         public List<EncryptorFileInfo> ProcessingFiles { get; set; }
         public int BufferSize { get; set; } = 1024 * 1024;
 

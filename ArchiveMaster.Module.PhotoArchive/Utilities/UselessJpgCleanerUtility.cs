@@ -12,9 +12,10 @@ namespace ArchiveMaster.Utilities
 {
     public class UselessJpgCleanerUtility(UselessJpgCleanerConfig config) : TwoStepUtilityBase
     {
-        private UselessJpgCleanerConfig Config { get;  } = config;
+        public override UselessJpgCleanerConfig Config { get; } = config;
 
         public List<SimpleFileInfo> DeletingJpgFiles { get; set; }
+
         public override Task ExecuteAsync(CancellationToken token)
         {
             ArgumentNullException.ThrowIfNull(DeletingJpgFiles);
@@ -28,6 +29,7 @@ namespace ArchiveMaster.Utilities
                     NotifyProgressUpdate(DeletingJpgFiles.Count, index, $"正在删除JPG（{index}/{DeletingJpgFiles.Count}）");
                     File.Delete(file.Path);
                 }
+
                 DeletingJpgFiles = null;
             }, token);
         }
@@ -40,7 +42,8 @@ namespace ArchiveMaster.Utilities
                 NotifyProgressUpdate(0, -1, "正在搜索JPG文件");
                 var jpgs = Directory
                     .EnumerateFiles(Config.Dir, "*.jp*g", SearchOption.AllDirectories)
-                    .Where(p => p.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) || p.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
+                    .Where(p => p.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) ||
+                                p.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
                     .ToList();
                 int index = 0;
                 foreach (var jpg in jpgs)
@@ -48,14 +51,14 @@ namespace ArchiveMaster.Utilities
                     token.ThrowIfCancellationRequested();
                     index++;
                     NotifyProgressUpdate(jpgs.Count, index, $"正在查找RAW文件（{index}/{jpgs.Count}）");
-                    var rawFile = $"{Path.Combine(Path.GetDirectoryName(jpg), Path.GetFileNameWithoutExtension(jpg))}.{Config.RawExtension}";
+                    var rawFile =
+                        $"{Path.Combine(Path.GetDirectoryName(jpg), Path.GetFileNameWithoutExtension(jpg))}.{Config.RawExtension}";
                     if (File.Exists(rawFile))
                     {
                         DeletingJpgFiles.Add(new SimpleFileInfo(jpg));
                     }
                 }
             }, token);
-
         }
     }
 }

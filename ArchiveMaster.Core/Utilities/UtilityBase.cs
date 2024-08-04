@@ -1,9 +1,11 @@
-﻿namespace ArchiveMaster.Utilities
+﻿using ArchiveMaster.Configs;
+
+namespace ArchiveMaster.Utilities
 {
     public abstract class UtilityBase
     {
         public event EventHandler<ProgressUpdateEventArgs<int>> ProgressUpdate;
-
+        public abstract ConfigBase Config { get; }
         protected void NotifyProgressUpdate(string message)
         {
             NotifyProgressUpdate(-1, 0, message);

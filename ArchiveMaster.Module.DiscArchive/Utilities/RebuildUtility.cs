@@ -11,7 +11,7 @@ namespace ArchiveMaster.Utilities
     {
         private Dictionary<string, List<DiscFile>> files;
 
-        public RebuildConfig Config { get; } = config;
+        public override RebuildConfig Config { get; } = config;
         public FileSystemTree FileTree { get; private set; }
         public List<RebuildError> rebuildErrors;
         public IReadOnlyList<RebuildError> RebuildErrors => rebuildErrors.AsReadOnly();

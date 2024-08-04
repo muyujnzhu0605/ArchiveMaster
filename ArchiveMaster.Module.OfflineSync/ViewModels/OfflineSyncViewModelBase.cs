@@ -99,7 +99,7 @@ namespace ArchiveMaster.ViewModels
 
         public int MovedFileCount => Files?.Cast<SyncFileInfo>().Where(p => p.UpdateType == FileUpdateType.Move && p.IsChecked)?.Count() ?? 0;
 
-        protected abstract OfflineSyncStepConfigBase Config { get; }
+        protected abstract ConfigBase Config { get; }
         protected abstract OfflineSyncUtilityBase Utility { get; }
 
         protected void UpdateStatus(StatusType status)

@@ -1,15 +1,44 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace ArchiveMaster.Configs;
 
-public class DirStructureSyncConfig : ConfigBase
+public partial class DirStructureSyncConfig : ConfigBase
 {
-    public string TemplateDir { get; set; }
-    public string SourceDir { get; set; }
-    public string TargetDir { get; set; }
-    public bool CompareTime { get; set; }
-    public bool CompareLength { get; set; }
-    public bool CompareName { get; set; }
-    public string BlackList { get; set; }
-    public bool BlackListUseRegex { get; set; }
-    public int MaxTimeToleranceSecond { get; set; }
-    public bool Copy { get; set; }
+    [ObservableProperty]
+    private string templateDir;
+
+    [ObservableProperty]
+    private string sourceDir;
+
+    [ObservableProperty]
+    private string targetDir;
+
+    [ObservableProperty]
+    private bool compareTime;
+
+    [ObservableProperty]
+    private bool compareLength;
+
+    [ObservableProperty]
+    private bool compareName;
+
+    [ObservableProperty]
+    private string blackList;
+
+    [ObservableProperty]
+    private bool blackListUseRegex;
+
+    [ObservableProperty]
+    private int maxTimeToleranceSecond;
+
+    [ObservableProperty]
+    private bool copy;
+    
+    partial void OnSourceDirChanged(string oldValue, string newValue)
+    {
+        if (string.IsNullOrWhiteSpace(TargetDir) || oldValue == TargetDir)
+        {
+            TargetDir = newValue;
+        }
+    }
 }

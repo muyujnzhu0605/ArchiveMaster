@@ -20,7 +20,7 @@ namespace ArchiveMaster.Utilities
 
         private int progress = 0;
         private Regex rRepairTime;
-        private RepairModifiedTimeConfig Config { get;  } = config;
+        public override RepairModifiedTimeConfig Config { get;  } = config;
         public List<string> ErrorFilesAndMessages { get; private set; }
         public List<string> UpdatingFilesAndMessages { get; private set; }
 

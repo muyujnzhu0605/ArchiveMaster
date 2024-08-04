@@ -17,13 +17,16 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class Step1ViewModel : OfflineSyncViewModelBase<FileInfoWithStatus>
     {
-        [ObservableProperty] private string outputFile;
+        [ObservableProperty]
+        private string outputFile;
 
-        [ObservableProperty] private string selectedSyncDir;
+        [ObservableProperty]
+        private string selectedSyncDir;
 
-        [ObservableProperty] private ObservableCollection<string> syncDirs;
+        [ObservableProperty]
+        private ObservableCollection<string> syncDirs;
 
-        protected override OfflineSyncStepConfigBase Config =>
+        protected override ConfigBase Config =>
             AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
 
         protected override OfflineSyncUtilityBase Utility => new Step1Utility();

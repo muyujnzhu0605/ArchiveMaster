@@ -1,10 +1,14 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public class TimeClassifyConfig: ConfigBase
+    public partial class TimeClassifyConfig: ConfigBase
     {
-        public string Dir { get; set; }
-        public TimeSpan MinTimeInterval { get; set; } = TimeSpan.FromMinutes(60);
+        [ObservableProperty]
+        private string dir;
+
+        [ObservableProperty]
+        private TimeSpan minTimeInterval = TimeSpan.FromMinutes(60);
     }
 }

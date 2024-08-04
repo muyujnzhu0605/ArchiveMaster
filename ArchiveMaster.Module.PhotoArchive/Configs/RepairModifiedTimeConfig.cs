@@ -1,11 +1,17 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public class RepairModifiedTimeConfig : ConfigBase
+    public partial class RepairModifiedTimeConfig : ConfigBase
     {
-        public string Dir {  get; set; }
-        public int ThreadCount { get; set; } = 2;
-        public TimeSpan MaxDurationTolerance { get; set; } = TimeSpan.FromSeconds(1);
+        [ObservableProperty]
+        private string dir;
+
+        [ObservableProperty]
+        private int threadCount = 2;
+
+        [ObservableProperty]
+        private TimeSpan maxDurationTolerance = TimeSpan.FromSeconds(1);
     }
 }

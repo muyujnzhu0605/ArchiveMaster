@@ -1,11 +1,21 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace ArchiveMaster.Configs;
 
-public class RebuildConfig
+public partial class RebuildConfig:ConfigBase 
 {
-    public string DiscDirs { get; set; }
-    public string TargetDir { get; set; }
-    public bool SkipIfExisted { get; set; }
-    public int MaxTimeToleranceSecond { get; set; }
+    [ObservableProperty]
+    private string discDirs;
 
-    public bool CheckOnly { get; set; }
+    [ObservableProperty]
+    private string targetDir;
+
+    [ObservableProperty]
+    private bool skipIfExisted;
+
+    [ObservableProperty]
+    private int maxTimeToleranceSecond;
+
+    [ObservableProperty]
+    private bool checkOnly;
 }

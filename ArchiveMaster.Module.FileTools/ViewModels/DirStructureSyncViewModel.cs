@@ -9,30 +9,15 @@ using OffsiteBackupOfflineSync.Utility;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DirStructureSyncViewModel : TwoStepViewModelBase
+public partial class DirStructureSyncViewModel : TwoStepViewModelBase<DirStructureSyncUtility>
 {
-    public DirStructureSyncViewModel()
-    {
-        SourceDir = Config.SourceDir;
-        TemplateDir = Config.TemplateDir;
-        TargetDir = Config.TargetDir;
-    }
-    public DirStructureSyncConfig Config { get; } = AppConfig.Instance.Get<DirStructureSyncConfig>();
+    public override DirStructureSyncConfig Config { get; } = AppConfig.Instance.Get<DirStructureSyncConfig>();
 
     [ObservableProperty]
     private bool displayMultipleMatches = true;
 
     [ObservableProperty]
     private bool displayRightPosition = false;
-
-    [ObservableProperty]
-    private string sourceDir;
-
-    [ObservableProperty]
-    private string templateDir;
-
-    [ObservableProperty]
-    private string targetDir;
 
     [ObservableProperty]
     private ObservableCollection<MatchingFileInfo> files;
@@ -45,14 +30,6 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase
 
     private DirStructureSyncUtility u;
 
-    partial void OnSourceDirChanged(string oldValue, string newValue)
-    {
-        if (string.IsNullOrWhiteSpace(TargetDir) || oldValue == TargetDir)
-        {
-            TargetDir = newValue;
-        }
-    }
-
     partial void OnDisplayMultipleMatchesChanged(bool value)
     {
         UpdateList();
@@ -63,44 +40,36 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase
         UpdateList();
     }
 
-
-    protected override async Task InitializeImplAsync()
+    protected override Task OnInitializingAsync()
     {
-        if (string.IsNullOrEmpty(TemplateDir))
+        if (string.IsNullOrEmpty(Config.TemplateDir))
         {
             throw new Exception("模板目录为空");
         }
 
-        if (!Directory.Exists(TemplateDir))
+        if (!Directory.Exists(Config.TemplateDir))
         {
             throw new Exception("模板目录不存在");
         }
 
-        if (string.IsNullOrEmpty(SourceDir))
+        if (string.IsNullOrEmpty(Config.SourceDir))
         {
             throw new Exception("源目录为空");
         }
 
-        if (!Directory.Exists(SourceDir))
+        if (!Directory.Exists(Config.SourceDir))
         {
             throw new Exception("源目录不存在");
         }
 
-        Config.TemplateDir = TemplateDir;
-        Config.SourceDir = SourceDir;
-        Config.TargetDir = TargetDir;
-
-
-        u = new DirStructureSyncUtility(Config);
-        u.ProgressUpdate += Utility_ProgressUpdate;
-        await u.InitializeAsync();
-        UpdateList();
+        return base.OnInitializingAsync();
     }
 
-    protected override async Task ExecuteImplAsync(CancellationToken token)
+
+    protected override Task OnInitializedAsync()
     {
-        await u.ExecuteAsync(token);
-        u.ProgressUpdate -= Utility_ProgressUpdate;
+        UpdateList();
+        return base.OnInitializedAsync();
     }
 
     [RelayCommand]
@@ -147,7 +116,7 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase
     }
 
 
-    protected override void ResetImpl()
+    protected override void OnReset()
     {
         Files = null;
         FilesCount = 0;

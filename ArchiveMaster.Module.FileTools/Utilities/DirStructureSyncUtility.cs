@@ -14,7 +14,7 @@ namespace OffsiteBackupOfflineSync.Utility
 {
     public class DirStructureSyncUtility(DirStructureSyncConfig config) : TwoStepUtilityBase
     {
-        public DirStructureSyncConfig Config { get; } = config;
+        public override DirStructureSyncConfig Config { get; } = config;
         public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();
         private readonly Dictionary<DateTime, object> modifiedTime2Template = new Dictionary<DateTime, object>();

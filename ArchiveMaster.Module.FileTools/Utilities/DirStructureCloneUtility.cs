@@ -10,7 +10,7 @@ namespace ArchiveMaster.Utilities
     public class DirStructureCloneUtility(DirStructureCloneConfig config) : TwoStepUtilityBase
     {
         public IList<FileInfoWithStatus> Files { get; private set; }
-        public DirStructureCloneConfig Config { get; } = config;
+        public override DirStructureCloneConfig Config { get; } = config;
 
         public override async Task ExecuteAsync(CancellationToken token)
         {

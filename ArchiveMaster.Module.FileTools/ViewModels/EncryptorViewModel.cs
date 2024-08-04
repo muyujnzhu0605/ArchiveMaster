@@ -12,11 +12,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
-public partial class EncryptorViewModel : TwoStepViewModelBase
-{
-    [ObservableProperty]
-    private string dir;
 
+public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility>
+{
     [ObservableProperty]
     private bool isEncrypting = true;
 
@@ -27,12 +25,9 @@ public partial class EncryptorViewModel : TwoStepViewModelBase
 
     public PaddingMode[] PaddingModes => Enum.GetValues<PaddingMode>();
 
-
-    private EncryptorUtility utility;
-
     public EncryptorViewModel()
     {
-        AppConfig.Instance.BeforeSaving+=(s,e)=>
+        AppConfig.Instance.BeforeSaving += (s, e) =>
         {
             if (!Config.RememberPassword)
             {
@@ -41,24 +36,21 @@ public partial class EncryptorViewModel : TwoStepViewModelBase
         };
     }
 
-    public EncryptorConfig Config { get; set; } = AppConfig.Instance.Get< EncryptorConfig>();
-    protected override async Task ExecuteImplAsync(CancellationToken token)
+    public override EncryptorConfig Config { get; } = AppConfig.Instance.Get<EncryptorConfig>();
+
+    protected override async Task OnExecutedAsync()
     {
-        ArgumentNullException.ThrowIfNull(utility);
-        await utility.ExecuteAsync(token);
-        utility.ProgressUpdate -= Utility_ProgressUpdate;
-        utility = null;
         if (ProcessingFiles.Any(p => p.Error != null))
         {
             string typeDesc = IsEncrypting ? "加密" : "解密";
             var errorDetails = ProcessingFiles.Where(p => p.Error != null).Select(p => $"{p.Name}：{p.Error.Message}");
-            WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
+            await WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
             {
                 Type = CommonDialogMessage.CommonDialogType.Error,
                 Title = $"{typeDesc}存在错误",
                 Message = $"{typeDesc}过程已结束，部分文件{typeDesc}失败，请检查",
                 Detail = string.Join(Environment.NewLine, errorDetails)
-            });
+            }).Task;
         }
     }
 
@@ -66,23 +58,31 @@ public partial class EncryptorViewModel : TwoStepViewModelBase
     private async Task CopyErrorAsync(Exception exception)
     {
         await WeakReferenceMessenger.Default.Send(new GetClipboardMessage())
-              .Clipboard
-              .SetTextAsync(exception.ToString());
+            .Clipboard
+            .SetTextAsync(exception.ToString());
     }
 
-    protected override async Task InitializeImplAsync()
+    protected override Task OnInitializingAsync()
     {
         if (string.IsNullOrEmpty(Config.Password))
         {
             throw new ArgumentException("密码为空");
         }
-        Config.Type = IsEncrypting ? EncryptorConfig.EncryptorTaskType.Encrypt : EncryptorConfig.EncryptorTaskType.Decrypt;
-        utility = new EncryptorUtility(Config);
-        utility.ProgressUpdate += Utility_ProgressUpdate;
-        await utility.InitializeAsync();
-        ProcessingFiles = utility.ProcessingFiles;
+
+        Config.Type = IsEncrypting
+            ? EncryptorConfig.EncryptorTaskType.Encrypt
+            : EncryptorConfig.EncryptorTaskType.Decrypt;
+        return base.OnInitializingAsync();
     }
-    protected override void ResetImpl()
+
+
+    protected override Task OnInitializedAsync()
+    {
+        ProcessingFiles = Utility.ProcessingFiles;
+        return base.OnInitializedAsync();
+    }
+
+    protected override void OnReset()
     {
         ProcessingFiles = null;
     }
