@@ -2,7 +2,7 @@
 using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
-using ArchiveMaster.Utility;
+using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Views
 {

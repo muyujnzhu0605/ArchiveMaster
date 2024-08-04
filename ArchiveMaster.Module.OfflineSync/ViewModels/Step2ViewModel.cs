@@ -9,7 +9,7 @@ using System.Collections.ObjectModel;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Configs;
 using ArchiveMaster.UI.ViewModels;
-using ArchiveMaster.Utility;
+using ArchiveMaster.Utilities;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;

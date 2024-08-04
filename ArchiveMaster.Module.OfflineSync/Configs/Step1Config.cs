@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
@@ -8,6 +9,6 @@ namespace ArchiveMaster.Configs
         private string outputFile;
 
         [ObservableProperty]
-        private List<string> syncDirs;
+        private ObservableCollection<string> syncDirs;
     }
 }

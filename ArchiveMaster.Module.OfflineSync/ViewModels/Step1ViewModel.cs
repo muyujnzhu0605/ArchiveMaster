@@ -1,7 +1,7 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Messages;
 using ArchiveMaster.UI.ViewModels;
-using ArchiveMaster.Utility;
+using ArchiveMaster.Utilities;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,24 +12,16 @@ using FzLib.Avalonia.Messages;
 using Mapster;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
+using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step1ViewModel : OfflineSyncViewModelBase<FileInfoWithStatus>
+    public partial class Step1ViewModel() : OfflineSyncViewModelBase<Step1Utility, FileInfoWithStatus>(false)
     {
-        [ObservableProperty]
-        private string outputFile;
-
         [ObservableProperty]
         private string selectedSyncDir;
 
-        [ObservableProperty]
-        private ObservableCollection<string> syncDirs;
-
-        protected override ConfigBase Config =>
-            AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
-
-        protected override OfflineSyncUtilityBase Utility => new Step1Utility();
+        public override Step1Config Config { get; } = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
 
         private void AddSyncDir(string path)
         {
@@ -40,13 +32,13 @@ namespace ArchiveMaster.ViewModels
                 throw new FileNotFoundException("指定的目录不存在");
             }
 
-            if (SyncDirs == null)
+            if (Config.SyncDirs == null)
             {
-                SyncDirs = new ObservableCollection<string>();
+                Config.SyncDirs = new ObservableCollection<string>();
             }
 
             // 检查新目录与现有目录是否相同
-            foreach (string existingPath in SyncDirs)
+            foreach (string existingPath in Config.SyncDirs)
             {
                 DirectoryInfo existingDirInfo = new DirectoryInfo(existingPath);
 
@@ -57,7 +49,7 @@ namespace ArchiveMaster.ViewModels
             }
 
             // 检查新目录是否是现有目录的子目录或父目录
-            foreach (string existingPath in SyncDirs)
+            foreach (string existingPath in Config.SyncDirs)
             {
                 DirectoryInfo existingDirInfo = new DirectoryInfo(existingPath);
 
@@ -86,7 +78,7 @@ namespace ArchiveMaster.ViewModels
                 }
             }
 
-            SyncDirs.Add(path);
+            Config.SyncDirs.Add(path);
         }
 
         [RelayCommand]
@@ -114,10 +106,9 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task ExportAsync()
+        protected override async Task OnExecutingAsync()
         {
-            var dirs = SyncDirs.ToHashSet();
+            var dirs = Config.SyncDirs.ToHashSet();
             if (dirs.Count == 0)
             {
                 await this.SendMessage(new CommonDialogMessage()
@@ -129,7 +120,7 @@ namespace ArchiveMaster.ViewModels
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(OutputFile))
+            if (string.IsNullOrWhiteSpace(Config.OutputFile))
             {
                 var result = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider
                     .SaveFilePickerAsync(new FilePickerSaveOptions()
@@ -141,30 +132,8 @@ namespace ArchiveMaster.ViewModels
                     });
                 if (result != null)
                 {
-                    OutputFile = result.TryGetLocalPath();
+                    Config.OutputFile = result.TryGetLocalPath();
                 }
-            }
-
-            UpdateStatus(StatusType.Processing);
-            try
-            {
-                await Task.Run(() => { (Utility as Step1Utility).Enumerate(dirs, OutputFile); });
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-                await this.SendMessage(new CommonDialogMessage()
-                {
-                    Type = CommonDialogMessage.CommonDialogType.Error,
-                    Title = "导出失败",
-                    Exception = ex
-                }).Task;
-            }
-            finally
-            {
-                UpdateStatus(StatusType.Ready);
             }
         }
 
@@ -173,12 +142,12 @@ namespace ArchiveMaster.ViewModels
         {
             try
             {
-                if ((await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
+                if (await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
                     {
                         Type = InputDialogMessage.InputDialogType.Text,
                         Title = "输入目录",
                         Message = "请输入欲加入的目录地址"
-                    }).Task) is string result)
+                    }).Task is string result)
                 {
                     AddSyncDir(result);
                 }
@@ -192,7 +161,7 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand]
         private void RemoveAll()
         {
-            SyncDirs.Clear();
+            Config.SyncDirs.Clear();
         }
 
         [RelayCommand]
@@ -200,14 +169,8 @@ namespace ArchiveMaster.ViewModels
         {
             if (SelectedSyncDir != null)
             {
-                SyncDirs.Remove(SelectedSyncDir);
+                Config.SyncDirs.Remove(SelectedSyncDir);
             }
-        }
-
-        private void Stop()
-        {
-            UpdateStatus(StatusType.Stopping);
-            (Utility as Step1Utility).Stop();
         }
     }
 }

@@ -16,7 +16,7 @@ using static System.Net.Mime.MediaTypeNames;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Utilities;
 
-namespace ArchiveMaster.Utility
+namespace ArchiveMaster.Utilities
 {
     public class Step2Utility : OfflineSyncUtilityBase
     {

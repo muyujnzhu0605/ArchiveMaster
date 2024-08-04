@@ -4,8 +4,9 @@ using ArchiveMaster.ViewModels;
 using FzLib.IO;
 using System.ComponentModel;
 using System.Diagnostics;
+using ArchiveMaster.Utilities;
 
-namespace ArchiveMaster.Utility
+namespace ArchiveMaster.Utilities
 {
     public class Step3Utility : OfflineSyncUtilityBase
     {

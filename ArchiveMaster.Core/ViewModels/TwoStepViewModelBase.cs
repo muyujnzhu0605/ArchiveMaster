@@ -28,39 +28,26 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     private bool isWorking = false;
 
     [ObservableProperty]
-    private string message;
+    private string message = "就绪";
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
-    protected override TUtility Utility => base.Utility as TUtility;
+    public TwoStepViewModelBase(bool enableInitialize)
+    {
+        EnableInitialize = enableInitialize;
+        CanInitialize = enableInitialize;
+        CanExecute = !enableInitialize;
+    }
+
+    public TwoStepViewModelBase() : this(true)
+    {
+    }
+    public bool EnableInitialize { get; }
 
     public bool ProgressIndeterminate => Progress < 0;
-
-    protected virtual void OnReset()
-    {
-    }
-
-    protected virtual Task OnInitializingAsync()
-    {
-        return Task.CompletedTask;
-    }
-
-    protected virtual Task OnInitializedAsync()
-    {
-        return Task.CompletedTask;
-    }
-
-    protected virtual Task OnExecutingAsync()
-    {
-        return Task.CompletedTask;
-    }
-
-    protected virtual Task OnExecutedAsync()
-    {
-        return Task.CompletedTask;
-    }
-
+    protected override TUtility Utility => base.Utility as TUtility;
     protected override T CreateUtility<T>()
     {
         var utility = base.CreateUtility<T>();
@@ -74,12 +61,29 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         base.DisposeUtility();
     }
 
-    private void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs<int> e)
+    protected virtual Task OnExecutedAsync()
     {
-        Progress = 1.0 * e.Current / e.Maximum;
-        Message = e.Message;
+        return Task.CompletedTask;
     }
 
+    protected virtual Task OnExecutingAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task OnInitializedAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual Task OnInitializingAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    protected virtual void OnReset()
+    {
+    }
     [RelayCommand]
     private void CancelExecute()
     {
@@ -89,10 +93,14 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         ExecuteCommand.NotifyCanExecuteChanged();
     }
 
-
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanExecute))]
     private async Task ExecuteAsync(CancellationToken token)
     {
+        if (!EnableInitialize)
+        {
+            CreateUtility<TUtility>();
+        }
+
         if (Utility == null)
         {
             throw new NullReferenceException($"{nameof(Utility)}为空");
@@ -112,8 +120,10 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
             await t.ExecuteAsync(token);
             await OnExecutedAsync();
         }, "执行失败");
-    }
 
+        CanReset = true;
+        ResetCommand.NotifyCanExecuteChanged();
+    }
 
     [RelayCommand(CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync()
@@ -146,13 +156,12 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         InitializeCommand.NotifyCanExecuteChanged();
     }
 
-
     [RelayCommand(CanExecute = nameof(CanReset))]
     private void Reset()
     {
         CanReset = false;
-        CanInitialize = true;
-        CanExecute = false;
+        CanInitialize = EnableInitialize;
+        CanExecute = !EnableInitialize;
 
         ResetCommand.NotifyCanExecuteChanged();
         ExecuteCommand.NotifyCanExecuteChanged();
@@ -199,5 +208,11 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
             Message = "完成";
             WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
         }
+    }
+
+    private void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs<int> e)
+    {
+        Progress = 1.0 * e.Current / e.Maximum;
+        Message = e.Message;
     }
 }

@@ -5,61 +5,59 @@ using System.Collections.Concurrent;
 using System.IO.Compression;
 using System.Reflection;
 using System.Text;
+using ArchiveMaster.Configs;
+using ArchiveMaster.Utilities;
 
-namespace ArchiveMaster.Utility
+namespace ArchiveMaster.Utilities
 {
-    public class Step1Utility : OfflineSyncUtilityBase
+    public class Step1Utility(Step1Config config) : TwoStepUtilityBase
     {
-        private volatile int index = 0;
-        public static Step1Model ReadStep1Model(string outputPath)
+        public override Step1Config Config { get; } = config;
+
+        public override Task InitializeAsync(CancellationToken token = default)
         {
-            return ReadFromZip<Step1Model>(outputPath);
+            throw new NotImplementedException();
         }
 
-        public Step1Model Enumerate(IEnumerable<string> dirs, string outputPath)
+        public override async Task ExecuteAsync(CancellationToken token = default)
         {
-            stopping = false;
-            index = 0;
+            int index = 0;
             List<SyncFileInfo> syncFiles = new List<SyncFileInfo>();
-            var groups = dirs.GroupBy(p => Path.GetFileName(p));
+            var groups = Config.SyncDirs.GroupBy(p => Path.GetFileName(p));
             foreach (var group in groups)
             {
-                if(group.Count()>1)
+                if (group.Count() > 1)
                 {
                     throw new ArgumentException("存在重复的顶级目录名：" + group.Key);
                 }
             }
 
-            foreach (var dir in dirs)
+            await Task.Run(() =>
             {
-                foreach (var file in new DirectoryInfo(dir).EnumerateFiles("*", SearchOption.AllDirectories))
+                foreach (var dir in Config.SyncDirs)
                 {
-                    if (stopping)
+                    foreach (var file in new DirectoryInfo(dir).EnumerateFiles("*", SearchOption.AllDirectories))
                     {
-                        throw new OperationCanceledException();
-                    }
-                    syncFiles.Add(new SyncFileInfo(file, dir));
+                        token.ThrowIfCancellationRequested();
+                        syncFiles.Add(new SyncFileInfo(file, dir));
 #if DEBUG
-                    TestUtility.SleepInDebug();
+                        TestUtility.SleepInDebug();
 #endif
-                    InvokeMessageReceivedEvent($"正在搜索：{dir}，已加入 {++index} 个文件");
+                        NotifyProgressUpdate($"正在搜索：{dir}，已加入 {++index} 个文件");
+                    }
                 }
-                if (stopping)
-                {
-                    throw new OperationCanceledException();
-                }
-            }
-            InvokeMessageReceivedEvent($"正在保存快照");
+            }, token);
+            NotifyProgressUpdate($"正在保存快照");
 
             Step1Model model = new Step1Model()
             {
                 Files = syncFiles.ToList(),
             };
-            WriteToZip(model, outputPath);
-            return model;
+            await Task.Run(() =>
+            {
+                ZipUtility.WriteToZip(model, Config.OutputFile);
+                
+            }, token);
         }
-
     }
 }
-
-

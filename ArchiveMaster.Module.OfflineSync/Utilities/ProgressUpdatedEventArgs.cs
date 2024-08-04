@@ -1,4 +1,4 @@
-﻿namespace ArchiveMaster.Utility
+﻿namespace ArchiveMaster.Utilities
 {
     public class ProgressUpdatedEventArgs : EventArgs
     {

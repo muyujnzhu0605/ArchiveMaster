@@ -41,10 +41,12 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
     {
         Configs = new ObservableCollection<PhotoSlimmingConfig>(
             AppConfig.Instance.Get(nameof(PhotoSlimmingConfig)) as List<PhotoSlimmingConfig>);
-        if (Configs.Count > 0)
+        if (Configs.Count == 0)
         {
-            SelectedConfig = Configs[0];
+            Configs.Add(new PhotoSlimmingConfig());
         }
+
+        SelectedConfig = Configs[0];
 
         AppConfig.Instance.BeforeSaving += (s, e) =>
         {
@@ -55,7 +57,7 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
     public ObservableCollection<PhotoSlimmingConfig> Configs { get; set; }
 
     protected override Task OnExecutedAsync()
-    {       
+    {
         ErrorMessages = new ObservableCollection<string>(Utility.ErrorMessages);
         return base.OnExecutedAsync();
     }
@@ -66,6 +68,7 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
         {
             throw new ArgumentException("请先选择配置");
         }
+
         return base.OnInitializingAsync();
     }
 
