@@ -1,6 +1,5 @@
 ﻿using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
-using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.IO.Compression;
 using System.Reflection;
@@ -53,11 +52,7 @@ namespace ArchiveMaster.Utilities
             {
                 Files = syncFiles.ToList(),
             };
-            await Task.Run(() =>
-            {
-                ZipUtility.WriteToZip(model, Config.OutputFile);
-                
-            }, token);
+            await Task.Run(() => { ZipUtility.WriteToZip(model, Config.OutputFile); }, token);
         }
     }
 }

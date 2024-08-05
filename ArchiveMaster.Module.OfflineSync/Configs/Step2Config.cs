@@ -1,4 +1,6 @@
-﻿using ArchiveMaster.Model;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+using ArchiveMaster.Model;
 using ArchiveMaster.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -23,8 +25,14 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string offsiteSnapshot;
-
+        
         [ObservableProperty]
-        private List<LocalAndOffsiteDir> matchingDirs;
+        [property:JsonIgnore]
+        private ObservableCollection<LocalAndOffsiteDir> matchingDirs;
+
+        partial void OnOffsiteSnapshotChanged(string value)
+        {
+            MatchingDirs = null;
+        }
     }
 }

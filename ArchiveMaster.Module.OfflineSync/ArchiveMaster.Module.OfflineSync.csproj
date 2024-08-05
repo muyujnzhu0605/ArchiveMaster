@@ -34,14 +34,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Utilities\Step3Utility.cs" />
-    <Compile Remove="Utilities\Step2Utility.cs" />
     <Compile Remove="ViewModels\Step3ViewModel.cs" />
-    <Compile Remove="ViewModels\Step2ViewModel.cs" />
-    <Compile Remove="Views\Step2Panel.axaml.cs" />
     <Compile Remove="Views\Step3Panel.axaml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <AvaloniaXaml Remove="Views\Step2Panel.axaml" />
     <AvaloniaXaml Remove="Views\Step3Panel.axaml" />
   </ItemGroup>
 

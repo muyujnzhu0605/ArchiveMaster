@@ -20,7 +20,7 @@
             <Border
                 Grid.Row="2"
                 Margin="32,16"
-                BorderBrush="{DynamicResource Background2}"
+                BorderBrush="{DynamicResource Background3}"
                 BorderThickness="0,2,0,0"
                 IsVisible="{Binding EnableInitialize}" />
             <ContentControl
@@ -44,13 +44,13 @@
                     Value="{Binding Progress}" />
                 <Button
                     Grid.Column="4"
-                    Classes="Middle"
+                    Classes="Long Primary"
                     Command="{Binding InitializeCommand}"
                     Content="{Binding #root.InitializeButtonContent}"
                     IsVisible="{Binding EnableInitialize}" />
                 <Button
                     Grid.Column="6"
-                    Classes="Middle"
+                    Classes="Long Primary"
                     Command="{Binding ExecuteCommand}"
                     Content="{Binding #root.ExecuteButtonContent}" />
                 <Button

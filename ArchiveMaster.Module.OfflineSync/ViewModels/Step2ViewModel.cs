@@ -1,7 +1,6 @@
 ﻿using ArchiveMaster.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib;
-using Newtonsoft.Json;
 using ArchiveMaster.Model;
 using ArchiveMaster.Views;
 using System.Collections;
@@ -17,31 +16,10 @@ using Mapster;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step2ViewModel : OfflineSyncViewModelBase<SyncFileInfo>
+    public partial class Step2ViewModel : OfflineSyncViewModelBase<Step2Utility, SyncFileInfo>
     {
-        [ObservableProperty]
-        private string blackList;
-
-        [ObservableProperty]
-        private bool blackListUseRegex;
-
-        [ObservableProperty]
-        private ExportMode exportMode;
-        [ObservableProperty]
-        private string localDir;
-
-        [ObservableProperty]
-        private ObservableCollection<LocalAndOffsiteDir> matchingDirs;
-
-        [ObservableProperty]
-        private string offsiteSnapshot;
-
-        [ObservableProperty] 
-        private string patchDir;
-        Step1Model step1 = null;
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        protected override ConfigBase Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
-        protected override Step2Utility Utility { get; } = new Step2Utility();
+        public override Step2Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
 
         [RelayCommand]
         private async Task BrowseLocalDirAsync()
@@ -55,13 +33,13 @@ namespace ArchiveMaster.ViewModels
             if (folders.Count > 0)
             {
                 string path = string.Join(Environment.NewLine, folders.Select((p => p.TryGetLocalPath())));
-                if (string.IsNullOrEmpty(LocalDir))
+                if (string.IsNullOrEmpty(Config.LocalDir))
                 {
-                    LocalDir = path;
+                    Config.LocalDir = path;
                 }
                 else
                 {
-                    LocalDir += Environment.NewLine + path;
+                    Config.LocalDir += Environment.NewLine + path;
                 }
             }
         }
@@ -80,7 +58,7 @@ namespace ArchiveMaster.ViewModels
 
             if (files.Count > 0)
             {
-                OffsiteSnapshot = files[0].TryGetLocalPath();
+                Config.OffsiteSnapshot = files[0].TryGetLocalPath();
             }
         }
 
@@ -95,83 +73,58 @@ namespace ArchiveMaster.ViewModels
 
             if (folders.Count > 0)
             {
-                PatchDir = folders[0].TryGetLocalPath();
+                Config.PatchDir = folders[0].TryGetLocalPath();
             }
         }
 
-        [RelayCommand]
-        private async Task ExportAsync()
+        protected override Task OnExecutingAsync()
         {
             if (Files.Count == 0)
             {
-                await this.ShowErrorAsync("导出失败", "本地和异地没有差异");
-                return;
+                throw new Exception("本地和异地没有差异");
             }
 
-            if (string.IsNullOrWhiteSpace(PatchDir))
+            if (string.IsNullOrWhiteSpace(Config.PatchDir))
             {
-                await this.ShowErrorAsync("导出失败", "未设置导出补丁目录");
-                return;
+                throw new Exception("未设置导出补丁目录");
             }
 
-            try
+            return base.OnExecutingAsync();
+        }
+
+        protected override async Task OnExecutedAsync()
+        {
+            if ((Utility as Step2Utility).HasError)
             {
-                UpdateStatus(StatusType.Processing);
-                bool allOk = true;
-                await Task.Run(() => { allOk = Utility.Export(PatchDir, ExportMode); });
-                if (!allOk)
-                {
-                    await this.ShowErrorAsync("导出失败", "导出完成，但部分文件出现错误");
-                    return;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-                await this.ShowErrorAsync("导出失败", ex);
-                return;
-            }
-            finally
-            {
-                UpdateStatus(StatusType.Analyzed);
+                await this.ShowErrorAsync("导出失败", "导出完成，但部分文件出现错误");
             }
         }
 
         [RelayCommand]
         private async Task MatchDirsAsync()
         {
-            if (string.IsNullOrEmpty(OffsiteSnapshot))
-            {
-                await this.ShowErrorAsync("匹配失败", "未设置快照文件");
-                return;
-            }
-
-            if (!File.Exists(OffsiteSnapshot))
-            {
-                await this.ShowErrorAsync("匹配失败", "快照文件不存在");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(LocalDir))
-            {
-                await this.ShowErrorAsync("匹配失败", "未设置本地目录");
-                return;
-            }
-
             try
             {
-                UpdateStatus(StatusType.Analyzing);
-                await Task.Run(() =>
+                if (string.IsNullOrEmpty(Config.OffsiteSnapshot))
                 {
-                    string[] localSearchingDirs = LocalDir.Split(new char[] { '|', '\r', '\n' },
-                        StringSplitOptions.RemoveEmptyEntries);
-                    step1 = Step1Utility.ReadStep1Model(OffsiteSnapshot);
-                    MatchingDirs =
-                        new ObservableCollection<LocalAndOffsiteDir>(
-                            Step2Utility.MatchLocalAndOffsiteDirs(step1, localSearchingDirs));
-                });
+                    throw new Exception("未设置快照文件");
+                }
+
+                if (!File.Exists(Config.OffsiteSnapshot))
+                {
+                    throw new Exception("快照文件不存在");
+                }
+
+                if (string.IsNullOrEmpty(Config.LocalDir))
+                {
+                    throw new Exception("未设置本地目录");
+                }
+
+                string[] localSearchingDirs = Config.LocalDir.Split(new char[] { '|', '\r', '\n' },
+                    StringSplitOptions.RemoveEmptyEntries);
+                Config.MatchingDirs =
+                    new ObservableCollection<LocalAndOffsiteDir>(await Step2Utility
+                        .MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot, localSearchingDirs));
             }
             catch (OperationCanceledException)
             {
@@ -180,60 +133,22 @@ namespace ArchiveMaster.ViewModels
             {
                 await this.ShowErrorAsync("匹配失败", ex);
             }
-            finally
-            {
-                UpdateStatus(StatusType.Ready);
-            }
         }
 
-        partial void OnOffsiteSnapshotChanged(string value)
+        protected override Task OnInitializingAsync()
         {
-            MatchingDirs = null;
-        }
-        [RelayCommand]
-        private async Task SearchChangeAsync()
-        {
-            if (step1 == null)
+            if (Config.MatchingDirs is null or { Count: 0 })
             {
-                await this.ShowErrorAsync("查找失败", "请先匹配目录");
-                return;
+                throw new Exception("没有匹配的目录");
             }
-            if (MatchingDirs is null or { Count: 0 })
-            {
-                await this.ShowErrorAsync("查找失败", "没有匹配的目录");
-                return;
-            }
-            bool needProcess = false;
-            try
-            {
-                UpdateStatus(StatusType.Analyzing);
-                await Task.Run(() =>
-                {
-                    Utility.Search(MatchingDirs, step1, BlackList,
-                        BlackListUseRegex, OfflineSyncConfig.MaxTimeTolerance,
-                        false);
-                    Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
-                });
-                if (Files.Count == 0)
-                {
-                    await this.ShowOkAsync("查找完成", "本地和异地没有差异");
-                }
-                else
-                {
-                    needProcess = true;
-                }
-                UpdateStatus(needProcess ? StatusType.Analyzed : StatusType.Ready);
-            }
-            catch (OperationCanceledException)
-            {
-                UpdateStatus(StatusType.Ready);
-            }
-            catch (Exception ex)
-            {
-                await this.ShowErrorAsync("查找失败",ex);
-                UpdateStatus(StatusType.Ready);
-            }
+
+            return base.OnInitializingAsync();
         }
 
+        protected override Task OnInitializedAsync()
+        {
+            Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
+            return base.OnInitializedAsync();
+        }
     }
 }

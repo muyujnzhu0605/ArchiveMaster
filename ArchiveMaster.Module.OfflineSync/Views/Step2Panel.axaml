@@ -3,210 +3,158 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:ArchiveMaster.Converters"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
+    xmlns:gb="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
-    xmlns:v="clr-namespace:ArchiveMaster.Views"
+    xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:Step2ViewModel"
+    ExecuteButtonContent="3.导出补丁"
+    InitializeButtonContent="2.分析差异"
     mc:Ignorable="d">
-    <v:OfflineSyncPanelBase.Styles>
-        <StyleInclude Source="../Styles.axaml" />
+    <v:TwoStepPanelBase.Styles>
         <Style Selector="TextBox">
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
         </Style>
-    </v:OfflineSyncPanelBase.Styles>
-    <v:OfflineSyncPanelBase.Resources>
+        <Style Selector="ctrl|FormItem">
+            <Setter Property="LabelWidth" Value="96" />
+        </Style>
+    </v:TwoStepPanelBase.Styles>
+
+    <v:TwoStepPanelBase.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="../Resources.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-    </v:OfflineSyncPanelBase.Resources>
-    <v:OfflineSyncPanelBase.PanelContent>
-        <Grid
-            ColumnDefinitions="*,16,2*"
-            RowDefinitions="*,8,Auto">
-            <Grid RowDefinitions="Auto,8,*">
-                <StackPanel
-                    Margin="8"
-                    IsEnabled="{Binding CanEditConfigs}"
-                    Spacing="8">
-                    <Grid
-                        ColumnDefinitions="96,8,*,8,Auto"
-                        RowDefinitions="Auto,8,Auto">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Text="异地快照文件：" />
-                        <TextBox
-                            Grid.Column="2"
-                            MaxLines="3"
-                            Text="{Binding OffsiteSnapshot}"
-                            TextWrapping="Wrap" />
-                        <Button
-                            Grid.Column="4"
-                            Classes="Middle"
-                            Command="{Binding BrowseOffsiteSnapshotCommand}"
-                            Content="浏览.." />
+    </v:TwoStepPanelBase.Resources>
 
-                        <TextBlock
-                            Grid.Row="2"
-                            VerticalAlignment="Center"
-                            Text="本地搜索目录：" />
+    <v:TwoStepPanelBase.ConfigsContent>
+        <Grid ColumnDefinitions="*,8,*">
+            <StackPanel
+                Margin="8"
+                IsEnabled="{Binding CanEditConfigs}"
+                Spacing="8">
+                <ctrl:FormItem Label="异地快照文件：">
+                    <ctrl:FilePickerTextBox
+                        FileNames="{Binding Config.OffsiteSnapshot}"
+                        StringFileTypeFilter="异地快照文件;*.os1;;"
+                        Type="OpenFile" />
+                </ctrl:FormItem>
+
+                <ctrl:FormItem Label="本地搜索目录：">
+                    <Grid ColumnDefinitions="*,8,Auto">
                         <TextBox
-                            Grid.Row="2"
-                            Grid.Column="2"
                             AcceptsReturn="True"
                             MaxLines="3"
-                            Text="{Binding LocalDir}"
+                            Text="{Binding Config.LocalDir}"
                             Watermark="在选择的目录中搜索需要同步的目录；一行一项" />
                         <Button
-                            Grid.Row="2"
-                            Grid.Column="4"
+                            Grid.Column="2"
                             Classes="Middle"
                             Command="{Binding BrowseLocalDirCommand}"
                             Content="添加.." />
+                    </Grid>
+                </ctrl:FormItem>
+                <Button
+                    HorizontalAlignment="Right"
+                    Classes="Primary Long"
+                    Command="{Binding MatchDirsCommand}"
+                    Content="1. 匹配目录" />
+                <ctrl:FormItem Label="导出补丁目录：">
+                    <ctrl:FilePickerTextBox
+                        FileNames="{Binding Config.PatchDir}"
+                        Type="OpenFolder" />
+                </ctrl:FormItem>
+                <ctrl:FormItem Label="黑名单：">
+                    <Grid ColumnDefinitions="*,8,Auto">
 
-                    </Grid>
-                    <Button
-                        HorizontalAlignment="Right"
-                        Classes="Long"
-                        Command="{Binding MatchDirsCommand}"
-                        Content="1. 匹配目录" />
-                </StackPanel>
-                <DataGrid
-                    Grid.Row="2"
-                    AutoGenerateColumns="False"
-                    CanUserReorderColumns="True"
-                    ItemsSource="{Binding MatchingDirs}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Binding="{Binding OffsiteDir}"
-                            Header="异地目录"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding LocalDir}"
-                            Header="本地目录" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-            <Grid
-                Grid.Column="2"
-                RowDefinitions="Auto,8,*">
-                <StackPanel
-                    Margin="8"
-                    IsEnabled="{Binding CanEditConfigs}"
-                    Spacing="8">
-                    <Grid ColumnDefinitions="96,8,*,8,Auto">
-                        <TextBlock
-                            Grid.Row="4"
-                            VerticalAlignment="Center"
-                            Text="导出补丁目录：" />
                         <TextBox
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Text="{Binding PatchDir}" />
-                        <Button
-                            x:Name="btnBrowse"
-                            Grid.Row="4"
-                            Grid.Column="4"
-                            Classes="Middle"
-                            Command="{Binding BrowsePatchDirCommand}"
-                            Content="浏览.." />
-                    </Grid>
-                    <Grid ColumnDefinitions="96,8,*,8,Auto">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Text="黑名单：" />
-                        <TextBox
-                            Grid.Column="2"
                             AcceptsReturn="True"
                             MaxLines="5"
-                            Text="{Binding BlackList}"
+                            Text="{Binding Config.BlackList}"
                             Watermark="可以是文件名，也可以是完整路径；一行一项" />
                         <CheckBox
-                            Grid.Column="4"
+                            Grid.Column="2"
                             Height="{Binding #btnBrowse.Bounds.Height}"
                             VerticalAlignment="Center"
                             Classes="Middle"
                             Content="正则"
-                            IsChecked="{Binding BlackListUseRegex}" />
+                            IsChecked="{Binding Config.BlackListUseRegex}" />
                     </Grid>
-                    <Button
-                        HorizontalAlignment="Right"
-                        Classes="Long"
-                        Command="{Binding SearchChangeCommand}"
-                        Content="2. 查找更改" />
-                </StackPanel>
-                <v:SyncFilesList Grid.Row="2" />
-
-            </Grid>
-            <Grid
-                Grid.Row="99"
-                Grid.ColumnSpan="99"
-                Margin="8"
-                ColumnDefinitions="*,8,*,8,Auto,8,Auto,8,Auto,8,Auto">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Text="{Binding Message}"
-                    TextTrimming="CharacterEllipsis"
-                    ToolTip.Tip="{Binding Message}" />
-                <ProgressBar
-                    Grid.Column="2"
-                    VerticalAlignment="Center"
-                    IsIndeterminate="{Binding ProgressIndeterminate}"
-                    Maximum="{Binding ProgressMax}"
-                    Value="{Binding Progress}" />
-                <TextBlock
-                    Grid.Column="4"
-                    VerticalAlignment="Center"
-                    Text="导出方式：" />
-                <ComboBox
-                    Grid.Column="6"
-                    Width="128"
-                    ItemsSource="{Binding ExportModes}"
-                    SelectedItem="{Binding ExportMode}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                    <ToolTip.Tip>
-                        <TextBlock>
-                            <Run FontWeight="Bold">复制：</Run>
-                            <Run>将文件复制到导出目录中</Run>
-                            <LineBreak />
-                            <Run FontWeight="Bold">硬链接：</Run>
-                            <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
-                            <LineBreak />
-                            <Run FontWeight="Bold">硬链接优先：</Run>
-                            <Run>优先使用硬链接，若失败，则复制</Run>
-                            <LineBreak />
-                            <Run FontWeight="Bold">脚本：</Run>
-                            <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
-                        </TextBlock>
-                    </ToolTip.Tip>
-                </ComboBox>
-                <Button
-                    Grid.Column="8"
-                    Classes="Long"
-                    Command="{Binding StopCommand}"
-                    Content="停止"
-                    IsEnabled="{Binding CanStop}" />
-                <Button
-                    Grid.Column="10"
-                    Classes="Long"
-                    Command="{Binding ExportCommand}"
-                    Content="3. 生成补丁"
-                    IsEnabled="{Binding CanProcess}" />
-            </Grid>
+                </ctrl:FormItem>
+                <ctrl:FormItem Label="导出方式：">
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding ExportModes}"
+                        SelectedItem="{Binding Config.ExportMode}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                        <ToolTip.Tip>
+                            <TextBlock>
+                                <Run FontWeight="Bold">复制：</Run>
+                                <Run>将文件复制到导出目录中</Run>
+                                <LineBreak />
+                                <Run FontWeight="Bold">硬链接：</Run>
+                                <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
+                                <LineBreak />
+                                <Run FontWeight="Bold">硬链接优先：</Run>
+                                <Run>优先使用硬链接，若失败，则复制</Run>
+                                <LineBreak />
+                                <Run FontWeight="Bold">脚本：</Run>
+                                <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
+                            </TextBlock>
+                        </ToolTip.Tip>
+                    </ComboBox>
+                </ctrl:FormItem>
+            </StackPanel>
+            <gb:GroupBox
+                Grid.Column="2"
+                Header="目录匹配">
+                <DataGrid
+                    AutoGenerateColumns="False"
+                    CanUserReorderColumns="True"
+                    ItemsSource="{Binding Config.MatchingDirs}">
+                    <DataGrid.Styles>
+                        <Style Selector="TextBlock">
+                            <Setter Property="Padding" Value="4,2" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                        <Style Selector="TextBox">
+                            <Setter Property="Padding" Value="4,2" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                    </DataGrid.Styles>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="*"
+                            Binding="{Binding OffsiteDir}"
+                            Header="异地目录"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Width="*"
+                            Binding="{Binding LocalDir}"
+                            Header="本地目录" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </gb:GroupBox>
         </Grid>
-    </v:OfflineSyncPanelBase.PanelContent>
+
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <v:SyncFilesList />
+    </v:TwoStepPanelBase.ResultsContent>
+
 </v:OfflineSyncPanelBase>

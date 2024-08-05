@@ -13,14 +13,9 @@ namespace ArchiveMaster.Views
     {
         public Step2Panel()
         {
-            ViewModel = new Step2ViewModel();
-            DataContext = ViewModel;
+            DataContext = new Step2ViewModel();
             InitializeComponent();
         }
-
-        public Step2ViewModel ViewModel { get; }
-
-        
 
     }
 }

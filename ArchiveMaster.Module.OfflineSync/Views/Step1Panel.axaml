@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:OfflineSyncPanelBase
     x:Class="ArchiveMaster.Views.Step1Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -57,4 +57,4 @@
             </StackPanel>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+</v:OfflineSyncPanelBase>

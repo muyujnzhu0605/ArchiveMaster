@@ -10,7 +10,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
 using FzLib.Avalonia.Messages;
 using Mapster;
-using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using ArchiveMaster.Utilities;
 

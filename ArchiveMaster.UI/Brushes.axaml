@@ -51,6 +51,10 @@
                 Background="{DynamicResource Accent2}"
                 Foreground="{DynamicResource Background0}"
                 Text="Accent2" />
+            <TextBlock
+                Background="{DynamicResource Accent3}"
+                Foreground="{DynamicResource Background0}"
+                Text="Accent3" />
 
         </StackPanel>
     </Design.PreviewWith>
@@ -95,5 +99,8 @@
     <SolidColorBrush
         x:Key="Accent2"
         Color="{DynamicResource SystemAccentColorDark2}" />
+    <SolidColorBrush
+        x:Key="Accent3"
+        Color="{DynamicResource SystemAccentColorDark3}" />
 
 </ResourceDictionary>

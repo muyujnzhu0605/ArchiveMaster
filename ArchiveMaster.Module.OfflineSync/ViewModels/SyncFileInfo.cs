@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Enums;
 using FzLib;
-using Newtonsoft.Json;
 
 namespace ArchiveMaster.ViewModels;
 

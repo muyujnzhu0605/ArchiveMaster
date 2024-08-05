@@ -34,6 +34,15 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Width" Value="120" />
         </Style>
+        <Style Selector="Button.Primary">
+            <Setter Property="Background" Value="{DynamicResource Accent1}" />
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource Accent2}" />
+            </Style>
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource Accent3}" />
+            </Style>
+        </Style>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
