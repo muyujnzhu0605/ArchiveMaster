@@ -16,10 +16,10 @@ namespace ArchiveMaster.ViewModels
         {
 
         }
-        public SimpleFileInfo(string path) : base(path)
+        public SimpleFileInfo(FileInfo file) : base(file)
         {
-            Length = FileInfo.Length;
-            Time = FileInfo.LastWriteTime;
+            Length = file.Length;
+            Time = file.LastWriteTime;
         }
 
         [ObservableProperty]

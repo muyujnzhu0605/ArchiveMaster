@@ -12,19 +12,19 @@ namespace ArchiveMaster.ViewModels
         {
 
         }
-        public SimpleDirInfo(string path) : base(path)
+        public SimpleDirInfo(DirectoryInfo dir) : base(dir)
         {
-            var subFiles = Directory.EnumerateFiles(path).ToList();
+            var subFiles = dir.EnumerateFiles().ToList();
             Subs = subFiles.Select(p => new SimpleFileOrDirInfo(p)).ToList();
             FilesCount = subFiles.Count;
             if (FilesCount > 0)
             {
                 EarliestTime = new DateTime(subFiles
-                    .Select(File.GetLastWriteTime)
+                    .Select(p=>p.LastWriteTime)
                     .Select(p => p.Ticks)
                     .Min());
                 LatestTime = new DateTime(subFiles
-                    .Select(File.GetLastWriteTime)
+                    .Select(p=>p.LastWriteTime)
                     .Select(p => p.Ticks)
                     .Max());
             }

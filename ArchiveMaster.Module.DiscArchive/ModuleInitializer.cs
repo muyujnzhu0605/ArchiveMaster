@@ -28,7 +28,7 @@ namespace ArchiveMaster
             Panels =
             {
                 new ToolPanelInfo(typeof(PackingPanel), "打包到光盘", "将文件按照修改时间顺序，根据光盘最大容量制作成若干文件包", baseUrl + "disc.svg"),
-                // new ToolPanelInfo(typeof(EncryptorPanel), "从光盘重建", "从备份的光盘冲提取文件并恢复为原始目录结构", baseUrl + "rebuild.svg"),
+                new ToolPanelInfo(typeof(RebuildPanel), "从光盘重建", "从备份的光盘冲提取文件并恢复为原始目录结构", baseUrl + "rebuild.svg"),
                 //
             },
             GroupName = ModuleName

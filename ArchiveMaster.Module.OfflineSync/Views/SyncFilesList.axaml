@@ -86,7 +86,7 @@
                     Header="修改时间"
                     IsReadOnly="True" />
                 <DataGridTextColumn
-                    Binding="{Binding Length, Converter={StaticResource FileLength2StringConverter}}"
+                    Binding="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}"
                     CanUserResize="False"
                     Header="大小"
                     IsReadOnly="True" />

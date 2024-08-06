@@ -2,7 +2,6 @@
     x:Class="ArchiveMaster.Views.PackingPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:bh="using:ArchiveMaster.Behaviours"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
@@ -159,14 +158,17 @@
                                     <TextBlock
                                         Grid.Column="4"
                                         VerticalAlignment="Center"
-                                        Text="{Binding TotalSize, Converter={StaticResource FileLength2StringConverter}}" />
+                                        Text="{Binding TotalLength, Converter={StaticResource FileLength2StringConverter}}" />
 
                                 </Grid>
 
                                 <TextBlock
+                                    Grid.Row="2"
                                     Width="165"
+                                    HorizontalAlignment="Left"
                                     Text="{Binding EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                                 <TextBlock
+                                    Grid.Row="2"
                                     HorizontalAlignment="Right"
                                     Text="{Binding LatestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                             </Grid>
@@ -206,13 +208,17 @@
 
                         <DataGridTextColumn
                             Binding="{Binding Path}"
-                            Header="文件路径" />
+                            Header="文件路径"
+                            IsReadOnly="True" />
+                        <!--  遇到一个BUG，如果不设置Mode=OneWay，Length这个属性就会被设置为0。目前没有找到这个BUG的报告。  -->
                         <DataGridTextColumn
-                            Binding="{Binding Length, Converter={StaticResource FileLength2StringConverter}}"
-                            Header="文件大小" />
+                            Binding="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}"
+                            Header="文件大小"
+                            IsReadOnly="True" />
                         <DataGridTextColumn
                             Binding="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                            Header="修改时间" />
+                            Header="修改时间"
+                            IsReadOnly="True" />
                     </DataGrid.Columns>
 
                 </DataGrid>

@@ -11,8 +11,7 @@ namespace ArchiveMaster.ViewModels
         private int index;
 
         [ObservableProperty]
-        private List<DiscFile> files;
-
+        private List<DiscFile> files = new List<DiscFile>();
 
         [ObservableProperty]
         private long totalLength;

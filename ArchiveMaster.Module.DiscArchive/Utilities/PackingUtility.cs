@@ -34,7 +34,7 @@ namespace ArchiveMaster.Utilities
                 filesOrderedByTime = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", SearchOption.AllDirectories)
                     .Where(p => p.LastWriteTime > Config.EarliestTime)
-                    .Where(blacks.IsInBlackList)
+                    .Where(p=>!blacks.IsInBlackList(p))
                     .OrderBy(p => p.LastWriteTime).ToList();
 
                 packages.DiscFilePackages.Add(new DiscFilePackage());
@@ -42,13 +42,7 @@ namespace ArchiveMaster.Utilities
                 foreach (var file in filesOrderedByTime)
                 {
                     token.ThrowIfCancellationRequested();
-                    DiscFile discFile = new DiscFile()
-                    {
-                        Name = file.Name,
-                        Path = file.FullName,
-                        Time = file.LastWriteTime,
-                        Length = file.Length
-                    };
+                    DiscFile discFile = new DiscFile(file);
 
                     //文件超过单盘大小
                     if (file.Length > maxSize)

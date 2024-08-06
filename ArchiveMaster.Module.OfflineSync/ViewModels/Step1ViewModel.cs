@@ -20,7 +20,7 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private string selectedSyncDir;
 
-        public override Step1Config Config { get; } = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+        public override Step1Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
 
         private void AddSyncDir(string path)
         {

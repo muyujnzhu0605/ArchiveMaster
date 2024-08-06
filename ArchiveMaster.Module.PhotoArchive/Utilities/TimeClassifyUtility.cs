@@ -9,11 +9,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 namespace ArchiveMaster.Utilities
 {
     public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase
     {
-        public override TimeClassifyConfig Config { get;  } = config;
+        public override TimeClassifyConfig Config { get; } = config;
         public List<SimpleDirInfo> TargetDirs { get; set; }
 
         public override async Task ExecuteAsync(CancellationToken token)
@@ -60,12 +61,12 @@ namespace ArchiveMaster.Utilities
             await Task.Run(() =>
             {
                 NotifyProgressUpdate(0, -1, "正在搜索文件");
-                files = Directory.EnumerateFiles(Config.Dir)
+                files = new DirectoryInfo(Config.Dir).EnumerateFiles()
                     .Select(p => new SimpleFileInfo(p))
                     .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
                     .ToList();
                 token.ThrowIfCancellationRequested();
-                subDirs = Directory.EnumerateDirectories(Config.Dir)
+                subDirs = new DirectoryInfo(Config.Dir).EnumerateDirectories()
                     .Select(p => new SimpleDirInfo(p))
                     .Where(p => p.FilesCount > 0)
                     .OrderBy(p => p.EarliestTime)
@@ -74,6 +75,7 @@ namespace ArchiveMaster.Utilities
                 {
                     throw new Exception("目录为空");
                 }
+
                 token.ThrowIfCancellationRequested();
 
                 NotifyProgressUpdate(0, -1, "正在分配目录");
@@ -94,8 +96,9 @@ namespace ArchiveMaster.Utilities
                             SimpleDirInfo newDir = new SimpleDirInfo();
                             targetDirs.Add(newDir);
                         }
+
                         targetDirs[^1].Subs.Add(file);
-                        time = time < file.Time ? file.Time : time;//存在dir.LatestTime>file.Time的可能
+                        time = time < file.Time ? file.Time : time; //存在dir.LatestTime>file.Time的可能
                         filesIndex++;
                     }
                     else if (file == null || (dir != null && dir.EarliestTime <= file.Time))
@@ -105,6 +108,7 @@ namespace ArchiveMaster.Utilities
                             SimpleDirInfo newDir = new SimpleDirInfo();
                             targetDirs.Add(newDir);
                         }
+
                         targetDirs[^1].Subs.Add(dir);
                         time = dir.LatestTime;
                         dirsIndex++;
@@ -139,6 +143,7 @@ namespace ArchiveMaster.Utilities
                 }).Max();
                 dir.Name = $"{dir.EarliestTime:yyyy-MM-dd HH:mm:ss} ~ {dir.LatestTime:yyyy-MM-dd HH:mm:ss}";
             }
+
             TargetDirs = targetDirs;
         }
     }

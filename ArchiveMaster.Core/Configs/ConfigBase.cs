@@ -25,7 +25,7 @@ namespace ArchiveMaster.Configs
         protected static void CheckDir(string dirPath, string name)
         {
             CheckEmpty(dirPath, name);
-            if (!File.Exists(dirPath))
+            if (!Directory.Exists(dirPath))
             {
                 throw new Exception($"{name}不存在");
             }

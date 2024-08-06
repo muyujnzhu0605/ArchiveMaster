@@ -30,7 +30,7 @@ namespace ArchiveMaster.ViewModels
         private string targetRelativePath;
 
 
-        public EncryptorFileInfo(string path) : base(path)
+        public EncryptorFileInfo(FileInfo file) : base(file)
         {
         }
     }

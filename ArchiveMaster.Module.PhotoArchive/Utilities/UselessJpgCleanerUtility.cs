@@ -40,10 +40,10 @@ namespace ArchiveMaster.Utilities
             return Task.Run(() =>
             {
                 NotifyProgressUpdate(0, -1, "正在搜索JPG文件");
-                var jpgs = Directory
-                    .EnumerateFiles(Config.Dir, "*.jp*g", SearchOption.AllDirectories)
-                    .Where(p => p.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) ||
-                                p.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
+                var jpgs = new DirectoryInfo(Config.Dir)
+                    .EnumerateFiles( "*.jp*g", SearchOption.AllDirectories)
+                    .Where(p => p.Name.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) ||
+                                p.Name.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
                     .ToList();
                 int index = 0;
                 foreach (var jpg in jpgs)
@@ -52,7 +52,7 @@ namespace ArchiveMaster.Utilities
                     index++;
                     NotifyProgressUpdate(jpgs.Count, index, $"正在查找RAW文件（{index}/{jpgs.Count}）");
                     var rawFile =
-                        $"{Path.Combine(Path.GetDirectoryName(jpg), Path.GetFileNameWithoutExtension(jpg))}.{Config.RawExtension}";
+                        $"{Path.Combine(jpg.DirectoryName, Path.GetFileNameWithoutExtension(jpg.Name))}.{Config.RawExtension}";
                     if (File.Exists(rawFile))
                     {
                         DeletingJpgFiles.Add(new SimpleFileInfo(jpg));

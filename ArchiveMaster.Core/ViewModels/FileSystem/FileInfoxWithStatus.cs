@@ -10,6 +10,15 @@ namespace ArchiveMaster.ViewModels;
 [DebuggerDisplay("{Name}")]
 public partial class FileInfoWithStatus : SimpleFileInfo
 {
+    public FileInfoWithStatus():base()
+    {
+        
+    }
+
+    public FileInfoWithStatus(FileInfo file):base(file)
+    {
+        
+    }
     [property: JsonIgnore]
     [ObservableProperty]
     private bool complete;

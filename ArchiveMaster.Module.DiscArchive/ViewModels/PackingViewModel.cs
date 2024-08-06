@@ -16,7 +16,7 @@ using FzLib.Avalonia.Messages;
 
 namespace DiscArchivingTool;
 
-public partial class PackingPanelViewModel : TwoStepViewModelBase<PackingUtility>
+public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
 {
     [ObservableProperty]
     private List<DiscFilePackage> discFilePackages;
@@ -94,6 +94,11 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase<PackingUtility
                 throw new OperationCanceledException();
             }
         }
+    }
+
+    partial void OnSelectedPackageChanged(DiscFilePackage value)
+    {
+        
     }
 
     protected override void OnReset()

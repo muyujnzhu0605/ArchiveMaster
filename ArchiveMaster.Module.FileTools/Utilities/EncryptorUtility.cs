@@ -207,19 +207,19 @@ namespace ArchiveMaster.Utilities
             await Task.Run(() =>
             {
                 NotifyProgressUpdate(0, -1, "正在搜索文件");
-                foreach (var file in Directory.EnumerateFiles(sourceDir, "*", new EnumerationOptions()
+                foreach (var file in new DirectoryInfo(sourceDir).EnumerateFiles( "*", new EnumerationOptions()
                          {
                              IgnoreInaccessible = true,
                              RecurseSubdirectories = true,
                          }))
                 {
                     token.ThrowIfCancellationRequested();
-                    var isEncrypted = IsEncryptedFile(file);
+                    var isEncrypted = IsEncryptedFile(file.FullName);
                     var fileM = new EncryptorFileInfo(file)
                     {
-                        IsFileNameEncrypted = isEncrypted && IsNameEncrypted(Path.GetFileName(file)),
+                        IsFileNameEncrypted = isEncrypted && IsNameEncrypted(file.Name),
                         IsEncrypted = isEncrypted,
-                        RelativePath = Path.GetRelativePath(sourceDir, file)
+                        RelativePath = Path.GetRelativePath(sourceDir, file.FullName)
                     };
                     if (fileM.Name != DirectoryStructureFile)
                     {

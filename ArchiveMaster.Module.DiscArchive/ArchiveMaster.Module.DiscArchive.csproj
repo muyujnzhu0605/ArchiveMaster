@@ -30,16 +30,5 @@
   <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <AvaloniaXaml Remove="Views\RebuildPanel.axaml" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Remove="Views\RebuildPanel.axaml.cs" />
-  </ItemGroup>
+ 
 </Project>

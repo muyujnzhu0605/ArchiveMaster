@@ -11,17 +11,15 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private string path;
 
-        protected FileInfo FileInfo { get;private set; }
         public SimpleFileOrDirInfo()
         {
         }
 
-        public SimpleFileOrDirInfo(string path)
+        public SimpleFileOrDirInfo(FileSystemInfo file)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(path);
-            FileInfo = new FileInfo(path);
-            Name = FileInfo.Name;
-            Path = FileInfo.FullName;
+            ArgumentNullException.ThrowIfNull(file);
+            Name = file.Name;
+            Path = file.FullName;
         }
     }
 }
