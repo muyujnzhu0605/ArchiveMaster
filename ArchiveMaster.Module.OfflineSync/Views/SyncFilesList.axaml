@@ -79,19 +79,6 @@
                     Binding="{Binding ., Converter={StaticResource SyncFilePathConverter}}"
                     Header="文件路径"
                     IsReadOnly="True" />
-                <!-- <DataGridTemplateColumn Header="文件路径" Width="200"> -->
-                <!--     <DataGridTemplateColumn.CellTemplate> -->
-                <!--         <DataTemplate> -->
-                <!--  <TextBlock  -->
-                <!--  HorizontalAlignment="Left"  -->
-                <!--  Margin="8,4"  -->
-                <!--  Text="{Binding ., Converter={StaticResource SyncFilePathConverter}}"  -->
-                <!--  TextWrapping="Wrap"  -->
-                <!--  VerticalAlignment="Center" />  -->
-                <!--    -->
-                <!--         </DataTemplate> -->
-                <!--     </DataGridTemplateColumn.CellTemplate> -->
-                <!-- </DataGridTemplateColumn> -->
 
                 <DataGridTextColumn
                     Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"

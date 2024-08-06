@@ -38,7 +38,7 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility>
 
     public override EncryptorConfig Config { get; } = AppConfig.Instance.Get<EncryptorConfig>();
 
-    protected override async Task OnExecutedAsync()
+    protected override async Task OnExecutedAsync(CancellationToken token)
     {
         if (ProcessingFiles.Any(p => p.Error != null))
         {

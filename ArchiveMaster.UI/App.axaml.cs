@@ -20,6 +20,7 @@ public partial class App : Application
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei"));
         }
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
     public override void OnFrameworkInitializationCompleted()

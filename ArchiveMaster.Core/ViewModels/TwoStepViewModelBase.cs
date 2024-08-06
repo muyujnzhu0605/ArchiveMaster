@@ -61,12 +61,12 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         base.DisposeUtility();
     }
 
-    protected virtual Task OnExecutedAsync()
+    protected virtual Task OnExecutedAsync(CancellationToken token)
     {
         return Task.CompletedTask;
     }
 
-    protected virtual Task OnExecutingAsync()
+    protected virtual Task OnExecutingAsync(CancellationToken token)
     {
         return Task.CompletedTask;
     }
@@ -116,9 +116,9 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
         await TryRunAsync(async () =>
         {
-            await OnExecutingAsync();
+            await OnExecutingAsync(token);
             await t.ExecuteAsync(token);
-            await OnExecutedAsync();
+            await OnExecutedAsync(token);
         }, "执行失败");
 
         CanReset = true;

@@ -80,7 +80,7 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase<PackingUtility
         return base.OnInitializedAsync();
     }
 
-    protected override async Task OnExecutingAsync()
+    protected override async Task OnExecutingAsync(CancellationToken token)
     {
         if (!DiscFilePackages.Any(p => p.IsChecked))
         {

@@ -105,7 +105,7 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        protected override async Task OnExecutingAsync()
+        protected override async Task OnExecutingAsync(CancellationToken token)
         {
             var dirs = Config.SyncDirs.ToHashSet();
             if (dirs.Count == 0)

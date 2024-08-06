@@ -14,93 +14,53 @@ using FzLib.Avalonia.Messages;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel : OfflineSyncViewModelBase<SyncFileInfo>
+    public partial class Step3ViewModel : OfflineSyncViewModelBase<Step3Utility, SyncFileInfo>
     {
-        [ObservableProperty] private DeleteMode deleteMode = DeleteMode.MoveToDeletedFolder;
-
-        [ObservableProperty] private string patchDir;
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
-        protected override ConfigBase Config =>
+        public override Step3Config Config =>
             AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step3;
 
-        protected override Step3Utility Utility { get; } = new Step3Utility();
 
-        [RelayCommand]
-        private async Task AnalyzeAsync()
+        protected override Task OnInitializingAsync()
         {
-            if (string.IsNullOrEmpty(PatchDir))
+            if (string.IsNullOrEmpty(Config.PatchDir))
             {
-                await this.ShowErrorAsync("分析失败", "未设置补丁目录");
-                return;
+                throw new Exception("未设置补丁目录");
             }
 
-            if (!Directory.Exists(PatchDir))
+            if (!Directory.Exists(Config.PatchDir))
             {
-                await this.ShowErrorAsync("分析失败", "补丁目录不存在");
-                return;
+                throw new Exception("补丁目录不存在");
             }
 
-            try
-            {
-                UpdateStatus(StatusType.Analyzing);
-                await Task.Run(() =>
-                {
-                    Utility.Analyze(PatchDir);
-                    Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
-                });
-                UpdateStatus(Files.Count > 0 ? StatusType.Analyzed : StatusType.Ready);
-            }
-            catch (OperationCanceledException)
-            {
-                UpdateStatus(StatusType.Ready);
-            }
-            catch (Exception ex)
-            {
-                await this.ShowErrorAsync("分析失败", ex);
-                UpdateStatus(StatusType.Ready);
-            }
+            return base.OnInitializingAsync();
         }
 
-        [RelayCommand]
-        private async Task UpdateAsync()
+        protected override Task OnInitializedAsync()
         {
-            try
-            {
-                UpdateStatus(StatusType.Processing);
-                await Task.Run(() =>
-                {
-                    Utility.Update(DeleteMode, AppConfig.Instance.Get<OfflineSyncConfig>().DeleteDirName);
-                    Utility.AnalyzeEmptyDirectories();
-                });
+            Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
+            return base.OnInitializedAsync();
+        }
 
-                if (Utility.DeletingDirectories.Count != 0)
+        protected override async Task OnExecutedAsync(CancellationToken token)
+        {
+            Utility.AnalyzeEmptyDirectories(token);
+            if (Utility.DeletingDirectories.Count != 0)
+            {
+                var result = await this.SendMessage(new CommonDialogMessage()
                 {
-                    var result = await this.SendMessage(new CommonDialogMessage()
-                    {
-                        Title = "删除空目录",
-                        Message = $"有{Utility.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
-                        Detail = string.Join(Environment.NewLine,
-                            Utility.DeletingDirectories.Select(p => Path.Combine(p.TopDirectory, p.Path))),
-                        Type = CommonDialogMessage.CommonDialogType.YesNo
-                    }).Task;
-                    if (result.Equals(true))
-                    {
-                        Utility.DeleteEmptyDirectories(DeleteMode,
-                            AppConfig.Instance.Get<OfflineSyncConfig>().DeleteDirName);
-                    }
+                    Title = "删除空目录",
+                    Message = $"有{Utility.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
+                    Detail = string.Join(Environment.NewLine,
+                        Utility.DeletingDirectories.Select(p => Path.Combine(p.TopDirectory, p.Path))),
+                    Type = CommonDialogMessage.CommonDialogType.YesNo
+                }).Task;
+                if (result.Equals(true))
+                {
+                    Utility.DeleteEmptyDirectories(Config.DeleteMode,
+                        AppConfig.Instance.Get<OfflineSyncConfig>().DeleteDirName);
                 }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-                await this.ShowErrorAsync("更新失败", ex);
-            }
-            finally
-            {
-                UpdateStatus(StatusType.Analyzed);
             }
         }
     }

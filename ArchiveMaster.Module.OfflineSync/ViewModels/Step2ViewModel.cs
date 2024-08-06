@@ -77,7 +77,7 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        protected override Task OnExecutingAsync()
+        protected override Task OnExecutingAsync(CancellationToken token)
         {
             if (Files.Count == 0)
             {
@@ -89,10 +89,10 @@ namespace ArchiveMaster.ViewModels
                 throw new Exception("未设置导出补丁目录");
             }
 
-            return base.OnExecutingAsync();
+            return base.OnExecutingAsync(token);
         }
 
-        protected override async Task OnExecutedAsync()
+        protected override async Task OnExecutedAsync(CancellationToken token)
         {
             if ((Utility as Step2Utility).HasError)
             {

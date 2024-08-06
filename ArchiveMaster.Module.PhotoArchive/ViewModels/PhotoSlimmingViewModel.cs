@@ -56,10 +56,10 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     public ObservableCollection<PhotoSlimmingConfig> Configs { get; set; }
 
-    protected override Task OnExecutedAsync()
+    protected override Task OnExecutedAsync(CancellationToken token)
     {
         ErrorMessages = new ObservableCollection<string>(Utility.ErrorMessages);
-        return base.OnExecutedAsync();
+        return base.OnExecutedAsync(token);
     }
 
     protected override Task OnInitializingAsync()

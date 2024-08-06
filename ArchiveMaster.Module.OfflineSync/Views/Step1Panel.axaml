@@ -13,19 +13,19 @@
     x:DataType="vm:Step1ViewModel"
     ExecuteButtonContent="导出"
     mc:Ignorable="d">
-
+    <v:OfflineSyncPanelBase.Styles>
+        <StyleInclude Source="Styles.axaml" />
+    </v:OfflineSyncPanelBase.Styles>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid
             Margin="8"
             RowDefinitions="Auto,8,*,8,Auto">
-
-            <ct:FilePickerTextBox
-                ButtonContent="浏览.."
-                FileNames="{Binding Config.OutputFile}"
-                Label="保存位置："
-                StringFileTypeFilter="异地快照文件;*.os1;;"
-                Type="SaveFile" />
-
+            <ct:FormItem Label="保存位置：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.OutputFile}"
+                    StringFileTypeFilter="异地快照文件;*.os1;;"
+                    Type="SaveFile" />
+            </ct:FormItem>
             <ListBox
                 x:Name="lvwSelectedDirs"
                 Grid.Row="2"

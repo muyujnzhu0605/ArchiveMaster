@@ -19,23 +19,9 @@
     ExecuteButtonContent="3.导出补丁"
     InitializeButtonContent="2.分析差异"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Styles>
-        <Style Selector="TextBox">
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-        </Style>
-        <Style Selector="ctrl|FormItem">
-            <Setter Property="LabelWidth" Value="96" />
-        </Style>
-    </v:TwoStepPanelBase.Styles>
-
-    <v:TwoStepPanelBase.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="../Resources.axaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </v:TwoStepPanelBase.Resources>
-
+    <v:OfflineSyncPanelBase.Styles>
+        <StyleInclude Source="Styles.axaml" />
+    </v:OfflineSyncPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <Grid ColumnDefinitions="*,8,*">
             <StackPanel
@@ -92,7 +78,6 @@
                 </ctrl:FormItem>
                 <ctrl:FormItem Label="导出方式：">
                     <ComboBox
-                        HorizontalAlignment="Stretch"
                         ItemsSource="{Binding ExportModes}"
                         SelectedItem="{Binding Config.ExportMode}">
                         <ComboBox.ItemTemplate>
@@ -119,6 +104,7 @@
                         </ToolTip.Tip>
                     </ComboBox>
                 </ctrl:FormItem>
+
             </StackPanel>
             <gb:GroupBox
                 Grid.Column="2"
@@ -127,16 +113,6 @@
                     AutoGenerateColumns="False"
                     CanUserReorderColumns="True"
                     ItemsSource="{Binding Config.MatchingDirs}">
-                    <DataGrid.Styles>
-                        <Style Selector="TextBlock">
-                            <Setter Property="Padding" Value="4,2" />
-                            <Setter Property="TextWrapping" Value="Wrap" />
-                        </Style>
-                        <Style Selector="TextBox">
-                            <Setter Property="Padding" Value="4,2" />
-                            <Setter Property="TextWrapping" Value="Wrap" />
-                        </Style>
-                    </DataGrid.Styles>
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Width="*"
