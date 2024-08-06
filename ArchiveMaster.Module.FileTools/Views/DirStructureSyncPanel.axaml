@@ -10,6 +10,7 @@
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:DirStructureSyncViewModel"
@@ -198,7 +199,7 @@
                                 <CheckBox
                                     Margin="8,0"
                                     IsChecked="{Binding IsChecked}"
-                                    IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
+                                    IsEnabled="{Binding #root.DataContext.CanExecute}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -21,27 +21,16 @@ namespace ArchiveMaster.ViewModels
         where TUtility : TwoStepUtilityBase
         where TFile : FileInfoWithStatus
     {
-        public OfflineSyncViewModelBase():base()
+        public OfflineSyncViewModelBase() : base()
         {
-            
         }
-        public OfflineSyncViewModelBase(bool enableInitialize):base(enableInitialize)
+
+        public OfflineSyncViewModelBase(bool enableInitialize) : base(enableInitialize)
         {
-            
         }
-        [ObservableProperty]
-        private bool canAnalyze = true;
 
-        [ObservableProperty]
-        private bool canEditConfigs = true;
-
-        [ObservableProperty]
-        private bool canProcess = false;
-
-        [ObservableProperty]
-        private bool canStop = false;
-
-        [ObservableProperty] [NotifyPropertyChangedFor(nameof(Config))]
+        [ObservableProperty] 
+        [NotifyPropertyChangedFor(nameof(Config))]
         private string configName = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName;
 
         [ObservableProperty]
@@ -57,7 +46,7 @@ namespace ArchiveMaster.ViewModels
             nameof(MovedFileCount),
             nameof(CheckedFileCount))]
         private ObservableCollection<TFile> files = new ObservableCollection<TFile>();
-        
+
         public long AddedFileCount => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Count() ?? 0;
 
@@ -116,11 +105,13 @@ namespace ArchiveMaster.ViewModels
                 {
                     return;
                 }
+
                 this.Notify(nameof(CheckedFileCount));
                 if (s is not SyncFileInfo syncFile)
                 {
                     return;
                 }
+
                 switch (syncFile.UpdateType)
                 {
                     case FileUpdateType.Add:
@@ -148,20 +139,12 @@ namespace ArchiveMaster.ViewModels
 
         partial void OnConfigNameChanged(string oldValue, string newValue)
         {
-            if (!string.IsNullOrEmpty(oldValue))
-            {
-                this.Adapt(Config, GetType(), Config.GetType());
-            }
-
             if (AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName != newValue)
             {
                 AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName = newValue;
             }
 
-            if (!string.IsNullOrEmpty(newValue))
-            {
-                Config.Adapt(this, Config.GetType(), GetType());
-            }
+            ResetCommand.Execute(null);
         }
 
         partial void OnFilesChanged(ObservableCollection<TFile> value)
@@ -169,7 +152,7 @@ namespace ArchiveMaster.ViewModels
             value.ForEach(p => AddFileCheckedNotify(p));
             value.CollectionChanged += (s, e) => throw new NotSupportedException("不允许对集合进行修改");
         }
-        
+
         [RelayCommand]
         private void RemoveConfig()
         {

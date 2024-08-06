@@ -34,5 +34,11 @@ namespace ArchiveMaster.Configs
         {
             MatchingDirs = null;
         }
+
+        public override void Check()
+        {
+            CheckFile(OffsiteSnapshot,"异地快照文件");
+            CheckEmpty(LocalDir,"本地目录");
+        }
     }
 }

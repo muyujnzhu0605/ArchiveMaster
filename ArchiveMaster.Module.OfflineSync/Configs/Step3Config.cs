@@ -13,5 +13,14 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string patchDir;
+
+        public override void Check()
+        {
+            CheckDir(PatchDir,"补丁目录");
+            if (DeleteMode == DeleteMode.MoveToDeletedFolder)
+            {
+                CheckEmpty(DeleteDir,"回收站目录名");
+            }
+        }
     }
 }

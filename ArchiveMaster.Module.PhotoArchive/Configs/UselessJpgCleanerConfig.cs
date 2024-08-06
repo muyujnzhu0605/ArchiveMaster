@@ -9,5 +9,11 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string rawExtension = "DNG";
+        
+        public override void Check()
+        {
+            CheckDir(Dir,"目录");
+            CheckEmpty(RawExtension,"RAW后缀名");
+        }
     }
 }

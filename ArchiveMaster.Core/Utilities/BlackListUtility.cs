@@ -14,8 +14,7 @@ public class BlackListUtility
     {
         this.blackList = blackList;
         this.blackListUseRegex = blackListUseRegex;
-        blackStrings = blackList?.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries) ??
-                       Array.Empty<string>();
+        blackStrings = blackList?.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries) ?? [];
         blackRegexs = null;
         if (!blackListUseRegex)
         {

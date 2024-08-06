@@ -10,5 +10,10 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private TimeSpan minTimeInterval = TimeSpan.FromMinutes(60);
+        
+        public override void Check()
+        {
+            CheckDir(Dir,"目录");
+        }
     }
 }

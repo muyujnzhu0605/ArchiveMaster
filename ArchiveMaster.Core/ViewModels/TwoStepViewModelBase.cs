@@ -57,6 +57,10 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
     protected override void DisposeUtility()
     {
+        if (Utility == null)
+        {
+            return;
+        }
         Utility.ProgressUpdate -= Utility_ProgressUpdate;
         base.DisposeUtility();
     }
@@ -117,6 +121,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         await TryRunAsync(async () =>
         {
             await OnExecutingAsync(token);
+            Config.Check();
             await t.ExecuteAsync(token);
             await OnExecutedAsync(token);
         }, "执行失败");
@@ -135,8 +140,9 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
         if (await TryRunAsync(async () =>
             {
-                await OnInitializingAsync();
                 var u = CreateUtility<TUtility>();
+                await OnInitializingAsync();
+                Config.Check();
                 await u.InitializeAsync();
                 await OnInitializedAsync();
             }, "初始化失败"))

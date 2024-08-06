@@ -26,7 +26,6 @@
         <Grid ColumnDefinitions="*,8,*">
             <StackPanel
                 Margin="8"
-                IsEnabled="{Binding CanEditConfigs}"
                 Spacing="8">
                 <ctrl:FormItem Label="异地快照文件：">
                     <ctrl:FilePickerTextBox

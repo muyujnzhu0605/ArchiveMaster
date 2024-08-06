@@ -64,11 +64,6 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility>
 
     protected override Task OnInitializingAsync()
     {
-        if (string.IsNullOrEmpty(Config.Password))
-        {
-            throw new ArgumentException("密码为空");
-        }
-
         Config.Type = IsEncrypting
             ? EncryptorConfig.EncryptorTaskType.Encrypt
             : EncryptorConfig.EncryptorTaskType.Decrypt;

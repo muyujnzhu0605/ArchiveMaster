@@ -28,7 +28,7 @@ namespace ArchiveMaster.ViewModels
 
             if (!newDirInfo.Exists)
             {
-                throw new FileNotFoundException("指定的目录不存在");
+                throw new DirectoryNotFoundException("指定的目录不存在");
             }
 
             if (Config.SyncDirs == null)
@@ -110,12 +110,7 @@ namespace ArchiveMaster.ViewModels
             var dirs = Config.SyncDirs.ToHashSet();
             if (dirs.Count == 0)
             {
-                await this.SendMessage(new CommonDialogMessage()
-                {
-                    Type = CommonDialogMessage.CommonDialogType.Error,
-                    Title = "目录为空",
-                    Message = "不存在任何目录"
-                }).Task;
+                await this.ShowErrorAsync("目录为空", "未选择任何目录");
                 return;
             }
 

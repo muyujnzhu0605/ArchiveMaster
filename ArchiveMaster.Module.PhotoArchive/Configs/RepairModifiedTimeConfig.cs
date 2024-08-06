@@ -13,5 +13,10 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private TimeSpan maxDurationTolerance = TimeSpan.FromSeconds(1);
+
+        public override void Check()
+        {
+            CheckDir(Dir,"目录");
+        }
     }
 }

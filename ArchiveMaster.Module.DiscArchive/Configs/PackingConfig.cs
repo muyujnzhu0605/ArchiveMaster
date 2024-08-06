@@ -28,4 +28,19 @@ public partial class PackingConfig : ConfigBase
 
     [ObservableProperty]
     private int maxDiscCount = 10000;
+
+    public override void Check()
+    {
+        CheckDir(SourceDir,"源目录");
+        CheckEmpty(TargetDir,"目标目录");
+        if (DiscSizeMB < 100)
+        {
+            throw new Exception("单盘容量过小");
+        }
+
+        if (MaxDiscCount < 1)
+        {
+            throw new Exception("盘片数量应大于等于1盘");
+        }
+    }
 }

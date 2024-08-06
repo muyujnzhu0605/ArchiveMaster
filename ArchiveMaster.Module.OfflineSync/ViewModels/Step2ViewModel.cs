@@ -84,17 +84,12 @@ namespace ArchiveMaster.ViewModels
                 throw new Exception("本地和异地没有差异");
             }
 
-            if (string.IsNullOrWhiteSpace(Config.PatchDir))
-            {
-                throw new Exception("未设置导出补丁目录");
-            }
-
             return base.OnExecutingAsync(token);
         }
 
         protected override async Task OnExecutedAsync(CancellationToken token)
         {
-            if ((Utility as Step2Utility).HasError)
+            if (Utility.HasError)
             {
                 await this.ShowErrorAsync("导出失败", "导出完成，但部分文件出现错误");
             }
@@ -105,22 +100,9 @@ namespace ArchiveMaster.ViewModels
         {
             try
             {
-                if (string.IsNullOrEmpty(Config.OffsiteSnapshot))
-                {
-                    throw new Exception("未设置快照文件");
-                }
+               Config.Check();
 
-                if (!File.Exists(Config.OffsiteSnapshot))
-                {
-                    throw new Exception("快照文件不存在");
-                }
-
-                if (string.IsNullOrEmpty(Config.LocalDir))
-                {
-                    throw new Exception("未设置本地目录");
-                }
-
-                string[] localSearchingDirs = Config.LocalDir.Split(new char[] { '|', '\r', '\n' },
+                string[] localSearchingDirs = Config.LocalDir.Split(new[] { '|', '\r', '\n' },
                     StringSplitOptions.RemoveEmptyEntries);
                 Config.MatchingDirs =
                     new ObservableCollection<LocalAndOffsiteDir>(await Step2Utility

@@ -21,22 +21,6 @@ namespace ArchiveMaster.ViewModels
         public override Step3Config Config =>
             AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step3;
 
-
-        protected override Task OnInitializingAsync()
-        {
-            if (string.IsNullOrEmpty(Config.PatchDir))
-            {
-                throw new Exception("未设置补丁目录");
-            }
-
-            if (!Directory.Exists(Config.PatchDir))
-            {
-                throw new Exception("补丁目录不存在");
-            }
-
-            return base.OnInitializingAsync();
-        }
-
         protected override Task OnInitializedAsync()
         {
             Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);

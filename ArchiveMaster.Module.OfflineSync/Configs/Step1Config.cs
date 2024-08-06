@@ -10,5 +10,14 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private ObservableCollection<string> syncDirs;
+
+        public override void Check()
+        {
+            CheckEmpty(OutputFile,"快照文件");
+            foreach (var dir in SyncDirs)
+            {
+                CheckDir(dir,$"目录{dir}");
+            }
+        }
     }
 }

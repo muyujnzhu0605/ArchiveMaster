@@ -40,31 +40,6 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase<DirStructu
         UpdateList();
     }
 
-    protected override Task OnInitializingAsync()
-    {
-        if (string.IsNullOrEmpty(Config.TemplateDir))
-        {
-            throw new Exception("模板目录为空");
-        }
-
-        if (!Directory.Exists(Config.TemplateDir))
-        {
-            throw new Exception("模板目录不存在");
-        }
-
-        if (string.IsNullOrEmpty(Config.SourceDir))
-        {
-            throw new Exception("源目录为空");
-        }
-
-        if (!Directory.Exists(Config.SourceDir))
-        {
-            throw new Exception("源目录不存在");
-        }
-
-        return base.OnInitializingAsync();
-    }
-
 
     protected override Task OnInitializedAsync()
     {

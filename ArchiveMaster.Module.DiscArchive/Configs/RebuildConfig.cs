@@ -18,4 +18,11 @@ public partial class RebuildConfig:ConfigBase
 
     [ObservableProperty]
     private bool checkOnly;
+    
+    
+    public override void Check()
+    {
+        CheckDir(DiscDirs,"光盘目录");
+        CheckEmpty(TargetDir,"目标目录");
+    }
 }

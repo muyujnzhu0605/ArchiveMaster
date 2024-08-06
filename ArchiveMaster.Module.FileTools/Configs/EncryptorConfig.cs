@@ -47,5 +47,12 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private EncryptorTaskType type = EncryptorTaskType.Encrypt;
+
+        public override void Check()
+        {
+            CheckDir(EncryptedDir,"加密目录");
+            CheckDir(RawDir,"原始目录");
+            CheckEmpty(Password,"密码");
+        }
     }
 }

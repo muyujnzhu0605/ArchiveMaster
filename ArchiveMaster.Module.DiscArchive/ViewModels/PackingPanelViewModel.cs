@@ -39,31 +39,6 @@ public partial class PackingPanelViewModel : TwoStepViewModelBase<PackingUtility
 
     public override PackingConfig Config { get; } = AppConfig.Instance.Get<PackingConfig>();
 
-    protected override Task OnInitializingAsync()
-    {
-        if (string.IsNullOrWhiteSpace(Config.SourceDir))
-        {
-            throw new Exception("源目录为空");
-        }
-
-        if (!Directory.Exists(Config.SourceDir))
-        {
-            throw new Exception("源目录不存在");
-        }
-
-        if (Config.DiscSizeMB < 100)
-        {
-            throw new Exception("单盘容量过小");
-        }
-
-        if (Config.MaxDiscCount < 1)
-        {
-            throw new Exception("盘片数量应大于等于1盘");
-        }
-
-        return base.OnInitializingAsync();
-    }
-
     protected override Task OnInitializedAsync()
     {
         var pkgs = Utility.Packages.DiscFilePackages;

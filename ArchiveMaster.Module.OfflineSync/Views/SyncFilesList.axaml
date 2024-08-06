@@ -49,7 +49,7 @@
                             <CheckBox
                                 Margin="8,0"
                                 IsChecked="{Binding IsChecked}"
-                                IsEnabled="{Binding DataContext.CanEditConfigs, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
+                                IsEnabled="{Binding #root.DataContext.CanExecute}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -168,16 +168,14 @@
                 HorizontalAlignment="Stretch"
                 Classes="Middle"
                 Command="{Binding SelectAllCommand}"
-                Content="全选"
-                IsEnabled="{Binding CanEditConfigs}" />
+                Content="全选" />
 
             <Button
                 Grid.Column="4"
                 HorizontalAlignment="Stretch"
                 Classes="Middle"
                 Command="{Binding SelectNoneCommand}"
-                Content="全不选"
-                IsEnabled="{Binding CanEditConfigs}" />
+                Content="全不选" />
         </Grid>
     </Grid>
 </UserControl>

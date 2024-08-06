@@ -34,6 +34,13 @@ public partial class DirStructureSyncConfig : ConfigBase
     [ObservableProperty]
     private bool copy;
     
+    public override void Check()
+    {
+        CheckDir(SourceDir,"源目录");
+        CheckDir(SourceDir,"模板目录");
+        CheckEmpty(SourceDir,"目标目录");
+    }
+    
     partial void OnSourceDirChanged(string oldValue, string newValue)
     {
         if (string.IsNullOrWhiteSpace(TargetDir) || oldValue == TargetDir)
