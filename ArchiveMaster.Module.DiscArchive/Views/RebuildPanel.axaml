@@ -48,7 +48,10 @@
                         Value="{Binding Config.MaxTimeToleranceSecond}" />
                     <CheckBox
                         Content="跳过已存在的文件"
-                        IsChecked="{Binding SkipIfExisted}" />
+                        IsChecked="{Binding Config.SkipIfExisted}" />
+                    <CheckBox
+                        Content="仅验证文件完整性，不重建文件"
+                        IsChecked="{Binding Config.CheckOnly}" />
                 </StackPanel>
             </ctrl:FormItem>
         </StackPanel>

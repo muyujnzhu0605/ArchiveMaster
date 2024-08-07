@@ -76,7 +76,7 @@ namespace ArchiveMaster.Utilities
                             var distFileDir = Path.GetDirectoryName(distPath);
                             var name = Path.GetFileName(file.Path);
                             NotifyProgressUpdate(totalLength, length, $"正在重建 {file.Path}");
-                            if (!Directory.Exists(distFileDir))
+                            if (!Directory.Exists(distFileDir) && !Config.CheckOnly)
                             {
                                 Directory.CreateDirectory(distFileDir);
                             }
@@ -87,14 +87,7 @@ namespace ArchiveMaster.Utilities
                             }
 
                             string md5;
-                            if (Config.CheckOnly)
-                            {
-                                md5 = GetMD5(srcPath);
-                            }
-                            else
-                            {      
-                                md5 = CopyAndGetHash(srcPath, distPath);
-                            }
+                            md5 = Config.CheckOnly ? GetMD5(srcPath) : CopyAndGetHash(srcPath, distPath);
 
                             if (md5 != file.Md5)
                             {

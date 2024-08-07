@@ -11,6 +11,7 @@ using FzLib.Avalonia.Messages;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,6 +54,29 @@ namespace ArchiveMaster
                     {
                         var folder = folders[0].TryGetLocalPath();
                         await TestUtility.CreateSyncTestFilesAsync(folder);
+                    }
+                })),
+                new ModuleMenuItemInfo("自动化测试", new AsyncRelayCommand(async () =>
+                {
+                    try
+                    {
+                        await TestUtility.TestAllAsync();
+
+                        await WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
+                        {
+                            Type = CommonDialogMessage.CommonDialogType.Ok,
+                            Title = "自动化测试",
+                            Message = "通过测试",
+                        }).Task;
+                    }
+                    catch (Exception ex)
+                    {
+                        await WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
+                        {
+                            Type = CommonDialogMessage.CommonDialogType.Error,
+                            Title = "测试未通过",
+                            Exception = ex
+                        }).Task;
                     }
                 }))
             }

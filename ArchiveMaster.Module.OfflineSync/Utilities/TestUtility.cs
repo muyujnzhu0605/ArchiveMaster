@@ -3,11 +3,14 @@ using ArchiveMaster.Models;
 using FzLib.IO;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Configs;
+using ArchiveMaster.Model;
 
 namespace ArchiveMaster.Utilities
 {
@@ -16,100 +19,126 @@ namespace ArchiveMaster.Utilities
         private const int Count = 2;
         private const int CostTimeCount = 0;
 
-        // public static async Task TestAll()
-        // {
-        //     string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        //     string localDir = Path.Combine(dir, "local");
-        //     string remoteDir = Path.Combine(dir, "remote");
-        //     Debug.WriteLine(dir);
-        //     await CreateSyncTestFilesAsync(dir);
-        //     await Task.Run(() =>
-        //     {
-        //         try
-        //         {
-        //             Step1Utility u1 = new Step1Utility();
-        //             string[] syncDirs = new[]
-        //             {
-        //                 Path.Combine(remoteDir,"syncDir1"),
-        //                 Path.Combine(remoteDir,"folder","syncDir2"),
-        //             };
-        //             string step1JSON = Path.GetRandomFileName();
-        //             u1.Enumerate(syncDirs, step1JSON);
-        //
-        //             Step1Model s1m = Step1Utility.ReadStep1Model(step1JSON);
-        //
-        //             string[] searchingDirs = new string[]
-        //             {
-        //                 localDir,
-        //                 Path.Combine(localDir,"folder"),
-        //             };
-        //             var match = Step2Utility.MatchLocalAndOffsiteDirs(s1m, searchingDirs);
-        //             Step2Utility u2 = new Step2Utility();
-        //             u2.Search(match, s1m, $"黑名单文件.+{Environment.NewLine}黑名单目录/", true, 2, false);
-        //             Debug.Assert(u2.UpdateFiles != null);
-        //             Debug.Assert(u2.UpdateFiles.Count == Count * 8);
-        //             Debug.Assert(!u2.UpdateFiles.Any(p => p.Name.Contains('黑')));
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("新建")).All(p => p.UpdateType == FileUpdateType.Add));
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("新建")).Count() == Count * 2);
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("删除")).All(p => p.UpdateType == FileUpdateType.Delete));
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("删除")).Count() == Count * 2);
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("移动")).All(p => p.UpdateType == FileUpdateType.Move));
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("移动")).Count() == Count * 2);
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("修改")).All(p => p.UpdateType == FileUpdateType.Modify));
-        //             Debug.Assert(u2.UpdateFiles.Where(p => p.Name.Contains("修改")).Count() == Count * 2);
-        //
-        //             string patchDir = Path.Combine(dir, "patch");
-        //             u2.Export(patchDir, ExportMode.Copy);
-        //
-        //             Step3Utility u3 = new Step3Utility();
-        //             u3.Analyze(patchDir);
-        //             u3.Update(DeleteMode.Delete, null);
-        //             u3.AnalyzeEmptyDirectories();
-        //             u3.DeleteEmptyDirectories(DeleteMode.Delete, null);
-        //
-        //             var localFiles = Directory.EnumerateFiles(localDir, "*", SearchOption.AllDirectories)
-        //                 .Select(p => Path.GetRelativePath(localDir, p))
-        //                 .Where(p => !p.Contains("黑"))
-        //                 .OrderBy(p => p)
-        //                 .ToList();
-        //             var remoteFiles = Directory.EnumerateFiles(remoteDir, "*", SearchOption.AllDirectories)
-        //                 .Select(p => Path.GetRelativePath(remoteDir, p))
-        //                 .Where(p => !p.Contains("黑"))
-        //                 .OrderBy(p => p)
-        //                 .ToList();
-        //
-        //             Debug.Assert(localFiles.SequenceEqual(remoteFiles));
-        //
-        //             localFiles = Directory.EnumerateFiles(localDir, "*", SearchOption.AllDirectories)
-        //                .Select(p => Path.GetRelativePath(localDir, p))
-        //                .Where(p => p.Contains("黑"))
-        //                .OrderBy(p => p)
-        //                .ToList();
-        //             remoteFiles = Directory.EnumerateFiles(remoteDir, "*", SearchOption.AllDirectories)
-        //                .Select(p => Path.GetRelativePath(remoteDir, p))
-        //                .Where(p => p.Contains("黑"))
-        //                .OrderBy(p => p)
-        //                .ToList();
-        //
-        //             Debug.Assert(localFiles.Count == remoteFiles.Count);
-        //
-        //             var localDirs = Directory.EnumerateDirectories(localDir, "*", SearchOption.AllDirectories)
-        //                 .Select(p => Path.GetRelativePath(localDir, p))
-        //                 .OrderBy(p => p)
-        //                 .ToList();
-        //             var remoteDirs = Directory.EnumerateDirectories(remoteDir, "*", SearchOption.AllDirectories)
-        //                 .Select(p => Path.GetRelativePath(remoteDir, p))
-        //                 .OrderBy(p => p)
-        //                 .ToList();
-        //
-        //             Debug.Assert(localDirs.SequenceEqual(remoteDirs));
-        //         }
-        //         finally
-        //         {
-        //             Directory.Delete(dir, true);
-        //         }
-        //     });
-        // }
+        public static async Task TestAllAsync()
+        {
+            string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            string localDir = Path.Combine(dir, "local");
+            string remoteDir = Path.Combine(dir, "remote");
+            Debug.WriteLine(dir);
+            await CreateSyncTestFilesAsync(dir);
+
+            try
+            {
+                ObservableCollection<string> syncDirs = new ObservableCollection<string>
+                {
+                    Path.Combine(remoteDir, "syncDir1"),
+                    Path.Combine(remoteDir, "folder", "syncDir2"),
+                };
+                Step1Config c1 = new Step1Config()
+                {
+                    SyncDirs = syncDirs,
+                    OutputFile = Path.GetTempFileName()
+                };
+                Step1Utility u1 = new Step1Utility(c1);
+                await u1.ExecuteAsync();
+
+                string[] searchingDirs =
+                [
+                    localDir,
+                    Path.Combine(localDir, "folder")
+                ];
+                Step2Config c2 = new Step2Config()
+                {
+                    OffsiteSnapshot = c1.OutputFile,
+                    PatchDir = Path.Combine(dir, "patch"),
+                    ExportMode = ExportMode.Copy,
+                    BlackList = $"黑名单文件.+{Environment.NewLine}黑名单目录/{Environment.NewLine}Thumb\\.db",
+                    BlackListUseRegex = true,
+                };
+                var match = await Step2Utility.MatchLocalAndOffsiteDirsAsync(c2.OffsiteSnapshot, searchingDirs);
+                c2.MatchingDirs = new ObservableCollection<LocalAndOffsiteDir>(match);
+                Step2Utility u2 = new Step2Utility(c2);
+                await u2.InitializeAsync();
+
+                Check(u2.UpdateFiles != null);
+                Check(u2.UpdateFiles.Count == Count * 8);
+                Check(!u2.UpdateFiles.Any(p => p.Name.Contains('黑')));
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("新建"))
+                    .All(p => p.UpdateType == FileUpdateType.Add));
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("新建")).Count() == Count * 2);
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("删除"))
+                    .All(p => p.UpdateType == FileUpdateType.Delete));
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("删除")).Count() == Count * 2);
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("移动"))
+                    .All(p => p.UpdateType == FileUpdateType.Move));
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("移动")).Count() == Count * 2);
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("修改"))
+                    .All(p => p.UpdateType == FileUpdateType.Modify));
+                Check(u2.UpdateFiles.Where(p => p.Name.Contains("修改")).Count() == Count * 2);
+
+                await u2.ExecuteAsync();
+
+                Step3Config c3 = new Step3Config()
+                {
+                    PatchDir = c2.PatchDir,
+                    DeleteMode = DeleteMode.MoveToDeletedFolder,
+                };
+                Step3Utility u3 = new Step3Utility(c3);
+                await u3.InitializeAsync();
+                await u3.ExecuteAsync();
+                u3.AnalyzeEmptyDirectories(CancellationToken.None);
+                u3.DeleteEmptyDirectories(DeleteMode.Delete, null);
+
+                var localFiles = Directory.EnumerateFiles(localDir, "*", SearchOption.AllDirectories)
+                    .Select(p => Path.GetRelativePath(localDir, p))
+                    .Where(p => !p.Contains("黑"))
+                    .OrderBy(p => p)
+                    .ToList();
+                var remoteFiles = Directory.EnumerateFiles(remoteDir, "*", SearchOption.AllDirectories)
+                    .Select(p => Path.GetRelativePath(remoteDir, p))
+                    .Where(p => !p.Contains("黑"))
+                    .OrderBy(p => p)
+                    .ToList();
+
+                Check(localFiles.SequenceEqual(remoteFiles));
+
+                localFiles = Directory.EnumerateFiles(localDir, "*", SearchOption.AllDirectories)
+                    .Select(p => Path.GetRelativePath(localDir, p))
+                    .Where(p => p.Contains("黑"))
+                    .OrderBy(p => p)
+                    .ToList();
+                remoteFiles = Directory.EnumerateFiles(remoteDir, "*", SearchOption.AllDirectories)
+                    .Select(p => Path.GetRelativePath(remoteDir, p))
+                    .Where(p => p.Contains("黑"))
+                    .OrderBy(p => p)
+                    .ToList();
+
+                Check(localFiles.Count == remoteFiles.Count);
+
+                var localDirs = Directory.EnumerateDirectories(localDir, "*", SearchOption.AllDirectories)
+                    .Select(p => Path.GetRelativePath(localDir, p))
+                    .OrderBy(p => p)
+                    .ToList();
+                var remoteDirs = Directory.EnumerateDirectories(remoteDir, "*", SearchOption.AllDirectories)
+                    .Select(p => Path.GetRelativePath(remoteDir, p))
+                    .OrderBy(p => p)
+                    .ToList();
+
+                Check(localDirs.SequenceEqual(remoteDirs));
+            }
+            finally
+            {
+                Directory.Delete(dir, true);
+            }
+        }
+
+        private static void Check(bool b)
+        {
+            if (!b)
+            {
+                throw new Exception();
+            }
+        }
 
         public static Task CreateSyncTestFilesAsync(string dir)
         {
@@ -121,13 +150,15 @@ namespace ArchiveMaster.Utilities
                 {
                     root.Delete(true);
                 }
+
                 root.Create();
 
                 var local = root.CreateSubdirectory("local");
                 var remote = root.CreateSubdirectory("remote");
 
                 CreateTestFiles(local.CreateSubdirectory("syncDir1"), remote.CreateSubdirectory("syncDir1"));
-                CreateTestFiles(local.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"), remote.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"));
+                CreateTestFiles(local.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"),
+                    remote.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"));
             });
         }
 
@@ -205,6 +236,7 @@ namespace ArchiveMaster.Utilities
                 CreateRandomFile(fileName);
                 File.SetLastWriteTime(fileName, now.AddDays(-1));
             }
+
             remoteDir.CreateSubdirectory("空目录1");
             localDir.CreateSubdirectory("空目录1");
             var emptyDir2 = remoteDir.CreateSubdirectory("空目录2");
