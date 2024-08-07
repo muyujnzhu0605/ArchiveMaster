@@ -14,6 +14,7 @@
     MinHeight="400"
     Background="{DynamicResource Background2}"
     Icon="/Assets/icon_light.ico"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <views:MainView />
 </Window>

@@ -14,7 +14,9 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.Styles>
-        <Style Selector="ctrl|FormItem" />
+        <Style Selector="ctrl|FormItem">
+            <Setter Property="LabelWidth" Value="96" />
+        </Style>
     </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <StackPanel
@@ -22,7 +24,9 @@
             Spacing="8">
             <ctrl:FormItem Label="光盘目录：">
                 <ctrl:FilePickerTextBox
+                    AllowMultiple="True"
                     FileNames="{Binding Config.DiscDirs}"
+                    MultipleFilesSeparator="|"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="重建目录：">
@@ -31,9 +35,21 @@
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
-                <CheckBox
-                    Content="跳过已存在的文件"
-                    IsChecked="{Binding SkipIfExisted}" />
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <TextBlock Text="最大可接受修改时间差异（秒）：" />
+                    <NumericUpDown
+                        Width="180"
+                        FormatString="0.00"
+                        Increment="1"
+                        Maximum="3600"
+                        Minimum="0"
+                        Value="{Binding Config.MaxTimeToleranceSecond}" />
+                    <CheckBox
+                        Content="跳过已存在的文件"
+                        IsChecked="{Binding SkipIfExisted}" />
+                </StackPanel>
             </ctrl:FormItem>
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
@@ -56,83 +72,37 @@
                         <TreeDataTemplate ItemsSource="{Binding All}">
                             <TextBlock
                                 x:Name="txtTreeItem"
-                                FontWeight="Bold"
-                                Text="{Binding Name}">
+                                FontWeight="Bold">
+                                <Run Text="{Binding Name}" />
 
                                 <Interaction.Behaviors>
                                     <DataTriggerBehavior
                                         Binding="{Binding IsFile}"
                                         Value="true">
                                         <ChangePropertyAction
-                                            PropertyName="Text"
+                                            PropertyName="FontWeight"
+                                            TargetObject="txtTreeItem"
+                                            Value="Normal" />
+                                        <ChangePropertyAction
+                                            PropertyName="Inlines"
                                             TargetObject="txtTreeItem">
                                             <ChangePropertyAction.Value>
-                                                <MultiBinding StringFormat="{}{0}（{1}，{2}）">
-                                                    <MultiBinding.Bindings>
-                                                        <Binding Path="Name" />
-                                                        <Binding Path="Length" />
-                                                        <Binding Path="Time" />
-                                                    </MultiBinding.Bindings>
-                                                </MultiBinding>
+                                                <InlineCollection>
+                                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                                    <Run Text="（" />
+                                                    <Run Text="{Binding File.Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                                                    <Run Text="，" />
+                                                    <Run Text="{Binding File.Time, Mode=OneWay, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                                    <Run Text="）" />
+
+                                                </InlineCollection>
                                             </ChangePropertyAction.Value>
                                         </ChangePropertyAction>
                                     </DataTriggerBehavior>
                                 </Interaction.Behaviors>
                             </TextBlock>
-
                         </TreeDataTemplate>
-
                     </TreeView.ItemTemplate>
-                    <!-- <TreeView.Resources> -->
-                    <!--  <HierarchicalDataTemplate  -->
-                    <!--  DataType="{x:Type local:FreeFileSystemTree}"  -->
-                    <!--  ItemsSource="{Binding All}">  -->
-                    <!--  <TreeViewItem  -->
-                    <!--  HorizontalAlignment="Stretch"  -->
-                    <!--  Header="{Binding .}"  -->
-                    <!--  PreviewMouseDoubleClick="TreeViewItem_PreviewMouseDoubleClick">  -->
-                    <!--             <TreeViewItem.HeaderTemplate> -->
-                    <!--                 <DataTemplate DataType="{x:Type local:FreeFileSystemTree}"> -->
-                    <!--                     <ContentControl x:Name="cc"> -->
-                    <!--  <TextBlock  -->
-                    <!--  FontWeight="Bold"  -->
-                    <!--  Text="{Binding Name}" />  -->
-                    <!--                     </ContentControl> -->
-                    <!--                     <DataTemplate.Triggers> -->
-                    <!--                         <DataTrigger Binding="{Binding IsFile}"> -->
-                    <!--                             <DataTrigger.Value> -->
-                    <!--                                 <sys:Boolean>True</sys:Boolean> -->
-                    <!--                             </DataTrigger.Value> -->
-                    <!--                             <DataTrigger.Setters> -->
-                    <!--                                 <Setter TargetName="cc" Property="Content"> -->
-                    <!--                                     <Setter.Value> -->
-                    <!--  <ui:SimpleStackPanel  -->
-                    <!--  Orientation="Horizontal"  -->
-                    <!--  Spacing="16">  -->
-                    <!--  <TextBlock  -->
-                    <!--  Width="240"  -->
-                    <!--  Text="{Binding Name}"  -->
-                    <!--  TextTrimming="CharacterEllipsis" />  -->
-                    <!--  <TextBlock  -->
-                    <!--  Width="80"  -->
-                    <!--  Text="{Binding File.Length, Converter={StaticResource FileLength2StringConverter}}"  -->
-                    <!--  TextTrimming="CharacterEllipsis" />  -->
-                    <!--  <TextBlock  -->
-                    <!--  Width="160"  -->
-                    <!--  Text="{Binding File.LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"  -->
-                    <!--  TextTrimming="CharacterEllipsis" />  -->
-                    <!--                                         </ui:SimpleStackPanel> -->
-                    <!--                                     </Setter.Value> -->
-                    <!--                                 </Setter> -->
-                    <!--                             </DataTrigger.Setters> -->
-                    <!--                         </DataTrigger> -->
-                    <!--                     </DataTemplate.Triggers> -->
-                    <!--                 </DataTemplate> -->
-                    <!--    -->
-                    <!--             </TreeViewItem.HeaderTemplate> -->
-                    <!--         </TreeViewItem> -->
-                    <!--     </HierarchicalDataTemplate> -->
-                    <!-- </TreeView.Resources> -->
                 </TreeView>
             </g:GroupBox>
 

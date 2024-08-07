@@ -80,7 +80,7 @@ public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
                         var dir = Path.Combine(Config.TargetDir, index.ToString());
                         if (Directory.Exists(dir))
                         {
-                            Directory.Delete(dir);
+                            Directory.Delete(dir,true);
                         }
                     }
                 }
@@ -96,13 +96,30 @@ public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
         }
     }
 
-    partial void OnSelectedPackageChanged(DiscFilePackage value)
+    protected override async Task OnExecutedAsync(CancellationToken token)
     {
-        
+        if (DiscFilePackages.Where(p=>p.IsChecked)
+            .Any(p => p.Files.Any(q => !q.Complete)))
+        {
+            await this.ShowErrorAsync("导出可能失败","部分文件导出失败，请检查");
+        }
+
     }
 
     protected override void OnReset()
     {
         DiscFilePackages = null;
+    }
+
+    [RelayCommand]
+    private void SelectAll()
+    {
+        DiscFilePackages.ForEach(p => p.IsChecked = true);
+    }
+
+    [RelayCommand]
+    private void SelectNone()
+    {
+        DiscFilePackages.ForEach(p => p.IsChecked = false);
     }
 }

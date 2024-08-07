@@ -18,10 +18,10 @@ namespace ArchiveMaster.Utilities
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            files = ReadFileList(Config.DiscDirs);
             FileSystemTree tree = FileSystemTree.CreateRoot();
             await Task.Run(() =>
             {
+                files = ReadFileList(Config.DiscDirs);
                 foreach (var dir in files.Keys)
                 {
                     foreach (var file in files[dir])

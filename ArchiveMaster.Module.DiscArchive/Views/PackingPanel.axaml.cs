@@ -6,9 +6,8 @@ namespace ArchiveMaster.Views
     {
         public PackingPanel()
         {
-            DataContext = ViewModel;
+            DataContext = new PackingViewModel();
             InitializeComponent();
         }
-        public PackingViewModel ViewModel { get; } = new PackingViewModel();
     }
 }

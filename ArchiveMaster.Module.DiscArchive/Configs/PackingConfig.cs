@@ -27,7 +27,7 @@ public partial class PackingConfig : ConfigBase
     private int discSizeMB = 23500;
 
     [ObservableProperty]
-    private int maxDiscCount = 10000;
+    private int maxDiscCount = 1000;
 
     public override void Check()
     {

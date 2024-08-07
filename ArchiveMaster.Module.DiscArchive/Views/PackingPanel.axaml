@@ -35,7 +35,7 @@
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
-                <Grid ColumnDefinitions="64,8,1.5*,16,Auto,8,0.7*,16,Auto,8,*,16,Auto,8,*,8,Auto">
+                <Grid ColumnDefinitions="64,8,1.5*,16,Auto,8,*,16,Auto,8,*,16,Auto,8,*,8,Auto">
                     <TextBlock
                         VerticalAlignment="Center"
                         Text="起始日期：" />
@@ -142,57 +142,57 @@
                     SelectedItem="{Binding SelectedPackage}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid RowDefinitions="Auto,4,Auto">
-                                <Grid ColumnDefinitions="*,8,*,8,*">
-                                    <CheckBox
-                                        Content="{Binding Index}"
-                                        FontWeight="Bold"
-                                        IsChecked="{Binding IsChecked}" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center">
-                                        <Run>共</Run>
-                                        <Run Text="{Binding Files.Count, Mode=OneWay}" />
-                                        <Run>个文件</Run>
-                                    </TextBlock>
-                                    <TextBlock
-                                        Grid.Column="4"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding TotalLength, Converter={StaticResource FileLength2StringConverter}}" />
+                            <ContentControl x:Name="c">
+                                <Grid RowDefinitions="Auto,4,Auto">
+                                    <Grid ColumnDefinitions="*,8,*,8,*">
+                                        <CheckBox
+                                            Content="{Binding Index}"
+                                            FontWeight="Bold"
+                                            IsChecked="{Binding IsChecked}" />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            VerticalAlignment="Center">
+                                            <Run>共</Run>
+                                            <Run Text="{Binding Files.Count, Mode=OneWay}" />
+                                            <Run>个文件</Run>
+                                        </TextBlock>
+                                        <TextBlock
+                                            Grid.Column="4"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding TotalLength, Converter={StaticResource FileLength2StringConverter}}" />
 
+                                    </Grid>
+
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Width="165"
+                                        HorizontalAlignment="Left"
+                                        Text="{Binding EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        HorizontalAlignment="Right"
+                                        Text="{Binding LatestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                                 </Grid>
-
-                                <TextBlock
-                                    Grid.Row="2"
-                                    Width="165"
-                                    HorizontalAlignment="Left"
-                                    Text="{Binding EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
-                                <TextBlock
-                                    Grid.Row="2"
-                                    HorizontalAlignment="Right"
-                                    Text="{Binding LatestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
-                            </Grid>
-
+                                <Interaction.Behaviors>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding Index}"
+                                        ComparisonCondition="Equal"
+                                        Value="-1">
+                                        <DataTriggerBehavior.Actions>
+                                            <ChangePropertyAction
+                                                PropertyName="Content"
+                                                TargetObject="c">
+                                                <ChangePropertyAction.Value>
+                                                    <TextBlock FontWeight="Bold">大于光盘容量的文件</TextBlock>
+                                                </ChangePropertyAction.Value>
+                                            </ChangePropertyAction>
+                                        </DataTriggerBehavior.Actions>
+                                    </DataTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </ContentControl>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
-                    <Interaction.Behaviors>
-                        <DataTriggerBehavior Binding="{Binding Index}">
-                            <DataTriggerBehavior.Value>
-                                <sys:Int32>-1</sys:Int32>
-                            </DataTriggerBehavior.Value>
-                            <DataTriggerBehavior.Actions>
-                                <ChangePropertyAction
-                                    PropertyName="ItemTemplate"
-                                    TargetObject="lvwPackages">
-                                    <ChangePropertyAction.Value>
-                                        <DataTemplate>
-                                            <TextBlock FontWeight="Bold">大于光盘容量的文件</TextBlock>
-                                        </DataTemplate>
-                                    </ChangePropertyAction.Value>
-                                </ChangePropertyAction>
-                            </DataTriggerBehavior.Actions>
-                        </DataTriggerBehavior>
-                    </Interaction.Behaviors>
+
                 </ListBox>
             </gb:GroupBox>
             <gb:GroupBox
@@ -219,6 +219,10 @@
                             Binding="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
                             Header="修改时间"
                             IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding Message}"
+                            Header="信息"
+                            IsReadOnly="True" />
                     </DataGrid.Columns>
 
                 </DataGrid>
@@ -230,10 +234,12 @@
                 ColumnDefinitions="Auto,8,Auto">
                 <Button
                     Classes="Middle"
+                    Command="{Binding SelectAllCommand}"
                     Content="全选" />
                 <Button
                     Grid.Column="2"
                     Classes="Middle"
+                    Command="{Binding SelectNoneCommand}"
                     Content="全不选" />
             </Grid>
         </Grid>

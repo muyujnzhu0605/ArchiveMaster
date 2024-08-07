@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs;
 
-public partial class RebuildConfig:ConfigBase 
+public partial class RebuildConfig : ConfigBase
 {
     [ObservableProperty]
     private string discDirs;
@@ -11,18 +11,18 @@ public partial class RebuildConfig:ConfigBase
     private string targetDir;
 
     [ObservableProperty]
-    private bool skipIfExisted;
+    private bool skipIfExisted = true;
 
     [ObservableProperty]
-    private int maxTimeToleranceSecond;
+    private int maxTimeToleranceSecond = 2;
 
     [ObservableProperty]
     private bool checkOnly;
-    
-    
+
+
     public override void Check()
     {
-        CheckDir(DiscDirs,"光盘目录");
-        CheckEmpty(TargetDir,"目标目录");
+        CheckEmpty(DiscDirs, "光盘目录");
+        CheckEmpty(TargetDir, "目标目录");
     }
 }

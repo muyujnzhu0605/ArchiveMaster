@@ -147,6 +147,7 @@ namespace ArchiveMaster.Utilities
 
                                 writer.WriteLine(
                                     $"{newName}\t{relativePath}\t{file.Time.ToString(DateTimeFormat)}\t{file.Length}\t{md5}");
+                                file.Complete = true;
                             }
                             catch (Exception ex)
                             {
