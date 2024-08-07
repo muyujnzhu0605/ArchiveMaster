@@ -17,5 +17,7 @@
     <PackageVersion Include="Mapster" Version="7.4.0" />
     <PackageVersion Include="Avalonia.Svg.Skia" Version="11.1.0" />
     <PackageVersion Include="Avalonia.Desktop" Version="11.1.0" />
+    <PackageVersion Include="Serilog" Version="4.0.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 </Project>

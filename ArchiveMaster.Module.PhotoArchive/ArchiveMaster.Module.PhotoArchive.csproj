@@ -23,6 +23,8 @@
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
     <PackageReference Include="FzLib.Avalonia" />
     <PackageReference Include="Mapster" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Sinks.File" />
 
   </ItemGroup>
   

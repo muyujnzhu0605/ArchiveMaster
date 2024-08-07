@@ -24,6 +24,8 @@
     <PackageReference Include="DiscUtils.Iso9660" />
     <PackageReference Include="FzLib.Avalonia" />
     <PackageReference Include="Mapster" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Sinks.File" />
 
   </ItemGroup>
   
