@@ -38,9 +38,9 @@ namespace ArchiveMaster
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(Step1Panel), "1.制作异地快照", "在异地计算机创建所需要的目录快照", baseUrl + "snapshot.svg"),
-                new ToolPanelInfo(typeof(Step2Panel), "2.本地生成补丁", "在本地计算机生成与异地的差异文件的补丁包", baseUrl + "patch.svg"),
-                new ToolPanelInfo(typeof(Step3Panel), "3.异地同步", "在异地应用补丁包，实现数据同步", baseUrl + "update.svg")
+                new ToolPanelInfo(typeof(Step1Panel), "制作异地快照", "在异地计算机创建所需要的目录快照", baseUrl + "snapshot.svg"),
+                new ToolPanelInfo(typeof(Step2Panel), "本地生成补丁", "在本地计算机生成与异地的差异文件的补丁包", baseUrl + "patch.svg"),
+                new ToolPanelInfo(typeof(Step3Panel), "异地同步", "在异地应用补丁包，实现数据同步", baseUrl + "update.svg")
             },
             GroupName = ModuleName,
             MenuItems =
