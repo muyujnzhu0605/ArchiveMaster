@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ArchiveMaster.UI.ViewModels
+namespace ArchiveMaster.ViewModels
 {
     public static class ViewModelExtension
     {

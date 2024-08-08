@@ -23,7 +23,6 @@ namespace ArchiveMaster.Utilities
         public override Step2Config Config { get; } = config;
         public Dictionary<string, List<string>> LocalDirectories { get; } = new Dictionary<string, List<string>>();
         public List<SyncFileInfo> UpdateFiles { get; } = new List<SyncFileInfo>();
-        public bool HasError { get; private set; }
 
         public static async Task<IList<LocalAndOffsiteDir>> MatchLocalAndOffsiteDirsAsync(string snapshotPath,
             string[] localSearchingDirs)
@@ -59,7 +58,6 @@ namespace ArchiveMaster.Utilities
                 Directory.CreateDirectory(Config.PatchDir);
             }
 
-            HasError = false;
             await Task.Run(() =>
             {
                 var files = UpdateFiles.Where(p => p.IsChecked).ToList();
@@ -114,6 +112,7 @@ namespace ArchiveMaster.Utilities
                                 try
                                 {
                                     CreateHardLink(destFile, sourceFile);
+                                    file.Complete();
                                 }
                                 catch (IOException)
                                 {
@@ -121,8 +120,7 @@ namespace ArchiveMaster.Utilities
                                 }
                                 catch (Exception ex)
                                 {
-                                    HasError = true;
-                                    file.Message = ex.Message;
+                                    file.Error(ex);
                                 }
 
                                 break;
@@ -141,14 +139,14 @@ namespace ArchiveMaster.Utilities
                                     {
                                         File.Copy(sourceFile, destFile);
                                         tryCount = 0;
+                                        file.Complete();
                                     }
                                     catch (IOException ex)
                                     {
                                         Debug.WriteLine($"复制文件{sourceFile}到{destFile}失败：{ex.Message}，剩余{tryCount}次重试");
                                         if (tryCount == 0)
                                         {
-                                            HasError = true;
-                                            file.Message = ex.Message;
+                                            file.Error(ex);
                                         }
 
                                         Thread.Sleep(1000);
@@ -160,6 +158,7 @@ namespace ArchiveMaster.Utilities
                                 try
                                 {
                                     CreateHardLink(destFile, sourceFile);
+                                    file.Complete();
                                 }
                                 catch (IOException)
                                 {
@@ -167,8 +166,7 @@ namespace ArchiveMaster.Utilities
                                 }
                                 catch (Exception ex)
                                 {
-                                    HasError = true;
-                                    file.Message = ex.Message;
+                                    file.Error(ex);
                                 }
 
                                 break;
@@ -192,11 +190,14 @@ namespace ArchiveMaster.Utilities
                                 ps1Script.AppendLine(
                                     $"Start-BitsTransfer -Source '{sourceFileWithNoWildcards}' -Destination '{file.TempName}' -DisplayName '正在复制文件' -Description '{sourceFile} => {file.TempName}'");
                                 ps1Script.AppendLine($"}}");
+                                file.Complete();
                                 break;
                         }
                     }
-
-                    file.Complete = true;
+                    else
+                    {
+                        file.Complete();
+                    }
                 }
 
                 if (Config.ExportMode == ExportMode.Script)
@@ -333,7 +334,7 @@ namespace ArchiveMaster.Utilities
                             if ((offsiteFile.Time - file.LastWriteTime).TotalSeconds >
                                 OfflineSyncConfig.MaxTimeTolerance)
                             {
-                                newFile.Message = "异地文件时间晚于本地文件时间";
+                                newFile.Warn("异地文件时间晚于本地文件时间");
                             }
 
                             UpdateFiles.Add(newFile);

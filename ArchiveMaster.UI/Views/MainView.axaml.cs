@@ -12,7 +12,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
-using ArchiveMaster.UI;
 using System.Reflection;
 using Avalonia.Media.Imaging;
 using Avalonia;

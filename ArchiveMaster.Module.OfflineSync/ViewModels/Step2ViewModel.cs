@@ -7,7 +7,6 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Configs;
-using ArchiveMaster.UI.ViewModels;
 using ArchiveMaster.Utilities;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
@@ -89,7 +88,7 @@ namespace ArchiveMaster.ViewModels
 
         protected override async Task OnExecutedAsync(CancellationToken token)
         {
-            if (Utility.HasError)
+            if (Files.Any(p=>p.Status==ProcessStatus.Error))
             {
                 await this.ShowErrorAsync("导出失败", "导出完成，但部分文件出现错误");
             }

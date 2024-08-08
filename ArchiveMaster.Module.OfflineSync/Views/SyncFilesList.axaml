@@ -62,7 +62,7 @@
                                 Margin="16,0"
                                 VerticalAlignment="Center"
                                 Foreground="Green"
-                                IsVisible="{Binding Complete}"
+                                IsVisible="{Binding IsCompleted}"
                                 Text="●" />
 
                         </DataTemplate>

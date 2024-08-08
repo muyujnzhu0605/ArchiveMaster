@@ -2,7 +2,7 @@
 using ArchiveMaster.ViewModels;
 using Avalonia;
 
-namespace ArchiveMaster.UI
+namespace ArchiveMaster
 {
     public interface IModuleInitializer
     {

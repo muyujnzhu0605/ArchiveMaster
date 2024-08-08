@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class MatchingFileInfo : FileInfoWithStatus
+public partial class MatchingFileInfo : SimpleFileInfo
 {
     [ObservableProperty]
     private bool multipleMatches;

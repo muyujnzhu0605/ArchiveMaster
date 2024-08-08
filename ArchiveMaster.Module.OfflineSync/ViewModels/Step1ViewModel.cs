@@ -1,6 +1,5 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Messages;
-using ArchiveMaster.UI.ViewModels;
 using ArchiveMaster.Utilities;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -15,7 +14,7 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step1ViewModel() : OfflineSyncViewModelBase<Step1Utility, FileInfoWithStatus>(false)
+    public partial class Step1ViewModel() : OfflineSyncViewModelBase<Step1Utility, SimpleFileInfo>(false)
     {
         [ObservableProperty]
         private string selectedSyncDir;

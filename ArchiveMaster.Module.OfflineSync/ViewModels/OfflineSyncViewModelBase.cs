@@ -1,7 +1,6 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Messages;
-using ArchiveMaster.UI.ViewModels;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -19,7 +18,7 @@ namespace ArchiveMaster.ViewModels
 {
     public abstract partial class OfflineSyncViewModelBase<TUtility, TFile> : TwoStepViewModelBase<TUtility>
         where TUtility : TwoStepUtilityBase
-        where TFile : FileInfoWithStatus
+        where TFile : SimpleFileInfo
     {
         public OfflineSyncViewModelBase() : base()
         {
@@ -97,11 +96,11 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        private void AddFileCheckedNotify(FileInfoWithStatus file)
+        private void AddFileCheckedNotify(SimpleFileInfo file)
         {
             file.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName != nameof(FileInfoWithStatus.IsChecked))
+                if (e.PropertyName != nameof(SimpleFileInfo.IsChecked))
                 {
                     return;
                 }

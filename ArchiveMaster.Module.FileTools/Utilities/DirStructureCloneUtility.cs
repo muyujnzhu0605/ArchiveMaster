@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
 using Avalonia.Controls.Platform;
 using Microsoft.Win32.SafeHandles;
@@ -9,7 +10,7 @@ namespace ArchiveMaster.Utilities
 {
     public class DirStructureCloneUtility(DirStructureCloneConfig config) : TwoStepUtilityBase
     {
-        public IList<FileInfoWithStatus> Files { get; private set; }
+        public IList<SimpleFileInfo> Files { get; private set; }
         public override DirStructureCloneConfig Config { get; } = config;
 
         public override async Task ExecuteAsync(CancellationToken token)
@@ -41,11 +42,11 @@ namespace ArchiveMaster.Utilities
                         }
 
                         File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
-                        file.Complete = true;
+                        file.Complete();
                     }
                     catch (Exception ex)
                     {
-                        file.Message = ex.Message;
+                        file.Error(ex);
                     }
                 }
             }, token);
@@ -58,7 +59,7 @@ namespace ArchiveMaster.Utilities
                 throw new NotSupportedException("仅支持Windows");
             }
 
-            List<FileInfoWithStatus> files = new List<FileInfoWithStatus>();
+            List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
             NotifyProgressUpdate(-1, 0, $"正在枚举文件");
             await Task.Run(() =>
@@ -79,7 +80,7 @@ namespace ArchiveMaster.Utilities
                     NotifyProgressUpdate(fileInfos.Count, index,
                         $"正在处理：{Path.GetRelativePath(Config.SourceDir, file.FullName)}（{index}/{fileInfos.Count}）");
 
-                    files.Add(new FileInfoWithStatus()
+                    files.Add(new SimpleFileInfo()
                     {
                         Name = file.Name,
                         Path = file.FullName,

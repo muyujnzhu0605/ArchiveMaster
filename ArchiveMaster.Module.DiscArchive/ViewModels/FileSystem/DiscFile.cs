@@ -2,7 +2,7 @@
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class DiscFile : FileInfoWithStatus
+    public partial class DiscFile : SimpleFileInfo
     {
         public DiscFile() : base()
         {

@@ -10,7 +10,7 @@ using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
-public class SyncFileInfo : FileInfoWithStatus
+public class SyncFileInfo : SimpleFileInfo
 {
     public SyncFileInfo()
     {

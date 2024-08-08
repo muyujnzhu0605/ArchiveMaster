@@ -1,5 +1,4 @@
 ﻿using ArchiveMaster.Configs;
-using ArchiveMaster.UI;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using Avalonia;

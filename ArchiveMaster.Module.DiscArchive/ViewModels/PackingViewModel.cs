@@ -1,20 +1,12 @@
 using System.Collections;
-using System.ComponentModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.UI.ViewModels;
 using ArchiveMaster.Utilities;
-using ArchiveMaster.ViewModels;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using FzLib;
-using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Messages;
 
-namespace DiscArchivingTool;
+namespace ArchiveMaster.ViewModels;
 
 public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
 {
@@ -57,7 +49,7 @@ public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
 
     protected override async Task OnExecutingAsync(CancellationToken token)
     {
-        if (!DiscFilePackages.Any(p => p.IsChecked))
+        if (!Enumerable.Any<DiscFilePackage>(DiscFilePackages, p => p.IsChecked))
         {
             throw new Exception("没有任何被选中的文件包");
         }
@@ -98,8 +90,8 @@ public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
 
     protected override async Task OnExecutedAsync(CancellationToken token)
     {
-        if (DiscFilePackages.Where(p=>p.IsChecked)
-            .Any(p => p.Files.Any(q => !q.Complete)))
+        if (Enumerable.Where<DiscFilePackage>(DiscFilePackages, p=>p.IsChecked)
+            .Any(p => p.Files.Any(q => q.Status==ProcessStatus.Error)))
         {
             await this.ShowErrorAsync("导出可能失败","部分文件导出失败，请检查");
         }

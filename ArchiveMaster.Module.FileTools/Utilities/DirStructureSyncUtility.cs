@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
 
@@ -90,7 +91,7 @@ namespace OffsiteBackupOfflineSync.Utility
                     foreach (var templateFile in matchedFiles)
                     {
                         //创建模板文件数据结构
-                        var template = new FileInfoWithStatus() //模板文件
+                        var template = new SimpleFileInfo() //模板文件
                         {
                             Path = Path.GetRelativePath(Config.TemplateDir, templateFile.FullName),
                             Name = templateFile.Name,
@@ -130,7 +131,7 @@ namespace OffsiteBackupOfflineSync.Utility
                         if (tempFiles.Any(p => p.RightPosition))
                         {
                             var tempWrongPositionFiles = tempFiles.Where(p => !p.RightPosition);
-                            tempWrongPositionFiles.ForEach(p => p.Message = "包含一个位置正确的匹配");
+                            tempWrongPositionFiles.ForEach(p => p.Warn("包含一个位置正确的匹配"));
                             wrongPositionFiles.AddRange(tempFiles.Where(p => !p.RightPosition));
                             rightPositionFiles.Add(tempFiles.First(p => p.RightPosition));
                         }
@@ -312,11 +313,11 @@ namespace OffsiteBackupOfflineSync.Utility
                             File.Move(Path.Combine(Config.SourceDir, file.Path), destFile);
                         }
 
-                        file.Complete = true;
+                        file.Complete();
                     }
                     catch (Exception ex)
                     {
-                        file.Message = ex.Message;
+                        file.Error(ex);
                     }
                 }
             }, token);

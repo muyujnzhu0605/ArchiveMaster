@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.UI.ViewModels;
 using ArchiveMaster.Utilities;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;

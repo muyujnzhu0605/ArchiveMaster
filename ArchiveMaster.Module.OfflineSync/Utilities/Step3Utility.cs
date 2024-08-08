@@ -9,13 +9,14 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step3Utility (Step3Config config): TwoStepUtilityBase
+    public class Step3Utility(Step3Config config) : TwoStepUtilityBase
     {
         public override Step3Config Config { get; } = config;
         private readonly DateTime createTime = DateTime.Now;
         public List<SyncFileInfo> DeletingDirectories { get; private set; }
         public Dictionary<string, List<string>> LocalDirectories { get; private set; }
         public List<SyncFileInfo> UpdateFiles { get; private set; }
+
         public static string GetNoDuplicateDirectory(string path, string suffixFormat = " ({i})")
         {
             if (!Directory.Exists(path))
@@ -35,7 +36,8 @@ namespace ArchiveMaster.Utilities
             string text;
             while (true)
             {
-                text = Path.Combine(directoryName, fileNameWithoutExtension + suffixFormat.Replace("{i}", num.ToString()) + extension);
+                text = Path.Combine(directoryName,
+                    fileNameWithoutExtension + suffixFormat.Replace("{i}", num.ToString()) + extension);
                 if (!Directory.Exists(text))
                 {
                     break;
@@ -66,7 +68,8 @@ namespace ArchiveMaster.Utilities
             string text;
             while (true)
             {
-                text = Path.Combine(directoryName, fileNameWithoutExtension + suffixFormat.Replace("{i}", num.ToString()) + extension);
+                text = Path.Combine(directoryName,
+                    fileNameWithoutExtension + suffixFormat.Replace("{i}", num.ToString()) + extension);
                 if (!File.Exists(text))
                 {
                     break;
@@ -107,7 +110,7 @@ namespace ArchiveMaster.Utilities
                     string oldPath = file.OldPath == null ? null : Path.Combine(file.TopDirectory, file.OldPath);
                     if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) && !File.Exists(patch))
                     {
-                        file.Message = "补丁文件不存在";
+                        file.Warn("补丁文件不存在");
                         file.IsChecked = false;
                     }
                     else
@@ -119,21 +122,21 @@ namespace ArchiveMaster.Utilities
                             case FileUpdateType.Add:
                                 if (File.Exists(target))
                                 {
-                                    file.Message = "应当为新增文件，但文件已存在";
+                                    file.Warn("应当为新增文件，但文件已存在");
                                 }
 
                                 break;
                             case FileUpdateType.Modify:
                                 if (!File.Exists(target))
                                 {
-                                    file.Message = "应当为修改后文件，但文件不存在";
+                                    file.Warn("应当为修改后文件，但文件不存在");
                                 }
 
                                 break;
                             case FileUpdateType.Delete:
                                 if (!File.Exists(target))
                                 {
-                                    file.Message = "应当为待删除文件，但文件不存在";
+                                    file.Warn("应当为待删除文件，但文件不存在");
                                     file.IsChecked = false;
                                 }
 
@@ -141,12 +144,12 @@ namespace ArchiveMaster.Utilities
                             case FileUpdateType.Move:
                                 if (!File.Exists(oldPath))
                                 {
-                                    file.Message = "应当为移动后文件，但源文件不存在";
+                                    file.Warn("应当为移动后文件，但源文件不存在");
                                     file.IsChecked = false;
                                 }
                                 else if (File.Exists(target))
                                 {
-                                    file.Message = "应当为移动后文件，但目标文件已存在";
+                                    file.Warn("应当为移动后文件，但目标文件已存在");
                                     file.IsChecked = false;
                                 }
 
@@ -156,7 +159,7 @@ namespace ArchiveMaster.Utilities
                         }
                     }
                 }
-            },token);
+            }, token);
         }
 
         public void AnalyzeEmptyDirectories(CancellationToken token)
@@ -166,17 +169,20 @@ namespace ArchiveMaster.Utilities
             foreach (var topDir in LocalDirectories.Keys)
             {
                 HashSet<string> deletingDirsInThisTopDir = new HashSet<string>();
-                foreach (var offsiteSubDir in Directory.EnumerateDirectories(topDir, "*", SearchOption.AllDirectories).ToList())
+                foreach (var offsiteSubDir in Directory.EnumerateDirectories(topDir, "*", SearchOption.AllDirectories)
+                             .ToList())
                 {
-                   token.ThrowIfCancellationRequested();
-                    if (!LocalDirectories[topDir].Contains(Path.GetRelativePath(topDir, offsiteSubDir)))//本地已经没有远程的这个目录了
+                    token.ThrowIfCancellationRequested();
+                    if (!LocalDirectories[topDir]
+                            .Contains(Path.GetRelativePath(topDir, offsiteSubDir))) //本地已经没有远程的这个目录了
                     {
-                        if (!Directory.EnumerateFiles(offsiteSubDir).Any())//并且远程的这个目录是空的
+                        if (!Directory.EnumerateFiles(offsiteSubDir).Any()) //并且远程的这个目录是空的
                         {
                             deletingDirsInThisTopDir.Add(offsiteSubDir);
                         }
                         else if (!Directory.EnumerateFiles(offsiteSubDir).Skip(1).Any() //目录里只有缩略图
-                            && Path.GetFileName(Directory.EnumerateFiles(offsiteSubDir).First()).ToLower() == "thumbs.db")
+                                 && Path.GetFileName(Directory.EnumerateFiles(offsiteSubDir).First()).ToLower() ==
+                                 "thumbs.db")
                         {
                             deletingDirsInThisTopDir.Add(offsiteSubDir);
                         }
@@ -184,18 +190,18 @@ namespace ArchiveMaster.Utilities
                 }
 
 
-
                 //通过两层循环，删除位于空目录下的空目录
-                foreach (var dir1 in deletingDirsInThisTopDir.ToList())//外层循环，dir1为内层空目录
+                foreach (var dir1 in deletingDirsInThisTopDir.ToList()) //外层循环，dir1为内层空目录
                 {
                     token.ThrowIfCancellationRequested();
-                    foreach (var dir2 in deletingDirsInThisTopDir)//内曾循环，dir2为外层空目录
+                    foreach (var dir2 in deletingDirsInThisTopDir) //内曾循环，dir2为外层空目录
                     {
                         if (dir1 == dir2)
                         {
                             continue;
                         }
-                        if (dir1.StartsWith(dir2))//如果dir2位于dir1的外层，那么dir1就不需要单独删除
+
+                        if (dir1.StartsWith(dir2)) //如果dir2位于dir1的外层，那么dir1就不需要单独删除
                         {
                             deletingDirsInThisTopDir.Remove(dir1);
                             break;
@@ -203,7 +209,8 @@ namespace ArchiveMaster.Utilities
                     }
                 }
 
-                DeletingDirectories.AddRange(deletingDirsInThisTopDir.Select(p => new SyncFileInfo() { Path = p, TopDirectory = topDir }));
+                DeletingDirectories.AddRange(deletingDirsInThisTopDir.Select(p => new SyncFileInfo()
+                    { Path = p, TopDirectory = topDir }));
             }
         }
 
@@ -299,15 +306,16 @@ namespace ArchiveMaster.Utilities
                                 throw new InvalidEnumArgumentException();
                         }
 
-                        file.Complete = true;
+                        file.Complete();
                     }
                     catch (Exception ex)
                     {
-                        file.Message = $"错误：{ex.Message}";
+                        file.Error(ex);
                     }
                 }
             }, token);
         }
+
         private static bool IsDirectory(string path)
         {
             FileAttributes attr = File.GetAttributes(path);
@@ -321,6 +329,7 @@ namespace ArchiveMaster.Utilities
             {
                 throw new ArgumentException("文件不在目录中");
             }
+
             switch (Config.DeleteMode)
             {
                 case DeleteMode.Delete:
@@ -332,16 +341,20 @@ namespace ArchiveMaster.Utilities
                     {
                         File.Delete(filePath);
                     }
+
                     break;
                 case DeleteMode.MoveToDeletedFolder:
                     string relative = Path.GetRelativePath(rootDir, filePath);
-                    string deletedFolder = Path.Combine(Path.GetPathRoot(filePath), Config.DeleteDir, createTime.ToString("yyyyMMdd-HHmmss"), rootDir.Replace(":\\", "#").Replace('\\', '#').Replace('/', '#'));
+                    string deletedFolder = Path.Combine(Path.GetPathRoot(filePath), Config.DeleteDir,
+                        createTime.ToString("yyyyMMdd-HHmmss"),
+                        rootDir.Replace(":\\", "#").Replace('\\', '#').Replace('/', '#'));
                     string target = Path.Combine(deletedFolder, relative);
                     string dir = Path.GetDirectoryName(target);
                     if (!Directory.Exists(dir))
                     {
                         Directory.CreateDirectory(dir);
                     }
+
                     if (IsDirectory(filePath))
                     {
                         Directory.Move(filePath, GetNoDuplicateDirectory(target));
@@ -350,14 +363,11 @@ namespace ArchiveMaster.Utilities
                     {
                         File.Move(filePath, GetNoDuplicateFile(target));
                     }
+
                     break;
                 default:
                     throw new InvalidEnumArgumentException();
             }
-
         }
     }
-
 }
-
-

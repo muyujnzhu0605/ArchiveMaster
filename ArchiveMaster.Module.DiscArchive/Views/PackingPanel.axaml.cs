@@ -1,4 +1,4 @@
-﻿using DiscArchivingTool;
+﻿using PackingViewModel = ArchiveMaster.ViewModels.PackingViewModel;
 
 namespace ArchiveMaster.Views
 {
