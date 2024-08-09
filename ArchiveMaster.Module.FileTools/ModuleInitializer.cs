@@ -20,7 +20,8 @@ namespace ArchiveMaster
         [
             new ConfigInfo(typeof(EncryptorConfig)),
             new ConfigInfo(typeof(DirStructureSyncConfig)),
-            new ConfigInfo(typeof(DirStructureCloneConfig))
+            new ConfigInfo(typeof(DirStructureCloneConfig)),
+            new ConfigInfo(typeof(RenameConfig))
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -32,6 +33,8 @@ namespace ArchiveMaster
                     baseUrl + "sync.svg"),
                 new ToolPanelInfo(typeof(DirStructureClonePanel), "目录结构克隆", "以一个目录为模板，生成一个新的目录，目录中文件与模板一致，但大小为0",
                     baseUrl + "directory.svg"),
+                new ToolPanelInfo(typeof(RenamePanel), "批量重命名", "批量对一个目录中的文件或文件夹按规则进行重命名操作",
+                    baseUrl + "rename.svg"),
             },
             GroupName = ModuleName
         };

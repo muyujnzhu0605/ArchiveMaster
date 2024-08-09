@@ -5,27 +5,29 @@ namespace ArchiveMaster.Configs;
 
 public partial class RenameConfig : ConfigBase
 {
-
     [ObservableProperty]
     private string dir;
-    
-    [ObservableProperty]
-    private string search;
-    
-    [ObservableProperty]
-    private string replace;
 
     [ObservableProperty]
-    private RenameTargetType renameTarget;
-    
+    private string searchPattern;
+
     [ObservableProperty]
-    private SearchMode searchMode;
-    
+    private string replacePattern;
+
     [ObservableProperty]
-    private RenameMode renameMode;
-    
+    private RenameTargetType renameTarget = RenameTargetType.File;
+
     [ObservableProperty]
-    private bool includeSubjectDirectories;
+    private SearchMode searchMode = SearchMode.Contain;
+
+    [ObservableProperty]
+    private RenameMode renameMode = RenameMode.ReplaceMatched;
+
+    [ObservableProperty]
+    private bool searchPath;
+
+    [ObservableProperty]
+    private bool includeSubDirs;
 
     public override void Check()
     {

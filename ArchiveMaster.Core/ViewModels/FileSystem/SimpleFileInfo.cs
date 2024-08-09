@@ -11,9 +11,6 @@ namespace ArchiveMaster.ViewModels
     {
         [ObservableProperty]
         private long length;
-        
-        [ObservableProperty]
-        private DateTime time;
 
         public SimpleFileInfo() : base()
         {
@@ -22,7 +19,6 @@ namespace ArchiveMaster.ViewModels
         public SimpleFileInfo(FileInfo file) : base(file)
         {
             Length = file.Length;
-            Time = file.LastWriteTime;
         }
     }
 }

@@ -36,5 +36,9 @@
     <Compile Update="Views\EncryptorPanel.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
+    <Compile Update="Views\RenamePanel.axaml.cs">
+      <DependentUpon>RenamePanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

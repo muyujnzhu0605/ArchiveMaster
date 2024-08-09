@@ -1,0 +1,143 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.RenamePanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:ArchiveMaster.Converters"
+    xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:markupExtensions="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    x:DataType="vm:EncryptorViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.Styles>
+        <Style Selector="ct|FormItem">
+            <Setter Property="LabelWidth" Value="96" />
+        </Style>
+
+    </v:TwoStepPanelBase.Styles>
+    <v:TwoStepPanelBase.ConfigsContent>
+        <StackPanel
+            Orientation="Vertical"
+            Spacing="8">
+            <ct:FormItem Label="目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="搜索关键词：">
+                <TextBox Text="{Binding Config.SearchPattern}" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="替换关键词：">
+                <TextBox Text="{Binding Config.ReplacePattern}" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="搜索选项：">
+                <WrapPanel>
+                    <WrapPanel.Styles>
+                        <Style Selector="ct|FormItem">
+                            <Setter Property="LabelWidth" Value="NaN" />
+                            <Setter Property="Margin" Value="0,0,16,0" />
+                        </Style>
+                        <Style Selector="CheckBox">
+                            <Setter Property="Margin" Value="0,0,16,0" />
+                        </Style>
+                    </WrapPanel.Styles>
+                    <ct:FormItem Label="类型：">
+                        <ComboBox
+                            Width="128"
+                            DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
+                            ItemsSource="{markupExtensions:EnumValues enums:RenameTargetType}"
+                            SelectedItem="{Binding Config.RenameTarget}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="搜索模式：">
+                        <ComboBox
+                            Width="128"
+                            DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
+                            ItemsSource="{markupExtensions:EnumValues enums:SearchMode}"
+                            SelectedItem="{Binding Config.SearchMode}" />
+                    </ct:FormItem>
+
+                    <CheckBox
+                        Content="包括子目录"
+                        IsChecked="{Binding Config.IncludeSubDirs}" />
+                    <CheckBox
+                        Content="搜索包括路径"
+                        IsChecked="{Binding Config.SearchPath}" />
+                </WrapPanel>
+            </ct:FormItem>
+
+            <ct:FormItem Label="重命名选项：">
+                <ct:FormItem Label="重命名模式：">
+                    <ComboBox
+                        Width="128"
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
+                        ItemsSource="{markupExtensions:EnumValues enums:RenameMode}"
+                        SelectedItem="{Binding Config.RenameMode}" />
+                </ct:FormItem>
+            </ct:FormItem>
+
+        </StackPanel>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <DataGrid
+            CanUserReorderColumns="False"
+            CanUserResizeColumns="True"
+            CanUserSortColumns="False"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn
+                    Binding="{Binding IsChecked}"
+                    Header="处理" />
+                <DataGridTemplateColumn
+                    CanUserResize="False"
+                    Header="匹配">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                x:Name="e"
+                                Margin="16,0"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding IsMatched}"
+                                Text="●" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn
+                    CanUserResize="False"
+                    Header="完成">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                x:Name="e"
+                                Margin="16,0"
+                                VerticalAlignment="Center"
+                                Foreground="Green"
+                                IsVisible="{Binding IsCompleted}"
+                                Text="●" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn
+                    Binding="{Binding Name}"
+                    Header="旧文件名" />
+                <DataGridTextColumn
+                    Binding="{Binding NewName}"
+                    Header="新文件名" />
+
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

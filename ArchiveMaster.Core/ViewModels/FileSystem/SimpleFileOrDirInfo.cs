@@ -18,6 +18,9 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private string path;
+        
+        [ObservableProperty]
+        private DateTime time;
 
         private ProcessStatus status = ProcessStatus.Ready;
 
@@ -30,6 +33,7 @@ namespace ArchiveMaster.ViewModels
             ArgumentNullException.ThrowIfNull(file);
             Name = file.Name;
             Path = file.FullName;
+            Time = file.LastWriteTime;
         }
 
         public string Message => message;
