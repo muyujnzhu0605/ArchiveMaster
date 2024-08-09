@@ -19,11 +19,40 @@ public partial class RenameViewModel : TwoStepViewModelBase<RenameUtility>
     [ObservableProperty]
     private ObservableCollection<RenameFileInfo> files;
 
+    [ObservableProperty]
+    private bool showMatchedOnly = true;
+
+    [ObservableProperty]
+    private int totalCount;
+
+    [ObservableProperty]
+    private int matchedCount;
+
     public override RenameConfig Config { get; } = AppConfig.Instance.Get<RenameConfig>();
 
     protected override Task OnInitializedAsync()
     {
-        Files = new ObservableCollection<RenameFileInfo>(Utility.Files);
+        var matched = Utility.Files.Where(p => p.IsMatched);
+        Files = new ObservableCollection<RenameFileInfo>(ShowMatchedOnly ? matched : Utility.Files);
+        TotalCount = Utility.Files.Count;
+        MatchedCount = matched.Count();
         return base.OnInitializedAsync();
+    }
+
+    partial void OnShowMatchedOnlyChanged(bool value)
+    {
+        if (Utility?.Files == null)
+        {
+            return;
+        }
+
+        Files = new ObservableCollection<RenameFileInfo>(value ? Utility.Files.Where(p => p.IsMatched) : Utility.Files);
+    }
+
+    protected override void OnReset()
+    {
+        Files = null;
+        TotalCount = 0;
+        MatchedCount = 0;
     }
 }

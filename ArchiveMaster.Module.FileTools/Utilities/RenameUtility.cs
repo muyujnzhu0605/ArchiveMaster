@@ -11,7 +11,7 @@ namespace ArchiveMaster.Utilities;
 
 public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 {
-    public static Dictionary<string, Func<SimpleFileOrDirInfo, string, string>> fileAttributesDic =
+    public static readonly Dictionary<string, Func<SimpleFileOrDirInfo, string, string>> fileAttributesDic =
         new Dictionary<string, Func<SimpleFileOrDirInfo, string, string>>()
         {
             //文件名
@@ -28,13 +28,13 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
             },
             //无扩展名的文件名截取
             {
-                "<NameWithoutExtension-" + subStringRegexArg + ">", (item, arg) =>
+                "<NameWithoutExtension-" + SubStringRegexString + ">", (item, arg) =>
                 {
                     try
                     {
                         string extension = Path.GetExtension(item.Name);
                         string name = extension == "" ? item.Name : item.Name.Replace(extension, "");
-                        Match match = Regex.Match(arg, "<NameWithoutExtension-" + subStringRegexArg + ">");
+                        Match match = Regex.Match(arg, "<NameWithoutExtension-" + SubStringRegexString + ">");
                         string direction = match.Groups["Direction"].Value;
                         int from = int.Parse(match.Groups["From"].Value);
                         int count = int.Parse(match.Groups["Count"].Value);
@@ -81,46 +81,46 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
             { "<Directory>", (item, arg) => Path.GetDirectoryName(item.Path) },
             //创建时间
             {
-                "<CreatTime-" + dateTimeRegexArg + ">",
+                "<CreatTime-" + DateTimeRegexString + ">",
                 (item, arg) =>
-                    File.GetCreationTime(item.Path).ToString(Regex.Match(arg, "<CreatTime-" + dateTimeRegexArg + ">")
+                    File.GetCreationTime(item.Path).ToString(Regex.Match(arg, "<CreatTime-" + DateTimeRegexString + ">")
                         .Groups["arg"]
                         .Value)
             },
             //创建时间UTC
             {
-                "<CreatTimeUtc-" + dateTimeRegexArg + ">",
+                "<CreatTimeUtc-" + DateTimeRegexString + ">",
                 (item, arg) =>
                     File.GetCreationTimeUtc(item.Path).ToString(Regex
-                        .Match(arg, "<CreatTimeUtc-" + dateTimeRegexArg + ">")
+                        .Match(arg, "<CreatTimeUtc-" + DateTimeRegexString + ">")
                         .Groups["arg"].Value)
             },
             //上次访问时间
             {
-                "<LastAccessTime-" + dateTimeRegexArg + ">",
+                "<LastAccessTime-" + DateTimeRegexString + ">",
                 (item, arg) =>
                     File.GetLastAccessTime(item.Path).ToString(Regex
-                        .Match(arg, "<LastAccessTime-" + dateTimeRegexArg + ">")
+                        .Match(arg, "<LastAccessTime-" + DateTimeRegexString + ">")
                         .Groups["arg"].Value)
             },
             {
-                "<LastAccessTimeUtc-" + dateTimeRegexArg + ">",
+                "<LastAccessTimeUtc-" + DateTimeRegexString + ">",
                 (item, arg) =>
                     File.GetLastAccessTimeUtc(item.Path).ToString(Regex
-                        .Match(arg, "<LastAccessTimeUtc-" + dateTimeRegexArg + ">")
+                        .Match(arg, "<LastAccessTimeUtc-" + DateTimeRegexString + ">")
                         .Groups["arg"].Value)
             },
             //修改时间
             {
-                "<LastWriteTime-" + dateTimeRegexArg + ">",
+                "<LastWriteTime-" + DateTimeRegexString + ">",
                 (item, arg) =>
-                    item.Time.ToString(Regex.Match(arg, "<LastWriteTime-" + dateTimeRegexArg + ">")
+                    item.Time.ToString(Regex.Match(arg, "<LastWriteTime-" + DateTimeRegexString + ">")
                         .Groups["arg"].Value)
             },
             {
-                "<LastWriteTimeUtc-" + dateTimeRegexArg + ">",
+                "<LastWriteTimeUtc-" + DateTimeRegexString + ">",
                 (item, arg) =>
-                    item.Time.ToString(Regex.Match(arg, "<LastWriteTimeUtc-" + dateTimeRegexArg + ">")
+                    item.Time.ToString(Regex.Match(arg, "<LastWriteTimeUtc-" + DateTimeRegexString + ">")
                         .Groups["arg"].Value)
             },
             //Exif信息
@@ -156,58 +156,102 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
             // }
         };
 
-    private const string dateTimeRegexArg = @"(?<arg>[a-zA-Z\-]+)";
-    private const string subStringRegexArg = @"(?<Direction>Left|Right)-(?<From>[0-9]+)-(?<Count>[0-9]+)";
-    private static Dictionary<string, Regex> regexes = new Dictionary<string, Regex>();
+    private const string DateTimeRegexString = @"(?<arg>[a-zA-Z\-]+)";
+    private const string SubStringRegexString = @"(?<Direction>Left|Right)-(?<From>[0-9]+)-(?<Count>[0-9]+)";
+    private static readonly Dictionary<string, Regex> regexes = new Dictionary<string, Regex>();
     private string[] replacePatterns;
     public override RenameConfig Config { get; } = config;
     public IReadOnlyList<RenameFileInfo> Files { get; private set; }
 
-    public override Task ExecuteAsync(CancellationToken token = default)
+    public override async Task ExecuteAsync(CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        var processingFiles = Files.Where(p => p.IsMatched && p.IsChecked);
+        var duplicates = processingFiles
+            .Select(p => p.NewPath)
+            .GroupBy(p => p)
+            .Where(p => p.Count() > 1)
+            .Select(p => p.Key);
+        if (duplicates.Any())
+        {
+            throw new Exception("有一些文件（夹）的目标路径相同：" + string.Join('、', duplicates));
+        }
+
+        await Task.Run(() =>
+        {
+            foreach (var file in processingFiles)
+            {
+                try
+                {
+                    //有可能新的文件名和其他文件的旧文件名一致导致错误，后续需要改
+                    File.Move(file.Path, file.NewPath);
+                    file.Complete();
+                }
+                catch (Exception ex)
+                {
+                    file.Error(ex);
+                }
+            }
+        }, token);
     }
 
     public override async Task InitializeAsync(CancellationToken token = default)
     {
+        regexOptions = Config.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
+        stringComparison = Config.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         NotifyProgressUpdate(0, -1, "正在查找文件");
         await Task.Run(() =>
         {
             PreprocessReplacePattern();
-            var files = new DirectoryInfo(Config.Dir)
-                .EnumerateFileSystemInfos("*", new EnumerationOptions()
-                {
-                    IgnoreInaccessible = true,
-                    RecurseSubdirectories = true,
-                }).ToList();
+            List<FileSystemInfo> files;
+            if (Config.RenameTarget == RenameTargetType.File)
+            {
+                files = new DirectoryInfo(Config.Dir)
+                    .EnumerateFiles("*", new EnumerationOptions()
+                    {
+                        IgnoreInaccessible = true,
+                        RecurseSubdirectories = true,
+                    }).Cast<FileSystemInfo>().ToList();
+            }
+            else
+            {
+                files = new DirectoryInfo(Config.Dir)
+                    .EnumerateDirectories("*", new EnumerationOptions()
+                    {
+                        IgnoreInaccessible = true,
+                        RecurseSubdirectories = true,
+                    }).Cast<FileSystemInfo>().ToList();
+            }
+
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
+
             foreach (var renameFile in files.Select(file => new RenameFileInfo(file)))
             {
-                renameFile.IsMatched = IsMatched(renameFile);
-                if (!renameFile.IsMatched)
-                {
-                    continue;
-                }
-
-                renameFile.NewName = GetTargetName(renameFile);
                 renameFiles.Add(renameFile);
+                renameFile.IsMatched = IsMatched(renameFile);
+                if (renameFile.IsMatched)
+                {
+                    renameFile.NewName = Rename(renameFile);
+                    renameFile.NewPath = Path.Combine(Path.GetDirectoryName(renameFile.Path), renameFile.NewName);
+                }
             }
 
             Files = renameFiles.AsReadOnly();
         }, token);
     }
 
-    private static Regex GetRegex(string pattern)
+    private Regex GetRegex(string pattern)
     {
         if (regexes.TryGetValue(pattern, out Regex r))
         {
             return r;
         }
 
-        r = new Regex(pattern);
+        r = new Regex(pattern, regexOptions);
         regexes.Add(pattern, r);
         return r;
     }
+
+    private RegexOptions regexOptions;
 
     private string GetTargetName(RenameFileInfo file)
     {
@@ -228,10 +272,11 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 
         return Config.SearchMode switch
         {
-            SearchMode.Contain => name.Contains(Config.SearchPattern),
-            SearchMode.EqualWithExtension => Path.GetExtension(name).Equals(Config.SearchPattern),
-            SearchMode.EqualWithName => Path.GetFileNameWithoutExtension(name).Equals(Config.SearchPattern),
-            SearchMode.Equal => name.Equals(Config.SearchPattern),
+            SearchMode.Contain => name.Contains(Config.SearchPattern, stringComparison),
+            SearchMode.EqualWithExtension => Path.GetExtension(name).Equals(Config.SearchPattern, stringComparison),
+            SearchMode.EqualWithName => Path.GetFileNameWithoutExtension(name)
+                .Equals(Config.SearchPattern, stringComparison),
+            SearchMode.Equal => name.Equals(Config.SearchPattern, stringComparison),
             SearchMode.Regex => GetRegex(Config.SearchPattern).IsMatch(name),
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -283,6 +328,8 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
         replacePatterns = list.ToArray();
     }
 
+    private StringComparison stringComparison;
+
     private string Rename(RenameFileInfo file)
     {
         string name = file.Name;
@@ -298,7 +345,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
         switch (Config.RenameMode)
         {
             case RenameMode.ReplaceMatched:
-                return name.Replace(matched, t);
+                return name.Replace(matched, t, stringComparison);
             case RenameMode.ReplaceExtension:
                 return $"{Path.GetFileNameWithoutExtension(name)}.{t}";
             case RenameMode.ReplaceName:

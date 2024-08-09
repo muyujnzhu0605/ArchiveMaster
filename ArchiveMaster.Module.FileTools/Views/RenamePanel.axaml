@@ -72,9 +72,10 @@
                     <CheckBox
                         Content="包括子目录"
                         IsChecked="{Binding Config.IncludeSubDirs}" />
+
                     <CheckBox
-                        Content="搜索包括路径"
-                        IsChecked="{Binding Config.SearchPath}" />
+                        Content="忽略大小写"
+                        IsChecked="{Binding Config.IgnoreCase}" />
                 </WrapPanel>
             </ct:FormItem>
 
@@ -91,53 +92,85 @@
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <DataGrid
-            CanUserReorderColumns="False"
-            CanUserResizeColumns="True"
-            CanUserSortColumns="False"
-            ItemsSource="{Binding Files}">
-            <DataGrid.Columns>
-                <DataGridCheckBoxColumn
-                    Binding="{Binding IsChecked}"
-                    Header="处理" />
-                <DataGridTemplateColumn
-                    CanUserResize="False"
-                    Header="匹配">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                x:Name="e"
-                                Margin="16,0"
-                                VerticalAlignment="Center"
-                                IsVisible="{Binding IsMatched}"
-                                Text="●" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn
-                    CanUserResize="False"
-                    Header="完成">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                x:Name="e"
-                                Margin="16,0"
-                                VerticalAlignment="Center"
-                                Foreground="Green"
-                                IsVisible="{Binding IsCompleted}"
-                                Text="●" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn
-                    Binding="{Binding Name}"
-                    Header="旧文件名" />
-                <DataGridTextColumn
-                    Binding="{Binding NewName}"
-                    Header="新文件名" />
+        <Grid RowDefinitions="*,8,Auto">
+            <DataGrid
+                CanUserReorderColumns="False"
+                CanUserResizeColumns="True"
+                CanUserSortColumns="False"
+                ItemsSource="{Binding Files}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn
+                        Width="48"
+                        CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox
+                                    HorizontalAlignment="Center"
+                                    IsChecked="{Binding IsChecked}"
+                                    IsVisible="{Binding IsMatched}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="匹配">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    x:Name="e"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding IsMatched}"
+                                    Text="●" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="完成">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    x:Name="e"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="Green"
+                                    IsVisible="{Binding IsCompleted}"
+                                    Text="●" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn
+                        Binding="{Binding Name}"
+                        Header="旧文件（夹）名"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding NewName}"
+                        Header="新文件（夹）名" />
+                    <DataGridTextColumn
+                        Binding="{Binding Path}"
+                        Header="旧路径"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding NewPath}"
+                        Header="新路径" />
 
-            </DataGrid.Columns>
-        </DataGrid>
-
+                </DataGrid.Columns>
+            </DataGrid>
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="Auto,*,Auto">
+                <CheckBox
+                    Content="仅显示匹配项"
+                    IsChecked="{Binding ShowMatchedOnly}" />
+                <TextBlock Grid.Column="2">
+                    <Run Text="共搜索到" />
+                    <Run Text="{Binding TotalCount}" />
+                    <Run Text="项，匹配" />
+                    <Run Text="{Binding MatchedCount}" />
+                    <Run Text="项" />
+                </TextBlock>
+            </Grid>
+        </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

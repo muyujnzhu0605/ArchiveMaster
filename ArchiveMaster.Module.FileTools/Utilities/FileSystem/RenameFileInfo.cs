@@ -18,4 +18,7 @@ namespace ArchiveMaster.Utilities;
         
         [ObservableProperty]
         private string newName;
+
+        [ObservableProperty]
+        private string newPath;
     }
