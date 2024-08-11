@@ -22,10 +22,17 @@ namespace ArchiveMaster.Configs
         };
 
         private static Dictionary<string, ConfigInfo> configs = new Dictionary<string, ConfigInfo>();
+
         private bool isLoaded = false;
         public event EventHandler BeforeSaving;
 
         public static AppConfig Instance { get; } = new AppConfig();
+
+        public bool DebugMode { get; set; }
+#if DEBUG
+            = true;
+#endif
+        public int DebugModeLoopDelay { get; set; } = 10;
 
         public static void RegisterConfig(Type type, string key)
         {
@@ -83,9 +90,13 @@ namespace ArchiveMaster.Configs
             isLoaded = true;
         }
 
-        public void Save()
+        public void Save(bool raiseEvent = true)
         {
-            BeforeSaving?.Invoke(this, EventArgs.Empty);
+            if (raiseEvent)
+            {
+                BeforeSaving?.Invoke(this, EventArgs.Empty);
+            }
+
             try
             {
                 var json = JsonSerializer.Serialize(configs.Values.ToDictionary(p => p.Key, p => p.Config),

@@ -1,12 +1,17 @@
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract class ViewModelBase : ObservableObject
+public abstract partial class ViewModelBase : ObservableObject
 {
+    [ObservableProperty]
+    private bool isWorking = false;
+    
     protected virtual UtilityBase Utility { get; private set; }
+    
     public abstract ConfigBase Config { get; }
 
     protected virtual T CreateUtility<T>() where T : UtilityBase

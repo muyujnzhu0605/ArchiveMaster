@@ -60,7 +60,7 @@ namespace ArchiveMaster.Utilities
                     states.MaxProgress = files.Count();
                     break;
             }
-            
+
             foreach (var file in files)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -104,6 +104,11 @@ namespace ArchiveMaster.Utilities
                 if (states.NeedBroken)
                 {
                     break;
+                }
+
+                if (AppConfig.Instance.DebugMode && AppConfig.Instance.DebugModeLoopDelay > 0)
+                {
+                    Thread.Sleep(AppConfig.Instance.DebugModeLoopDelay);
                 }
             }
         }

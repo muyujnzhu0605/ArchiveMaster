@@ -65,7 +65,7 @@ namespace ArchiveMaster.Utilities
                     }
 
                     NotifyProgress(1.0*index/sourceFiles.Count);
-                    NotifyMessage($"正在分析源文件：{sourceFile.FullName}（{index}/{sourceFiles.Count}）");
+                    NotifyMessage($"正在分析源文件（{index}/{sourceFiles.Count}）：{sourceFile.FullName}");
                     matchedFiles.Clear();
                     tempFiles.Clear();
 
@@ -267,7 +267,7 @@ namespace ArchiveMaster.Utilities
         }
 
 
-        public override  Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken token)
         {
             if (ExecutingFiles == null)
             {
@@ -286,7 +286,7 @@ namespace ArchiveMaster.Utilities
             return TryForFilesAsync(files, (file, s) =>
             {
                 progress += file.Length;
-                NotifyMessage($"正在{copyMoveText}：{file.Path}{s.GetProgressMessage()}");
+                NotifyMessage($"正在{copyMoveText}{s.GetProgressMessage()}：{file.Path}");
                 string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
                 string destFileDir = Path.GetDirectoryName(destFile);
                 if (!Directory.Exists(destFileDir))

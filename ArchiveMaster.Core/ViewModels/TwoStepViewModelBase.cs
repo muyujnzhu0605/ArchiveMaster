@@ -5,8 +5,12 @@ using FzLib.Avalonia.Messages;
 using ArchiveMaster.Messages;
 using ArchiveMaster.Utilities;
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Configs;
+using Avalonia.Controls;
 using Serilog;
 
 namespace ArchiveMaster.ViewModels;
@@ -21,12 +25,6 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
     [ObservableProperty]
     private bool canReset = false;
-
-    [ObservableProperty]
-    private bool isEnable = true;
-
-    [ObservableProperty]
-    private bool isWorking = false;
 
     [ObservableProperty]
     private string message = "就绪";
@@ -123,6 +121,8 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
 
         CanExecute = false;
+        CanReset = false;
+        ResetCommand.NotifyCanExecuteChanged();
 
         await TryRunAsync(async () =>
         {
@@ -139,6 +139,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     [RelayCommand(CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync()
     {
+        AppConfig.Instance.Save(false);
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();
         CanReset = false;
