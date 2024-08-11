@@ -11,7 +11,7 @@ using ArchiveMaster.Enums;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
 
-namespace OffsiteBackupOfflineSync.Utility
+namespace ArchiveMaster.Utilities
 {
     public class DirStructureSyncUtility(DirStructureSyncConfig config) : TwoStepUtilityBase
     {
@@ -25,12 +25,7 @@ namespace OffsiteBackupOfflineSync.Utility
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            if (!(Config.CompareName || Config.CompareLength || Config.CompareTime))
-            {
-                throw new ArgumentException("至少需要有一个比较类型");
-            }
-
-            List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
+          List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
             List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
 
             await Task.Run(() =>
@@ -46,7 +41,7 @@ namespace OffsiteBackupOfflineSync.Utility
                 //分析模板目录，创建由属性指向文件的字典
                 CreateDictionaries(Config.TemplateDir, Config.MaxTimeToleranceSecond, token);
 
-                NotifyProgressUpdate($"正在查找源文件");
+                NotifyMessage($"正在查找源文件");
 
                 //枚举源目录
                 var sourceFiles = new DirectoryInfo(Config.SourceDir)
@@ -69,8 +64,8 @@ namespace OffsiteBackupOfflineSync.Utility
                         continue;
                     }
 
-                    NotifyProgressUpdate(sourceFiles.Count, index,
-                        $"正在分析源文件：{sourceFile.FullName}（{index}/{sourceFiles.Count}）");
+                    NotifyProgress(1.0*index/sourceFiles.Count);
+                    NotifyMessage($"正在分析源文件：{sourceFile.FullName}（{index}/{sourceFiles.Count}）");
                     matchedFiles.Clear();
                     tempFiles.Clear();
 
@@ -146,13 +141,13 @@ namespace OffsiteBackupOfflineSync.Utility
                     void GetMatchedFiles<TK>(Dictionary<TK, object> dic, TK key)
                     {
                         object files = null;
-                        if (!dic.ContainsKey(key))
+                        if (!dic.TryGetValue(key, out var value))
                         {
                             notMatched = true;
                             return;
                         }
 
-                        files = dic[key];
+                        files = value;
                         //}
 
                         if (matchedFiles.Count == 0) //如果notMatched==false，但matchedFiles.Count==0，说明这是第一个匹配
@@ -235,7 +230,8 @@ namespace OffsiteBackupOfflineSync.Utility
 
             foreach (var file in fileInfos)
             {
-                NotifyProgressUpdate($"正在分析模板文件：{file.FullName}");
+                NotifyProgressIndeterminate();
+                NotifyMessage($"正在分析模板文件：{file.FullName}");
                 SetOrAdd(name2Template, file.Name);
                 SetOrAdd(length2Template, file.Length);
                 for (int i = -maxTimeTolerance; i <= maxTimeTolerance; i++)
@@ -271,7 +267,7 @@ namespace OffsiteBackupOfflineSync.Utility
         }
 
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override  Task ExecuteAsync(CancellationToken token)
         {
             if (ExecutingFiles == null)
             {
@@ -287,40 +283,28 @@ namespace OffsiteBackupOfflineSync.Utility
                 files = files.Where(p => !p.RightPosition);
             }
 
-            await Task.Run(() =>
+            return TryForFilesAsync(files, (file, s) =>
             {
-                foreach (var file in files)
+                progress += file.Length;
+                NotifyMessage($"正在{copyMoveText}：{file.Path}{s.GetProgressMessage()}");
+                string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
+                string destFileDir = Path.GetDirectoryName(destFile);
+                if (!Directory.Exists(destFileDir))
                 {
-                    token.ThrowIfCancellationRequested();
-                    try
-                    {
-                        progress += file.Length;
-                        NotifyProgressUpdate(count, progress,
-                            $"正在{copyMoveText}：{file.Path}（{progress}/{count}）");
-                        string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
-                        string destFileDir = Path.GetDirectoryName(destFile);
-                        if (!Directory.Exists(destFileDir))
-                        {
-                            Directory.CreateDirectory(destFileDir);
-                        }
-
-                        if (Config.Copy)
-                        {
-                            File.Copy(Path.Combine(Config.SourceDir, file.Path), destFile);
-                        }
-                        else
-                        {
-                            File.Move(Path.Combine(Config.SourceDir, file.Path), destFile);
-                        }
-
-                        file.Complete();
-                    }
-                    catch (Exception ex)
-                    {
-                        file.Error(ex);
-                    }
+                    Directory.CreateDirectory(destFileDir);
                 }
+
+                if (Config.Copy)
+                {
+                    File.Copy(Path.Combine(Config.SourceDir, file.Path), destFile);
+                }
+                else
+                {
+                    File.Move(Path.Combine(Config.SourceDir, file.Path), destFile);
+                }
+
             }, token);
+           
         }
     }
 }

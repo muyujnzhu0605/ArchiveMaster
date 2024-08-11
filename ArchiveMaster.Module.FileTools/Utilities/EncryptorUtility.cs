@@ -38,58 +38,52 @@ namespace ArchiveMaster.Utilities
                 Dictionary<string, string> dirStructureDic = CreateDirStructureDic();
 
                 //初始化进度通知
-                string baseMessage = null;
                 var files = ProcessingFiles.Where(p => p.IsEnable).ToList();
                 int count = files.Count;
+
                 var progressReport = new AesExtension.RefreshFileProgress(
                     (string source, string target, long max, long value) =>
                     {
-                        NotifyProgressUpdate(count, index, baseMessage +
-                                                           $"（{index}/{count}），当前文件：{Path.GetFileName(source)}（{1.0 * value / 1024 / 1024:0}MB/{1.0 * max / 1024 / 1024:0}MB）");
+                        string baseMessage = isEncrypting ? "正在加密文件" : "正在解密文件";
+                        NotifyMessage(baseMessage +
+                                      $"（{index}/{count}），当前文件：{Path.GetFileName(source)}（{1.0 * value / 1024 / 1024:0}MB/{1.0 * max / 1024 / 1024:0}MB）");
                     });
 
-                foreach (var file in files)
+                TryForFiles(files, (file, s) =>
                 {
-                    token.ThrowIfCancellationRequested();
-                    baseMessage = isEncrypting ? "正在加密文件" : "正在解密文件";
-                    NotifyProgressUpdate(count, index++, baseMessage +
-                                                         $"（{index}/{count}），当前文件：{file.Name}（0MB/{1.0 * new FileInfo(file.Path).Length / 1024 / 1024:0}）");
+                    index++;
 
-                    try
+                    ProcessFileNames(file, dirStructureDic);
+                    if (isEncrypting)
                     {
-                        ProcessFileNames(file, dirStructureDic);
-                        if (isEncrypting)
-                        {
-                            aes.GenerateIV();
-                            aes.EncryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
-                                progressReport);
-                            file.IsFileNameEncrypted = Config.EncryptFileNames;
-                        }
-                        else
-                        {
-                            aes.DecryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
-                                progressReport);
-                            file.IsFileNameEncrypted = false;
-                        }
-
-                        file.IsEncrypted = isEncrypting;
-                        File.SetLastWriteTime(file.TargetPath, File.GetLastWriteTime(file.Path));
-
-                        if (Config.DeleteSourceFiles)
-                        {
-                            if (File.GetAttributes(file.Path).HasFlag(FileAttributes.ReadOnly))
-                            {
-                                File.SetAttributes(file.Path, FileAttributes.Normal);
-                            }
-
-                            File.Delete(file.Path);
-                        }
+                        aes.GenerateIV();
+                        aes.EncryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
+                            progressReport);
+                        file.IsFileNameEncrypted = Config.EncryptFileNames;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        file.Error = ex;
+                        aes.DecryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
+                            progressReport);
+                        file.IsFileNameEncrypted = false;
                     }
-                }
+
+                    file.IsEncrypted = isEncrypting;
+                    File.SetLastWriteTime(file.TargetPath, File.GetLastWriteTime(file.Path));
+
+                    if (Config.DeleteSourceFiles)
+                    {
+                        if (File.GetAttributes(file.Path).HasFlag(FileAttributes.ReadOnly))
+                        {
+                            File.SetAttributes(file.Path, FileAttributes.Normal);
+                        }
+
+                        File.Delete(file.Path);
+                    }
+                }, token, new FilesLoopOptions()
+                {
+                    AutoApplyProgress = AutoApplyProgressMode.FileLength
+                });
 
                 if (Config.EncryptDirectoryStructure && isEncrypting)
                 {
@@ -204,29 +198,27 @@ namespace ArchiveMaster.Utilities
                 throw new Exception("源目录不存在");
             }
 
-            await Task.Run(() =>
-            {
-                NotifyProgressUpdate(0, -1, "正在搜索文件");
-                foreach (var file in new DirectoryInfo(sourceDir).EnumerateFiles( "*", new EnumerationOptions()
-                         {
-                             IgnoreInaccessible = true,
-                             RecurseSubdirectories = true,
-                         }))
+            NotifyProgressIndeterminate();
+            NotifyMessage("正在枚举文件");
+
+            await TryForFilesAsync(new DirectoryInfo(sourceDir)
+                .EnumerateFiles("*", new EnumerationOptions()
                 {
-                    token.ThrowIfCancellationRequested();
-                    var isEncrypted = IsEncryptedFile(file.FullName);
-                    var fileM = new EncryptorFileInfo(file)
-                    {
-                        IsFileNameEncrypted = isEncrypted && IsNameEncrypted(file.Name),
-                        IsEncrypted = isEncrypted,
-                        RelativePath = Path.GetRelativePath(sourceDir, file.FullName)
-                    };
-                    if (fileM.Name != DirectoryStructureFile)
-                    {
-                        files.Add(fileM);
-                    }
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = true,
+                })
+                .Select(p => new EncryptorFileInfo(p)), (file, s) =>
+            {
+                var isEncrypted = IsEncryptedFile(file.Path);
+                file.IsFileNameEncrypted = isEncrypted && IsNameEncrypted(file.Name);
+                file.IsEncrypted = isEncrypted;
+                file.RelativePath = Path.GetRelativePath(sourceDir, file.Path);
+                if (file.Name != DirectoryStructureFile)
+                {
+                    NotifyMessage("正在加入：" + file.Name);
+                    files.Add(file);
                 }
-            }, token);
+            }, token, new FilesLoopOptions(false));
 
             ProcessingFiles = files;
         }

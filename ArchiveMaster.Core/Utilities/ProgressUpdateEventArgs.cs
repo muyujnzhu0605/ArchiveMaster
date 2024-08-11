@@ -3,10 +3,17 @@ using System.Numerics;
 
 namespace ArchiveMaster.Utilities
 {
-    public class ProgressUpdateEventArgs<T>(T maximum, T current, string message) : EventArgs where T : INumber<T>
+    public class ProgressUpdateEventArgs : EventArgs 
     {
-        public T Maximum { get; } = maximum;
-        public T Current { get; } = current;
-        public string Message { get; } = message;
+        public double Progress { get; }
+
+        public ProgressUpdateEventArgs(double progress)
+        {
+            if (!double.IsNaN(progress) && progress is < 0 or > 1)
+            {
+                throw new ArgumentException("百分比应在0和1之间，或用NaN表示不确定", nameof(progress));
+            }
+            Progress = progress;
+        }
     }
 }

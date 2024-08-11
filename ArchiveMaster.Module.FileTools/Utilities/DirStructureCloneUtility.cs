@@ -13,46 +13,33 @@ namespace ArchiveMaster.Utilities
         public IList<SimpleFileInfo> Files { get; private set; }
         public override DirStructureCloneConfig Config { get; } = config;
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken token)
         {
-            int index = 0;
-            await Task.Run(() =>
+            return TryForFilesAsync(Files, (file, s) =>
             {
-                foreach (var file in Files)
+                string relativePath = Path.GetRelativePath(Config.SourceDir, file.Path);
+                string newPath = Path.Combine(Config.TargetDir, relativePath);
+                FileInfo newFile = new FileInfo(newPath);
+                if (!newFile.Directory.Exists)
                 {
-                    token.ThrowIfCancellationRequested();
-                    string relativePath = Path.GetRelativePath(Config.SourceDir, file.Path);
-                    string newPath = Path.Combine(Config.TargetDir, relativePath);
-                    FileInfo newFile = new FileInfo(newPath);
-                    if (!newFile.Directory.Exists)
-                    {
-                        newFile.Directory.Create();
-                    }
-
-                    index++;
-                    NotifyProgressUpdate(Files.Count, index, $"正在创建：{relativePath}（{index}/{Files.Count}）");
-
-                    try
-                    {
-                        using (FileStream fs = File.Create(newPath))
-                        {
-                            MarkAsSparseFile(fs.SafeFileHandle);
-                            fs.SetLength(file.Length);
-                            fs.Seek(-1, SeekOrigin.End);
-                        }
-
-                        File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
-                        file.Complete();
-                    }
-                    catch (Exception ex)
-                    {
-                        file.Error(ex);
-                    }
+                    newFile.Directory.Create();
                 }
+
+                NotifyMessage($"正在创建：{relativePath}{s.GetProgressMessage()}");
+
+
+                using (FileStream fs = File.Create(newPath))
+                {
+                    MarkAsSparseFile(fs.SafeFileHandle);
+                    fs.SetLength(file.Length);
+                    fs.Seek(-1, SeekOrigin.End);
+                }
+
+                File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
             }, token);
         }
 
-        public override async Task InitializeAsync(CancellationToken token )
+        public override async Task InitializeAsync(CancellationToken token)
         {
             if (!OperatingSystem.IsWindows())
             {
@@ -61,7 +48,9 @@ namespace ArchiveMaster.Utilities
 
             List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
-            NotifyProgressUpdate(-1, 0, $"正在枚举文件");
+            NotifyMessage("正在枚举文件");
+            NotifyProgressIndeterminate();
+
             await Task.Run(() =>
             {
                 var fileInfos = new DirectoryInfo(Config.SourceDir)
@@ -71,23 +60,13 @@ namespace ArchiveMaster.Utilities
                         AttributesToSkip = 0,
                         RecurseSubdirectories = true,
                     }).ToList();
-                token.ThrowIfCancellationRequested();
-                int index = 0;
-                foreach (var file in fileInfos)
-                {
-                    index++;
-                    token.ThrowIfCancellationRequested();
-                    NotifyProgressUpdate(fileInfos.Count, index,
-                        $"正在处理：{Path.GetRelativePath(Config.SourceDir, file.FullName)}（{index}/{fileInfos.Count}）");
 
-                    files.Add(new SimpleFileInfo()
-                    {
-                        Name = file.Name,
-                        Path = file.FullName,
-                        Time = file.LastWriteTime,
-                        Length = file.Length,
-                    });
-                }
+                TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p)), (file, s) =>
+                {
+                    NotifyMessage(
+                        $"正在处理：{Path.GetRelativePath(Config.SourceDir, file.Path)}{s.GetProgressMessage()}");
+                    files.Add(file);
+                }, token, new FilesLoopOptions(false));
             }, token);
             Files = files;
         }
@@ -101,7 +80,8 @@ namespace ArchiveMaster.Utilities
             IntPtr OutBuffer,
             int nOutBufferSize,
             ref int pBytesReturned,
-            [In] ref NativeOverlapped lpOverlapped
+            [In]
+            ref NativeOverlapped lpOverlapped
         );
 
         private static void MarkAsSparseFile(SafeFileHandle fileHandle)

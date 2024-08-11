@@ -218,6 +218,7 @@ namespace ArchiveMaster.Utilities
                     int size;
                     byte[] input = new byte[bufferLength];
                     long fileLength = streamSource.Length;
+                    refreshFileProgress?.Invoke(sourcePath, targetPath, fileLength, currentSize); //更新进度
 
                     while ((size = streamSource.Read(input, 0, bufferLength)) > 0)
                     {

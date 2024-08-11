@@ -21,4 +21,7 @@ namespace ArchiveMaster.Utilities;
 
         [ObservableProperty]
         private string newPath;
+        
+        [ObservableProperty]
+        private string tempPath;
     }

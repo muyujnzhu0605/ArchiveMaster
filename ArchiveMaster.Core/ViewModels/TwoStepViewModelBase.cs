@@ -7,6 +7,7 @@ using ArchiveMaster.Utilities;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -30,8 +31,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     [ObservableProperty]
     private string message = "就绪";
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
     public TwoStepViewModelBase(bool enableInitialize)
@@ -44,14 +44,18 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     public TwoStepViewModelBase() : this(true)
     {
     }
+
     public bool EnableInitialize { get; }
 
-    public bool ProgressIndeterminate => Progress < 0;
+    public bool ProgressIndeterminate => double.IsNaN(Progress);
+
     protected override TUtility Utility => base.Utility as TUtility;
+
     protected override T CreateUtility<T>()
     {
         var utility = base.CreateUtility<T>();
         Utility.ProgressUpdate += Utility_ProgressUpdate;
+        Utility.MessageUpdate += Utility_MessageUpdate;
         return utility;
     }
 
@@ -61,6 +65,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         {
             return;
         }
+
         Utility.ProgressUpdate -= Utility_ProgressUpdate;
         base.DisposeUtility();
     }
@@ -88,6 +93,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     protected virtual void OnReset()
     {
     }
+
     [RelayCommand]
     private void CancelExecute()
     {
@@ -186,7 +192,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
             await action();
             return true;
         }
-        catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException)
+        catch (OperationCanceledException ex)
         {
             WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
             {
@@ -199,6 +205,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "执行工具失败");
             WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
             {
                 Type = CommonDialogMessage.CommonDialogType.Error,
@@ -216,9 +223,13 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         }
     }
 
-    private void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs<int> e)
+    private void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
     {
-        Progress = 1.0 * e.Current / e.Maximum;
+        Progress = e.Progress;
+    }
+
+    private void Utility_MessageUpdate(object sender, MessageUpdateEventArgs e)
+    {
         Message = e.Message;
     }
 }

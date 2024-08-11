@@ -15,9 +15,6 @@ namespace ArchiveMaster.ViewModels
         private bool isFileNameEncrypted;
 
         [ObservableProperty]
-        private Exception error;
-
-        [ObservableProperty]
         private string relativePath;
 
         [ObservableProperty]

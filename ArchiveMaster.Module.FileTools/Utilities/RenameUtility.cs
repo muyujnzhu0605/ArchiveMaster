@@ -176,29 +176,28 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
             throw new Exception("有一些文件（夹）的目标路径相同：" + string.Join('、', duplicates));
         }
 
-        await Task.Run(() =>
+        //重命名为临时文件名，避免有可能新的文件名和其他文件的旧文件名一致导致错误的问题
+        await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            foreach (var file in processingFiles)
-            {
-                try
-                {
-                    //有可能新的文件名和其他文件的旧文件名一致导致错误，后续需要改
-                    File.Move(file.Path, file.NewPath);
-                    file.Complete();
-                }
-                catch (Exception ex)
-                {
-                    file.Error(ex);
-                }
-            }
-        }, token);
+            NotifyMessage($"正在重命名（第一步，共二步）：{file.Name}=>{file.NewName}{s.GetProgressMessage()}");
+            file.TempPath = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
+            File.Move(file.Path, file.TempPath);
+        },token);  
+        
+        //重命名为目标文件名
+        await TryForFilesAsync(processingFiles, (file, s) =>
+        {
+            NotifyMessage($"正在重命名（第一步，共二步）：{file.Name}=>{file.NewName}{s.GetProgressMessage()}");
+            File.Move(file.TempPath, file.NewPath);
+        },token);
     }
 
     public override async Task InitializeAsync(CancellationToken token = default)
     {
         regexOptions = Config.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
         stringComparison = Config.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-        NotifyProgressUpdate(0, -1, "正在查找文件");
+        NotifyProgressIndeterminate();
+        NotifyMessage("正在查找文件");
         await Task.Run(() =>
         {
             PreprocessReplacePattern();
@@ -224,7 +223,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
 
-            foreach (var renameFile in files.Select(file => new RenameFileInfo(file)))
+            TryForFiles(files.Select(file => new RenameFileInfo(file)), (renameFile, s) =>
             {
                 renameFiles.Add(renameFile);
                 renameFile.IsMatched = IsMatched(renameFile);
@@ -233,7 +232,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
                     renameFile.NewName = Rename(renameFile);
                     renameFile.NewPath = Path.Combine(Path.GetDirectoryName(renameFile.Path), renameFile.NewName);
                 }
-            }
+            },token, new FilesLoopOptions(false));
 
             Files = renameFiles.AsReadOnly();
         }, token);

@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib;
-using OffsiteBackupOfflineSync.Utility;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -26,8 +26,6 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase<DirStructu
 
     [ObservableProperty]
     private int checkedFilesCount = 0;
-
-    private DirStructureSyncUtility u;
 
     partial void OnDisplayMultipleMatchesChanged(bool value)
     {
@@ -60,21 +58,21 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase<DirStructu
 
     private void UpdateList()
     {
-        if (u == null)
+        if (Utility == null)
         {
             return;
         }
 
-        if (u.WrongPositionFiles == null || u.RightPositionFiles == null)
+        if (Utility.WrongPositionFiles == null || Utility.RightPositionFiles == null)
         {
             Files = new ObservableCollection<MatchingFileInfo>();
             return;
         }
 
-        IEnumerable<MatchingFileInfo> files = u.WrongPositionFiles;
+        IEnumerable<MatchingFileInfo> files = Utility.WrongPositionFiles;
         if (DisplayRightPosition)
         {
-            files = files.Concat(u.RightPositionFiles);
+            files = files.Concat(Utility.RightPositionFiles);
         }
 
         if (!DisplayMultipleMatches)
@@ -84,7 +82,7 @@ public partial class DirStructureSyncViewModel : TwoStepViewModelBase<DirStructu
 
         files = files.OrderBy(p => p.Path);
         Files = new ObservableCollection<MatchingFileInfo>(files);
-        u.ExecutingFiles = Files;
+        Utility.ExecutingFiles = Files;
         FilesCount = Files.Count;
         CheckedFilesCount = Files.Count(p => p.IsChecked);
     }

@@ -43,7 +43,7 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility>
         if (ProcessingFiles.Any(p => p.Error != null))
         {
             string typeDesc = IsEncrypting ? "加密" : "解密";
-            var errorDetails = ProcessingFiles.Where(p => p.Error != null).Select(p => $"{p.Name}：{p.Error.Message}");
+            var errorDetails = ProcessingFiles.Where(p => p.Error != null).Select(p => $"{p.Name}：{p.Message}");
             await WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
             {
                 Type = CommonDialogMessage.CommonDialogType.Error,

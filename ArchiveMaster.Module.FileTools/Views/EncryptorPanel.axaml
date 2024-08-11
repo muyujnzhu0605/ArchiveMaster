@@ -178,21 +178,21 @@
                                 HorizontalAlignment="Stretch"
                                 Background="Transparent"
                                 Cursor="Hand"
-                                IsVisible="{Binding Error, Converter={StaticResource NotNullConverter}}">
+                                IsVisible="{Binding Message, Converter={StaticResource NotNullConverter}}">
                                 <TextBlock
-                                    Text="{Binding Error.Message}"
+                                    Text="{Binding Message}"
                                     TextTrimming="CharacterEllipsis" />
                                 <Button.Flyout>
                                     <Flyout>
                                         <Grid RowDefinitions="Auto,8,Auto">
                                             <TextBlock
-                                                Text="{Binding Error}"
+                                                Text="{Binding Message}"
                                                 TextWrapping="Wrap" />
                                             <Button
                                                 Grid.Row="2"
                                                 HorizontalAlignment="Left"
                                                 Command="{Binding $parent[DataGrid].DataContext.CopyErrorCommand}"
-                                                CommandParameter="{Binding Error}"
+                                                CommandParameter="{Binding Message}"
                                                 Content="复制" />
                                         </Grid>
                                     </Flyout>
