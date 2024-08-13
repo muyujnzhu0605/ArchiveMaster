@@ -286,7 +286,7 @@ namespace ArchiveMaster.Utilities
             return TryForFilesAsync(files, (file, s) =>
             {
                 progress += file.Length;
-                NotifyMessage($"正在{copyMoveText}{s.GetProgressMessage()}：{file.Path}");
+                NotifyMessage($"正在{copyMoveText}{s.GetFileIndexAndCountMessage()}：{file.Path}");
                 string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
                 string destFileDir = Path.GetDirectoryName(destFile);
                 if (!Directory.Exists(destFileDir))

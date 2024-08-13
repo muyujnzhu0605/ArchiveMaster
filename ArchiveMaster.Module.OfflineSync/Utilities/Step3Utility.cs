@@ -96,15 +96,10 @@ namespace ArchiveMaster.Utilities
                 UpdateFiles = step2.Files;
                 LocalDirectories = step2.LocalDirectories;
 
-                //检查文件
-                int index = 0;
-                foreach (var file in UpdateFiles)
+                TryForFiles(UpdateFiles, (file, s) =>
                 {
-                    token.ThrowIfCancellationRequested();
-#if DEBUG
-                    TestUtility.SleepInDebug();
-#endif
-                    index++;
+                    ;
+
                     string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
                     string target = Path.Combine(file.TopDirectory, file.Path);
                     string oldPath = file.OldPath == null ? null : Path.Combine(file.TopDirectory, file.OldPath);
@@ -115,8 +110,7 @@ namespace ArchiveMaster.Utilities
                     }
                     else
                     {
-                        NotifyProgressUpdate(UpdateFiles.Count, index,
-                            $"正在处理：{file.Path}（{index}/{UpdateFiles.Count}）");
+                        NotifyMessage($"正在处理{s.GetFileIndexAndCountMessage()}：{file.Path}");
                         switch (file.UpdateType)
                         {
                             case FileUpdateType.Add:
@@ -158,13 +152,13 @@ namespace ArchiveMaster.Utilities
                                 throw new InvalidEnumArgumentException();
                         }
                     }
-                }
+                }, token, new FilesLoopOptions(false));
             }, token);
         }
 
         public void AnalyzeEmptyDirectories(CancellationToken token)
         {
-            NotifyProgressUpdate($"正在查找空目录");
+            NotifyMessage($"正在查找空目录");
             DeletingDirectories = new List<SyncFileInfo>();
             foreach (var topDir in LocalDirectories.Keys)
             {
@@ -230,20 +224,12 @@ namespace ArchiveMaster.Utilities
                 long totalLength = updateFiles
                     .Where(p => p.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move))
                     .Sum(p => p.Length);
+
                 long length = 0;
-                foreach (var file in updateFiles.OrderByDescending(p => p.UpdateType))
+                TryForFiles(updateFiles.OrderByDescending(p => p.UpdateType), (file, s) =>
                 {
                     //先处理移动，然后处理修改，这样能避免一些问题（2022-12-17）
-                    token.ThrowIfCancellationRequested();
-#if DEBUG
-                    TestUtility.SleepInDebug();
-#endif
-                    if (file.UpdateType is FileUpdateType.Add or FileUpdateType.Modify)
-                    {
-                        length += file.Length;
-                    }
-
-                    NotifyProgressUpdate(totalLength, length, $"正在处理：{file.Path}");
+                    NotifyMessage($"正在处理{s}：{file.Path}");
 
                     try
                     {
@@ -305,14 +291,17 @@ namespace ArchiveMaster.Utilities
                             default:
                                 throw new InvalidEnumArgumentException();
                         }
-
-                        file.Complete();
                     }
-                    catch (Exception ex)
+                    finally
                     {
-                        file.Error(ex);
+                        if (file.UpdateType is FileUpdateType.Add or FileUpdateType.Modify)
+                        {
+                            length += file.Length;
+                        }
+
+                        NotifyProgress(1.0 * length / totalLength);
                     }
-                }
+                }, token, new FilesLoopOptions(AutoApplyProgressMode.None));
             }, token);
         }
 

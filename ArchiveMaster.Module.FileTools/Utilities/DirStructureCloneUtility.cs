@@ -25,7 +25,7 @@ namespace ArchiveMaster.Utilities
                     newFile.Directory.Create();
                 }
 
-                NotifyMessage($"正在创建{s.GetProgressMessage()}：{relativePath}");
+                NotifyMessage($"正在创建{s.GetFileIndexAndCountMessage()}：{relativePath}");
 
 
                 using (FileStream fs = File.Create(newPath))
@@ -64,7 +64,7 @@ namespace ArchiveMaster.Utilities
                 TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p)), (file, s) =>
                 {
                     NotifyMessage(
-                        $"正在处理{s.GetProgressMessage()}：{Path.GetRelativePath(Config.SourceDir, file.Path)}");
+                        $"正在处理{s.GetFileIndexAndCountMessage()}：{Path.GetRelativePath(Config.SourceDir, file.Path)}");
                     files.Add(file);
                 }, token, new FilesLoopOptions(false));
             }, token);

@@ -179,7 +179,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
         //重命名为临时文件名，避免有可能新的文件名和其他文件的旧文件名一致导致错误的问题
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            NotifyMessage($"正在重命名（第一步，共二步）{s.GetProgressMessage()}：{file.Name}=>{file.NewName}");
+            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileIndexAndCountMessage()}：{file.Name}=>{file.NewName}");
             file.TempPath = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
             File.Move(file.Path, file.TempPath);
         },token);  
@@ -187,7 +187,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            NotifyMessage($"正在重命名（第一步，共二步）{s.GetProgressMessage()}：{file.Name}=>{file.NewName}");
+            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileIndexAndCountMessage()}：{file.Name}=>{file.NewName}");
             File.Move(file.TempPath, file.NewPath);
         },token);
     }
@@ -225,7 +225,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 
             TryForFiles(files.Select(file => new RenameFileInfo(file)), (renameFile, s) =>
             {
-                NotifyMessage($"正在处理文件{s.GetProgressMessage()}：{renameFile.Name}");
+                NotifyMessage($"正在处理文件{s.GetFileIndexAndCountMessage()}：{renameFile.Name}");
                 renameFiles.Add(renameFile);
                 renameFile.IsMatched = IsMatched(renameFile);
                 if (renameFile.IsMatched)

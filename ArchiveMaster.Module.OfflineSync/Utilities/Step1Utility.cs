@@ -30,29 +30,35 @@ namespace ArchiveMaster.Utilities
                     throw new ArgumentException("存在重复的顶级目录名：" + group.Key);
                 }
             }
+            
+            NotifyProgressIndeterminate();
 
             await Task.Run(() =>
             {
                 foreach (var dir in Config.SyncDirs)
                 {
-                    foreach (var file in new DirectoryInfo(dir).EnumerateFiles("*", SearchOption.AllDirectories))
+                    TryForFiles(new DirectoryInfo(dir)
+                        .EnumerateFiles("*", SearchOption.AllDirectories)
+                        .Select(p => new SyncFileInfo(p, dir)), (file, s) =>
                     {
-                        token.ThrowIfCancellationRequested();
-                        syncFiles.Add(new SyncFileInfo(file, dir));
-#if DEBUG
-                        TestUtility.SleepInDebug();
-#endif
-                        NotifyProgressUpdate($"正在搜索：{dir}，已加入 {++index} 个文件");
-                    }
+                        syncFiles.Add(file);
+                        index++;
+                        if (index % 10 == 0)
+                        {
+                            NotifyMessage($"正在搜索：{dir}，已加入 {index} 个文件");
+                        }
+                    }, token, new FilesLoopOptions(true, AutoApplyProgressMode.None));
                 }
-            }, token);
-            NotifyProgressUpdate($"正在保存快照");
 
-            Step1Model model = new Step1Model()
-            {
-                Files = syncFiles.ToList(),
-            };
-            await Task.Run(() => { ZipUtility.WriteToZip(model, Config.OutputFile); }, token);
+
+                NotifyMessage($"正在保存快照");
+
+                Step1Model model = new Step1Model()
+                {
+                    Files = syncFiles.ToList(),
+                };
+                ZipUtility.WriteToZip(model, Config.OutputFile);
+            }, token);
         }
     }
 }

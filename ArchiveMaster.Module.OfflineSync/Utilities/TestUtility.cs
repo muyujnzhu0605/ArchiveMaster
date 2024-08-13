@@ -162,11 +162,6 @@ namespace ArchiveMaster.Utilities
             });
         }
 
-        public static void SleepInDebug()
-        {
-            // Thread.Sleep(1);
-        }
-
         private static Random random = new Random();
 
         private static void CreateRandomFile(string path)

@@ -52,12 +52,14 @@ namespace ArchiveMaster.Utilities
                                 nameof(files));
                         }
 
-                        states.MaxProgress += f.Length;
+                        states.TotalLength += f.Length;
                     }
+
+                    states.CanAccessTotalLength = true;
 
                     break;
                 case AutoApplyProgressMode.FileNumber:
-                    states.MaxProgress = files.Count();
+                    states.FileCount = files.Count();
                     break;
             }
 
@@ -82,23 +84,27 @@ namespace ArchiveMaster.Utilities
                 catch (Exception ex)
                 {
                     file.Error(ex);
+                    options.CatchAction?.Invoke(file);
                 }
                 finally
                 {
+                    if (states.CanAccessTotalLength)
+                    {
+                        states.AccumulatedLength += (file as SimpleFileInfo).Length;
+                    }
+
+                    states.FileIndex++;
+
                     switch (options.AutoApplyProgress)
                     {
                         case AutoApplyProgressMode.FileLength:
-                            states.Progress += (file as SimpleFileInfo).Length;
+                            NotifyProgress(1.0 * states.AccumulatedLength / states.TotalLength);
                             break;
                         case AutoApplyProgressMode.FileNumber:
-                            states.Progress++;
+                            NotifyProgress(1.0 * states.FileIndex / states.FileCount);
                             break;
                     }
-
-                    if (options.AutoApplyProgress is not AutoApplyProgressMode.None)
-                    {
-                        NotifyProgress(1.0 * states.Progress / states.MaxProgress);
-                    }
+                    options.FinnalyAction?.Invoke(file);
                 }
 
                 if (states.NeedBroken)
@@ -115,25 +121,31 @@ namespace ArchiveMaster.Utilities
 
         public class FilesLoopStates(FilesLoopOptions options)
         {
+            private long totalLength = 0;
+
             public FilesLoopOptions Options { get; } = options;
             internal bool NeedBroken { get; private set; }
-            internal long MaxProgress { get; set; }
-            internal long Progress { get; set; }
 
-            public static string ProgressMessageFormat { get; set; } = "（{Progress}/{MaxProgress}）";
+            public int FileCount { get; internal set; }
 
-            public string GetProgressMessage()
+            public int FileIndex { get; internal set; }
+
+            public long TotalLength
             {
-                long progress = Options.AutoApplyProgress switch
-                {
-                    AutoApplyProgressMode.FileNumber => Progress + 1,
-                    AutoApplyProgressMode.FileLength => Progress,
-                    AutoApplyProgressMode.None or _ => throw new ArgumentException(
-                        "当AutoApplyProgressMode为None时，不支持调用该方法"),
-                };
-                return ProgressMessageFormat
-                    .Replace("{Progress}", progress.ToString())
-                    .Replace("{MaxProgress}", MaxProgress.ToString());
+                get => CanAccessTotalLength ? totalLength : throw new ArgumentException("未初始化总大小，不可调用TotalLength");
+                internal set => totalLength = value;
+            }
+
+            internal bool CanAccessTotalLength { get; set; }
+
+            public long AccumulatedLength { get; internal set; }
+
+            public static string ProgressMessageFormat { get; set; } = "（{0}/{1}）";
+
+            public string GetFileIndexAndCountMessage()
+            {
+                int fileIndex = FileCount + 1;
+                return string.Format(ProgressMessageFormat, fileIndex, FileCount);
             }
 
             public void Break()
@@ -159,8 +171,17 @@ namespace ArchiveMaster.Utilities
                 AutoApplyProgress = autoApplyProgress;
             }
 
+            public FilesLoopOptions(AutoApplyProgressMode autoApplyProgress)
+            {
+                AutoApplyProgress = autoApplyProgress;
+            }
+
             public bool AutoApplyStatus { get; set; } = true;
             public AutoApplyProgressMode AutoApplyProgress { get; set; } = AutoApplyProgressMode.FileNumber;
+            
+            public Action<SimpleFileOrDirInfo> CatchAction { get; set; }
+            
+            public Action<SimpleFileOrDirInfo> FinnalyAction { get; set; }
         }
 
         public enum AutoApplyProgressMode

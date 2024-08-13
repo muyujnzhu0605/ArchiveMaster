@@ -58,147 +58,135 @@ namespace ArchiveMaster.Utilities
                 Directory.CreateDirectory(Config.PatchDir);
             }
 
+            NotifyProgressIndeterminate();
             await Task.Run(() =>
             {
+                Thread.Sleep(3000);
                 var files = UpdateFiles.Where(p => p.IsChecked).ToList();
                 Dictionary<string, string> offsiteTopDir2LocalDir =
                     Config.MatchingDirs.ToDictionary(p => p.OffsiteDir, p => p.LocalDir);
-                long totalLength = files.Where(p => p.UpdateType != FileUpdateType.Delete).Sum(p => p.Length);
+                long totalLength = files.Where(p => p.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move))
+                    .Sum(p => p.Length);
                 long length = 0;
                 StringBuilder batScript = new StringBuilder();
                 StringBuilder ps1Script = new StringBuilder();
                 batScript.AppendLine("@echo off");
                 ps1Script.AppendLine("Import-Module BitsTransfer");
                 using var sha256 = SHA256.Create();
-                foreach (var file in files)
+
+                TryForFiles(files, (file, s) =>
                 {
-                    token.ThrowIfCancellationRequested();
-#if DEBUG
-                    TestUtility.SleepInDebug();
-#endif
-                    if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move))
+                    if (file.UpdateType is FileUpdateType.Delete or FileUpdateType.Move)
                     {
-                        file.TempName = GetTempFileName(file, sha256);
-                        length += file.Length;
-                        NotifyProgressUpdate(totalLength, length, $"正在处理：{file.Path}");
-                        string sourceFile = Path.Combine(offsiteTopDir2LocalDir[file.TopDirectory], file.Path);
-                        string destFile = Path.Combine(Config.PatchDir, file.TempName);
-                        if (File.Exists(destFile))
+                        return;
+                    }
+
+                    file.TempName = GetTempFileName(file, sha256);
+                    NotifyMessage($"正在处理{s.GetFileIndexAndCountMessage()}：{file.Path}");
+                    string sourceFile = Path.Combine(offsiteTopDir2LocalDir[file.TopDirectory], file.Path);
+                    string destFile = Path.Combine(Config.PatchDir, file.TempName);
+                    if (File.Exists(destFile))
+                    {
+                        FileInfo existingFile = new FileInfo(destFile);
+                        if (existingFile.Length == file.Length
+                            && existingFile.LastWriteTime == file.Time
+                            && Config.ExportMode != ExportMode.Script)
                         {
-                            FileInfo existingFile = new FileInfo(destFile);
-                            if (existingFile.Length == file.Length
-                                && existingFile.LastWriteTime == file.Time
-                                && Config.ExportMode != ExportMode.Script)
+                            return;
+                        }
+
+                        try
+                        {
+                            File.Delete(destFile);
+                        }
+                        catch (IOException ex)
+                        {
+                            throw new IOException(
+                                $"修改时间或长度与待写入文件{file.Path}不同的目标补丁文件{destFile}已存在，但无法删除：{ex.Message}", ex);
+                        }
+                    }
+
+                    switch (Config.ExportMode)
+                    {
+                        case ExportMode.PreferHardLink:
+                            try
                             {
-                                continue;
+                                CreateHardLink(destFile, sourceFile);
                             }
-                            else
+                            catch (IOException)
                             {
-                                try
+                                goto copy;
+                            }
+
+                            break;
+                        case ExportMode.Copy:
+                            copy:
+                            int tryCount = 10;
+
+                            while (--tryCount > 0)
+                            {
+                                if (tryCount < 9 && File.Exists(destFile))
                                 {
                                     File.Delete(destFile);
                                 }
+
+                                try
+                                {
+                                    File.Copy(sourceFile, destFile);
+                                    tryCount = 0;
+                                }
                                 catch (IOException ex)
                                 {
-                                    throw new IOException(
-                                        $"修改时间或长度与待写入文件{file.Path}不同的目标补丁文件{destFile}已存在，但无法删除：{ex.Message}", ex);
+                                    Debug.WriteLine($"复制文件{sourceFile}到{destFile}失败：{ex.Message}，剩余{tryCount}次重试");
+                                    if (tryCount == 0)
+                                    {
+                                        throw new IOException($"复制文件{sourceFile}到{destFile}失败：已重试10次", ex);
+                                    }
+
+                                    Thread.Sleep(1000);
                                 }
                             }
-                        }
 
-                        switch (Config.ExportMode)
-                        {
-                            case ExportMode.PreferHardLink:
-                                try
-                                {
-                                    CreateHardLink(destFile, sourceFile);
-                                    file.Complete();
-                                }
-                                catch (IOException)
-                                {
-                                    goto copy;
-                                }
-                                catch (Exception ex)
-                                {
-                                    file.Error(ex);
-                                }
+                            break;
+                        case ExportMode.HardLink:
+                            CreateHardLink(destFile, sourceFile);
+                            break;
+                        case ExportMode.Script:
+                            string sourceFileWithReplaceSpecialChars = sourceFile.Replace("%", "%%");
+                            batScript.AppendLine($"if exist \"{file.TempName}\" (");
+                            batScript.AppendLine($"echo \"文件 {sourceFileWithReplaceSpecialChars} 已存在\"");
+                            batScript.AppendLine($") else (");
+                            batScript.AppendLine($"echo 正在复制 \"{sourceFileWithReplaceSpecialChars}\"");
+                            batScript.AppendLine(
+                                $"copy \"{sourceFileWithReplaceSpecialChars}\" \"{file.TempName}\"");
+                            batScript.AppendLine($")");
 
-                                break;
-                            case ExportMode.Copy:
-                                copy:
-                                int tryCount = 10;
-
-                                while (--tryCount > 0)
-                                {
-                                    if (tryCount < 9 && File.Exists(destFile))
-                                    {
-                                        File.Delete(destFile);
-                                    }
-
-                                    try
-                                    {
-                                        File.Copy(sourceFile, destFile);
-                                        tryCount = 0;
-                                        file.Complete();
-                                    }
-                                    catch (IOException ex)
-                                    {
-                                        Debug.WriteLine($"复制文件{sourceFile}到{destFile}失败：{ex.Message}，剩余{tryCount}次重试");
-                                        if (tryCount == 0)
-                                        {
-                                            file.Error(ex);
-                                        }
-
-                                        Thread.Sleep(1000);
-                                    }
-                                }
-
-                                break;
-                            case ExportMode.HardLink:
-                                try
-                                {
-                                    CreateHardLink(destFile, sourceFile);
-                                    file.Complete();
-                                }
-                                catch (IOException)
-                                {
-                                    throw;
-                                }
-                                catch (Exception ex)
-                                {
-                                    file.Error(ex);
-                                }
-
-                                break;
-                            case ExportMode.Script:
-                                string sourceFileWithReplaceSpecialChars = sourceFile.Replace("%", "%%");
-                                batScript.AppendLine($"if exist \"{file.TempName}\" (");
-                                batScript.AppendLine($"echo \"文件 {sourceFileWithReplaceSpecialChars} 已存在\"");
-                                batScript.AppendLine($") else (");
-                                batScript.AppendLine($"echo 正在复制 \"{sourceFileWithReplaceSpecialChars}\"");
-                                batScript.AppendLine(
-                                    $"copy \"{sourceFileWithReplaceSpecialChars}\" \"{file.TempName}\"");
-                                batScript.AppendLine($")");
-
-                                string ps1SourceName = sourceFile.Replace("'", "''");
-                                ps1Script.AppendLine($"if ([System.IO.File]::Exists(\"{file.TempName}\")){{");
-                                ps1Script.AppendLine($"'文件 {ps1SourceName} 已存在'");
-                                ps1Script.AppendLine($"}}else{{");
-                                ps1Script.AppendLine($"'正在复制 {sourceFile}'");
-                                string sourceFileWithNoWildcards = sourceFile.Replace("`", "``").Replace("[", "`[")
-                                    .Replace("]", "`]").Replace("?", "`?").Replace("?", "`?");
-                                ps1Script.AppendLine(
-                                    $"Start-BitsTransfer -Source '{sourceFileWithNoWildcards}' -Destination '{file.TempName}' -DisplayName '正在复制文件' -Description '{sourceFile} => {file.TempName}'");
-                                ps1Script.AppendLine($"}}");
-                                file.Complete();
-                                break;
-                        }
+                            string ps1SourceName = sourceFile.Replace("'", "''");
+                            ps1Script.AppendLine($"if ([System.IO.File]::Exists(\"{file.TempName}\")){{");
+                            ps1Script.AppendLine($"'文件 {ps1SourceName} 已存在'");
+                            ps1Script.AppendLine($"}}else{{");
+                            ps1Script.AppendLine($"'正在复制 {sourceFile}'");
+                            string sourceFileWithNoWildcards = sourceFile.Replace("`", "``").Replace("[", "`[")
+                                .Replace("]", "`]").Replace("?", "`?").Replace("?", "`?");
+                            ps1Script.AppendLine(
+                                $"Start-BitsTransfer -Source '{sourceFileWithNoWildcards}' -Destination '{file.TempName}' -DisplayName '正在复制文件' -Description '{sourceFile} => {file.TempName}'");
+                            ps1Script.AppendLine($"}}");
+                            break;
                     }
-                    else
+                }, token, new FilesLoopOptions(AutoApplyProgressMode.None)
+                {
+                    FinnalyAction = file =>
                     {
-                        file.Complete();
+                        var f = file as SyncFileInfo;
+                        if (f.UpdateType is FileUpdateType.Delete or FileUpdateType.Move)
+                        {
+                            return;
+                        }
+
+                        length += f.Length;
+                        NotifyProgress(1.0 * length / totalLength);
                     }
-                }
+                });
 
                 if (Config.ExportMode == ExportMode.Script)
                 {
@@ -229,7 +217,8 @@ namespace ArchiveMaster.Utilities
             UpdateFiles.Clear();
             LocalDirectories.Clear();
             int index = 0;
-            NotifyProgressUpdate($"正在初始化");
+            NotifyProgressIndeterminate();
+            NotifyMessage($"正在初始化");
             var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
             await Task.Run(() =>
             {
@@ -265,7 +254,7 @@ namespace ArchiveMaster.Utilities
                 {
                     var localDir = new DirectoryInfo(localAndOffsiteDir.LocalDir);
                     var offsiteDir = new DirectoryInfo(localAndOffsiteDir.OffsiteDir);
-                    NotifyProgressUpdate($"正在查找：{localDir}");
+                    NotifyMessage($"正在查找：{localDir}");
                     var localFileList = localDir.EnumerateFiles("*", SearchOption.AllDirectories).ToList();
                     var localFilePathSet = localFileList.Select(p => p.FullName).ToHashSet();
 
@@ -283,37 +272,19 @@ namespace ArchiveMaster.Utilities
 
                     foreach (var file in localFileList)
                     {
-#if DEBUG
-                        TestUtility.SleepInDebug();
-                        Debug.WriteLine(file);
-#endif
                         token.ThrowIfCancellationRequested();
 
                         string relativePath = Path.GetRelativePath(localDir.FullName, file.FullName);
-                        NotifyProgressUpdate($"正在比对第 {++index} 个文件：{relativePath}");
-#if DEBUG
-                        try
-                        {
-#endif
-                            localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
+                        NotifyMessage($"正在比对第 {++index} 个文件：{relativePath}");
+                        localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
 
-#if DEBUG
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new Exception(
-                                $"加入localFiles失败，localDir={localDir}，relativePath={relativePath}，已经存在的Key={Path.Combine(localDir.Name, relativePath)}，Value={localFiles[Path.Combine(localDir.Name, relativePath)]}",
-                                ex);
-                        }
-#endif
                         if (blacks.IsInBlackList(file))
                         {
                             continue;
                         }
 
-                        if (offsitePath2File.ContainsKey(relativePath)) //路径相同，说明是没有变化或者文件被修改
+                        if (offsitePath2File.TryGetValue(relativePath, out var offsiteFile)) //路径相同，说明是没有变化或者文件被修改
                         {
-                            var offsiteFile = offsitePath2File[relativePath];
                             if ((offsiteFile.Time - file.LastWriteTime).Duration().TotalSeconds <
                                 OfflineSyncConfig.MaxTimeTolerance
                                 && offsiteFile.Length == file.Length) //文件没有发生改动
@@ -363,9 +334,6 @@ namespace ArchiveMaster.Utilities
                                 if (!localFilePathSet.Contains(localSameLocation))
                                 {
                                     move = true;
-                                }
-                                else
-                                {
                                 }
                             }
 
@@ -423,7 +391,7 @@ namespace ArchiveMaster.Utilities
                             continue;
                         }
 
-                        NotifyProgressUpdate($"正在查找删除的文件：{++index} / {step1Model.Files.Count}");
+                        NotifyMessage($"正在查找删除的文件：{++index} / {step1Model.Files.Count}");
                         if (!localFiles.ContainsKey(offsitePathWithTopDir))
                         {
                             file.UpdateType = FileUpdateType.Delete;
