@@ -110,7 +110,7 @@ namespace ArchiveMaster.Utilities
                     }
                     else
                     {
-                        NotifyMessage($"正在处理{s.GetFileIndexAndCountMessage()}：{file.Path}");
+                        NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.Path}");
                         switch (file.UpdateType)
                         {
                             case FileUpdateType.Add:
@@ -152,7 +152,7 @@ namespace ArchiveMaster.Utilities
                                 throw new InvalidEnumArgumentException();
                         }
                     }
-                }, token, new FilesLoopOptions(false));
+                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
             }, token);
         }
 
@@ -226,82 +226,79 @@ namespace ArchiveMaster.Utilities
                     .Sum(p => p.Length);
 
                 long length = 0;
-                TryForFiles(updateFiles.OrderByDescending(p => p.UpdateType), (file, s) =>
+                TryForFiles(updateFiles.OrderByDescending(p => p.UpdateType).ToList(), (file, s) =>
                 {
                     //先处理移动，然后处理修改，这样能避免一些问题（2022-12-17）
                     NotifyMessage($"正在处理{s}：{file.Path}");
 
-                    try
+                    string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
+                    if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) &&
+                        !File.Exists(patch))
                     {
-                        string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
-                        if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) &&
-                            !File.Exists(patch))
-                        {
-                            throw new Exception("补丁文件不存在");
-                        }
+                        throw new Exception("补丁文件不存在");
+                    }
 
-                        string target = Path.Combine(file.TopDirectory, file.Path);
-                        string oldPath = file.OldPath == null ? null : Path.Combine(file.TopDirectory, file.OldPath);
-                        if (!Directory.Exists(Path.GetDirectoryName(target)))
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(target));
-                        }
+                    string target = Path.Combine(file.TopDirectory, file.Path);
+                    string oldPath = file.OldPath == null ? null : Path.Combine(file.TopDirectory, file.OldPath);
+                    if (!Directory.Exists(Path.GetDirectoryName(target)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(target));
+                    }
 
-                        switch (file.UpdateType)
-                        {
-                            case FileUpdateType.Add:
-                                if (File.Exists(target))
-                                {
-                                    Delete(file.TopDirectory, target);
-                                }
-
-                                File.Copy(patch, target);
-                                File.SetLastWriteTime(target, file.Time);
-                                break;
-                            case FileUpdateType.Modify:
-                                if (File.Exists(target))
-                                {
-                                    Delete(file.TopDirectory, target);
-                                }
-
-                                File.Copy(patch, target);
-                                File.SetLastWriteTime(target, file.Time);
-                                break;
-                            case FileUpdateType.Delete:
-                                if (!File.Exists(target))
-                                {
-                                    throw new Exception("应当为待删除文件，但文件不存在");
-                                }
-
+                    switch (file.UpdateType)
+                    {
+                        case FileUpdateType.Add:
+                            if (File.Exists(target))
+                            {
                                 Delete(file.TopDirectory, target);
-                                break;
+                            }
 
-                            case FileUpdateType.Move:
-                                if (!File.Exists(oldPath))
-                                {
-                                    throw new Exception("应当为移动后文件，但源文件不存在");
-                                }
-                                else if (File.Exists(target))
-                                {
-                                    throw new Exception("应当为移动后文件，但目标文件已存在");
-                                }
+                            File.Copy(patch, target);
+                            File.SetLastWriteTime(target, file.Time);
+                            break;
+                        case FileUpdateType.Modify:
+                            if (File.Exists(target))
+                            {
+                                Delete(file.TopDirectory, target);
+                            }
 
-                                File.Move(oldPath, target);
-                                break;
-                            default:
-                                throw new InvalidEnumArgumentException();
-                        }
+                            File.Copy(patch, target);
+                            File.SetLastWriteTime(target, file.Time);
+                            break;
+                        case FileUpdateType.Delete:
+                            if (!File.Exists(target))
+                            {
+                                throw new Exception("应当为待删除文件，但文件不存在");
+                            }
+
+                            Delete(file.TopDirectory, target);
+                            break;
+
+                        case FileUpdateType.Move:
+                            if (!File.Exists(oldPath))
+                            {
+                                throw new Exception("应当为移动后文件，但源文件不存在");
+                            }
+                            else if (File.Exists(target))
+                            {
+                                throw new Exception("应当为移动后文件，但目标文件已存在");
+                            }
+
+                            File.Move(oldPath, target);
+                            break;
+                        default:
+                            throw new InvalidEnumArgumentException();
                     }
-                    finally
+                }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Finally(file =>
+                {
+                    var f = file as SyncFileInfo;
+                    if (f.UpdateType is FileUpdateType.Add or FileUpdateType.Modify)
                     {
-                        if (file.UpdateType is FileUpdateType.Add or FileUpdateType.Modify)
-                        {
-                            length += file.Length;
-                        }
-
-                        NotifyProgress(1.0 * length / totalLength);
+                        length += f.Length;
                     }
-                }, token, new FilesLoopOptions(AutoApplyProgressMode.None));
+
+                    NotifyProgress(1.0 * length / totalLength);
+                }).Build());
             }, token);
         }
 

@@ -25,7 +25,7 @@ namespace ArchiveMaster.Utilities
                     newFile.Directory.Create();
                 }
 
-                NotifyMessage($"正在创建{s.GetFileIndexAndCountMessage()}：{relativePath}");
+                NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{relativePath}");
 
 
                 using (FileStream fs = File.Create(newPath))
@@ -36,7 +36,7 @@ namespace ArchiveMaster.Utilities
                 }
 
                 File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
-            }, token);
+            }, token,FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
         }
 
         public override async Task InitializeAsync(CancellationToken token)
@@ -59,14 +59,14 @@ namespace ArchiveMaster.Utilities
                         IgnoreInaccessible = true,
                         AttributesToSkip = 0,
                         RecurseSubdirectories = true,
-                    }).ToList();
+                    });
 
                 TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p)), (file, s) =>
                 {
                     NotifyMessage(
-                        $"正在处理{s.GetFileIndexAndCountMessage()}：{Path.GetRelativePath(Config.SourceDir, file.Path)}");
+                        $"正在处理{s.GetFileNumberMessage()}：{Path.GetRelativePath(Config.SourceDir, file.Path)}");
                     files.Add(file);
-                }, token, new FilesLoopOptions(false));
+                }, token, FilesLoopOptions.DoNothing());
             }, token);
             Files = files;
         }

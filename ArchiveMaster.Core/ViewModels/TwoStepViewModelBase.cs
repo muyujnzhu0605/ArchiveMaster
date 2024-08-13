@@ -27,6 +27,9 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     private bool canReset = false;
 
     [ObservableProperty]
+    private bool canCancel = false;
+
+    [ObservableProperty]
     private string message = "就绪";
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
@@ -65,6 +68,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         }
 
         Utility.ProgressUpdate -= Utility_ProgressUpdate;
+        Utility.MessageUpdate -= Utility_MessageUpdate;
         base.DisposeUtility();
     }
 
@@ -92,13 +96,22 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     {
     }
 
-    [RelayCommand]
-    private void CancelExecute()
+    [RelayCommand(CanExecute = nameof(CanCancel))]
+    private void Cancel()
     {
         WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
-        ExecuteCommand.Cancel();
-        CanExecute = false;
-        ExecuteCommand.NotifyCanExecuteChanged();
+        if (InitializeCommand.IsRunning)
+        {
+            InitializeCommand.Cancel();
+            CanInitialize = false;
+            InitializeCommand.NotifyCanExecuteChanged();
+        }
+        else if (ExecuteCommand.IsRunning)
+        {
+            ExecuteCommand.Cancel();
+            CanExecute = false;
+            ExecuteCommand.NotifyCanExecuteChanged();
+        }
     }
 
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanExecute))]
@@ -123,6 +136,8 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         CanExecute = false;
         CanReset = false;
         ResetCommand.NotifyCanExecuteChanged();
+        CanCancel = true;
+        CancelCommand.NotifyCanExecuteChanged();
 
         await TryRunAsync(async () =>
         {
@@ -134,23 +149,27 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
         CanReset = true;
         ResetCommand.NotifyCanExecuteChanged();
+        CanCancel = false;
+        CancelCommand.NotifyCanExecuteChanged();
     }
 
-    [RelayCommand(CanExecute = nameof(CanInitialize))]
-    private async Task InitializeAsync()
+    [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
+    private async Task InitializeAsync(CancellationToken token)
     {
         AppConfig.Instance.Save(false);
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();
         CanReset = false;
         ResetCommand.NotifyCanExecuteChanged();
+        CanCancel = true;
+        CancelCommand.NotifyCanExecuteChanged();
 
         if (await TryRunAsync(async () =>
             {
                 var u = CreateUtility<TUtility>();
                 await OnInitializingAsync();
                 Config.Check();
-                await u.InitializeAsync();
+                await u.InitializeAsync(token);
                 await OnInitializedAsync();
             }, "初始化失败"))
         {
@@ -167,6 +186,8 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         ExecuteCommand.NotifyCanExecuteChanged();
         ResetCommand.NotifyCanExecuteChanged();
         InitializeCommand.NotifyCanExecuteChanged();
+        CanCancel = false;
+        CancelCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanReset))]

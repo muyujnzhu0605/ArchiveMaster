@@ -32,7 +32,7 @@ namespace ArchiveMaster.Configs
 #if DEBUG
             = true;
 #endif
-        public int DebugModeLoopDelay { get; set; } = 10;
+        public int DebugModeLoopDelay { get; set; } = 100;
 
         public static void RegisterConfig(Type type, string key)
         {

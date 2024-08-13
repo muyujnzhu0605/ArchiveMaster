@@ -31,8 +31,6 @@ namespace ArchiveMaster.Utilities
                 Aes aes = GetAes();
 
                 bool isEncrypting = IsEncrypting();
-                string sourceDir = GetSourceDir();
-                string targetDir = GetDistDir();
 
                 //初始化文件结构加密字典
                 Dictionary<string, string> dirStructureDic = CreateDirStructureDic();
@@ -42,7 +40,7 @@ namespace ArchiveMaster.Utilities
                 int count = files.Count;
 
                 var progressReport = new AesExtension.RefreshFileProgress(
-                    (string source, string target, long max, long value) =>
+                    (source, target, max, value) =>
                     {
                         string baseMessage = isEncrypting ? "正在加密文件" : "正在解密文件";
                         NotifyMessage(baseMessage +
@@ -80,10 +78,7 @@ namespace ArchiveMaster.Utilities
 
                         File.Delete(file.Path);
                     }
-                }, token, new FilesLoopOptions()
-                {
-                    AutoApplyProgress = AutoApplyProgressMode.FileLength
-                });
+                }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build());
 
                 if (Config.EncryptDirectoryStructure && isEncrypting)
                 {
@@ -215,10 +210,10 @@ namespace ArchiveMaster.Utilities
                 file.RelativePath = Path.GetRelativePath(sourceDir, file.Path);
                 if (file.Name != DirectoryStructureFile)
                 {
-                    NotifyMessage("正在加入：" + file.Name);
+                    NotifyMessage($"正在加入{s.GetFileNumberMessage()}：{file.Name}");
                     files.Add(file);
                 }
-            }, token, new FilesLoopOptions(false));
+            }, token, FilesLoopOptions.DoNothing());
 
             ProcessingFiles = files;
         }

@@ -61,7 +61,6 @@ namespace ArchiveMaster.Utilities
             NotifyProgressIndeterminate();
             await Task.Run(() =>
             {
-                Thread.Sleep(3000);
                 var files = UpdateFiles.Where(p => p.IsChecked).ToList();
                 Dictionary<string, string> offsiteTopDir2LocalDir =
                     Config.MatchingDirs.ToDictionary(p => p.OffsiteDir, p => p.LocalDir);
@@ -82,7 +81,7 @@ namespace ArchiveMaster.Utilities
                     }
 
                     file.TempName = GetTempFileName(file, sha256);
-                    NotifyMessage($"正在处理{s.GetFileIndexAndCountMessage()}：{file.Path}");
+                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.Path}");
                     string sourceFile = Path.Combine(offsiteTopDir2LocalDir[file.TopDirectory], file.Path);
                     string destFile = Path.Combine(Config.PatchDir, file.TempName);
                     if (File.Exists(destFile))
@@ -173,20 +172,17 @@ namespace ArchiveMaster.Utilities
                             ps1Script.AppendLine($"}}");
                             break;
                     }
-                }, token, new FilesLoopOptions(AutoApplyProgressMode.None)
+                }, token,FilesLoopOptions.Builder().AutoApplyStatus().Finally(file =>
                 {
-                    FinnalyAction = file =>
+                    var f = file as SyncFileInfo;
+                    if (f.UpdateType is FileUpdateType.Delete or FileUpdateType.Move)
                     {
-                        var f = file as SyncFileInfo;
-                        if (f.UpdateType is FileUpdateType.Delete or FileUpdateType.Move)
-                        {
-                            return;
-                        }
-
-                        length += f.Length;
-                        NotifyProgress(1.0 * length / totalLength);
+                        return;
                     }
-                });
+
+                    length += f.Length;
+                    NotifyProgress(1.0 * length / totalLength);
+                }).Build());
 
                 if (Config.ExportMode == ExportMode.Script)
                 {
@@ -229,7 +225,7 @@ namespace ArchiveMaster.Utilities
                 //用于之后寻找差异文件的哈希表
                 Dictionary<string, byte> localFiles = new Dictionary<string, byte>();
                 HashSet<string> offsiteTopDirs = Config.MatchingDirs.Select(p => p.OffsiteDir).ToHashSet();
-                if (offsiteTopDirs.Count != Config.MatchingDirs.Count())
+                if (offsiteTopDirs.Count != Config.MatchingDirs.Count)
                 {
                     throw new ArgumentException("异地顶级目录存在重复", nameof(Config.MatchingDirs));
                 }
@@ -275,7 +271,7 @@ namespace ArchiveMaster.Utilities
                         token.ThrowIfCancellationRequested();
 
                         string relativePath = Path.GetRelativePath(localDir.FullName, file.FullName);
-                        NotifyMessage($"正在比对第 {++index} 个文件：{relativePath}");
+                        NotifyMessage($"正在比对第（{++index} 个）：{relativePath}");
                         localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
 
                         if (blacks.IsInBlackList(file))

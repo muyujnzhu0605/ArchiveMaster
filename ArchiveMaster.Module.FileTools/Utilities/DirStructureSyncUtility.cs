@@ -25,19 +25,16 @@ namespace ArchiveMaster.Utilities
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-          List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
+            List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
             List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
 
+            var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
+            List<SimpleFileInfo> notMatchedFiles = new List<SimpleFileInfo>();
+            List<SimpleFileInfo> matchedFiles = new List<SimpleFileInfo>();
+
+            List<MatchingFileInfo> tempFiles = new List<MatchingFileInfo>();
             await Task.Run(() =>
             {
-                var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
-
-                List<FileInfo> notMatchedFiles = new List<FileInfo>();
-                List<FileInfo> matchedFiles = new List<FileInfo>();
-
-                List<MatchingFileInfo> tempFiles = new List<MatchingFileInfo>();
-
-
                 //分析模板目录，创建由属性指向文件的字典
                 CreateDictionaries(Config.TemplateDir, Config.MaxTimeToleranceSecond, token);
 
@@ -50,22 +47,20 @@ namespace ArchiveMaster.Utilities
                         IgnoreInaccessible = true,
                         AttributesToSkip = 0,
                         RecurseSubdirectories = true,
-                    }).ToList();
+                    })
+                    .Select(p => new SimpleFileInfo((p)))
+                    .WithCancellationToken(token)
+                    .ToList();
 
-                int index = 0;
-                //对每个源文件进行匹配分析
-                foreach (var sourceFile in sourceFiles)
+                TryForFiles(sourceFiles, (sourceFile, s) =>
                 {
-                    token.ThrowIfCancellationRequested();
-                    index++;
                     //黑名单检测
                     if (blacks.IsInBlackList(sourceFile))
                     {
-                        continue;
+                        return;
                     }
 
-                    NotifyProgress(1.0*index/sourceFiles.Count);
-                    NotifyMessage($"正在分析源文件（{index}/{sourceFiles.Count}）：{sourceFile.FullName}");
+                    NotifyMessage($"正在分析源文件{s.GetFileNumberMessage()}：{sourceFile.Path}");
                     matchedFiles.Clear();
                     tempFiles.Clear();
 
@@ -73,34 +68,33 @@ namespace ArchiveMaster.Utilities
                     bool notMatched = false;
                     if (Config.CompareName) GetMatchedFiles(name2Template, sourceFile.Name);
                     if (!notMatched && Config.CompareTime)
-                        GetMatchedFiles(modifiedTime2Template, TruncateToSecond(sourceFile.LastWriteTime));
+                        GetMatchedFiles(modifiedTime2Template, TruncateToSecond(sourceFile.Time));
                     if (!notMatched && Config.CompareLength) GetMatchedFiles(length2Template, sourceFile.Length);
 
                     if (notMatched) //无匹配，不需要继续操作
                     {
                         notMatchedFiles.Add(sourceFile);
-                        continue;
+                        return;
                     }
 
-                    //对与该源文件匹配的模板文件（一般来说就一个）进行处理
                     foreach (var templateFile in matchedFiles)
                     {
                         //创建模板文件数据结构
                         var template = new SimpleFileInfo() //模板文件
                         {
-                            Path = Path.GetRelativePath(Config.TemplateDir, templateFile.FullName),
+                            Path = Path.GetRelativePath(Config.TemplateDir, templateFile.Path),
                             Name = templateFile.Name,
                             Length = templateFile.Length,
-                            Time = templateFile.LastWriteTime,
+                            Time = templateFile.Time,
                         };
 
                         //创建模型
                         var goHomeFile = new MatchingFileInfo() //源文件
                         {
-                            Path = Path.GetRelativePath(Config.SourceDir, sourceFile.FullName),
+                            Path = Path.GetRelativePath(Config.SourceDir, sourceFile.Path),
                             Name = sourceFile.Name,
                             Length = sourceFile.Length,
-                            Time = sourceFile.LastWriteTime,
+                            Time = sourceFile.Time,
                             MultipleMatches = matchedFiles.Count > 1,
                             Template = template,
                         };
@@ -141,22 +135,19 @@ namespace ArchiveMaster.Utilities
                     void GetMatchedFiles<TK>(Dictionary<TK, object> dic, TK key)
                     {
                         object files = null;
-                        if (!dic.TryGetValue(key, out var value))
+                        if (!dic.TryGetValue(key, out files))
                         {
                             notMatched = true;
                             return;
                         }
 
-                        files = value;
-                        //}
-
                         if (matchedFiles.Count == 0) //如果notMatched==false，但matchedFiles.Count==0，说明这是第一个匹配
                         {
-                            if (files is FileInfo f)
+                            if (files is SimpleFileInfo f)
                             {
                                 matchedFiles.Add(f);
                             }
-                            else if (files is List<FileInfo> list)
+                            else if (files is List<SimpleFileInfo> list)
                             {
                                 matchedFiles.AddRange(list);
                             }
@@ -167,7 +158,7 @@ namespace ArchiveMaster.Utilities
                         }
                         else //如果不是第一个匹配，已经有规则匹配了
                         {
-                            if (files is FileInfo f)
+                            if (files is SimpleFileInfo f)
                             {
                                 if (!matchedFiles.Contains(f)) //单个文件，但是当前匹配不在之前匹配的文件中，说明匹配失败
                                 {
@@ -179,9 +170,9 @@ namespace ArchiveMaster.Utilities
                                     matchedFiles.Add(f);
                                 }
                             }
-                            else if (files is List<FileInfo> list)
+                            else if (files is List<SimpleFileInfo> list)
                             {
-                                var oldMatchedFiles = new List<FileInfo>(matchedFiles);
+                                var oldMatchedFiles = new List<SimpleFileInfo>(matchedFiles);
                                 matchedFiles.Clear();
                                 matchedFiles.AddRange(oldMatchedFiles.Intersect(list));
                             }
@@ -196,7 +187,7 @@ namespace ArchiveMaster.Utilities
                             }
                         }
                     }
-                }
+                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().ThrowExceptions().Build());
             }, token);
             RightPositionFiles = rightPositionFiles;
             WrongPositionFiles = wrongPositionFiles;
@@ -226,32 +217,37 @@ namespace ArchiveMaster.Utilities
                     IgnoreInaccessible = true,
                     AttributesToSkip = 0,
                     RecurseSubdirectories = true,
-                });
+                })
+                .WithCancellationToken(token)
+                .Select(p => new SimpleFileInfo(p))
+                .ToList();
+
+            NotifyProgressIndeterminate();
 
             foreach (var file in fileInfos)
             {
-                NotifyProgressIndeterminate();
-                NotifyMessage($"正在分析模板文件：{file.FullName}");
+                token.ThrowIfCancellationRequested();
+
+                NotifyMessage($"正在分析模板文件：{file.Path}");
                 SetOrAdd(name2Template, file.Name);
                 SetOrAdd(length2Template, file.Length);
                 for (int i = -maxTimeTolerance; i <= maxTimeTolerance; i++)
                 {
-                    SetOrAdd(modifiedTime2Template, TruncateToSecond(file.LastWriteTime).AddSeconds(i));
+                    SetOrAdd(modifiedTime2Template, TruncateToSecond(file.Time).AddSeconds(i));
                 }
 
-                token.ThrowIfCancellationRequested();
 
                 void SetOrAdd<TK>(Dictionary<TK, object> dic, TK key)
                 {
                     if (dic.ContainsKey(key))
                     {
-                        if (dic[key] is List<FileInfo> list)
+                        if (dic[key] is List<SimpleFileInfo> list)
                         {
                             list.Add(file);
                         }
-                        else if (dic[key] is FileInfo f)
+                        else if (dic[key] is SimpleFileInfo f)
                         {
-                            dic[key] = new List<FileInfo>() { f, file };
+                            dic[key] = new List<SimpleFileInfo>() { f, file };
                         }
                         else
                         {
@@ -266,7 +262,6 @@ namespace ArchiveMaster.Utilities
             }
         }
 
-
         public override Task ExecuteAsync(CancellationToken token)
         {
             if (ExecutingFiles == null)
@@ -277,7 +272,7 @@ namespace ArchiveMaster.Utilities
             string copyMoveText = Config.Copy ? "复制" : "移动";
             IEnumerable<MatchingFileInfo> files = ExecutingFiles;
             long count = files.Sum(p => p.Length);
-            long progress = 0;
+
             if (!Config.Copy)
             {
                 files = files.Where(p => !p.RightPosition);
@@ -285,8 +280,7 @@ namespace ArchiveMaster.Utilities
 
             return TryForFilesAsync(files, (file, s) =>
             {
-                progress += file.Length;
-                NotifyMessage($"正在{copyMoveText}{s.GetFileIndexAndCountMessage()}：{file.Path}");
+                NotifyMessage($"正在{copyMoveText}{s.GetFileNumberMessage()}：{file.Path}");
                 string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
                 string destFileDir = Path.GetDirectoryName(destFile);
                 if (!Directory.Exists(destFileDir))
@@ -302,9 +296,7 @@ namespace ArchiveMaster.Utilities
                 {
                     File.Move(Path.Combine(Config.SourceDir, file.Path), destFile);
                 }
-
-            }, token);
-           
+            }, token,FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
     }
 }

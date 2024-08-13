@@ -30,7 +30,7 @@ namespace ArchiveMaster.Utilities
                     throw new ArgumentException("存在重复的顶级目录名：" + group.Key);
                 }
             }
-            
+
             NotifyProgressIndeterminate();
 
             await Task.Run(() =>
@@ -43,11 +43,8 @@ namespace ArchiveMaster.Utilities
                     {
                         syncFiles.Add(file);
                         index++;
-                        if (index % 10 == 0)
-                        {
-                            NotifyMessage($"正在搜索：{dir}，已加入 {index} 个文件");
-                        }
-                    }, token, new FilesLoopOptions(true, AutoApplyProgressMode.None));
+                        NotifyMessage($"正在搜索：{dir}，已加入 {index} 个文件");
+                    }, token, FilesLoopOptions.Builder().AutoApplyStatus().Build());
                 }
 
 

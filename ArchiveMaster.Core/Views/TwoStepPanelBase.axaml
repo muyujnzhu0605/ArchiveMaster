@@ -60,9 +60,8 @@
                 <Button
                     Grid.Column="8"
                     Classes="Middle"
-                    Command="{Binding CancelExecuteCommand}"
-                    Content="{Binding #root.StopButtonContent}"
-                    IsEnabled="{Binding ExecuteCommand.CanBeCanceled}" />
+                    Command="{Binding CancelCommand}"
+                    Content="{Binding #root.StopButtonContent}" />
                 <Button
                     Grid.Column="10"
                     Classes="Middle"

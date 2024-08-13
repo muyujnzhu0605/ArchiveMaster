@@ -165,7 +165,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 
     public override async Task ExecuteAsync(CancellationToken token = default)
     {
-        var processingFiles = Files.Where(p => p.IsMatched && p.IsChecked);
+        var processingFiles = Files.Where(p => p.IsMatched && p.IsChecked).ToList();
         var duplicates = processingFiles
             .Select(p => p.NewPath)
             .GroupBy(p => p)
@@ -179,17 +179,17 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
         //重命名为临时文件名，避免有可能新的文件名和其他文件的旧文件名一致导致错误的问题
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileIndexAndCountMessage()}：{file.Name}=>{file.NewName}");
+            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             file.TempPath = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
             File.Move(file.Path, file.TempPath);
-        },token);  
+        },token,FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());  
         
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileIndexAndCountMessage()}：{file.Name}=>{file.NewName}");
+            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             File.Move(file.TempPath, file.NewPath);
-        },token);
+        },token,FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
     }
 
     public override async Task InitializeAsync(CancellationToken token = default)
@@ -201,7 +201,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
         await Task.Run(() =>
         {
             PreprocessReplacePattern();
-            List<FileSystemInfo> files;
+            IEnumerable<FileSystemInfo> files;
             if (Config.RenameTarget == RenameTargetType.File)
             {
                 files = new DirectoryInfo(Config.Dir)
@@ -209,7 +209,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
                     {
                         IgnoreInaccessible = true,
                         RecurseSubdirectories = true,
-                    }).Cast<FileSystemInfo>().ToList();
+                    });
             }
             else
             {
@@ -218,14 +218,14 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
                     {
                         IgnoreInaccessible = true,
                         RecurseSubdirectories = true,
-                    }).Cast<FileSystemInfo>().ToList();
+                    });
             }
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
 
             TryForFiles(files.Select(file => new RenameFileInfo(file)), (renameFile, s) =>
             {
-                NotifyMessage($"正在处理文件{s.GetFileIndexAndCountMessage()}：{renameFile.Name}");
+                NotifyMessage($"正在处理文件{s.GetFileNumberMessage()}：{renameFile.Name}");
                 renameFiles.Add(renameFile);
                 renameFile.IsMatched = IsMatched(renameFile);
                 if (renameFile.IsMatched)
@@ -233,7 +233,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
                     renameFile.NewName = Rename(renameFile);
                     renameFile.NewPath = Path.Combine(Path.GetDirectoryName(renameFile.Path), renameFile.NewName);
                 }
-            },token, new FilesLoopOptions(false));
+            },token, FilesLoopOptions.DoNothing());
 
             Files = renameFiles.AsReadOnly();
         }, token);

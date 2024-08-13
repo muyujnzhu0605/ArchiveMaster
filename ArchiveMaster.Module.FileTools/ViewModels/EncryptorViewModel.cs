@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -40,16 +41,15 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility>
 
     protected override async Task OnExecutedAsync(CancellationToken token)
     {
-        if (ProcessingFiles.Any(p => p.Error != null))
+        if (ProcessingFiles.Any(p => p.Status == ProcessStatus.Error))
         {
             string typeDesc = IsEncrypting ? "加密" : "解密";
-            var errorDetails = ProcessingFiles.Where(p => p.Error != null).Select(p => $"{p.Name}：{p.Message}");
+
             await WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
             {
                 Type = CommonDialogMessage.CommonDialogType.Error,
                 Title = $"{typeDesc}存在错误",
                 Message = $"{typeDesc}过程已结束，部分文件{typeDesc}失败，请检查",
-                Detail = string.Join(Environment.NewLine, errorDetails)
             }).Task;
         }
     }

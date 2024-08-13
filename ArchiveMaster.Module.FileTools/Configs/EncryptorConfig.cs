@@ -50,8 +50,17 @@ namespace ArchiveMaster.Configs
 
         public override void Check()
         {
-            CheckDir(EncryptedDir,"加密目录");
-            CheckDir(RawDir,"原始目录");
+            switch (Type)
+            {
+                case EncryptorTaskType.Encrypt:
+                    CheckDir(RawDir,"原始目录");
+                    break;
+                case EncryptorTaskType.Decrypt:
+                    CheckDir(EncryptedDir,"加密目录");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
             CheckEmpty(Password,"密码");
         }
     }
