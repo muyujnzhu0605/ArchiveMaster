@@ -8,22 +8,25 @@ public class FilesLoopOptions
     {
         return new FilesLoopOptions();
     }
+
     public static FilesLoopOptionsBuilder Builder()
     {
         return new FilesLoopOptionsBuilder();
     }
-    
+
     public class FilesLoopOptionsBuilder
     {
         private AutoApplyProgressMode autoApplyProgress;
 
         private bool autoApplyStatus;
 
-        private Action<SimpleFileOrDirInfo> catchAction;
+        private Action<SimpleFileInfo, Exception> catchAction;
 
-        private Action<SimpleFileOrDirInfo> finallyAction;
+        private Action<SimpleFileInfo> finallyAction;
 
         private bool throwExceptions;
+
+        private int threads = 1;
 
         public FilesLoopOptionsBuilder AutoApplyFileNumberProgress()
         {
@@ -42,14 +45,14 @@ public class FilesLoopOptions
             autoApplyStatus = true;
             return this;
         }
-        
-        public FilesLoopOptionsBuilder Catch(Action<SimpleFileOrDirInfo> action)
+
+        public FilesLoopOptionsBuilder Catch(Action<SimpleFileInfo, Exception> action)
         {
             catchAction = action;
             return this;
         }
-        
-        public FilesLoopOptionsBuilder Finally(Action<SimpleFileOrDirInfo> action)
+
+        public FilesLoopOptionsBuilder Finally(Action<SimpleFileInfo> action)
         {
             finallyAction = action;
             return this;
@@ -60,7 +63,19 @@ public class FilesLoopOptions
             throwExceptions = true;
             return this;
         }
-        
+
+        public FilesLoopOptionsBuilder WithMultiThreads()
+        {
+            threads = 0;
+            return this;
+        }
+
+        public FilesLoopOptionsBuilder WithMultiThreads(int threadCount)
+        {
+            threads = threadCount;
+            return this;
+        }
+
         public FilesLoopOptions Build()
         {
             return new FilesLoopOptions()
@@ -69,7 +84,8 @@ public class FilesLoopOptions
                 AutoApplyStatus = autoApplyStatus,
                 CatchAction = catchAction,
                 FinallyAction = finallyAction,
-                ThrowExceptions = throwExceptions
+                ThrowExceptions = throwExceptions,
+                Threads = threads
             };
         }
     }
@@ -81,9 +97,11 @@ public class FilesLoopOptions
     public bool AutoApplyStatus { get; init; }
     public AutoApplyProgressMode AutoApplyProgress { get; init; } = AutoApplyProgressMode.None;
 
-    public Action<SimpleFileOrDirInfo> CatchAction { get; init; }
+    public Action<SimpleFileInfo, Exception> CatchAction { get; init; }
 
-    public Action<SimpleFileOrDirInfo> FinallyAction { get; init; }
+    public Action<SimpleFileInfo> FinallyAction { get; init; }
 
     public bool ThrowExceptions { get; init; }
+
+    public int Threads { get; init; } = 1;
 }

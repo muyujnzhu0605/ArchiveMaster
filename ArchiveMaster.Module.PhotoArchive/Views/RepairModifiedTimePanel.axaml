@@ -51,36 +51,46 @@
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid
-            Grid.Row="10"
-            ColumnDefinitions="*,8,*">
-            <gb:GroupBox Header="待更新文件">
-                <Grid RowDefinitions="*,8,Auto">
-                    <ListBox ItemsSource="{Binding UpdatingFiles}" />
-                    <TextBlock
-                        Grid.Row="2"
-                        IsVisible="{Binding UpdatingFiles, Converter={StaticResource NotNullConverter}}">
-                        <Run Text="共" />
-                        <Run Text="{Binding UpdatingFiles.Count}" />
-                        <Run Text="个文件" />
-                    </TextBlock>
-                </Grid>
-            </gb:GroupBox>
-            <gb:GroupBox
-                Grid.Column="2"
-                Header="错误文件">
-                <Grid RowDefinitions="*,8,Auto">
-                    <ListBox ItemsSource="{Binding ErrorFiles}" />
-                    <TextBlock
-                        Grid.Row="2"
-                        IsVisible="{Binding ErrorFiles, Converter={StaticResource NotNullConverter}}">
-                        <Run Text="共" />
-                        <Run Text="{Binding ErrorFiles.Count}" />
-                        <Run Text="个文件" />
-                    </TextBlock>
-                </Grid>
-            </gb:GroupBox>
-
+        <Grid RowDefinitions="*,8,Auto">
+            <DataGrid
+                CanUserReorderColumns="False"
+                CanUserSortColumns="False"
+                ItemsSource="{Binding Files}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="完成">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Ellipse
+                                    Width="8"
+                                    Height="8"
+                                    Fill="Green"
+                                    IsVisible="{Binding IsCompleted}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn
+                        Binding="{Binding Name}"
+                        Header="文件名" />
+                    <DataGridTextColumn
+                        Binding="{Binding Path}"
+                        Header="文件路径" />
+                    <DataGridTextColumn
+                        Binding="{Binding Time}"
+                        Header="修改时间" />
+                    <DataGridTextColumn
+                        Binding="{Binding ExifTime}"
+                        Header="Exif时间" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock
+                Grid.Row="2"
+                IsVisible="{Binding UpdatingFiles, Converter={StaticResource NotNullConverter}}">
+                <Run Text="共" />
+                <Run Text="{Binding UpdatingFiles.Count}" />
+                <Run Text="个文件" />
+            </TextBlock>
         </Grid>
 
     </v:TwoStepPanelBase.ResultsContent>

@@ -22,7 +22,6 @@ namespace ArchiveMaster.Utilities
         private readonly Regex rCopy;
         private readonly Regex rWhite;
         private ConcurrentBag<string> errorMessages;
-        private int progress = 0;
 
         public PhotoSlimmingUtility(PhotoSlimmingConfig config)
         {
@@ -78,12 +77,8 @@ namespace ArchiveMaster.Utilities
                     Directory.CreateDirectory(Config.DistDir);
                 }
 
-                progress = 0;
-
                 Compress(token);
-
                 Copy(token);
-
                 Clear(token);
             }, token);
         }
@@ -98,7 +93,6 @@ namespace ArchiveMaster.Utilities
             return Task.Run(() =>
             {
                 SearchCopyingAndCompressingFiles(token);
-
                 SearchDeletingFiles(token);
             }, token);
         }
@@ -110,11 +104,12 @@ namespace ArchiveMaster.Utilities
                 return;
             }
 
-            NotifyProgressUpdate(1, -1, "正在筛选需要删除的文件");
+            NotifyProgressIndeterminate();
+            NotifyMessage("正在筛选需要删除的文件");
             var desiredDistFiles = CopyFiles.SkippedFiles
-                .Select(file => GetDistPath(file.FullName, null, out _))
+                .Select(file => GetDistPath(file.Path, null, out _))
                 .Concat(CompressFiles.SkippedFiles
-                    .Select(file => GetDistPath(file.FullName, Config.OutputFormat, out _)))
+                    .Select(file => GetDistPath(file.Path, Config.OutputFormat, out _)))
                 .ToHashSet();
 
             foreach (var file in Directory
@@ -124,39 +119,38 @@ namespace ArchiveMaster.Utilities
                 token.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
                 {
-                    DeleteFiles.Add(new FileInfo(file));
+                    DeleteFiles.Add(new SimpleFileInfo(new FileInfo(file)));
                 }
             }
 
-            NotifyProgressUpdate(1, -1, "正在需要删除的文件夹");
+            NotifyMessage("正在需要删除的文件夹");
             var desiredDistFolders = desiredDistFiles.Select(Path.GetDirectoryName).ToHashSet();
 
             foreach (var dir in Directory.EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories))
             {
                 if (!desiredDistFolders.Contains(dir))
                 {
-                    DeleteFiles.Add(new FileInfo(dir));
+                    DeleteFiles.Add(new SimpleFileInfo(new DirectoryInfo(dir)));
                 }
             }
         }
 
         private void SearchCopyingAndCompressingFiles(CancellationToken token)
         {
-            NotifyProgressUpdate(1, -1, "正在搜索目录");
+            NotifyProgressIndeterminate();
+            NotifyMessage("正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
                 .EnumerateFiles("*", SearchOption.AllDirectories)
-                .ToList();
-            int index = 0;
-            foreach (var file in files)
-            {
-                token.ThrowIfCancellationRequested();
-                index++;
-                NotifyProgressUpdate(files.Count, index, $"正在查找文件 ({index}/{files.Count})");
+                .Select(p => new SimpleFileInfo(p));
 
-                if (rBlack.IsMatch(file.FullName)
+            TryForFiles(files, (file, s) =>
+            {
+                NotifyMessage($"正在查找文件{s.GetFileNumberMessage()}");
+
+                if (rBlack.IsMatch(file.Path)
                     || !rWhite.IsMatch(Path.GetFileNameWithoutExtension(file.Name)))
                 {
-                    continue;
+                    return;
                 }
 
                 if (rCompress.IsMatch(file.Name))
@@ -181,83 +175,49 @@ namespace ArchiveMaster.Utilities
                         CopyFiles.AddSkipped(file);
                     }
                 }
-            }
+            }, token, FilesLoopOptions.DoNothing());
         }
 
         private void Clear(CancellationToken token)
         {
-            foreach (var file in DeleteFiles.ProcessingFiles)
+            TryForFiles(DeleteFiles.ProcessingFiles, (file, s) =>
             {
-                token.ThrowIfCancellationRequested();
-                try
+                if (file.IsDir)
                 {
-                    if (file.Exists)
+                    Directory.Delete(file.Path, true);
+                }
+                else
+                {
+                    File.Delete(file.Path);
+                }
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress()
+                .WithMultiThreads(Config.Thread).Catch(
+                    (file, ex) =>
                     {
-                        File.Delete(file.FullName);
-                    }
-                    else if (Directory.Exists(file.FullName))
-                    {
-                        Directory.Delete(file.FullName, true);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    errorMessages.Add($"删除 {Path.GetRelativePath(Config.SourceDir, file.FullName)} 失败：{ex.Message}");
-                }
-                finally
-                {
-                    int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count +
-                                     DeleteFiles.ProcessingFiles.Count;
-                    Interlocked.Increment(ref progress);
-                    NotifyProgressUpdate(totalCount, progress, $"正在删除 ({progress} / {totalCount})");
-                }
-            }
+                        errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
+                    }).Build());
         }
 
         private void Compress(CancellationToken token)
         {
-            if (Config.Thread != 1)
+            TryForFiles(CompressFiles.ProcessingFiles, (file, s) =>
             {
-                Parallel.ForEach(CompressFiles.ProcessingFiles,
-                    new ParallelOptions()
-                    {
-                        MaxDegreeOfParallelism = Config.Thread <= 0 ? -1 : Config.Thread,
-                        CancellationToken = token
-                    },
-                    file =>
-                    {
-                        token.ThrowIfCancellationRequested();
-                        CompressSingle(file);
-                    });
-            }
-            else
-            {
-                foreach (var file in CompressFiles.ProcessingFiles)
+                NotifyMessage($"（第一步，共三步）正在压缩{s.GetFileNumberMessage()}：{file.Name}");
+                string distPath = GetDistPath(file.Path, Config.OutputFormat, out _);
+                if (File.Exists(distPath))
                 {
-                    token.ThrowIfCancellationRequested();
-                    CompressSingle(file);
+                    File.Delete(distPath);
                 }
-            }
-        }
 
-        private void CompressSingle(FileInfo file)
-        {
-            string distPath = GetDistPath(file.FullName, Config.OutputFormat, out _);
-            if (File.Exists(distPath))
-            {
-                File.Delete(distPath);
-            }
+                string dir = Path.GetDirectoryName(distPath)!;
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
 
-            string dir = Path.GetDirectoryName(distPath)!;
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
+                Console.OutputEncoding = System.Text.Encoding.Unicode;
 
-            Console.OutputEncoding = System.Text.Encoding.Unicode;
-            try
-            {
-                using (MagickImage image = new MagickImage(file))
+                using (MagickImage image = new MagickImage(file.Path))
                 {
                     bool portrait = image.Height > image.Width;
                     int width = portrait ? image.Height : image.Width;
@@ -280,33 +240,29 @@ namespace ArchiveMaster.Utilities
                     image.Write(distPath);
                 }
 
-                File.SetLastWriteTime(distPath, file.LastWriteTime);
+                File.SetLastWriteTime(distPath, file.Time);
 
                 FileInfo distFile = new FileInfo(distPath);
                 if (distFile.Length > file.Length)
                 {
-                    file.CopyTo(distPath, true);
+                    File.Copy(file.Path, distPath, true);
                 }
-            }
-            catch (Exception ex)
-            {
-                errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.FullName)} 失败：{ex.Message}");
-            }
-            finally
-            {
-                int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count +
-                                 DeleteFiles.ProcessingFiles.Count;
-                Interlocked.Increment(ref progress);
-                NotifyProgressUpdate(totalCount, progress, $"正在压缩 ({progress} / {totalCount})");
-            }
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
+                .WithMultiThreads(Config.Thread).Catch(
+                    (file, ex) =>
+                    {
+                        errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
+                    }).Build());
         }
+
 
         private void Copy(CancellationToken token)
         {
-            foreach (var file in CopyFiles.ProcessingFiles)
+            TryForFiles(CopyFiles.ProcessingFiles, (file, s) =>
             {
-                token.ThrowIfCancellationRequested();
-                string distPath = GetDistPath(file.FullName, null, out string subPath);
+                NotifyMessage($"（第二步，共三步）正在复制{s.GetFileNumberMessage()}：{file.Name}");
+
+                string distPath = GetDistPath(file.Path, null, out string subPath);
                 if (File.Exists(distPath))
                 {
                     File.Delete(distPath);
@@ -318,22 +274,13 @@ namespace ArchiveMaster.Utilities
                     Directory.CreateDirectory(dir);
                 }
 
-                try
-                {
-                    file.CopyTo(distPath);
-                }
-                catch (Exception ex)
-                {
-                    errorMessages.Add($"赋值 {Path.GetRelativePath(Config.SourceDir, file.FullName)} 失败：{ex.Message}");
-                }
-                finally
-                {
-                    int totalCount = CopyFiles.ProcessingFiles.Count + CompressFiles.ProcessingFiles.Count +
-                                     DeleteFiles.ProcessingFiles.Count;
-                    Interlocked.Increment(ref progress);
-                    NotifyProgressUpdate(totalCount, progress, $"正在复制 ({progress} / {totalCount})");
-                }
-            }
+                File.Copy(file.Path, distPath, true);
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
+                .WithMultiThreads(Config.Thread).Catch(
+                    (file, ex) =>
+                    {
+                        errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
+                    }).Build());
         }
 
         private string GetDistPath(string sourceFileName, string newExtension, out string subPath)
@@ -382,7 +329,7 @@ namespace ArchiveMaster.Utilities
             return Path.Combine(Config.DistDir, subPath);
         }
 
-        private bool NeedProcess(TaskType type, FileInfo file)
+        private bool NeedProcess(TaskType type, SimpleFileInfo file)
         {
             if (type is TaskType.Delete)
             {
@@ -396,10 +343,10 @@ namespace ArchiveMaster.Utilities
 
 
             var distFile =
-                new FileInfo(GetDistPath(file.FullName, type is TaskType.Copy ? null : Config.OutputFormat, out _));
+                new FileInfo(GetDistPath(file.Path, type is TaskType.Copy ? null : Config.OutputFormat, out _));
 
             if (distFile.Exists && (type is TaskType.Compress ||
-                                    file.Length == distFile.Length && file.LastWriteTime == distFile.LastWriteTime))
+                                    file.Length == distFile.Length && file.Time == distFile.LastWriteTime))
             {
                 return false;
             }

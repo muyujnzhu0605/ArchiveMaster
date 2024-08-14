@@ -9,101 +9,61 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
     public class RepairModifiedTimeUtility(RepairModifiedTimeConfig config) : TwoStepUtilityBase
     {
         public string[] Extensions = { "jpg", "jpeg", "heif", "heic" };
-        private ConcurrentDictionary<FileInfo, string> errorFiles = new ConcurrentDictionary<FileInfo, string>();
-        private ConcurrentDictionary<FileInfo, DateTime> fileExifTimes;
 
-        private int progress = 0;
+        public ConcurrentBag<ExifTimeFileInfo> Files { get; } = new ConcurrentBag<ExifTimeFileInfo>();
+
         private Regex rRepairTime;
-        public override RepairModifiedTimeConfig Config { get;  } = config;
-        public List<string> ErrorFilesAndMessages { get; private set; }
-        public List<string> UpdatingFilesAndMessages { get; private set; }
+
+        public override RepairModifiedTimeConfig Config { get; } = config;
 
         public override Task ExecuteAsync(CancellationToken token)
         {
-            ErrorFilesAndMessages = new List<string>();
-            return Task.Run(() =>
+            return TryForFilesAsync(Files, (file, s) =>
             {
-                int index = 0;
-                foreach (var file in fileExifTimes.Keys)
+                if (!file.ExifTime.HasValue)
                 {
-                    token.ThrowIfCancellationRequested();
-                    index++;
-                    NotifyProgressUpdate(fileExifTimes.Count, index, $"正在处理（{index}/{fileExifTimes.Count}）：{file.FullName}");
-                    try
-                    {
-                        file.LastWriteTime = fileExifTimes[file];
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorFilesAndMessages.Add($"{file.FullName}：{ex.Message}");
-                    }
+                    return;
                 }
-            }, token);
-        }
-        public override async Task InitializeAsync(CancellationToken token)
-        {
-            fileExifTimes = new ConcurrentDictionary<FileInfo, DateTime>();
-            errorFiles = new ConcurrentDictionary<FileInfo, string>();
-            rRepairTime = new Regex(@$"\.({string.Join('|', Extensions)})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-            List<FileInfo> files = null;
-            await Task.Run(() =>
-            {
-                NotifyProgressUpdate(1, -1, "正在扫描文件");
-                files = new DirectoryInfo(Config.Dir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
-                if (Config.ThreadCount > 1)
-                {
-                    var options = new ParallelOptions() { MaxDegreeOfParallelism = Config.ThreadCount };
-                    Parallel.ForEach(files, options, Check);
-                }
-                else
-                {
-                    files.ForEach(Check);
-                }
-            }, token);
-            token.ThrowIfCancellationRequested();
-            ErrorFilesAndMessages = errorFiles
-                .Select(p => $"{Path.GetRelativePath(Config.Dir, p.Key.FullName)}：{p.Value}")
-                .ToList();
-            token.ThrowIfCancellationRequested();
-            UpdatingFilesAndMessages = fileExifTimes
-                .Select(p => $"{Path.GetRelativePath(Config.Dir, p.Key.FullName)}    {p.Key.LastWriteTime} => {p.Value}")
-                .ToList();
 
-            void Check(FileInfo file)
+                NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.Name}");
+                File.SetLastAccessTime(file.Path, file.ExifTime.Value);
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+        }
+
+        public override Task InitializeAsync(CancellationToken token)
+        {
+            rRepairTime = new Regex(@$"\.({string.Join('|', Extensions)})$",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            NotifyProgressIndeterminate();
+            NotifyMessage("正在查找文件");
+            var files = new DirectoryInfo(Config.Dir).EnumerateFiles("*", SearchOption.AllDirectories)
+                .Select(p => new ExifTimeFileInfo(p));
+            return TryForFilesAsync(files, (file, s) =>
             {
-                Interlocked.Increment(ref progress);
-                NotifyProgressUpdate(files.Count, progress, $"正在扫描照片日期（{progress}/{files.Count}）");
+                NotifyMessage($"正在扫描照片日期{s.GetFileNumberMessage()}");
                 if (rRepairTime.IsMatch(file.Name))
                 {
-                    DateTime? exifTime;
-                    try
-                    {
-                        exifTime = FindExifTime(file.FullName);
-                    }
-                    catch (Exception ex)
-                    {
-                        errorFiles.TryAdd(file, ex.Message);
-                        return;
-                    }
+                    DateTime? exifTime = FindExifTime(file.Path);
 
                     if (exifTime.HasValue)
                     {
-                        var fileTime = file.LastWriteTime;
+                        Files.Add(file);
+                        var fileTime = file.Time;
                         var duration = (exifTime.Value - fileTime).Duration();
                         if (duration > Config.MaxDurationTolerance)
                         {
-                            fileExifTimes.TryAdd(file, exifTime.Value);
+                            file.ExifTime = exifTime.Value;
                         }
                     }
                 }
-            }
-
+            }, token, FilesLoopOptions.Builder().WithMultiThreads(Config.ThreadCount).Build());
         }
 
         private DateTime? FindExifTime(string file)
@@ -116,11 +76,13 @@ namespace ArchiveMaster.Utilities
                 {
                     return time1;
                 }
+
                 if (dir.TryGetDateTime(36868, out DateTime time2))
                 {
                     return time2;
                 }
             }
+
             if ((dir = directories.FirstOrDefault(p => p.Name == "Exif IFD0")) != null)
             {
                 if (dir.TryGetDateTime(306, out DateTime time))

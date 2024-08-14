@@ -1,9 +1,12 @@
 namespace ArchiveMaster.Utilities;
 
-public class FilesLoopStates()
+public class FilesLoopStates(FilesLoopOptions options)
 {
+    public FilesLoopOptions Options { get; } = options;
     private long totalLength = 0;
     private int fileCount = 0;
+    private int fileIndex = 0;
+    private long fileLength = 0;
 
     internal bool NeedBroken { get; private set; }
 
@@ -17,7 +20,7 @@ public class FilesLoopStates()
         }
     }
 
-    public int FileIndex { get; internal set; }
+    public int FileIndex => fileIndex;
 
     public long TotalLength
     {
@@ -33,11 +36,35 @@ public class FilesLoopStates()
 
     internal bool CanAccessFileCount { get; set; }
 
-    public long AccumulatedLength { get; internal set; }
+    public long AccumulatedLength => fileLength;
 
     public static string ProgressMessageFormat { get; set; } = "（{0}/{1}）";
 
     public static string ProgressMessageIndexOnlyFormat { get; set; } = "（{0}个）";
+
+    public void IncreaseFileIndex()
+    {
+        if (options.Threads != 1)
+        {
+            Interlocked.Increment(ref fileIndex);
+        }
+        else
+        {
+            fileIndex++;
+        }
+    }
+
+    public void IncreaseFileLength(long increment)
+    {
+        if (options.Threads != 1)
+        {
+            Interlocked.Add(ref fileLength, increment);
+        }
+        else
+        {
+            fileLength += increment;
+        }
+    }
 
     public string GetFileNumberMessage()
     {

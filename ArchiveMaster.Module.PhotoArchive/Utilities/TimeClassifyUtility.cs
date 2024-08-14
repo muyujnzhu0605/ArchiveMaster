@@ -17,39 +17,28 @@ namespace ArchiveMaster.Utilities
         public override TimeClassifyConfig Config { get; } = config;
         public List<SimpleDirInfo> TargetDirs { get; set; }
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken token)
         {
-            ArgumentNullException.ThrowIfNull(TargetDirs, nameof(TargetDirs));
-            await Task.Run(() =>
+            return TryForFilesAsync(TargetDirs, (dir, s) =>
             {
-                int index = 0;
-                foreach (var dir in TargetDirs)
+                NotifyMessage($"正在移动{s.GetFileNumberMessage()}");
+                string newDirName = dir.EarliestTime.ToString("yyyyMMdd-HHmmss");
+                string newDirPath = Path.Combine(Config.Dir, newDirName);
+                Directory.CreateDirectory(newDirPath);
+                foreach (var sub in dir.Subs)
                 {
-                    token.ThrowIfCancellationRequested();
-                    index++;
-                    NotifyProgressUpdate(TargetDirs.Count, index, $"正在移动（{index}/{TargetDirs.Count}）");
-                    string newDirName = dir.EarliestTime.ToString("yyyyMMdd-HHmmss");
-                    string newDirPath = Path.Combine(Config.Dir, newDirName);
-                    Directory.CreateDirectory(newDirPath);
-                    foreach (var sub in dir.Subs)
+                    string targetPath = Path.Combine(newDirPath, sub.Name);
+                    Debug.WriteLine($"{sub.Path} => {targetPath}");
+                    if (sub.IsDir)
                     {
-                        string targetPath = Path.Combine(newDirPath, sub.Name);
-                        Debug.WriteLine($"{sub.Path} => {targetPath}");
-                        if (sub is SimpleDirInfo d)
-                        {
-                            Directory.Move(sub.Path, targetPath);
-                        }
-                        else if (sub is SimpleFileInfo f)
-                        {
-                            File.Move(sub.Path, targetPath);
-                        }
-                        else
-                        {
-                            throw new NotImplementedException();
-                        }
+                        Directory.Move(sub.Path, targetPath);
+                    }
+                    else
+                    {
+                        File.Move(sub.Path, targetPath);
                     }
                 }
-            }, token);
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         public override async Task InitializeAsync(CancellationToken token)
@@ -60,7 +49,7 @@ namespace ArchiveMaster.Utilities
 
             await Task.Run(() =>
             {
-                NotifyProgressUpdate(0, -1, "正在搜索文件");
+                NotifyMessage("正在搜索文件");
                 files = new DirectoryInfo(Config.Dir).EnumerateFiles()
                     .Select(p => new SimpleFileInfo(p))
                     .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
@@ -78,7 +67,7 @@ namespace ArchiveMaster.Utilities
 
                 token.ThrowIfCancellationRequested();
 
-                NotifyProgressUpdate(0, -1, "正在分配目录");
+                NotifyMessage("正在分配目录");
                 DateTime time = DateTime.MinValue;
                 int filesIndex = 0;
                 int dirsIndex = 0;
@@ -123,15 +112,8 @@ namespace ArchiveMaster.Utilities
             foreach (var dir in targetDirs)
             {
                 token.ThrowIfCancellationRequested();
-                dir.EarliestTime = dir.Subs.Select(p =>
-                {
-                    return p switch
-                    {
-                        SimpleDirInfo d => d.EarliestTime,
-                        SimpleFileInfo f => f.Time,
-                        _ => throw new NotImplementedException()
-                    };
-                }).Min();
+                dir.EarliestTime = dir.Subs.Select(p =>p.IsDir?(p as SimpleDirInfo).EarliestTime:p.Time)
+               .Min();
                 dir.LatestTime = dir.Subs.Select(p =>
                 {
                     return p switch

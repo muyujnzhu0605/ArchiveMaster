@@ -19,46 +19,31 @@ namespace ArchiveMaster.Utilities
         public override Task ExecuteAsync(CancellationToken token)
         {
             ArgumentNullException.ThrowIfNull(DeletingJpgFiles);
-            return Task.Run(() =>
+            return TryForFilesAsync(DeletingJpgFiles, (file, s) =>
             {
-                int index = 0;
-                foreach (var file in DeletingJpgFiles)
-                {
-                    index++;
-                    token.ThrowIfCancellationRequested();
-                    NotifyProgressUpdate(DeletingJpgFiles.Count, index, $"正在删除JPG（{index}/{DeletingJpgFiles.Count}）");
-                    File.Delete(file.Path);
-                }
-
-                DeletingJpgFiles = null;
-            }, token);
+                NotifyMessage($"正在删除JPG{s.GetFileNumberMessage()}：{file.Name}");
+                File.Delete(file.Path);
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         public override Task InitializeAsync(CancellationToken token)
         {
             DeletingJpgFiles = new List<SimpleFileInfo>();
-            return Task.Run(() =>
+            var jpgs = new DirectoryInfo(Config.Dir)
+                .EnumerateFiles("*.jp*g", SearchOption.AllDirectories)
+                .Where(p => p.Name.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) ||
+                            p.Name.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
+                .Select(p => new SimpleFileInfo(p));
+            return TryForFilesAsync(jpgs, (file, s) =>
             {
-                NotifyProgressUpdate(0, -1, "正在搜索JPG文件");
-                var jpgs = new DirectoryInfo(Config.Dir)
-                    .EnumerateFiles( "*.jp*g", SearchOption.AllDirectories)
-                    .Where(p => p.Name.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) ||
-                                p.Name.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
-                    .ToList();
-                int index = 0;
-                foreach (var jpg in jpgs)
+                NotifyMessage($"正在查找JPG和RAW文件{s.GetFileNumberMessage()}");
+                var rawFile =
+                    $"{Path.Combine(Path.GetDirectoryName(file.Path), Path.GetFileNameWithoutExtension(file.Name))}.{Config.RawExtension}";
+                if (File.Exists(rawFile))
                 {
-                    token.ThrowIfCancellationRequested();
-                    index++;
-                    NotifyProgressUpdate(jpgs.Count, index, $"正在查找RAW文件（{index}/{jpgs.Count}）");
-                    var rawFile =
-                        $"{Path.Combine(jpg.DirectoryName, Path.GetFileNameWithoutExtension(jpg.Name))}.{Config.RawExtension}";
-                    if (File.Exists(rawFile))
-                    {
-                        DeletingJpgFiles.Add(new SimpleFileInfo(jpg));
-                    }
+                    DeletingJpgFiles.Add(file);
                 }
-            }, token);
+            }, token, FilesLoopOptions.DoNothing());
         }
     }
 }

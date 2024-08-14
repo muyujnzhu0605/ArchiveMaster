@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Utilities;
 
-    public partial class RenameFileInfo : SimpleFileOrDirInfo
+    public partial class RenameFileInfo : SimpleFileInfo
     {
         public RenameFileInfo(FileSystemInfo fileOrDir) : base(fileOrDir)
         {

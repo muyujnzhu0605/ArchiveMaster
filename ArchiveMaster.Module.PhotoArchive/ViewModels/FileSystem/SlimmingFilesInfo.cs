@@ -8,36 +8,36 @@ namespace ArchiveMaster.ViewModels
 {
     public class SlimmingFilesInfo
     {
-        private List<FileInfo> processingFiles = new List<FileInfo>();
+        private List<SimpleFileInfo> processingFiles = new List<SimpleFileInfo>();
 
         private IList<string> processingFilesRelativePaths;
 
         private string rootDir;
 
-        private List<FileInfo> skippedFiles = new List<FileInfo>();
+        private List<SimpleFileInfo> skippedFiles = new List<SimpleFileInfo>();
 
         public SlimmingFilesInfo(string rootDir)
         {
             this.rootDir = rootDir;
         }
-        public IReadOnlyList<FileInfo> ProcessingFiles => processingFiles.AsReadOnly();
+        public IReadOnlyList<SimpleFileInfo> ProcessingFiles => processingFiles.AsReadOnly();
 
         public long ProcessingFilesLength { get; private set; } = 0;
 
         public IList<string> ProcessingFilesRelativePaths => processingFilesRelativePaths ?? throw new Exception($"还未调用{nameof(CreateRelativePathsAsync)}方法");
 
-        public IReadOnlyList<FileInfo> SkippedFiles => skippedFiles.AsReadOnly();
+        public IReadOnlyList<SimpleFileInfo> SkippedFiles => skippedFiles.AsReadOnly();
 
-        public void Add(FileInfo file)
+        public void Add(SimpleFileInfo file)
         {
             processingFiles.Add(file);
-            if (file.Exists)
+            if (!file.IsDir )
             {
                 ProcessingFilesLength += file.Length;
             }
         }
 
-        public void AddSkipped(FileInfo file)
+        public void AddSkipped(SimpleFileInfo file)
         {
             skippedFiles.Add(file);
         }
@@ -56,7 +56,7 @@ namespace ArchiveMaster.ViewModels
                 processingFilesRelativePaths = processingFiles
                 .Select(p =>
                 {
-                    return Path.GetRelativePath(rootDir, p.FullName) + (p.Exists ? "" : "/");
+                    return Path.GetRelativePath(rootDir, p.Path) + (Path.Exists(p.Path) ? "" : "/");
                 })
                .ToList();
             });

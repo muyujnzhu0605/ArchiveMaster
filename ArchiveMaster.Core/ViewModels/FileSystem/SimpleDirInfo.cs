@@ -6,16 +6,16 @@ using System.Linq;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class SimpleDirInfo : SimpleFileOrDirInfo
+    public partial class SimpleDirInfo : SimpleFileInfo
     {
         public SimpleDirInfo()
         {
-
+            IsDir = true;
         }
         public SimpleDirInfo(DirectoryInfo dir) : base(dir)
         {
             var subFiles = dir.EnumerateFiles().ToList();
-            Subs = subFiles.Select(p => new SimpleFileOrDirInfo(p)).ToList();
+            Subs = subFiles.Select(p => new SimpleFileInfo(p)).ToList();
             FilesCount = subFiles.Count;
             if (FilesCount > 0)
             {
@@ -40,6 +40,6 @@ namespace ArchiveMaster.ViewModels
         private DateTime latestTime;
 
         [ObservableProperty]
-        private List<SimpleFileOrDirInfo> subs  = new List<SimpleFileOrDirInfo>();
+        private List<SimpleFileInfo> subs  = new List<SimpleFileInfo>();
     }
 }

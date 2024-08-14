@@ -16,21 +16,16 @@ public partial class RepairModifiedTimeViewModel : TwoStepViewModelBase<RepairMo
     public override RepairModifiedTimeConfig Config { get; } = AppConfig.Instance.Get<RepairModifiedTimeConfig>();
 
     [ObservableProperty]
-    private List<string> updatingFiles;
-
-    [ObservableProperty]
-    private List<string> errorFiles;
+    private List<ExifTimeFileInfo> files=new List<ExifTimeFileInfo>();
 
     protected override Task OnInitializedAsync()
     {
-        UpdatingFiles = Utility.UpdatingFilesAndMessages;
-        ErrorFiles = Utility.ErrorFilesAndMessages;
+        Files = Utility.Files.ToList();
         return base.OnInitializedAsync();
     }
 
     protected override void OnReset()
     {
-        UpdatingFiles = new List<string>();
-        ErrorFiles = new List<string>();
+        Files = new List<ExifTimeFileInfo>();
     }
 }

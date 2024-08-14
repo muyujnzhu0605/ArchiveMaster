@@ -11,8 +11,8 @@ namespace ArchiveMaster.Utilities;
 
 public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 {
-    public static readonly Dictionary<string, Func<SimpleFileOrDirInfo, string, string>> fileAttributesDic =
-        new Dictionary<string, Func<SimpleFileOrDirInfo, string, string>>()
+    public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
+        new Dictionary<string, Func<SimpleFileInfo, string, string>>()
         {
             //文件名
             { "<Name>", (item, arg) => item.Name },
@@ -257,7 +257,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
     {
         return string.Concat(replacePatterns.Select(p =>
         {
-            if (p[0] == '<' && fileAttributesDic.TryGetValue(p, out Func<SimpleFileOrDirInfo, string, string> func))
+            if (p[0] == '<' && fileAttributesDic.TryGetValue(p, out Func<SimpleFileInfo, string, string> func))
             {
                 return func(file, p);
             }
