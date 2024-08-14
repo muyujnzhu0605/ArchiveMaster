@@ -34,50 +34,9 @@
         <Grid
             Grid.Row="2"
             RowDefinitions="*,8,Auto">
-            <DataGrid
-                AutoGenerateColumns="False"
-                CanUserReorderColumns="True"
-                ItemsSource="{Binding Files}">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn
-                        CanUserResize="False"
-                        Header="完成">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    x:Name="e"
-                                    Margin="16,0"
-                                    VerticalAlignment="Center"
-                                    Foreground="Green"
-                                    IsVisible="{Binding IsCompleted}"
-                                    Text="●" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn
-                        Width="200"
-                        Binding="{Binding Name}"
-                        Header="文件名"
-                        IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Width="400"
-                        Binding="{Binding Path}"
-                        Header="路径"
-                        IsReadOnly="True" />
-
-                    <DataGridTextColumn
-                        Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                        CanUserResize="False"
-                        Header="修改时间"
-                        IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Binding="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}"
-                        CanUserResize="False"
-                        Header="大小"
-                        IsReadOnly="True" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <v:SimpleFileDataGrid
+                ColumnIsCheckedIndex="-1"
+                ItemsSource="{Binding Files}" />
             <StackPanel
                 Grid.Row="2"
                 Margin="8,0"

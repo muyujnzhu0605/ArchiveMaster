@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="clr-namespace:ArchiveMaster.Views;assembly=ArchiveMaster.Core"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"
     d:DesignHeight="450"
@@ -16,7 +17,7 @@
     </UserControl.Resources>
     <Grid RowDefinitions="*,8,Auto">
 
-        <DataGrid
+        <v:SimpleFileDataGrid
             x:Name="dg"
             AutoGenerateColumns="False"
             CanUserReorderColumns="True"
@@ -38,59 +39,8 @@
                     </TextBlock>
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
+
             <DataGrid.Columns>
-                <DataGridTemplateColumn
-                    Width="36"
-                    CanUserReorder="False"
-                    CanUserResize="False"
-                    CanUserSort="False">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate x:DataType="{x:Type vm:SyncFileInfo}">
-                            <CheckBox
-                                Margin="8,0"
-                                IsChecked="{Binding IsChecked}"
-                                IsEnabled="{Binding #root.DataContext.CanExecute}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn
-                    CanUserResize="False"
-                    Header="完成">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                Margin="16,0"
-                                VerticalAlignment="Center"
-                                Foreground="Green"
-                                IsVisible="{Binding IsCompleted}"
-                                Text="●" />
-
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTextColumn
-                    Width="200"
-                    Binding="{Binding Name}"
-                    Header="文件名"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    Width="200"
-                    Binding="{Binding ., Converter={StaticResource SyncFilePathConverter}}"
-                    Header="文件路径"
-                    IsReadOnly="True" />
-
-                <DataGridTextColumn
-                    Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                    CanUserResize="False"
-                    Header="修改时间"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    Binding="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}"
-                    CanUserResize="False"
-                    Header="大小"
-                    IsReadOnly="True" />
-
                 <DataGridTemplateColumn
                     CanUserResize="False"
                     Header="更新类型"
@@ -135,13 +85,8 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn
-                    Binding="{Binding Message}"
-                    CanUserResize="False"
-                    Header="信息"
-                    IsReadOnly="True" />
             </DataGrid.Columns>
-        </DataGrid>
+        </v:SimpleFileDataGrid>
 
         <Grid
             Grid.Row="2"

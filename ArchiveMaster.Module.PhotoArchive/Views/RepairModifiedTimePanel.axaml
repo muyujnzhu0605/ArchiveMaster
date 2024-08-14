@@ -53,7 +53,7 @@
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <v:SimpleFileDataGrid
-                IsCheckedColumnIndex="-1"
+                ColumnIsCheckedIndex="-1"
                 ItemsSource="{Binding Files}">
                 <DataGrid.Columns>
                     <DataGridTextColumn

@@ -93,15 +93,18 @@
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
-            <DataGrid
-                CanUserReorderColumns="False"
-                CanUserResizeColumns="True"
-                CanUserSortColumns="False"
+            <v:SimpleFileDataGrid
+                ColumnIsCheckedIndex="-1"
+                ColumnLengthIndex="-1"
+                ColumnNameHeader="旧文件（夹）名"
+                ColumnNameIndex="2"
+                ColumnPathHeader="旧路径"
+                ColumnPathIndex="3"
+                ColumnStatusIndex="1"
+                ColumnTimeIndex="-1"
                 ItemsSource="{Binding Files}">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn
-                        Width="48"
-                        CanUserResize="False">
+                    <DataGridTemplateColumn CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -125,38 +128,16 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn
-                        CanUserResize="False"
-                        Header="完成">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    x:Name="e"
-                                    Margin="16,0"
-                                    VerticalAlignment="Center"
-                                    Foreground="Green"
-                                    IsVisible="{Binding IsCompleted}"
-                                    Text="●" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn
-                        Binding="{Binding Name}"
-                        Header="旧文件（夹）名"
-                        IsReadOnly="True" />
+
                     <DataGridTextColumn
                         Binding="{Binding NewName}"
                         Header="新文件（夹）名" />
-                    <DataGridTextColumn
-                        Binding="{Binding Path}"
-                        Header="旧路径"
-                        IsReadOnly="True" />
                     <DataGridTextColumn
                         Binding="{Binding NewPath}"
                         Header="新路径" />
 
                 </DataGrid.Columns>
-            </DataGrid>
+            </v:SimpleFileDataGrid>
             <Grid
                 Grid.Row="2"
                 ColumnDefinitions="Auto,*,Auto">

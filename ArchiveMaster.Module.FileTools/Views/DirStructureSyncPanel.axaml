@@ -179,46 +179,21 @@
         <Grid
             Grid.Row="2"
             RowDefinitions="*,8,Auto">
-            <DataGrid
+            <v:SimpleFileDataGrid
                 AreRowDetailsFrozen="True"
-                AutoGenerateColumns="False"
                 CanUserReorderColumns="True"
+                ColumnLengthIndex="2.3"
+                ColumnNameIndex="1.1"
+                ColumnPathHeader="源路径"
+                ColumnPathIndex="1.2"
+                ColumnTimeIndex="2.4"
                 ItemsSource="{Binding Files}"
                 RowDetailsTemplate="{StaticResource DataGridDetailTemplate}">
                 <DataGrid.Resources>
                     <c:DirStructureSyncTypeDescriptionConverter x:Key="DirStructureSyncTypeDescriptionConverter" />
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn
-                        Width="36"
-                        CanUserReorder="False"
-                        CanUserResize="False"
-                        CanUserSort="False">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="8,0"
-                                    IsChecked="{Binding IsChecked}"
-                                    IsEnabled="{Binding #root.DataContext.CanExecute}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn
-                        CanUserResize="False"
-                        Header="完成">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    x:Name="e"
-                                    Margin="16,0"
-                                    VerticalAlignment="Center"
-                                    Foreground="Green"
-                                    IsVisible="{Binding IsCompleted}"
-                                    Text="●" />
 
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn
                         CanUserResize="False"
                         Header="多匹配">
@@ -232,45 +207,17 @@
                                     Foreground="{Binding ., Converter={StaticResource DirStructureSyncTypeDescriptionConverter}, ConverterParameter=Foreground}"
                                     Text="{Binding ., Converter={StaticResource DirStructureSyncTypeDescriptionConverter}, ConverterParameter=Text}"
                                     ToolTip.Tip="{Binding ., Converter={StaticResource DirStructureSyncTypeDescriptionConverter}, ConverterParameter=ToolTip}" />
-
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTextColumn
-                        Width="200"
-                        Binding="{Binding Name}"
-                        Header="文件名"
-                        IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Width="300"
-                        Binding="{Binding Path}"
-                        Header="源路径"
-                        IsReadOnly="True" />
-
-                    <DataGridTextColumn
-                        Width="300"
                         Binding="{Binding Template.Path}"
                         Header="模板路径"
                         IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Binding="{Binding LastWriteTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                        CanUserResize="False"
-                        Header="修改时间"
-                        IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Binding="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}"
-                        CanUserResize="False"
-                        Header="大小"
-                        IsReadOnly="True" />
 
-                    <DataGridTextColumn
-                        Binding="{Binding Message}"
-                        CanUserResize="False"
-                        Header="信息"
-                        IsReadOnly="True" />
                 </DataGrid.Columns>
-            </DataGrid>
+            </v:SimpleFileDataGrid>
             <Grid
                 Grid.Row="2"
                 ColumnDefinitions="Auto,*,Auto">

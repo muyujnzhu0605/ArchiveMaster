@@ -6,9 +6,6 @@ namespace ArchiveMaster.ViewModels
     public partial class EncryptorFileInfo : SimpleFileInfo
     {
         [ObservableProperty]
-        private bool isEnable = true;
-
-        [ObservableProperty]
         private bool isEncrypted;
 
         [ObservableProperty]
