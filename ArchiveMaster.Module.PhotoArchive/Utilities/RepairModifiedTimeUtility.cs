@@ -54,16 +54,19 @@ namespace ArchiveMaster.Utilities
 
                     if (exifTime.HasValue)
                     {
-                        Files.Add(file);
                         var fileTime = file.Time;
                         var duration = (exifTime.Value - fileTime).Duration();
                         if (duration > Config.MaxDurationTolerance)
                         {
                             file.ExifTime = exifTime.Value;
+                            Files.Add(file);
                         }
                     }
                 }
-            }, token, FilesLoopOptions.Builder().WithMultiThreads(Config.ThreadCount).Build());
+            }, token, FilesLoopOptions.Builder().WithMultiThreads(Config.ThreadCount).Catch((file, ex) =>
+            {
+                Files.Add(file as ExifTimeFileInfo);
+            }).Build());
         }
 
         private DateTime? FindExifTime(string file)
