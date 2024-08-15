@@ -28,6 +28,11 @@ public class FilesLoopOptions
 
         private int threads = 1;
 
+        private int totalCount = 0;
+        private long totalLength = 0;
+        private int initialCount = 0;
+        private long initialLength = 0;
+
         public FilesLoopOptionsBuilder AutoApplyFileNumberProgress()
         {
             autoApplyProgress = AutoApplyProgressMode.FileNumber;
@@ -76,6 +81,22 @@ public class FilesLoopOptions
             return this;
         }
 
+        public FilesLoopOptionsBuilder SetCount(int initial, int total)
+        {
+            initialCount = initial;
+            totalCount = total;
+            return this;
+        }
+
+
+        public FilesLoopOptionsBuilder SetLength(long initial, long total)
+        {
+            initialLength = initial;
+            totalLength = total;
+            return this;
+        }
+
+
         public FilesLoopOptions Build()
         {
             return new FilesLoopOptions()
@@ -85,7 +106,11 @@ public class FilesLoopOptions
                 CatchAction = catchAction,
                 FinallyAction = finallyAction,
                 ThrowExceptions = throwExceptions,
-                Threads = threads
+                Threads = threads,
+                InitialCount = initialCount,
+                InitialLength = initialLength,
+                TotalCount = totalCount,
+                TotalLength = totalLength,
             };
         }
     }
@@ -104,4 +129,12 @@ public class FilesLoopOptions
     public bool ThrowExceptions { get; init; }
 
     public int Threads { get; init; } = 1;
+
+    public int TotalCount { get; set; }
+
+    public long TotalLength { get; set; }
+    
+    public int InitialCount { get; set; }
+    
+    public long InitialLength { get; set; }
 }

@@ -12,13 +12,6 @@ namespace ArchiveMaster.Utilities
         public override PackingConfig Config { get; } = config;
 
         /// <summary>
-        /// 根据时间顺序从早到晚排序后的文件
-        /// </summary>
-        List<FileInfo> filesOrderedByTime = new List<FileInfo>();
-
-        public bool HasMore { get; private set; }
-
-        /// <summary>
         /// 光盘文件包
         /// </summary>
         public DiscFilePackageCollection Packages { get; private set; }
@@ -27,28 +20,29 @@ namespace ArchiveMaster.Utilities
         {
             var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
             DiscFilePackageCollection packages = new DiscFilePackageCollection();
+            NotifyMessage("正在搜索文件");
 
             await Task.Run(() =>
             {
-                NotifyProgressUpdate("正在搜索文件");
-                filesOrderedByTime = new DirectoryInfo(Config.SourceDir)
+                var filesOrderedByTime = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", SearchOption.AllDirectories)
                     .Where(p => p.LastWriteTime > Config.EarliestTime)
-                    .Where(p=>!blacks.IsInBlackList(p))
-                    .OrderBy(p => p.LastWriteTime).ToList();
+                    .Where(p => !blacks.IsInBlackList(p))
+                    .OrderBy(p => p.LastWriteTime)
+                    .Select(p => new DiscFile(p));
 
                 packages.DiscFilePackages.Add(new DiscFilePackage());
                 long maxSize = 1L * 1024 * 1024 * Config.DiscSizeMB;
-                foreach (var file in filesOrderedByTime)
+
+                TryForFiles(filesOrderedByTime, (file, s) =>
                 {
-                    token.ThrowIfCancellationRequested();
-                    DiscFile discFile = new DiscFile(file);
+                    NotifyMessage($"正在搜索文件{s.GetFileNumberMessage()}：{file.Path}");
 
                     //文件超过单盘大小
                     if (file.Length > maxSize)
                     {
-                        packages.SizeOutOfRangeFiles.Add(discFile);
-                        continue;
+                        packages.SizeOutOfRangeFiles.Add(file);
+                        return;
                     }
 
                     //文件超过剩余空间
@@ -61,7 +55,8 @@ namespace ArchiveMaster.Utilities
                         if (packages.DiscFilePackages.Count >= Config.MaxDiscCount)
                         {
                             Packages = packages;
-                            HasMore = true;
+                            s.Break();
+                            return;
                         }
 
                         package = new DiscFilePackage();
@@ -69,9 +64,10 @@ namespace ArchiveMaster.Utilities
                     }
 
                     //加入文件
-                    package.Files.Add(discFile);
+                    package.Files.Add(file);
                     package.TotalLength += file.Length;
-                }
+                }, token, FilesLoopOptions.DoNothing());
+
 
                 //处理最后一个
                 var lastPackage = packages.DiscFilePackages[^1];
@@ -79,8 +75,8 @@ namespace ArchiveMaster.Utilities
                 lastPackage.LatestTime = lastPackage.Files[^1].Time;
                 lastPackage.Index = packages.DiscFilePackages.Count;
             }, token);
+
             Packages = packages;
-            HasMore = false;
         }
 
 
@@ -125,14 +121,11 @@ namespace ArchiveMaster.Utilities
                                 var relativePath = Path.GetRelativePath(Config.SourceDir, file.Path);
                                 string newName = relativePath.Replace(":", "#c#").Replace("\\", "#s#");
                                 string md5 = null;
-                                NotifyProgressUpdate(totalLength, length,
-                                    $"正在复制第 {package.Index} 个光盘文件包中的 {relativePath}");
+                                NotifyMessage($"正在复制第{package.Index}个光盘文件包中的{relativePath}");
 
                                 switch (Config.PackingType)
                                 {
                                     case PackingType.Copy:
-                                        NotifyProgressUpdate(totalLength, length,
-                                            $"正在复制第 {package.Index} 个光盘文件包中的 {relativePath}");
                                         md5 = CopyAndGetHash(file.Path, Path.Combine(dir, newName));
                                         break;
                                     case PackingType.ISO:
@@ -153,12 +146,17 @@ namespace ArchiveMaster.Utilities
                             {
                                 file.Error(ex);
                             }
+                            finally
+                            {
+                                NotifyProgress(1.0 * length / totalLength);
+                            }
                         }
                     }
 
+                    NotifyProgressIndeterminate();
                     if (Config.PackingType == PackingType.ISO)
                     {
-                        NotifyProgressUpdate($"正在创第 {package.Index} 个ISO");
+                        NotifyMessage($"正在创第 {package.Index} 个ISO");
                         builder.AddFile(fileListName, Path.Combine(dir, fileListName));
                         builder.Build(Path.Combine(Path.GetDirectoryName(dir), Path.GetFileName(dir) + ".iso"));
                     }

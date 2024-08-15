@@ -28,7 +28,7 @@
                 Content="{Binding ElementName=root, Path=ResultsContent}" />
             <Grid
                 Grid.Row="6"
-                ColumnDefinitions="3*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
+                ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
                 IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}">
 
 
@@ -45,7 +45,13 @@
                     Minimum="0"
                     ProgressTextFormat="{}{1:0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
-                    Value="{Binding Progress}" />
+                    Value="{Binding Progress}">
+                    <ProgressBar.Styles>
+                        <Style Selector="ProgressBar:horizontal">
+                            <Setter Property="MinWidth" Value="72" />
+                        </Style>
+                    </ProgressBar.Styles>
+                </ProgressBar>
                 <Button
                     Grid.Column="4"
                     Classes="Long Primary"

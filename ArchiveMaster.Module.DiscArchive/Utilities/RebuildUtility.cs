@@ -18,14 +18,23 @@ namespace ArchiveMaster.Utilities
 
         public override async Task InitializeAsync(CancellationToken token)
         {
+            NotifyProgressIndeterminate();
+            NotifyMessage("正在建立文件树");
             FileSystemTree tree = FileSystemTree.CreateRoot();
             await Task.Run(() =>
             {
                 files = ReadFileList(Config.DiscDirs);
+                int count = files.Sum(p => p.Value.Count);
+                int index = 0;
                 foreach (var dir in files.Keys)
                 {
-                    foreach (var file in files[dir])
+                    FilesLoopOptions options = FilesLoopOptions.Builder()
+                        .SetCount(index, count)
+                        .AutoApplyFileNumberProgress()
+                        .Build();
+                    var states = TryForFiles(files[dir], (file, s) =>
                     {
+                        NotifyMessage($"正在列举目录{dir}中的文件：{file.Name}");
                         string filePath = Path.Combine(dir, file.DiscName);
                         if (!File.Exists(filePath))
                         {
@@ -49,7 +58,8 @@ namespace ArchiveMaster.Utilities
 
                         var treeFile = current.AddFile(file.Name);
                         treeFile.File = file;
-                    }
+                    }, token, options);
+                    index = states.FileIndex;
                 }
             }, token);
             FileTree = tree;
@@ -59,54 +69,57 @@ namespace ArchiveMaster.Utilities
         {
             rebuildErrors = new List<RebuildError>();
             long length = 0;
-            long totalLength = files.Values.Sum(p => p.Sum(q => q.Length));
             int count = 0;
             return Task.Run(() =>
             {
+                int count = files.Sum(p => p.Value.Count);
+                int index = 0;
+                long currentLength = 0;
+                long totalLength = files.Values.Sum(p => p.Sum(q => q.Length));
+
                 foreach (var dir in files.Keys)
                 {
-                    foreach (var file in files[dir])
+                    FilesLoopOptions options = FilesLoopOptions.Builder()
+                        .SetCount(index, count)
+                        .SetLength(currentLength, totalLength)
+                        .AutoApplyFileLengthProgress()
+                        .AutoApplyStatus()
+                        .Catch((file, ex) => { rebuildErrors.Add(new RebuildError(file as DiscFile, ex.Message)); })
+                        .Build();
+
+                    var states = TryForFiles(files[dir], (file, s) =>
                     {
-                        token.ThrowIfCancellationRequested();
-                        try
+                        length += file.Length;
+                        var srcPath = Path.Combine(dir, file.DiscName);
+                        var distPath = Path.Combine(Config.TargetDir, file.Path);
+                        var distFileDir = Path.GetDirectoryName(distPath);
+                        NotifyMessage($"正在重建{s.GetFileNumberMessage()}：{file.Path}");
+                        if (!Directory.Exists(distFileDir) && !Config.CheckOnly)
                         {
-                            length += file.Length;
-                            var srcPath = Path.Combine(dir, file.DiscName);
-                            var distPath = Path.Combine(Config.TargetDir, file.Path);
-                            var distFileDir = Path.GetDirectoryName(distPath);
-                            var name = Path.GetFileName(file.Path);
-                            NotifyProgressUpdate(totalLength, length, $"正在重建 {file.Path}");
-                            if (!Directory.Exists(distFileDir) && !Config.CheckOnly)
-                            {
-                                Directory.CreateDirectory(distFileDir);
-                            }
-
-                            if (File.Exists(distPath) && Config.SkipIfExisted)
-                            {
-                                throw new Exception("文件已存在");
-                            }
-
-                            string md5;
-                            md5 = Config.CheckOnly ? GetMD5(srcPath) : CopyAndGetHash(srcPath, distPath);
-
-                            if (md5 != file.Md5)
-                            {
-                                throw new Exception("MD5验证失败");
-                            }
-
-                            if ((File.GetLastWriteTime(srcPath) - file.Time).Duration().TotalSeconds >
-                                Config.MaxTimeToleranceSecond)
-                            {
-                                throw new Exception("修改时间不一致");
-                            }
-
-                            count++;
+                            Directory.CreateDirectory(distFileDir);
                         }
-                        catch (Exception ex)
+
+                        if (File.Exists(distPath) && Config.SkipIfExisted)
                         {
-                            rebuildErrors.Add(new RebuildError(file, ex.Message));
+                            throw new Exception("文件已存在");
                         }
-                    }
+
+                        string md5;
+                        md5 = Config.CheckOnly ? GetMD5(srcPath) : CopyAndGetHash(srcPath, distPath);
+
+                        if (md5 != file.Md5)
+                        {
+                            throw new Exception("MD5验证失败");
+                        }
+
+                        if ((File.GetLastWriteTime(srcPath) - file.Time).Duration().TotalSeconds >
+                            Config.MaxTimeToleranceSecond)
+                        {
+                            throw new Exception("修改时间不一致");
+                        }
+                    }, token, options);
+                    index = states.FileIndex;
+                    currentLength = states.AccumulatedLength;
                 }
             }, token);
         }

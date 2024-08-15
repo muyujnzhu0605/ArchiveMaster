@@ -207,7 +207,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
     private async Task<bool> TryRunAsync(Func<Task> action, string errorTitle)
     {
-        Progress = -1;
+        Progress = double.NaN;
         IsWorking = true;
         try
         {

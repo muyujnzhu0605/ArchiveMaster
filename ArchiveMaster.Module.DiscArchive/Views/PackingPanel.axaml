@@ -13,6 +13,7 @@
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    ExecuteButtonContent="导出"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <StackPanel
@@ -136,7 +137,6 @@
                 Background="Transparent" />
             <gb:GroupBox Header="文件包">
                 <ListBox
-                    x:Name="lvwPackages"
                     ItemsSource="{Binding DiscFilePackages}"
                     SelectedItem="{Binding SelectedPackage}">
                     <ListBox.ItemTemplate>
@@ -198,33 +198,9 @@
                 Grid.RowSpan="99"
                 Grid.Column="2"
                 Header="文件包中的文件">
-                <DataGrid
-                    CanUserReorderColumns="False"
-                    CanUserResizeColumns="False"
-                    CanUserSortColumns="False"
-                    ItemsSource="{Binding SelectedPackage.Files}">
-                    <DataGrid.Columns>
-
-                        <DataGridTextColumn
-                            Binding="{Binding Path}"
-                            Header="文件路径"
-                            IsReadOnly="True" />
-                        <!--  遇到一个BUG，如果不设置Mode=OneWay，Length这个属性就会被设置为0。目前没有找到这个BUG的报告。  -->
-                        <DataGridTextColumn
-                            Binding="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}"
-                            Header="文件大小"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                            Header="修改时间"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding Message}"
-                            Header="信息"
-                            IsReadOnly="True" />
-                    </DataGrid.Columns>
-
-                </DataGrid>
+                <v:SimpleFileDataGrid
+                    ColumnIsCheckedIndex="-1"
+                    ItemsSource="{Binding SelectedPackage.Files}" />
             </gb:GroupBox>
 
             <Grid

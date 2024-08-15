@@ -1,8 +1,26 @@
 namespace ArchiveMaster.Utilities;
 
-public class FilesLoopStates(FilesLoopOptions options)
-{
-    public FilesLoopOptions Options { get; } = options;
+public class FilesLoopStates{
+    public FilesLoopStates(FilesLoopOptions options)
+    {
+        Options = options;
+        totalLength = options.TotalLength;
+        fileLength = options.InitialLength;
+        fileCount = options.TotalCount;
+        fileIndex = options.InitialCount;
+        
+        if (totalLength > 0)
+        {
+            CanAccessTotalLength = true;
+        }
+
+        if (fileCount > 0)
+        {
+            CanAccessFileCount = true;
+        }
+    }
+
+    public FilesLoopOptions Options { get; } 
     private long totalLength = 0;
     private int fileCount = 0;
     private int fileIndex = 0;
@@ -44,7 +62,7 @@ public class FilesLoopStates(FilesLoopOptions options)
 
     public void IncreaseFileIndex()
     {
-        if (options.Threads != 1)
+        if (Options.Threads != 1)
         {
             Interlocked.Increment(ref fileIndex);
         }
@@ -56,7 +74,7 @@ public class FilesLoopStates(FilesLoopOptions options)
 
     public void IncreaseFileLength(long increment)
     {
-        if (options.Threads != 1)
+        if (Options.Threads != 1)
         {
             Interlocked.Add(ref fileLength, increment);
         }

@@ -26,22 +26,24 @@ namespace ArchiveMaster.Utilities
             MessageUpdate?.Invoke(this, new MessageUpdateEventArgs(message));
         }
 
-        protected Task TryForFilesAsync<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
+        protected async Task<FilesLoopStates> TryForFilesAsync<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
             CancellationToken cancellationToken, FilesLoopOptions options = null)
             where T : SimpleFileInfo
         {
-            return Task.Run(() => { TryForFiles(files, body, cancellationToken, options); }, cancellationToken);
+            FilesLoopStates states = null;
+            await Task.Run(() => { states=TryForFiles(files, body, cancellationToken, options); }, cancellationToken);
+            return states;
         }
 
-        protected void TryForFiles<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
+        protected FilesLoopStates TryForFiles<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
             CancellationToken cancellationToken,
             FilesLoopOptions options = null)
             where T : SimpleFileInfo
         {
             options ??= FilesLoopOptions.DoNothing();
             var states = new FilesLoopStates(options);
-
-            if (options.AutoApplyProgress == AutoApplyProgressMode.FileLength)
+            
+            if (options.AutoApplyProgress == AutoApplyProgressMode.FileLength && options.TotalLength==0)
             {
                 states.CanAccessTotalLength = true;
 
@@ -59,17 +61,20 @@ namespace ArchiveMaster.Utilities
                 }
             }
 
-            if (files is ICollection collection)
+            if (options.TotalCount == 0)
             {
-                states.FileCount = collection.Count;
-            }
-            else
-            {
-                if (options.AutoApplyProgress == AutoApplyProgressMode.FileNumber)
+                if (files is ICollection collection)
                 {
-                    throw new ArgumentException(
-                        "必须为集合，才可以使用AutoApplyProgressMode.FileNumber",
-                        nameof(files));
+                    states.FileCount = collection.Count;
+                }
+                else
+                {
+                    if (options.AutoApplyProgress == AutoApplyProgressMode.FileNumber)
+                    {
+                        throw new ArgumentException(
+                            "必须为集合，才可以使用AutoApplyProgressMode.FileNumber",
+                            nameof(files));
+                    }
                 }
             }
 
@@ -103,6 +108,8 @@ namespace ArchiveMaster.Utilities
                 default:
                     throw new ArgumentOutOfRangeException("Threads应为大于等于0的整数，其中1表示单线程，0表示自动多线程，>=2表示指定线程数");
             }
+
+            return states;
         }
 
         private void TryForFilesSingle<T>(Action<T, FilesLoopStates> body, CancellationToken cancellationToken,
