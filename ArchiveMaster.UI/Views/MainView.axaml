@@ -55,9 +55,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel
-                                Orientation="Vertical"
-                                Spacing="8">
+                            <StackPanel Orientation="Vertical">
                                 <Grid ColumnDefinitions="*,Auto,*">
                                     <TextBlock
                                         Grid.Column="1"
@@ -81,10 +79,8 @@
                                                     <ControlTheme
                                                         BasedOn="{StaticResource {x:Type MenuItem}}"
                                                         TargetType="MenuItem">
-
                                                         <Setter Property="Header" Value="{Binding Header}" />
                                                         <Setter Property="Command" Value="{Binding Command}" />
-
                                                     </ControlTheme>
                                                 </MenuFlyout.ItemContainerTheme>
                                             </MenuFlyout>
@@ -140,9 +136,7 @@
                     IsVisible="{Binding !IsToolOpened}">
                     <Button.Flyout>
                         <Flyout>
-                            <StackPanel
-                                Orientation="Vertical"
-                                Spacing="8">
+                            <StackPanel Orientation="Vertical">
                                 <CheckBox
                                     Content="调试模式"
                                     IsChecked="{Binding Source={x:Static cfg:AppConfig.Instance}, Path=DebugMode}" />

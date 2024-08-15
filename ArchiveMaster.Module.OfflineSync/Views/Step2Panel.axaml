@@ -24,9 +24,7 @@
     </v:OfflineSyncPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <Grid ColumnDefinitions="*,8,*">
-            <StackPanel
-                Margin="8"
-                Spacing="8">
+            <StackPanel Margin="8">
                 <ctrl:FormItem Label="异地快照文件：">
                     <ctrl:FilePickerTextBox
                         FileNames="{Binding Config.OffsiteSnapshot}"

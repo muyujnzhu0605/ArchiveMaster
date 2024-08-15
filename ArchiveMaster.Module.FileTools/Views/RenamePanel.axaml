@@ -26,9 +26,7 @@
 
     </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Orientation="Vertical"
-            Spacing="8">
+        <StackPanel Orientation="Vertical">
             <ct:FormItem Label="目录：">
                 <ct:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"

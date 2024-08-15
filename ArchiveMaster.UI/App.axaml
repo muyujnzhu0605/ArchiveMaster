@@ -2,59 +2,19 @@
     x:Class="ArchiveMaster.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:c="using:ArchiveMaster.Converters"
-    RequestedThemeVariant="Light">
-    <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
+    RequestedThemeVariant="Default">
 
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
-        <Style Selector="Button">
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="Padding" Value="24,6" />
-        </Style>
-        <Style Selector="TextBlock">
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style Selector="Button.Middle">
-            <Setter Property="Padding" Value="8,6" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Width" Value="84" />
-        </Style>
-        <Style Selector="CheckBox.Middle">
-            <Setter Property="Padding" Value="8,6" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Width" Value="84" />
-        </Style>
-        <Style Selector="Button.Long">
-            <Setter Property="Padding" Value="8,6" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Width" Value="120" />
-        </Style>
-        <Style Selector="Button.Primary">
-            <Setter Property="Background" Value="{DynamicResource Accent1}" />
-            <Setter Property="Foreground" Value="White" />
-
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource Accent2}" />
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource Accent3}" />
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-        </Style>
+        <StyleInclude Source="avares://ArchiveMaster.Core/GlobalStyles.axaml" />
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
-            <FontFamily x:Key="IconFont">avares://ArchiveMaster.Core/Assets/#Segoe Fluent Icons</FontFamily>
-            <c:BitmapAssetValueConverter x:Key="BitmapAssetValueConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://FzLib.Avalonia/Resources.axaml" />
-                <ResourceInclude Source="Brushes.axaml" />
+                <ResourceInclude Source="avares://ArchiveMaster.Core/Brushes.axaml" />
+                <ResourceInclude Source="avares://ArchiveMaster.Core/GlobalResources.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

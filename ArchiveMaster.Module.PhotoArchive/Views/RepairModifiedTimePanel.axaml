@@ -13,9 +13,7 @@
     x:DataType="vm:RepairModifiedTimeViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Orientation="Vertical"
-            Spacing="8">
+        <StackPanel Orientation="Vertical">
             <ct:FilePickerTextBox
                 Grid.Row="2"
                 FileNames="{Binding Config.Dir}"
@@ -23,8 +21,7 @@
                 Type="OpenFolder" />
             <StackPanel
                 Grid.Row="4"
-                Orientation="Horizontal"
-                Spacing="8">
+                Orientation="Horizontal">
                 <TextBlock Text="线程数：" />
                 <NumericUpDown
                     Width="120"
@@ -35,8 +32,7 @@
             </StackPanel>
             <StackPanel
                 Grid.Row="6"
-                Orientation="Horizontal"
-                Spacing="8">
+                Orientation="Horizontal">
                 <TextBlock Text="最长容忍差异时间：" />
                 <NumericUpDown
                     Width="120"

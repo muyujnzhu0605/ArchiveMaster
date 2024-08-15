@@ -20,9 +20,7 @@
         <StyleInclude Source="Styles.axaml" />
     </v:OfflineSyncPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Orientation="Vertical"
-            Spacing="8">
+        <StackPanel Orientation="Vertical">
             <ctrl:FormItem Label="本地补丁目录：">
                 <ctrl:FilePickerTextBox
                     ButtonContent="浏览.."

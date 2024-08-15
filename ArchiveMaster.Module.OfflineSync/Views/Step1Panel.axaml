@@ -34,8 +34,7 @@
                 SelectedItem="{Binding SelectedSyncDir}" />
             <StackPanel
                 Grid.Row="4"
-                Orientation="Horizontal"
-                Spacing="8">
+                Orientation="Horizontal">
                 <Button
                     Grid.Column="4"
                     Classes="Long"

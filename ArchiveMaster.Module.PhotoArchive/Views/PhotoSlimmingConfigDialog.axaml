@@ -25,18 +25,14 @@
     <ScrollViewer
         HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto">
-        <StackPanel
-            Orientation="Vertical"
-            Spacing="8">
+        <StackPanel Orientation="Vertical">
             <ct:FormItem
                 Margin="8,0,0,0"
                 Label="配置名称：">
                 <TextBox Text="{Binding Config.Name}" />
             </ct:FormItem>
             <gb:GroupBox Header="目录和文件">
-                <StackPanel
-                    Orientation="Vertical"
-                    Spacing="8">
+                <StackPanel Orientation="Vertical">
                     <ct:FormItem Label="源目录：">
                         <ct:FilePickerTextBox
                             Grid.Row="2"
@@ -75,9 +71,7 @@
                 </StackPanel>
             </gb:GroupBox>
             <gb:GroupBox Header="文件筛选">
-                <StackPanel
-                    Orientation="Vertical"
-                    Spacing="8">
+                <StackPanel Orientation="Vertical">
                     <ct:FormItem Label="匹配条件（正则）：">
                         <TextBox Text="{Binding Config.WhiteList}" />
                     </ct:FormItem>
@@ -103,9 +97,7 @@
                 </StackPanel>
             </gb:GroupBox>
             <gb:GroupBox Header="图像压缩">
-                <StackPanel
-                    Orientation="Vertical"
-                    Spacing="8">
+                <StackPanel Orientation="Vertical">
                     <ct:FormItem Label="最大长边像素：">
                         <NumericUpDown
                             Increment="10"

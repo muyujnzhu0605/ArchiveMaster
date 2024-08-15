@@ -110,9 +110,7 @@
     </UserControl.Resources>
 
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Margin="8"
-            Spacing="8">
+        <StackPanel Margin="8">
             <StackPanel.Styles>
                 <Style Selector="ctrl|FormItem">
                     <Setter Property="LabelWidth" Value="96" />
@@ -149,9 +147,7 @@
                 </Grid>
             </ctrl:FormItem>
             <ctrl:FormItem Label="文件匹配选项：">
-                <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="8">
+                <StackPanel Orientation="Horizontal">
                     <CheckBox
                         Content="匹配文件名"
                         IsChecked="{Binding Config.CompareName}" />
@@ -164,9 +160,7 @@
                 </StackPanel>
             </ctrl:FormItem>
             <ctrl:FormItem Label="操作选项：">
-                <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="8">
+                <StackPanel Orientation="Horizontal">
                     <CheckBox
                         Content="建立副本"
                         IsChecked="{Binding Config.Copy}" />
@@ -224,8 +218,7 @@
                 <StackPanel
                     Margin="8,0"
                     HorizontalAlignment="Left"
-                    Orientation="Horizontal"
-                    Spacing="8">
+                    Orientation="Horizontal">
                     <TextBlock
                         VerticalAlignment="Center"
                         Text="显示：" />
@@ -240,8 +233,7 @@
                     Grid.Column="2"
                     Margin="8,0"
                     HorizontalAlignment="Right"
-                    Orientation="Horizontal"
-                    Spacing="8">
+                    Orientation="Horizontal">
 
                     <TextBlock VerticalAlignment="Center">
                         <Run Text="共" />

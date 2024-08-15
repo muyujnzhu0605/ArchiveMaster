@@ -16,9 +16,7 @@
     ExecuteButtonContent="导出"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Margin="8"
-            Spacing="8">
+        <StackPanel Margin="8">
             <StackPanel.Styles>
                 <Style Selector="ctrl|FormItem">
                     <Setter Property="LabelWidth" Value="84" />

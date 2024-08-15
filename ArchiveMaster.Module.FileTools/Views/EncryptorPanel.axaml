@@ -23,9 +23,7 @@
         </Style>
     </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Orientation="Vertical"
-            Spacing="8">
+        <StackPanel Orientation="Vertical">
             <ct:FormItem Label="原始目录：">
                 <ct:FilePickerTextBox
                     FileNames="{Binding Config.RawDir}"
@@ -109,9 +107,7 @@
 
 
             <ct:FormItem Label="操作：">
-                <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="8">
+                <StackPanel Orientation="Horizontal">
                     <RadioButton
                         Content="加密"
                         IsChecked="{Binding IsEncrypting}" />

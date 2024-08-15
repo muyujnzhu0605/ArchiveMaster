@@ -15,9 +15,7 @@
     x:DataType="vm:DirStructureCloneViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel
-            Margin="8"
-            Spacing="8">
+        <StackPanel Margin="8">
             <ctrl:FilePickerTextBox
                 FileNames="{Binding Config.SourceDir}"
                 Label="模板目录："
@@ -41,8 +39,7 @@
                 Grid.Row="2"
                 Margin="8,0"
                 HorizontalAlignment="Right"
-                Orientation="Horizontal"
-                Spacing="8">
+                Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center">
                     <Run Text="共" />
                     <Run Text="{Binding Files.Count, Mode=OneWay}" />
