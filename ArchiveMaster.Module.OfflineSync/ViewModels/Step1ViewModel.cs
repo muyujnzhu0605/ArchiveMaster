@@ -21,6 +21,8 @@ namespace ArchiveMaster.ViewModels
 
         public override Step1Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
 
+        public string SnapshotSuggestedFileName => $"异地备份（{DateTime.Now:yyyyMMdd-HHmmss}）";
+
         private void AddSyncDir(string path)
         {
             DirectoryInfo newDirInfo = new DirectoryInfo(path);

@@ -1,46 +1,55 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>ArchiveMaster</RootNamespace>
-    <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>ArchiveMaster</RootNamespace>
+        <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" />
-    <PackageReference Include="Avalonia.Themes.Fluent" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" />
-    <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="FzLib.Avalonia" />
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" />
-    <PackageReference Include="MetadataExtractor" />
-    <PackageReference Include="Serilog" />
-    <PackageReference Include="Serilog.Sinks.File" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Views\PanelBase.axaml.cs">
-      <DependentUpon>%(Filename)</DependentUpon>
-    </Compile>
-    <Compile Update="Views\TwoStepPanelBase.axaml.cs">
-      <DependentUpon>TwoStepPanelBase.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\TwoStepPanelBase.axaml.cs">
-      <SubType>Code</SubType>
-      <DependentUpon>%(Filename)</DependentUpon>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        <Reference Include="FzLib">
+            <HintPath>..\..\模块\Publish\Release\net8.0\FzLib.dll</HintPath>
+        </Reference>
+        <Reference Include="FzLib.Avalonia">
+            <HintPath>..\..\模块\Publish\Release\net8.0\FzLib.Avalonia.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Views\TwoStepPanelBase.axaml">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid"/>
+        <PackageReference Include="Avalonia.Themes.Fluent"/>
+        <PackageReference Include="Avalonia.Xaml.Behaviors"/>
+        <PackageReference Include="CommunityToolkit.Mvvm"/>
+        <PackageReference Include="Magick.NET-Q16-AnyCPU"/>
+        <PackageReference Include="MetadataExtractor"/>
+        <PackageReference Include="Serilog"/>
+        <PackageReference Include="Serilog.Sinks.File"/>
+        <PackageReference Condition="'$(Configuration)' == 'Release'" Include="FzLib.Avalonia"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Views\PanelBase.axaml.cs">
+            <DependentUpon>%(Filename)</DependentUpon>
+        </Compile>
+        <Compile Update="Views\TwoStepPanelBase.axaml.cs">
+            <DependentUpon>TwoStepPanelBase.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Views\TwoStepPanelBase.axaml.cs">
+            <SubType>Code</SubType>
+            <DependentUpon>%(Filename)</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Views\TwoStepPanelBase.axaml">
+            <SubType>Designer</SubType>
+        </None>
+    </ItemGroup>
 
 </Project>
