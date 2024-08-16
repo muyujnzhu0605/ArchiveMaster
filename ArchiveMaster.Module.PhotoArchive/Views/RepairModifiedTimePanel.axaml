@@ -59,9 +59,9 @@
             </v:SimpleFileDataGrid>
             <TextBlock
                 Grid.Row="2"
-                IsVisible="{Binding UpdatingFiles, Converter={StaticResource NotNullConverter}}">
+                IsVisible="{Binding Files, Converter={StaticResource NotNullConverter}}">
                 <Run Text="共" />
-                <Run Text="{Binding UpdatingFiles.Count}" />
+                <Run Text="{Binding Files.Count}" />
                 <Run Text="个文件" />
             </TextBlock>
         </Grid>

@@ -109,7 +109,7 @@
                                                 Icon="{Binding IconUri}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior
-                                                        EventName="PointerReleased"
+                                                        EventName="Tapped"
                                                         SourceObject="tib">
                                                         <InvokeCommandAction
                                                             Command="{Binding #root.DataContext.EnterToolCommand}"
