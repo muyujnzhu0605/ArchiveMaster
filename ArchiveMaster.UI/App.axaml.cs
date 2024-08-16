@@ -38,7 +38,6 @@ public partial class App : Application
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            throw new NotSupportedException();
             singleViewPlatform.MainView = new MainView
             {
                 DataContext = new MainViewModel()

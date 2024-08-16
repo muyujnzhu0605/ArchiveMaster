@@ -22,7 +22,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace ArchiveMaster
 {
-    public class ModuleInitializer : IModuleInitializer
+    public class OfflineSyncModuleInitializer : IModuleInitializer
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
         public string ModuleName => "异地备份离线同步";

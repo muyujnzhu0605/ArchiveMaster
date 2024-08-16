@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster
 {
-    public class ModuleInitializer : IModuleInitializer
+    public class PhotoArchiveModuleInitializer : IModuleInitializer
     {
         public string ModuleName => "照片工具";
         

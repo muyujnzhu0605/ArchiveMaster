@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster
 {
-    public class ModuleInitializer : IModuleInitializer
+    public class DiscArchiveModuleInitializer : IModuleInitializer
     {
         public string ModuleName => "光盘归档工具";
         
