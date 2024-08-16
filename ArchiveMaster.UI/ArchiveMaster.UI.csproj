@@ -7,34 +7,8 @@
     <RootNamespace>ArchiveMaster.UI</RootNamespace>
   </PropertyGroup>
 
-  
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
-  
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <Reference Include="FzLib">
-      <HintPath>..\..\模块\Publish\Release\net8.0\FzLib.dll</HintPath>
-    </Reference>
-    <Reference Include="FzLib.Avalonia">
-      <HintPath>..\..\模块\Publish\Release\net8.0\FzLib.Avalonia.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" />
-    <PackageReference Include="Avalonia.Themes.Fluent" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" />
-    <PackageReference Include="BinToss.GroupBox.Avalonia" />
-    <PackageReference Include="CommunityToolkit.Mvvm" />
-
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" />
+    <ItemGroup>
     <PackageReference Include="Avalonia.Svg.Skia" />
-    <PackageReference Condition="'$(Configuration)' == 'Release'" Include="FzLib.Avalonia"/>
-    <PackageReference Include="Serilog" />
-    <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
 
   <ItemGroup>

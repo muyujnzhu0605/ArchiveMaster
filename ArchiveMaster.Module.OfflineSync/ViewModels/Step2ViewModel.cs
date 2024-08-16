@@ -11,7 +11,6 @@ using ArchiveMaster.Utilities;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
-using Mapster;
 
 namespace ArchiveMaster.ViewModels
 {

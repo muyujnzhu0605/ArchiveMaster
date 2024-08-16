@@ -8,7 +8,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
 using FzLib.Avalonia.Messages;
-using Mapster;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
