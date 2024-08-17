@@ -33,6 +33,10 @@ public partial class MainView : UserControl
         AppConfig.Instance.Load();
         InitializeComponent();
         RegisterMessages();
+        if (OperatingSystem.IsAndroid()) {
+
+            Padding = new Thickness(0, 24, 0, 0);
+        }
     }
 
     private List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
@@ -171,7 +175,7 @@ public partial class MainView : UserControl
     {
         base.OnLoaded(e);
 
-        PlatformService.Permissions?.CheckPermissions();
+        PlatformServices.Permissions?.CheckPermissions();
     }
 
 

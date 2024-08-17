@@ -13,12 +13,22 @@ using System.Text;
 using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Platforms;
 
 namespace ArchiveMaster.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     public MainViewModel()
     {
+        PlatformServices.BackCommand?.RegisterBackCommand(() =>
+        {
+            if(mainContent is PanelBase p && IsToolOpened)
+            {
+                IsToolOpened = false;
+                return true;
+            }
+            return false;
+        });
     }
     [ObservableProperty]
     private object mainContent;

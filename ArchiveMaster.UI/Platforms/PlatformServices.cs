@@ -1,7 +1,8 @@
 ﻿namespace ArchiveMaster.Platforms
 {
-    public class PlatformService
+    public class PlatformServices
     {
         public static IPermissionService Permissions { get; set; }
+        public static IBackCommandService BackCommand { get; set; }
     }
 }
