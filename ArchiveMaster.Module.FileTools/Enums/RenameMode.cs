@@ -15,4 +15,10 @@ public enum RenameMode
     
     [Description("替换全名")]
     ReplaceAll,
+
+    [Description("保留匹配值")]
+    RetainMatched,
+
+    [Description("保留匹配值和扩展名")]
+    RetainMatchedExtension,
 }

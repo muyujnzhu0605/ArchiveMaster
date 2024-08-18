@@ -80,7 +80,7 @@
             <ct:FormItem Label="重命名选项：">
                 <ct:FormItem Label="重命名模式：">
                     <ComboBox
-                        Width="128"
+                        Width="192"
                         DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
                         ItemsSource="{markupExtensions:EnumValues enums:RenameMode}"
                         SelectedItem="{Binding Config.RenameMode}" />

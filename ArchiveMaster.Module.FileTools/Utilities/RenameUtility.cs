@@ -182,14 +182,14 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
             NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             file.TempPath = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
             File.Move(file.Path, file.TempPath);
-        },token,FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());  
-        
+        }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
             NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             File.Move(file.TempPath, file.NewPath);
-        },token,FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+        }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
     }
 
     public override async Task InitializeAsync(CancellationToken token = default)
@@ -233,7 +233,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
                     renameFile.NewName = Rename(renameFile);
                     renameFile.NewPath = Path.Combine(Path.GetDirectoryName(renameFile.Path), renameFile.NewName);
                 }
-            },token, FilesLoopOptions.DoNothing());
+            }, token, FilesLoopOptions.DoNothing());
 
             Files = renameFiles.AsReadOnly();
         }, token);
@@ -284,11 +284,22 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 
     private void PreprocessReplacePattern()
     {
+        string text = Config.ReplacePattern;
+        if (text == null)
+        {
+            if (Config.RenameMode is RenameMode.RetainMatched or RenameMode.RetainMatchedExtension)
+            {
+                return;
+            }
+            else
+            {
+                text = "";
+            }
+        }
         List<string> list = new List<string>();
         int left = 0;
         int right = 0;
         bool hasLeftBracket = false;
-        string text = Config.ReplacePattern;
         while (right < text.Length)
         {
             char c = text[right];
@@ -325,7 +336,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
             list.Add(text[left..]);
         }
 
-        replacePatterns = list.ToArray();
+        replacePatterns = [.. list];
     }
 
     private StringComparison stringComparison;
@@ -334,26 +345,22 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
     {
         string name = file.Name;
         string matched = null;
-        if (Config.RenameMode is RenameMode.ReplaceMatched)
+        if (Config.RenameMode is RenameMode.ReplaceMatched or RenameMode.RetainMatched or RenameMode.RetainMatchedExtension)
         {
             matched = Config.SearchMode == SearchMode.Regex
                 ? GetRegex(Config.SearchPattern).Match(name).Value
                 : Config.SearchPattern;
         }
 
-        var t = GetTargetName(file);
-        switch (Config.RenameMode)
+        return Config.RenameMode switch
         {
-            case RenameMode.ReplaceMatched:
-                return name.Replace(matched, t, stringComparison);
-            case RenameMode.ReplaceExtension:
-                return $"{Path.GetFileNameWithoutExtension(name)}.{t}";
-            case RenameMode.ReplaceName:
-                return t + Path.GetExtension(name);
-            case RenameMode.ReplaceAll:
-                return t;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            RenameMode.ReplaceMatched => name.Replace(matched, GetTargetName(file), stringComparison),
+            RenameMode.ReplaceExtension => $"{Path.GetFileNameWithoutExtension(name)}.{GetTargetName(file)}",
+            RenameMode.ReplaceName => GetTargetName(file) + Path.GetExtension(name),
+            RenameMode.ReplaceAll => GetTargetName(file),
+            RenameMode.RetainMatched => matched,
+            RenameMode.RetainMatchedExtension => $"{matched}{Path.GetExtension(name)}",
+            _ => throw new ArgumentOutOfRangeException(),
+        };
     }
 }
