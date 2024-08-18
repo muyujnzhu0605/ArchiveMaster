@@ -25,6 +25,9 @@
     <ProguardConfiguration Remove="obj\**" />
     <TransformFile Remove="obj\**" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\values-night\styles.xml" />
+  </ItemGroup>
 
   <ItemGroup>
     <AndroidResource Include="Icon.png">
