@@ -33,9 +33,9 @@ public partial class MainView : UserControl
         AppConfig.Instance.Load();
         InitializeComponent();
         RegisterMessages();
-        if (OperatingSystem.IsAndroid()) {
-
-            Padding = new Thickness(0, 24, 0, 0);
+        if (PlatformServices.ViewService != null)
+        {
+            Padding = new Thickness(0, PlatformServices.ViewService.GetTop(), 0, PlatformServices.ViewService.GetBottom());
         }
     }
 
