@@ -1,35 +1,43 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>ArchiveMaster</RootNamespace>
-        <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ArchiveMaster</RootNamespace>
+    <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+    <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaXaml Remove="obj\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
 
 
-    <ItemGroup>
-        <PackageReference Include="Magick.NET-Q16-AnyCPU" />
-        <PackageReference Include="MetadataExtractor" />
-    </ItemGroup>
 
-    <ItemGroup>
-        <Compile Update="Views\PanelBase.axaml.cs">
-            <DependentUpon>%(Filename)</DependentUpon>
-        </Compile>
-        <Compile Update="Views\TwoStepPanelBase.axaml.cs">
-            <DependentUpon>TwoStepPanelBase.axaml</DependentUpon>
-        </Compile>
-        <Compile Update="Views\TwoStepPanelBase.axaml.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>%(Filename)</DependentUpon>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" />
+    <PackageReference Include="MetadataExtractor" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Update="Views\TwoStepPanelBase.axaml">
-            <SubType>Designer</SubType>
-        </None>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\PanelBase.axaml.cs">
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\TwoStepPanelBase.axaml.cs">
+      <DependentUpon>TwoStepPanelBase.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\TwoStepPanelBase.axaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Views\TwoStepPanelBase.axaml">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
 
 </Project>

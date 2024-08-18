@@ -5,16 +5,24 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ArchiveMaster</RootNamespace>
     <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+    <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
   </PropertyGroup>
-  
+  <ItemGroup>
+    <AvaloniaXaml Remove="obj\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+
   <ItemGroup>
     <PackageReference Include="Mapster" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Compile Update="Views\PhotoSlimmingConfigDialog.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
