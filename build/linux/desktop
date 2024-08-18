@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=文件归档大师
+Comment=文件归档大师
+Icon=ArchiveMaster
+Exec=ArchiveMaster
+StartupWMClass=ArchiveMaster
+Terminal=false
+Type=Application
+Categories=Development
+GenericName=文件归档大师
+Keywords=文件; 管理; 归档
