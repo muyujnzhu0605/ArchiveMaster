@@ -1,4 +1,6 @@
-﻿try {
+﻿$rawDir = Get-Location
+
+try {
     $c = $true
     $s = $true
     if (-not (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
@@ -20,7 +22,7 @@
 
     New-Item -Path $publishDirectory -ItemType Directory | Out-Null
 
-    Set-Location ..
+    Set-Location $PSScriptRoot/..
     
     Clear-Host
 
@@ -36,8 +38,11 @@
     Write-Output "操作完成"
 
     Invoke-Item $publishDirectory
-    pause
 }
 catch {
     Write-Error $_
 }
+
+Set-Location $rawDir
+
+pause
