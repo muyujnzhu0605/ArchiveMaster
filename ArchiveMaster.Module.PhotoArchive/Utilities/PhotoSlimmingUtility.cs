@@ -2,6 +2,7 @@
 using ArchiveMaster.Configs;
 using System.Collections.Concurrent;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -106,11 +107,11 @@ namespace ArchiveMaster.Utilities
 
             NotifyProgressIndeterminate();
             NotifyMessage("正在筛选需要删除的文件");
-            var desiredDistFiles = CopyFiles.SkippedFiles
+            ISet<string> desiredDistFiles = CopyFiles.SkippedFiles
                 .Select(file => GetDistPath(file.Path, null, out _))
                 .Concat(CompressFiles.SkippedFiles
                     .Select(file => GetDistPath(file.Path, Config.OutputFormat, out _)))
-                .ToHashSet();
+                .ToFrozenSet();
 
             foreach (var file in Directory
                          .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories)
@@ -123,10 +124,22 @@ namespace ArchiveMaster.Utilities
                 }
             }
 
-            NotifyMessage("正在需要删除的文件夹");
-            var desiredDistFolders = desiredDistFiles.Select(Path.GetDirectoryName).ToHashSet();
+            NotifyMessage("正在查找需要删除的文件夹");
+            ISet<string> desiredDistFolders = desiredDistFiles.Select(Path.GetDirectoryName).ToHashSet();
+            foreach (var leafDir in desiredDistFolders.ToList())
+            {
+                string d = Path.GetDirectoryName(leafDir);
+                while (d.Length > Config.DistDir.Length)
+                {
+                    desiredDistFolders.Add(d);
+                    d = Path.GetDirectoryName(d);
+                }
+            }
 
-            foreach (var dir in Directory.EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories))
+            desiredDistFolders = desiredDistFolders.ToFrozenSet();
+            foreach (var dir in Directory
+                         .EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories)
+                         .Where(p=>!rBlack.IsMatch(p)))
             {
                 if (!desiredDistFolders.Contains(dir))
                 {

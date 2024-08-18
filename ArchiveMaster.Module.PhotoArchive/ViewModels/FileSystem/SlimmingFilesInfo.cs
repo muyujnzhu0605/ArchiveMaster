@@ -20,18 +20,21 @@ namespace ArchiveMaster.ViewModels
         {
             this.rootDir = rootDir;
         }
+
         public IReadOnlyList<SimpleFileInfo> ProcessingFiles => processingFiles.AsReadOnly();
 
         public long ProcessingFilesLength { get; private set; } = 0;
 
-        public IList<string> ProcessingFilesRelativePaths => processingFilesRelativePaths ?? throw new Exception($"还未调用{nameof(CreateRelativePathsAsync)}方法");
+        public IList<string> ProcessingFilesRelativePaths => processingFilesRelativePaths ??
+                                                             throw new Exception(
+                                                                 $"还未调用{nameof(CreateRelativePathsAsync)}方法");
 
         public IReadOnlyList<SimpleFileInfo> SkippedFiles => skippedFiles.AsReadOnly();
 
         public void Add(SimpleFileInfo file)
         {
             processingFiles.Add(file);
-            if (!file.IsDir )
+            if (!file.IsDir)
             {
                 ProcessingFilesLength += file.Length;
             }
@@ -54,11 +57,8 @@ namespace ArchiveMaster.ViewModels
             return Task.Run(() =>
             {
                 processingFilesRelativePaths = processingFiles
-                .Select(p =>
-                {
-                    return Path.GetRelativePath(rootDir, p.Path) + (Path.Exists(p.Path) ? "" : "/");
-                })
-               .ToList();
+                    .Select(p => Path.GetRelativePath(rootDir, p.Path) + (p.IsDir ? Path.DirectorySeparatorChar : ""))
+                    .ToList();
             });
         }
     }

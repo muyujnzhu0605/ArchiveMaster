@@ -76,6 +76,7 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
     {
         Progress = -1;
         Message = "正在生成统计信息";
+        Progress=Double.NaN;
         await Utility.CopyFiles.CreateRelativePathsAsync();
         await Utility.CompressFiles.CreateRelativePathsAsync();
         await Utility.DeleteFiles.CreateRelativePathsAsync();
