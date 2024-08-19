@@ -19,7 +19,7 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     where TUtility : TwoStepUtilityBase<TConfig>
     where TConfig : ConfigBase
 {
-    public TwoStepViewModelBase(TUtility utility, TConfig config, bool enableInitialize = true) : base(utility, config)
+    public TwoStepViewModelBase(TConfig config, bool enableInitialize = true) : base(config)
     {
         EnableInitialize = enableInitialize;
         CanInitialize = enableInitialize;

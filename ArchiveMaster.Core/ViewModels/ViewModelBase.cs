@@ -10,12 +10,11 @@ public abstract partial class ViewModelBase<TUtility, TConfig> : ObservableObjec
     where TUtility : UtilityBase<TConfig>
     where TConfig : ConfigBase
 {
-    public ViewModelBase(TUtility utility, TConfig config)
+    public ViewModelBase(TConfig config)
     {
-        Utility = utility;
         Config = config;
     }
-    
+
     [ObservableProperty]
     private bool isWorking = false;
 

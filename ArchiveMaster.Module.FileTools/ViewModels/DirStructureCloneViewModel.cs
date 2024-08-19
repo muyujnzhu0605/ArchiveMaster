@@ -6,9 +6,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace ArchiveMaster.ViewModels;
 
 public partial class
-    DirStructureCloneViewModel(DirStructureCloneUtility utility, DirStructureCloneConfig config)
-    : TwoStepViewModelBase<DirStructureCloneUtility, DirStructureCloneConfig>(utility,
-        config)
+    DirStructureCloneViewModel(DirStructureCloneConfig config)
+    : TwoStepViewModelBase<DirStructureCloneUtility, DirStructureCloneConfig>(config)
 {
     [ObservableProperty]
     private ObservableCollection<SimpleFileInfo> files;

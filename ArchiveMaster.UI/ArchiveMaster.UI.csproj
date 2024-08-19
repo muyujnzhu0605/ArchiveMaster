@@ -4,7 +4,7 @@
     <Nullable>disable</Nullable>
     <LangVersion>latest</LangVersion>
     <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
-    <RootNamespace>ArchiveMaster.UI</RootNamespace>
+    <RootNamespace>ArchiveMaster</RootNamespace>
     <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
