@@ -15,8 +15,17 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase where TUtility : TwoStepUtilityBase
+public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewModelBase<TUtility, TConfig>
+    where TUtility : TwoStepUtilityBase<TConfig>
+    where TConfig : ConfigBase
 {
+    public TwoStepViewModelBase(TUtility utility, TConfig config, bool enableInitialize = true) : base(utility, config)
+    {
+        EnableInitialize = enableInitialize;
+        CanInitialize = enableInitialize;
+        CanExecute = !enableInitialize;
+    }
+
     [ObservableProperty]
     private bool canExecute = false;
 
@@ -35,26 +44,13 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
-    public TwoStepViewModelBase(bool enableInitialize)
-    {
-        EnableInitialize = enableInitialize;
-        CanInitialize = enableInitialize;
-        CanExecute = !enableInitialize;
-    }
-
-    public TwoStepViewModelBase() : this(true)
-    {
-    }
-
     public bool EnableInitialize { get; }
 
     public bool ProgressIndeterminate => double.IsNaN(Progress);
 
-    protected override TUtility Utility => base.Utility as TUtility;
-
-    protected override T CreateUtility<T>()
+    protected override TUtility CreateUtility()
     {
-        var utility = base.CreateUtility<T>();
+        var utility = base.CreateUtility();
         Utility.ProgressUpdate += Utility_ProgressUpdate;
         Utility.MessageUpdate += Utility_MessageUpdate;
         return utility;
@@ -119,19 +115,13 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
     {
         if (!EnableInitialize)
         {
-            CreateUtility<TUtility>();
+            CreateUtility();
         }
 
         if (Utility == null)
         {
             throw new NullReferenceException($"{nameof(Utility)}为空");
         }
-
-        if (Utility is not TwoStepUtilityBase t)
-        {
-            throw new ArgumentException($"{nameof(Utility)}不是{nameof(TwoStepUtilityBase)}的子类");
-        }
-
 
         CanExecute = false;
         CanReset = false;
@@ -143,7 +133,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
         {
             await OnExecutingAsync(token);
             Config.Check();
-            await t.ExecuteAsync(token);
+            await Utility.ExecuteAsync(token);
             await OnExecutedAsync(token);
         }, "执行失败");
 
@@ -166,7 +156,7 @@ public abstract partial class TwoStepViewModelBase<TUtility> : ViewModelBase whe
 
         if (await TryRunAsync(async () =>
             {
-                var u = CreateUtility<TUtility>();
+                var u = CreateUtility();
                 await OnInitializingAsync();
                 Config.Check();
                 await u.InitializeAsync(token);

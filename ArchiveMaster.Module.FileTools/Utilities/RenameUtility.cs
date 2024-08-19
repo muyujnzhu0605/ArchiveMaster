@@ -9,7 +9,7 @@ using FzLib.Program;
 
 namespace ArchiveMaster.Utilities;
 
-public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
+public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfig>(config)
 {
     public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
         new Dictionary<string, Func<SimpleFileInfo, string, string>>()
@@ -160,7 +160,6 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
     private const string SubStringRegexString = @"(?<Direction>Left|Right)-(?<From>[0-9]+)-(?<Count>[0-9]+)";
     private static readonly Dictionary<string, Regex> regexes = new Dictionary<string, Regex>();
     private string[] replacePatterns;
-    public override RenameConfig Config { get; } = config;
     public IReadOnlyList<RenameFileInfo> Files { get; private set; }
 
     public override async Task ExecuteAsync(CancellationToken token = default)

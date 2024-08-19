@@ -23,7 +23,7 @@
     <Grid>
         <ScrollViewer
             Grid.Row="2"
-            Margin="8"
+            Padding="8"
             Classes.hidden="{Binding IsToolOpened}"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">

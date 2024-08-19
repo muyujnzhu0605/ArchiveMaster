@@ -1,3 +1,4 @@
+using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
@@ -21,7 +22,8 @@ public class SimpleFileDataGrid : DataGrid
         CanUserReorderColumns = false;
         CanUserResizeColumns = false;
         CanUserSortColumns = false;
-        this[!IsReadOnlyProperty] = new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase>.IsWorking));
+        this[!IsReadOnlyProperty] =
+            new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking));
     }
 
     protected override Type StyleKeyOverride => typeof(DataGrid);
@@ -170,7 +172,7 @@ public class SimpleFileDataGrid : DataGrid
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
                 [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
-                [!IsEnabledProperty] = new Binding("DataContext.IsWorking")//执行命令时，这CheckBox不可以Enable
+                [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
                     { Source = rootPanel, Converter = new InverseBoolConverter() },
             };
         });

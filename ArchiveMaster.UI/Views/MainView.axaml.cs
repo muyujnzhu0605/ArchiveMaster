@@ -20,6 +20,7 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Interactivity;
 using ArchiveMaster.Platforms;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.Views;
 
@@ -31,11 +32,13 @@ public partial class MainView : UserControl
     {
         InitializeModules();
         AppConfig.Instance.Load();
+        Services.BuildServiceProvider();
+        
         InitializeComponent();
         RegisterMessages();
-        if (PlatformServices.ViewService != null)
+        if (Services.Provider.GetService<IViewPadding>() is IViewPadding v)
         {
-            Padding = new Thickness(0, PlatformServices.ViewService.GetTop(), 0, PlatformServices.ViewService.GetBottom());
+            Padding = new Thickness(0, v.GetTop(), 0, v.GetBottom());
         }
     }
 
@@ -43,23 +46,26 @@ public partial class MainView : UserControl
 
     private void InitializeModules()
     {
-        IModuleInitializer[] moduleInitializers = [
+        IModuleInitializer[] moduleInitializers =
+        [
             new FileToolsModuleInitializer(),
-            new PhotoArchiveModuleInitializer(),
-            new OfflineSyncModuleInitializer(),
-            new DiscArchiveModuleInitializer(),
-            ];
+            // new PhotoArchiveModuleInitializer(),
+            // new OfflineSyncModuleInitializer(),
+            // new DiscArchiveModuleInitializer(),
+        ];
 
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
         foreach (var moduleInitializer in moduleInitializers)
         {
+            if (moduleInitializer == null)
+            {
+                throw new Exception($"模块不存在实现了{nameof(IModuleInitializer)}的类");
+            }
+
+            moduleInitializer.RegisterServices(Services.Builder);
+      
             try
             {
-                if (moduleInitializer == null)
-                {
-                    throw new Exception($"模块不存在实现了{nameof(IModuleInitializer)}的类");
-                }
-
                 if (moduleInitializer.Configs != null)
                 {
                     foreach (var config in moduleInitializer.Configs)
@@ -82,6 +88,7 @@ public partial class MainView : UserControl
         }
 
         views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
+        
     }
     //private void InitializeModules()
     //{
@@ -175,8 +182,6 @@ public partial class MainView : UserControl
     {
         base.OnLoaded(e);
 
-        PlatformServices.Permissions?.CheckPermissions();
+        Services.Provider.GetService<IPermissionService>()?.CheckPermissions();
     }
-
-
 }

@@ -13,9 +13,9 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureSyncUtility(DirStructureSyncConfig config) : TwoStepUtilityBase
+    public class DirStructureSyncUtility(DirStructureSyncConfig config)
+        : TwoStepUtilityBase<DirStructureSyncConfig>(config)
     {
-        public override DirStructureSyncConfig Config { get; } = config;
         public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();
         private readonly Dictionary<DateTime, object> modifiedTime2Template = new Dictionary<DateTime, object>();
@@ -296,7 +296,7 @@ namespace ArchiveMaster.Utilities
                 {
                     File.Move(Path.Combine(Config.SourceDir, file.Path), destFile);
                 }
-            }, token,FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
     }
 }

@@ -14,13 +14,14 @@ using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     public MainViewModel()
     {
-        PlatformServices.BackCommand?.RegisterBackCommand(() =>
+        Services.Provider.GetService<IBackCommandService>()?.RegisterBackCommand(() =>
         {
             if(mainContent is PanelBase p && IsToolOpened)
             {
@@ -44,7 +45,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (panelInfo.PanelInstance == null)
         {
-            panelInfo.PanelInstance = Activator.CreateInstance(panelInfo.PanelType) as PanelBase;
+            panelInfo.PanelInstance =(Services.Provider.GetService(panelInfo.PanelType) as PanelBase)??throw new Exception($"无法找到{panelInfo.PanelType}服务");
             panelInfo.PanelInstance.RequestClosing += (s, e) =>
             {
                 IsToolOpened = false;

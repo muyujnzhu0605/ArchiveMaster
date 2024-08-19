@@ -23,6 +23,5 @@ namespace ArchiveMaster.Configs
 
         public Type Type { get; set; }
         public string Key { get; set; }
-        public object Config { get; set; }
     }
 }

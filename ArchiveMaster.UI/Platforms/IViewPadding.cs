@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Platforms
 {
-    public interface IViewService
+    public interface IViewPadding
     {
         public double GetTop();
 

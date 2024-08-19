@@ -8,6 +8,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using System;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster;
 
@@ -15,11 +16,14 @@ public partial class App : Application
 {
     public override void Initialize()
     {
+        Services.BuildServiceProvider();
+
         AvaloniaXamlLoader.Load(this);
         if (OperatingSystem.IsWindows())
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei"));
         }
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 

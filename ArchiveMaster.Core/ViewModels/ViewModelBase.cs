@@ -2,22 +2,32 @@ using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class ViewModelBase : ObservableObject
+public abstract partial class ViewModelBase<TUtility, TConfig> : ObservableObject
+    where TUtility : UtilityBase<TConfig>
+    where TConfig : ConfigBase
 {
+    public ViewModelBase(TUtility utility, TConfig config)
+    {
+        Utility = utility;
+        Config = config;
+    }
+    
     [ObservableProperty]
     private bool isWorking = false;
-    
-    protected virtual UtilityBase Utility { get; private set; }
-    
-    public abstract ConfigBase Config { get; }
 
-    protected virtual T CreateUtility<T>() where T : UtilityBase
+    protected virtual TUtility Utility { get; private set; }
+
+    public virtual TConfig Config { get; }
+
+
+    protected virtual TUtility CreateUtility()
     {
-        Utility = Activator.CreateInstance(typeof(T), Config) as T;
-        return Utility as T;
+        Utility = Services.Provider.GetService<TUtility>();
+        return Utility;
     }
 
     protected virtual void DisposeUtility()

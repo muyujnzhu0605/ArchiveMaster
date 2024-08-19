@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.Configs
 {
@@ -39,28 +40,6 @@ namespace ArchiveMaster.Configs
             configs.Add(key, new ConfigInfo(type: type, key: key));
         }
 
-        public T Get<T>() where T : class
-        {
-            string key = typeof(T).Name;
-            return Get(key) as T;
-        }
-
-        public object Get(string key)
-        {
-            if (!isLoaded)
-            {
-                Load();
-            }
-
-            if (configs.TryGetValue(key, out ConfigInfo config))
-            {
-                config.Config ??= Activator.CreateInstance(config.Type);
-                return config.Config;
-            }
-
-            throw new Exception($"找不到对应的配置：{key}");
-        }
-
         public void Load()
         {
             if (isLoaded)
@@ -70,6 +49,7 @@ namespace ArchiveMaster.Configs
 
             try
             {
+                Dictionary<string, object> fileConfigs = new Dictionary<string, object>();
                 if (File.Exists(configFile))
                 {
                     var json = File.ReadAllText(configFile);
@@ -78,8 +58,23 @@ namespace ArchiveMaster.Configs
                     {
                         if (configs.TryGetValue(kv.Key, out ConfigInfo config))
                         {
-                            config.Config = JsonSerializer.Deserialize(kv.Value, config.Type);
+                            fileConfigs.Add(kv.Key, JsonSerializer.Deserialize(kv.Value, config.Type));
+                            //
+                            // config.Config = JsonSerializer.Deserialize(kv.Value, config.Type);
+                            // Services.Builder.AddSingleton(config.Type,  config.Config);
                         }
+                    }
+                }
+
+                foreach (var config in configs.Values)
+                {
+                    if (fileConfigs.ContainsKey(config.Key))
+                    {
+                        Services.Builder.AddSingleton(config.Type, fileConfigs[config.Key]);
+                    }
+                    else
+                    {
+                        Services.Builder.AddSingleton(config.Type);
                     }
                 }
             }
@@ -99,34 +94,14 @@ namespace ArchiveMaster.Configs
 
             try
             {
-                var json = JsonSerializer.Serialize(configs.Values.ToDictionary(p => p.Key, p => p.Config),
+                var json = JsonSerializer.Serialize(
+                    configs.Values.ToDictionary(p => p.Key, p => Services.Provider.GetRequiredService(p.Type)),
                     jsonOptions);
                 File.WriteAllText(configFile, json);
             }
             catch (Exception ex)
             {
             }
-        }
-
-        public void Set<T>(object value) where T : class
-        {
-            Set(typeof(T).Name, value);
-        }
-
-
-        public void Set(string key, object value)
-        {
-            if (!isLoaded)
-            {
-                Load();
-            }
-
-            if (!configs.TryGetValue(key, out ConfigInfo config))
-            {
-                throw new Exception("找不到对应的配置");
-            }
-
-            config.Config = value;
         }
     }
 }
