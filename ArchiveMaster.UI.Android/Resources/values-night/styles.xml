@@ -9,7 +9,6 @@
     <item name="android:windowBackground">@drawable/splash_screen</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowLightStatusBar">false</item>
-    <item name="android:statusBarColor">@color/main_background</item>
 
   </style>
 </resources>

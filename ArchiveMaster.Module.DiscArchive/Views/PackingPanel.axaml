@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:ctrl2="using:ArchiveMaster.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
@@ -51,14 +52,7 @@
                 </Grid>
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
-                <WrapPanel>
-                    <WrapPanel.Styles>
-                        <Style Selector="ctrl|FormItem">
-                            <Setter Property="LabelWidth" Value="NaN" />
-                            <Setter Property="Margin" Value="0,0,16,8" />
-                        </Style>
-                    </WrapPanel.Styles>
-
+                <ctrl2:FormItemGroup LabelWidth="NaN">
                     <ctrl:FormItem Label="起始日期：">
                         <TextBox
                             Width="160"
@@ -120,8 +114,7 @@
                         </StackPanel>
 
                     </ctrl:FormItem>
-
-                </WrapPanel>
+                </ctrl2:FormItemGroup>
             </ctrl:FormItem>
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
