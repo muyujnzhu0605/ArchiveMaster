@@ -31,14 +31,12 @@ public class Initializer
     [
         new FileToolsModuleInitializer(),
         // new PhotoArchiveModuleInitializer(),
-        // new OfflineSyncModuleInitializer(),
+        new OfflineSyncModuleInitializer(),
         // new DiscArchiveModuleInitializer(),
     ];
 
     private void InitializeModules()
     {
-  
-
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
         foreach (var moduleInitializer in ModuleInitializers)
         {

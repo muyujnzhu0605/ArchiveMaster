@@ -9,15 +9,20 @@ using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
 using FzLib.Avalonia.Messages;
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step1ViewModel() : OfflineSyncViewModelBase<Step1Utility, SimpleFileInfo>(false)
+    public partial class Step1ViewModel() : OfflineSyncViewModelBase<Step1Utility, Step1Config, SimpleFileInfo>(false)
     {
         [ObservableProperty]
         private string selectedSyncDir;
 
-        public override Step1Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step1;
+        public override Step1Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step1;
+        protected override Step1Utility CreateUtilityImplement()
+        {
+            return new Step1Utility(Config);
+        }
 
         public string SnapshotSuggestedFileName => $"异地备份（{DateTime.Now:yyyyMMdd-HHmmss}）";
 

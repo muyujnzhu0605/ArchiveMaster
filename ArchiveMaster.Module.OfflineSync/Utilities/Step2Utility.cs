@@ -18,7 +18,7 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step2Utility(Step2Config config) : TwoStepUtilityBase
+    public class Step2Utility(Step2Config config) : TwoStepUtilityBase<Step2Config>(config)
     {
         public override Step2Config Config { get; } = config;
         public Dictionary<string, List<string>> LocalDirectories { get; } = new Dictionary<string, List<string>>();

@@ -10,15 +10,20 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel : OfflineSyncViewModelBase<Step3Utility, SyncFileInfo>
+    public partial class Step3ViewModel : OfflineSyncViewModelBase<Step3Utility, Step3Config, SyncFileInfo>
     {
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
         public override Step3Config Config =>
-            AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step3;
+            Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step3;
+        protected override Step3Utility CreateUtilityImplement()
+        {
+            return new Step3Utility(Config);
+        }
 
         protected override Task OnInitializedAsync()
         {
@@ -42,7 +47,7 @@ namespace ArchiveMaster.ViewModels
                 if (result.Equals(true))
                 {
                     Utility.DeleteEmptyDirectories(Config.DeleteMode,
-                        AppConfig.Instance.Get<OfflineSyncConfig>().DeleteDirName);
+                        Services.Provider.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
                 }
             }
         }

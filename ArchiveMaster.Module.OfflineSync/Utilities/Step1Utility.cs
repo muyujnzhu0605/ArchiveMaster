@@ -9,10 +9,8 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step1Utility(Step1Config config) : TwoStepUtilityBase
+    public class Step1Utility(Step1Config config) : TwoStepUtilityBase<Step1Config>(config)
     {
-        public override Step1Config Config { get; } = config;
-
         public override Task InitializeAsync(CancellationToken token = default)
         {
             throw new NotImplementedException();

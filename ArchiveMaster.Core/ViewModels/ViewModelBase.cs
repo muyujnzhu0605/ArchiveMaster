@@ -6,7 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class ViewModelBase<TUtility, TConfig> : ObservableObject
+public abstract partial class ViewModelBase : ObservableObject
+{
+    [ObservableProperty]
+    private bool isWorking = false;
+
+    public virtual void OnEnter()
+    {
+        
+    }
+}
+public abstract partial class ViewModelBase<TUtility, TConfig> :ViewModelBase
     where TUtility : UtilityBase<TConfig>
     where TConfig : ConfigBase
 {
@@ -15,8 +25,6 @@ public abstract partial class ViewModelBase<TUtility, TConfig> : ObservableObjec
         Config = config;
     }
 
-    [ObservableProperty]
-    private bool isWorking = false;
 
     protected virtual TUtility Utility { get; private set; }
 
@@ -25,8 +33,19 @@ public abstract partial class ViewModelBase<TUtility, TConfig> : ObservableObjec
 
     protected virtual TUtility CreateUtility()
     {
-        Utility = Services.Provider.GetService<TUtility>();
+        Utility = CreateUtilityImplement();
+
+        if (Utility == null)
+        {
+            Utility = Services.Provider.GetService<TUtility>();
+        }
+
         return Utility;
+    }
+
+    protected virtual TUtility CreateUtilityImplement()
+    {
+        return null;
     }
 
     protected virtual void DisposeUtility()

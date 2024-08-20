@@ -56,10 +56,11 @@ public partial class MainViewModel : ObservableObject
             panelInfo.PanelInstance = Services.Provider.GetService(panelInfo.PanelType) as PanelBase ??
                                       throw new Exception($"无法找到{panelInfo.PanelType}服务");
             panelInfo.PanelInstance.RequestClosing += (s, e) => { IsToolOpened = false; };
+            panelInfo.PanelInstance.Title = panelInfo.Title;
+            panelInfo.PanelInstance.Description = panelInfo.Description;
         }
 
-        panelInfo.PanelInstance.Title = panelInfo.Title;
-        panelInfo.PanelInstance.Description = panelInfo.Description;
+        (panelInfo.PanelInstance.DataContext as ViewModelBase)?.OnEnter();
         MainContent = panelInfo.PanelInstance;
         IsToolOpened = true;
     }

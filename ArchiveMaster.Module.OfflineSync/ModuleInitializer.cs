@@ -19,6 +19,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
@@ -27,6 +28,21 @@ namespace ArchiveMaster
         private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
         public string ModuleName => "异地备份离线同步";
         public int Order => 3;
+
+        public void RegisterServices(IServiceCollection services)
+        {
+            services.AddTransient<Step1ViewModel>();
+            services.AddTransient<Step2ViewModel>();
+            services.AddTransient<Step3ViewModel>();
+
+            services.AddTransient<Step1Panel>();
+            services.AddTransient<Step2Panel>();
+            services.AddTransient<Step3Panel>();
+
+            services.AddTransient<Step1Utility>();
+            services.AddTransient<Step2Utility>();
+            services.AddTransient<Step3Utility>();
+        }
 
         public IList<ConfigInfo> Configs =>
         [

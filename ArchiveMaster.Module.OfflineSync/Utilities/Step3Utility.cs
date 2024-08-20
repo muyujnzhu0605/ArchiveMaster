@@ -9,9 +9,8 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step3Utility(Step3Config config) : TwoStepUtilityBase
+    public class Step3Utility(Step3Config config) : TwoStepUtilityBase<Step3Config>(config)
     {
-        public override Step3Config Config { get; } = config;
         private readonly DateTime createTime = DateTime.Now;
         public List<SyncFileInfo> DeletingDirectories { get; private set; }
         public Dictionary<string, List<string>> LocalDirectories { get; private set; }
