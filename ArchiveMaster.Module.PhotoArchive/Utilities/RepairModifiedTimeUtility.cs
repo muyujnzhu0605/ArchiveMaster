@@ -13,15 +13,14 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class RepairModifiedTimeUtility(RepairModifiedTimeConfig config) : TwoStepUtilityBase
+    public class RepairModifiedTimeUtility(RepairModifiedTimeConfig config)
+        : TwoStepUtilityBase<RepairModifiedTimeConfig>(config)
     {
         public string[] Extensions = { "jpg", "jpeg", "heif", "heic" };
 
         public ConcurrentBag<ExifTimeFileInfo> Files { get; } = new ConcurrentBag<ExifTimeFileInfo>();
 
         private Regex rRepairTime;
-
-        public override RepairModifiedTimeConfig Config { get; } = config;
 
         public override Task ExecuteAsync(CancellationToken token)
         {
@@ -46,27 +45,28 @@ namespace ArchiveMaster.Utilities
             var files = new DirectoryInfo(Config.Dir).EnumerateFiles("*", SearchOption.AllDirectories)
                 .Select(p => new ExifTimeFileInfo(p));
             return TryForFilesAsync(files, (file, s) =>
-            {
-                NotifyMessage($"正在扫描照片日期{s.GetFileNumberMessage()}");
-                if (rRepairTime.IsMatch(file.Name))
                 {
-                    DateTime? exifTime = FindExifTime(file.Path);
-
-                    if (exifTime.HasValue)
+                    NotifyMessage($"正在扫描照片日期{s.GetFileNumberMessage()}");
+                    if (rRepairTime.IsMatch(file.Name))
                     {
-                        var fileTime = file.Time;
-                        var duration = (exifTime.Value - fileTime).Duration();
-                        if (duration > Config.MaxDurationTolerance)
+                        DateTime? exifTime = FindExifTime(file.Path);
+
+                        if (exifTime.HasValue)
                         {
-                            file.ExifTime = exifTime.Value;
-                            Files.Add(file);
+                            var fileTime = file.Time;
+                            var duration = (exifTime.Value - fileTime).Duration();
+                            if (duration > Config.MaxDurationTolerance)
+                            {
+                                file.ExifTime = exifTime.Value;
+                                Files.Add(file);
+                            }
                         }
                     }
-                }
-            }, token, FilesLoopOptions.Builder().WithMultiThreads(Config.ThreadCount).Catch((file, ex) =>
-            {
-                Files.Add(file as ExifTimeFileInfo);
-            }).Build());
+                }, token,
+                FilesLoopOptions.Builder().WithMultiThreads(Config.ThreadCount).Catch((file, ex) =>
+                {
+                    Files.Add(file as ExifTimeFileInfo);
+                }).Build());
         }
 
         private DateTime? FindExifTime(string file)

@@ -1,9 +1,11 @@
 ﻿using System.Security.Cryptography;
+using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public abstract class DiscUtilityBase : TwoStepUtilityBase
+    public abstract class DiscUtilityBase<TConfig>(TConfig config) : TwoStepUtilityBase<TConfig>(config)
+        where TConfig : ConfigBase
     {
         public const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
 

@@ -5,9 +5,9 @@ namespace ArchiveMaster.Views
 {
     public partial class TimeClassifyPanel : TwoStepPanelBase
     {
-        public TimeClassifyPanel()
+        public TimeClassifyPanel(TimeClassifyViewModel viewModel)
         {
-            DataContext = new TimeClassifyViewModel();
+            DataContext = viewModel;
             InitializeComponent();
         }
     }

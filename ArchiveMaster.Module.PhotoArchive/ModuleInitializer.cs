@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
@@ -25,9 +27,26 @@ namespace ArchiveMaster
             new ConfigInfo(typeof(TimeClassifyConfig)),
             new ConfigInfo(typeof(RepairModifiedTimeConfig)),
             new ConfigInfo(typeof(UselessJpgCleanerConfig)),
-            new ConfigInfo(typeof(List<PhotoSlimmingConfig>), nameof(PhotoSlimmingConfig)),
+            new ConfigInfo(typeof(PhotoSlimmingCollectionConfig)),
         ];
         
+        public void RegisterServices(IServiceCollection services)
+        {
+            services.AddTransient<PhotoSlimmingViewModel>();
+            services.AddTransient<RepairModifiedTimeViewModel>();
+            services.AddTransient<UselessJpgCleanerViewModel>();
+            services.AddTransient<TimeClassifyViewModel>();
+
+            services.AddTransient<PhotoSlimmingPanel>();
+            services.AddTransient<RepairModifiedTimePanel>();
+            services.AddTransient<UselessJpgCleanerPanel>();
+            services.AddTransient<TimeClassifyPanel>();
+
+            services.AddTransient<PhotoSlimmingUtility>();
+            services.AddTransient<RepairModifiedTimeUtility>();
+            services.AddTransient<UselessJpgCleanerUtility>();
+            services.AddTransient<TimeClassifyUtility>();
+        }
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =

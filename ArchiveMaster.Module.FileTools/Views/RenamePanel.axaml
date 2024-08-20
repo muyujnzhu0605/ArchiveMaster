@@ -8,7 +8,6 @@
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="using:ArchiveMaster.Enums"
-    xmlns:markupExtensions="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -56,14 +55,14 @@
                         <ComboBox
                             Width="128"
                             DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
-                            ItemsSource="{markupExtensions:EnumValues enums:RenameTargetType}"
+                            ItemsSource="{me:EnumValues enums:RenameTargetType}"
                             SelectedItem="{Binding Config.RenameTarget}" />
                     </ct:FormItem>
                     <ct:FormItem Label="搜索模式：">
                         <ComboBox
                             Width="128"
                             DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
-                            ItemsSource="{markupExtensions:EnumValues enums:SearchMode}"
+                            ItemsSource="{me:EnumValues enums:SearchMode}"
                             SelectedItem="{Binding Config.SearchMode}" />
                     </ct:FormItem>
 
@@ -82,7 +81,7 @@
                     <ComboBox
                         Width="192"
                         DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
-                        ItemsSource="{markupExtensions:EnumValues enums:RenameMode}"
+                        ItemsSource="{me:EnumValues enums:RenameMode}"
                         SelectedItem="{Binding Config.RenameMode}" />
                 </ct:FormItem>
             </ct:FormItem>

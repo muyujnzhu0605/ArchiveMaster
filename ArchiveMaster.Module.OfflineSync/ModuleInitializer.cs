@@ -46,7 +46,7 @@ namespace ArchiveMaster
 
         public IList<ConfigInfo> Configs =>
         [
-            new ConfigInfo(type: typeof(OfflineSyncConfig), key: nameof(OfflineSyncConfig))
+            new ConfigInfo(typeof(OfflineSyncConfig))
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

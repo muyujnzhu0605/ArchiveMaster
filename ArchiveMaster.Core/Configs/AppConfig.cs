@@ -35,9 +35,9 @@ namespace ArchiveMaster.Configs
 #endif
         public int DebugModeLoopDelay { get; set; } = 30;
 
-        public static void RegisterConfig(Type type, string key)
+        public static void RegisterConfig(ConfigInfo config)
         {
-            configs.Add(key, new ConfigInfo(type: type, key: key));
+            configs.Add(config.Key,config);
         }
 
         public void Load()

@@ -7,12 +7,10 @@ using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RebuildViewModel : TwoStepViewModelBase<RebuildUtility>
+public partial class RebuildViewModel(RebuildConfig config) : TwoStepViewModelBase<RebuildUtility,RebuildConfig>(config)
 {
     [ObservableProperty]
     private FileSystemTree fileTree;
-
-    public override RebuildConfig Config => AppConfig.Instance.Get<RebuildConfig>();
 
     [ObservableProperty]
     private IReadOnlyList<RebuildError> rebuildErrors;

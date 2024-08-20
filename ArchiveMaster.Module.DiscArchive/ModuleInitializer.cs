@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
@@ -21,7 +23,18 @@ namespace ArchiveMaster
             new ConfigInfo(typeof(PackingConfig)),
             new ConfigInfo(typeof(RebuildConfig)),
         ];
+        
+        public void RegisterServices(IServiceCollection services)
+        {
+            services.AddTransient<PackingViewModel>();
+            services.AddTransient<RebuildViewModel>();
 
+            services.AddTransient<PackingPanel>();
+            services.AddTransient<RebuildPanel>();
+
+            services.AddTransient<PackingUtility>();
+            services.AddTransient<RebuildUtility>();
+        }
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =

@@ -34,7 +34,8 @@
 
                 <TextBlock
                     Text="{Binding Message}"
-                    TextTrimming="CharacterEllipsis" />
+                    TextTrimming="CharacterEllipsis"
+                    ToolTip.Tip="{Binding Message}" />
 
                 <ProgressBar
                     Grid.Column="2"

@@ -12,9 +12,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase
+    public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase<TimeClassifyConfig>(config)
     {
-        public override TimeClassifyConfig Config { get; } = config;
         public List<SimpleDirInfo> TargetDirs { get; set; }
 
         public override Task ExecuteAsync(CancellationToken token)
@@ -112,8 +111,8 @@ namespace ArchiveMaster.Utilities
             foreach (var dir in targetDirs)
             {
                 token.ThrowIfCancellationRequested();
-                dir.EarliestTime = dir.Subs.Select(p =>p.IsDir?(p as SimpleDirInfo).EarliestTime:p.Time)
-               .Min();
+                dir.EarliestTime = dir.Subs.Select(p => p.IsDir ? (p as SimpleDirInfo).EarliestTime : p.Time)
+                    .Min();
                 dir.LatestTime = dir.Subs.Select(p =>
                 {
                     return p switch

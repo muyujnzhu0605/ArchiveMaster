@@ -4,9 +4,9 @@ namespace ArchiveMaster.Views
 {
     public partial class PackingPanel : TwoStepPanelBase
     {
-        public PackingPanel()
+        public PackingPanel(PackingViewModel viewModel)
         {
-            DataContext = new PackingViewModel();
+            DataContext = viewModel;
             InitializeComponent();
         }
     }

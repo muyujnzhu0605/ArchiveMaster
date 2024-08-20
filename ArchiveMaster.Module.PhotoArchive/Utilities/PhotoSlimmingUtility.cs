@@ -16,7 +16,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class PhotoSlimmingUtility : TwoStepUtilityBase
+    public class PhotoSlimmingUtility : TwoStepUtilityBase<PhotoSlimmingConfig>
     {
         private readonly Regex rBlack;
         private readonly Regex rCompress;
@@ -24,9 +24,8 @@ namespace ArchiveMaster.Utilities
         private readonly Regex rWhite;
         private ConcurrentBag<string> errorMessages;
 
-        public PhotoSlimmingUtility(PhotoSlimmingConfig config)
+        public PhotoSlimmingUtility(PhotoSlimmingConfig config):base(config)
         {
-            Config = config;
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
             rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
             rBlack = new Regex(Config.BlackList);
@@ -52,8 +51,6 @@ namespace ArchiveMaster.Utilities
         }
 
         public SlimmingFilesInfo CompressFiles { get; private set; }
-
-        public override PhotoSlimmingConfig Config { get; }
 
         public SlimmingFilesInfo CopyFiles { get; private set; }
 

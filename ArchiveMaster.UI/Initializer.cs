@@ -18,21 +18,21 @@ public class Initializer
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         InitializeModules();
         AppConfig.Instance.Load();
-        
+
         Services.Builder.AddSingleton(this);
         Services.Builder.AddTransient<MainWindow>();
         Services.Builder.AddTransient<MainView>();
         Services.Builder.AddTransient<MainViewModel>();
-        
+
         Services.BuildServiceProvider();
     }
 
     public IModuleInitializer[] ModuleInitializers { get; } =
     [
         new FileToolsModuleInitializer(),
-        // new PhotoArchiveModuleInitializer(),
+        new PhotoArchiveModuleInitializer(),
         new OfflineSyncModuleInitializer(),
-        // new DiscArchiveModuleInitializer(),
+        new DiscArchiveModuleInitializer(),
     ];
 
     private void InitializeModules()
@@ -46,14 +46,14 @@ public class Initializer
             }
 
             moduleInitializer.RegisterServices(Services.Builder);
-      
+
             try
             {
                 if (moduleInitializer.Configs != null)
                 {
                     foreach (var config in moduleInitializer.Configs)
                     {
-                        AppConfig.RegisterConfig(config.Type, config.Key);
+                        AppConfig.RegisterConfig(config);
                     }
                 }
 
@@ -69,9 +69,8 @@ public class Initializer
         }
 
         views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
-        
-    }  
-    
+    }
+
     private List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
     public IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
 }

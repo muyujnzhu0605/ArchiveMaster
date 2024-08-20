@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class UselessJpgCleanerUtility(UselessJpgCleanerConfig config) : TwoStepUtilityBase
+    public class UselessJpgCleanerUtility(UselessJpgCleanerConfig config)
+        : TwoStepUtilityBase<UselessJpgCleanerConfig>(config)
     {
-        public override UselessJpgCleanerConfig Config { get; } = config;
-
         public List<SimpleFileInfo> DeletingJpgFiles { get; set; }
 
         public override Task ExecuteAsync(CancellationToken token)
