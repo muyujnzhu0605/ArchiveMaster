@@ -229,34 +229,20 @@
                         Content="包含多匹配"
                         IsChecked="{Binding DisplayMultipleMatches}" />
                 </StackPanel>
-                <StackPanel
+
+                <TextBlock
                     Grid.Column="2"
                     Margin="8,0"
                     HorizontalAlignment="Right"
-                    Orientation="Horizontal">
+                    VerticalAlignment="Center">
+                    <Run Text="共" />
+                    <Run Text="{Binding FilesCount, Mode=OneWay}" />
+                    <Run Text="个文件，已选择" />
+                    <Run Text="{Binding CheckedFilesCount, Mode=OneWay}" />
+                    <Run Text="个" />
+                </TextBlock>
 
-                    <TextBlock VerticalAlignment="Center">
-                        <Run Text="共" />
-                        <Run Text="{Binding FilesCount, Mode=OneWay}" />
-                        <Run Text="个文件，已选择" />
-                        <Run Text="{Binding CheckedFilesCount, Mode=OneWay}" />
-                        <Run Text="个" />
-                    </TextBlock>
 
-                    <Button
-                        HorizontalAlignment="Stretch"
-                        Classes="Middle"
-                        Command="{Binding SelectAllCommand}">
-                        全选
-                    </Button>
-                    <Button
-                        Grid.Column="2"
-                        HorizontalAlignment="Stretch"
-                        Classes="Middle"
-                        Command="{Binding SelectNoneCommand}">
-                        全不选
-                    </Button>
-                </StackPanel>
             </Grid>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>

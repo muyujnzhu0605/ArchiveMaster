@@ -88,39 +88,24 @@
             </DataGrid.Columns>
         </v:SimpleFileDataGrid>
 
-        <Grid
+
+        <TextBlock
             Grid.Row="2"
             Margin="8,0"
-            ColumnDefinitions="Auto,*,Auto,8,Auto">
-            <TextBlock VerticalAlignment="Center">
-                <Run Text="共新增文件" />
-                <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
-                <Run Text="个（" />
-                <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-                <Run Text="），修改文件" />
-                <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
-                <Run Text="个（" />
-                <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-                <Run Text="），移动文件" />
-                <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
-                <Run Text="个，删除文件" />
-                <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
-                <Run Text="个" />
-            </TextBlock>
-
-            <Button
-                Grid.Column="2"
-                HorizontalAlignment="Stretch"
-                Classes="Middle"
-                Command="{Binding SelectAllCommand}"
-                Content="全选" />
-
-            <Button
-                Grid.Column="4"
-                HorizontalAlignment="Stretch"
-                Classes="Middle"
-                Command="{Binding SelectNoneCommand}"
-                Content="全不选" />
-        </Grid>
+            VerticalAlignment="Center">
+            <Run Text="共新增文件" />
+            <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
+            <Run Text="个（" />
+            <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+            <Run Text="），修改文件" />
+            <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
+            <Run Text="个（" />
+            <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+            <Run Text="），移动文件" />
+            <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
+            <Run Text="个，删除文件" />
+            <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
+            <Run Text="个" />
+        </TextBlock>
     </Grid>
 </UserControl>

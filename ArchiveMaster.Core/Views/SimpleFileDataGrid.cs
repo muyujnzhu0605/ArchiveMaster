@@ -1,3 +1,4 @@
+using System.Collections;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Utilities;
@@ -11,6 +12,7 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using FzLib.Avalonia.Converters;
 
 namespace ArchiveMaster.Views;
@@ -19,14 +21,13 @@ public class SimpleFileDataGrid : DataGrid
 {
     public SimpleFileDataGrid()
     {
-        CanUserReorderColumns = false;
-        CanUserResizeColumns = false;
-        CanUserSortColumns = false;
+        CanUserReorderColumns = true;
+        CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] =
             new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking));
     }
 
-    protected override Type StyleKeyOverride => typeof(DataGrid);
+    protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
 
     public double ColumnIsCheckedIndex { get; init; } = 0.1;
     public double ColumnStatusIndex { get; init; } = 0.2;
@@ -179,5 +180,51 @@ public class SimpleFileDataGrid : DataGrid
 
         column.CellTemplate = cellTemplate;
         return column;
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        if (ColumnIsCheckedIndex >= 0)
+        {
+            var buttons = this.GetVisualDescendants()
+                .OfType<Button>()
+                .ToList();
+            if (buttons.Count == 4)
+            {
+                var tbtn = (ToggleButton)buttons[3];
+                buttons[0].Click += (_, _) =>
+                {
+                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                    {
+                        file.IsChecked = true;
+                    }
+                };
+                buttons[1].Click += (_, _) =>
+                {
+                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                    {
+                        file.IsChecked = !file.IsChecked;
+                    }
+                };
+                buttons[2].Click += (_, _) =>
+                {
+                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                    {
+                        file.IsChecked = false;
+                    }
+                };
+            }
+        }
+        else
+        {
+            var stk= this.GetVisualDescendants()
+                .OfType<StackPanel>()
+                .FirstOrDefault();
+            if (stk != null)
+            {
+                ((Grid)stk.Parent).Children.Remove(stk);
+            }
+        }
     }
 }

@@ -127,10 +127,11 @@
                     CanUserResize="False"
                     Header="已加密">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate x:DataType="vm:EncryptorFileInfo">
+                        <DataTemplate>
                             <Ellipse
                                 Width="8"
                                 Height="8"
+                                Fill="{DynamicResource Foreground0}"
                                 IsVisible="{Binding IsEncrypted}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
