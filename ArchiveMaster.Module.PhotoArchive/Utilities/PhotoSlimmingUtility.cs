@@ -24,7 +24,7 @@ namespace ArchiveMaster.Utilities
         private readonly Regex rWhite;
         private ConcurrentBag<string> errorMessages;
 
-        public PhotoSlimmingUtility(PhotoSlimmingConfig config):base(config)
+        public PhotoSlimmingUtility(PhotoSlimmingConfig config) : base(config)
         {
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
             rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
@@ -117,7 +117,7 @@ namespace ArchiveMaster.Utilities
                 token.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
                 {
-                    DeleteFiles.Add(new SimpleFileInfo(new FileInfo(file)));
+                    DeleteFiles.Add(new SimpleFileInfo(new FileInfo(file), Config.DistDir));
                 }
             }
 
@@ -136,11 +136,11 @@ namespace ArchiveMaster.Utilities
             desiredDistFolders = desiredDistFolders.ToFrozenSet();
             foreach (var dir in Directory
                          .EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories)
-                         .Where(p=>!rBlack.IsMatch(p)))
+                         .Where(p => !rBlack.IsMatch(p)))
             {
                 if (!desiredDistFolders.Contains(dir))
                 {
-                    DeleteFiles.Add(new SimpleFileInfo(new DirectoryInfo(dir)));
+                    DeleteFiles.Add(new SimpleFileInfo(new DirectoryInfo(dir), Config.DistDir));
                 }
             }
         }
@@ -151,7 +151,7 @@ namespace ArchiveMaster.Utilities
             NotifyMessage("正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
                 .EnumerateFiles("*", SearchOption.AllDirectories)
-                .Select(p => new SimpleFileInfo(p));
+                .Select(p => new SimpleFileInfo(p, Config.SourceDir));
 
             TryForFiles(files, (file, s) =>
             {

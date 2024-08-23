@@ -50,12 +50,12 @@ namespace ArchiveMaster.Utilities
             {
                 NotifyMessage("正在搜索文件");
                 files = new DirectoryInfo(Config.Dir).EnumerateFiles()
-                    .Select(p => new SimpleFileInfo(p))
+                    .Select(p => new SimpleFileInfo(p, Config.Dir))
                     .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
                     .ToList();
                 token.ThrowIfCancellationRequested();
                 subDirs = new DirectoryInfo(Config.Dir).EnumerateDirectories()
-                    .Select(p => new SimpleDirInfo(p))
+                    .Select(p => new SimpleDirInfo(p, Config.Dir))
                     .Where(p => p.FilesCount > 0)
                     .OrderBy(p => p.EarliestTime)
                     .ToList();

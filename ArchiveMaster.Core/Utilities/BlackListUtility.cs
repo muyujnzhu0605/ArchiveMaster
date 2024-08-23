@@ -94,14 +94,14 @@ public class BlackListUtility
                 if (blackStrings[i].Contains('\\') || blackStrings[i].Contains('/')) //目录
                 {
                     path = path.Replace("\\", "/");
-                    if (path.Contains(blackList[i]))
+                    if (path.Contains(blackStrings[i]))
                     {
                         return true;
                     }
                 }
                 else //文件
                 {
-                    if (name.Contains(blackList[i]))
+                    if (name.Contains(blackStrings[i]))
                     {
                         return true;
                     }

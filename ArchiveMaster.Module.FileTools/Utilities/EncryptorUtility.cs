@@ -201,7 +201,7 @@ namespace ArchiveMaster.Utilities
                     IgnoreInaccessible = true,
                     RecurseSubdirectories = true,
                 })
-                .Select(p => new EncryptorFileInfo(p)), (file, s) =>
+                .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 var isEncrypted = IsEncryptedFile(file.Path);
                 file.IsFileNameEncrypted = isEncrypted && IsNameEncrypted(file.Name);

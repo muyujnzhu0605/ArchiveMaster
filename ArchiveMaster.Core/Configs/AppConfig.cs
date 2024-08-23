@@ -30,9 +30,9 @@ namespace ArchiveMaster.Configs
         public static AppConfig Instance { get; } = new AppConfig();
 
         public bool DebugMode { get; set; }
-#if DEBUG
-            = true;
-#endif
+// #if DEBUG
+//             = true;
+// #endif
         public int DebugModeLoopDelay { get; set; } = 30;
 
         public static void RegisterConfig(ConfigInfo config)

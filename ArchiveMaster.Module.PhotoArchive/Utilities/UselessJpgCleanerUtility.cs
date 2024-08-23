@@ -17,8 +17,8 @@ namespace ArchiveMaster.Utilities
 
         public override Task ExecuteAsync(CancellationToken token)
         {
-            ArgumentNullException.ThrowIfNull(DeletingJpgFiles);
-            return TryForFilesAsync(DeletingJpgFiles, (file, s) =>
+            var files = DeletingJpgFiles.Where(p => p.IsChecked).ToList();
+            return TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在删除JPG{s.GetFileNumberMessage()}：{file.Name}");
                 File.Delete(file.Path);
@@ -32,7 +32,7 @@ namespace ArchiveMaster.Utilities
                 .EnumerateFiles("*.jp*g", SearchOption.AllDirectories)
                 .Where(p => p.Name.EndsWith(".jpg", StringComparison.InvariantCultureIgnoreCase) ||
                             p.Name.EndsWith(".jpeg", StringComparison.InvariantCultureIgnoreCase))
-                .Select(p => new SimpleFileInfo(p));
+                .Select(p => new SimpleFileInfo(p, Config.Dir));
             return TryForFilesAsync(jpgs, (file, s) =>
             {
                 NotifyMessage($"正在查找JPG和RAW文件{s.GetFileNumberMessage()}");

@@ -81,8 +81,8 @@ namespace ArchiveMaster.Utilities
                     }
 
                     file.TempName = GetTempFileName(file, sha256);
-                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.Path}");
-                    string sourceFile = Path.Combine(offsiteTopDir2LocalDir[file.TopDirectory], file.Path);
+                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.RelativePath}");
+                    string sourceFile = Path.Combine(offsiteTopDir2LocalDir[file.TopDirectory], file.RelativePath);
                     string destFile = Path.Combine(Config.PatchDir, file.TempName);
                     if (File.Exists(destFile))
                     {
@@ -101,7 +101,7 @@ namespace ArchiveMaster.Utilities
                         catch (IOException ex)
                         {
                             throw new IOException(
-                                $"修改时间或长度与待写入文件{file.Path}不同的目标补丁文件{destFile}已存在，但无法删除：{ex.Message}", ex);
+                                $"修改时间或长度与待写入文件{file.RelativePath}不同的目标补丁文件{destFile}已存在，但无法删除：{ex.Message}", ex);
                         }
                     }
 
@@ -172,7 +172,7 @@ namespace ArchiveMaster.Utilities
                             ps1Script.AppendLine($"}}");
                             break;
                     }
-                }, token,FilesLoopOptions.Builder().AutoApplyStatus().Finally(file =>
+                }, token, FilesLoopOptions.Builder().AutoApplyStatus().Finally(file =>
                 {
                     var f = file as SyncFileInfo;
                     if (f.UpdateType is FileUpdateType.Delete or FileUpdateType.Move)
@@ -221,7 +221,8 @@ namespace ArchiveMaster.Utilities
                 var step1Model = ZipUtility.ReadFromZip<Step1Model>(Config.OffsiteSnapshot);
                 //将异地文件根据顶级目录
                 var offsiteTopDir2Files =
-                    step1Model.Files.GroupBy(p => p.TopDirectory).ToDictionary(p => p.Key, p => p.ToList());
+                    step1Model.Files.GroupBy(p => p.TopDirectory)
+                        .ToDictionary(p => p.Key, p => p.ToList());
                 //用于之后寻找差异文件的哈希表
                 Dictionary<string, byte> localFiles = new Dictionary<string, byte>();
                 HashSet<string> offsiteTopDirs = Config.MatchingDirs.Select(p => p.OffsiteDir).ToHashSet();
@@ -257,7 +258,7 @@ namespace ArchiveMaster.Utilities
                     //从路径、文件名、时间、长度寻找本地文件的字典
                     string offsiteTopDirectory = localAndOffsiteDir.OffsiteDir;
                     Dictionary<string, SyncFileInfo> offsitePath2File =
-                        offsiteTopDir2Files[offsiteTopDirectory].ToDictionary(p => p.Path);
+                        offsiteTopDir2Files[offsiteTopDirectory].ToDictionary(p => p.RelativePath);
                     Dictionary<string, List<SyncFileInfo>> offsiteName2File = offsiteTopDir2Files[offsiteTopDirectory]
                         .GroupBy(p => p.Name).ToDictionary(p => p.Key, p => p.ToList());
                     Dictionary<DateTime, List<SyncFileInfo>> offsiteTime2File = offsiteTopDir2Files[offsiteTopDirectory]
@@ -291,7 +292,7 @@ namespace ArchiveMaster.Utilities
                             //文件发生改变
                             var newFile = new SyncFileInfo()
                             {
-                                Path = relativePath,
+                                Path = Path.Combine(offsiteTopDirectory, relativePath),
                                 Name = file.Name,
                                 Length = file.Length,
                                 Time = file.LastWriteTime,
@@ -325,7 +326,7 @@ namespace ArchiveMaster.Utilities
                                 //1、异地磁盘中，满足要求的相同文件仅找到一个
                                 //2、在找到的这个相同文件对应的本地的位置，不存在相同文件
                                 //      这一条时避免出现本地存在2个及以上的相同文件时，错误移动异地文件
-                                string localSameLocation = sameFiles.First().Path;
+                                string localSameLocation = sameFiles.First().RelativePath;
                                 localSameLocation = Path.Combine(localDir.FullName, localSameLocation);
                                 if (!localFilePathSet.Contains(localSameLocation))
                                 {
@@ -338,8 +339,8 @@ namespace ArchiveMaster.Utilities
                                 var offsiteMovedFile = sameFiles.First();
                                 var movedFile = new SyncFileInfo()
                                 {
-                                    Path = relativePath,
-                                    OldPath = offsiteMovedFile.Path,
+                                    Path = Path.Combine(offsiteTopDirectory, relativePath),
+                                    OldRelativePath = offsiteMovedFile.RelativePath,
                                     Name = file.Name,
                                     Length = file.Length,
                                     Time = file.LastWriteTime,
@@ -347,14 +348,14 @@ namespace ArchiveMaster.Utilities
                                     TopDirectory = offsiteTopDirectory,
                                 };
                                 UpdateFiles.Add(movedFile);
-                                localFiles.Add(Path.Combine(offsiteDir.Name, offsiteMovedFile.Path),
+                                localFiles.Add(Path.Combine(offsiteDir.Name, offsiteMovedFile.RelativePath),
                                     0); //如果被移动了，那么不需要进行删除判断，所以要把异地的文件地址也加入进去。
                             }
                             else //新增文件
                             {
                                 var newFile = new SyncFileInfo()
                                 {
-                                    Path = relativePath,
+                                    Path = Path.Combine(offsiteTopDirectory, relativePath),
                                     Name = file.Name,
                                     Length = file.Length,
                                     Time = file.LastWriteTime,
@@ -381,7 +382,8 @@ namespace ArchiveMaster.Utilities
                     index = 0;
                     foreach (var file in offsiteTopDir2Files[offsiteTopDirectory])
                     {
-                        var offsitePathWithTopDir = Path.Combine(Path.GetFileName(file.TopDirectory), file.Path);
+                        var offsitePathWithTopDir =
+                            Path.Combine(Path.GetFileName(file.TopDirectory), file.RelativePath);
                         if (blacks.IsInBlackList(file))
                         {
                             continue;
@@ -428,7 +430,7 @@ namespace ArchiveMaster.Utilities
 
         private static string GetTempFileName(SyncFileInfo file, SHA256 sha256)
         {
-            string featureCode = $"{file.TopDirectory}{file.Path}{file.Time}{file.Length}";
+            string featureCode = $"{file.TopDirectory}{file.RelativePath}{file.Time}{file.Length}";
 
             var bytes = Encoding.UTF8.GetBytes(featureCode);
             var code = sha256.ComputeHash(bytes);

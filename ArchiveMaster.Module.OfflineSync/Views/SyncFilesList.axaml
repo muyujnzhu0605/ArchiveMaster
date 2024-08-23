@@ -17,22 +17,22 @@
         <c:SyncFilePathConverter x:Key="SyncFilePathConverter" />
     </v:SimpleFileDataGrid.Resources>
 
-    <DataGrid.RowDetailsTemplate>
-        <DataTemplate>
-            <TextBlock
-                Margin="8"
-                IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"
-                TextWrapping="Wrap">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}{0}{1}{2}">
-                        <Binding Path="TopDirectory" />
-                        <Binding Path="#root.DataContext.DirectorySeparatorChar" />
-                        <Binding Path="Path" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-        </DataTemplate>
-    </DataGrid.RowDetailsTemplate>
+    <!-- <DataGrid.RowDetailsTemplate> -->
+    <!--     <DataTemplate> -->
+    <!--  <TextBlock  -->
+    <!--  Margin="8"  -->
+    <!--  IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"  -->
+    <!--  TextWrapping="Wrap">  -->
+    <!--             <TextBlock.Text> -->
+    <!--                 <MultiBinding StringFormat="{}{0}{1}{2}"> -->
+    <!--                     <Binding Path="TopDirectory" /> -->
+    <!--                     <Binding Path="#root.DataContext.DirectorySeparatorChar" /> -->
+    <!--                     <Binding Path="Path" /> -->
+    <!--                 </MultiBinding> -->
+    <!--             </TextBlock.Text> -->
+    <!--         </TextBlock> -->
+    <!--     </DataTemplate> -->
+    <!-- </DataGrid.RowDetailsTemplate> -->
 
     <DataGrid.Columns>
         <DataGridTemplateColumn

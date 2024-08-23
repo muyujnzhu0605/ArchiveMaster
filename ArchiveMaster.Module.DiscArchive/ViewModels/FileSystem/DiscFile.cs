@@ -4,11 +4,11 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class DiscFile : SimpleFileInfo
     {
-        public DiscFile() : base()
+        public DiscFile()
         {
             
         }
-        public DiscFile(FileInfo file) : base(file)
+        public DiscFile(FileInfo file,string topDir) : base(file,topDir)
         {
         }
         [ObservableProperty]

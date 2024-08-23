@@ -17,6 +17,7 @@ namespace ArchiveMaster.ViewModels
         private string name;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(RelativePath))]
         private string path;
         
         [ObservableProperty]
@@ -28,17 +29,47 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private long length;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(RelativePath))]
+        private string topDirectory;
+
+        [property: JsonIgnore]
+        [ObservableProperty]
+        private FileSystemInfo fileSystemInfo;
+
+        [JsonIgnore]
+        public string RelativePath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(TopDirectory))
+                {
+                    return Path;
+                }
+                return System.IO.Path.GetRelativePath(TopDirectory, Path);
+            }
+        }
+
         private ProcessStatus status = ProcessStatus.Ready;
 
         public SimpleFileInfo()
         {
         }
 
-        public SimpleFileInfo(FileSystemInfo file)
+        public SimpleFileInfo(FileSystemInfo file,string topDir)
         {
             ArgumentNullException.ThrowIfNull(file);
+            FileSystemInfo = file;
             Name = file.Name;
             Path = file.FullName;
+            if (System.IO.Path.IsPathRooted(topDir))
+            {
+                TopDirectory = topDir;
+            }
+            else
+            {
+                throw new ArgumentException($"提供的{nameof(topDir)}不是{nameof(file)}的父级");
+            }
             Time = file.LastWriteTime;
             IsDir = file.Attributes.HasFlag(FileAttributes.Directory);
             if (!IsDir && file is FileInfo f)

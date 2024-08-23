@@ -43,7 +43,7 @@ namespace ArchiveMaster.Utilities
             NotifyProgressIndeterminate();
             NotifyMessage("正在查找文件");
             var files = new DirectoryInfo(Config.Dir).EnumerateFiles("*", SearchOption.AllDirectories)
-                .Select(p => new ExifTimeFileInfo(p));
+                .Select(p => new ExifTimeFileInfo(p, Config.Dir));
             return TryForFilesAsync(files, (file, s) =>
                 {
                     NotifyMessage($"正在扫描照片日期{s.GetFileNumberMessage()}");

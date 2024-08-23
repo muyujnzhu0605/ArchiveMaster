@@ -206,7 +206,7 @@
                     </DataGridTemplateColumn>
 
                     <DataGridTextColumn
-                        Binding="{Binding Template.Path}"
+                        Binding="{Binding Template.RelativePath}"
                         Header="模板路径"
                         IsReadOnly="True" />
 

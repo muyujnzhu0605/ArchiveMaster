@@ -38,6 +38,11 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     public override PhotoSlimmingConfig Config => SelectedConfig;
 
+    protected override PhotoSlimmingUtility CreateUtilityImplement()
+    {
+        return new PhotoSlimmingUtility(Config);
+    }
+
     public PhotoSlimmingViewModel(PhotoSlimmingConfig config = null) : base(config)
     {
         Configs = Services.Provider.GetRequiredService<PhotoSlimmingCollectionConfig>().List;

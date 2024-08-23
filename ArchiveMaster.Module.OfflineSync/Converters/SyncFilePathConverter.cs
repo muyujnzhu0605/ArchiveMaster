@@ -27,7 +27,7 @@ namespace ArchiveMaster.Converters
             }
 
             string topDirName = Path.GetFileName(file.TopDirectory);
-            string relativePath = file.Path;
+            string relativePath = file.RelativePath;
             switch (file.UpdateType)
             {
                 case FileUpdateType.None:
@@ -36,7 +36,7 @@ namespace ArchiveMaster.Converters
                 case FileUpdateType.Delete:
                     return Path.Combine(topDirName,relativePath);
                 case FileUpdateType.Move:
-                    return $"{Path.Combine(topDirName, file.OldPath)} -> {Path.Combine(topDirName, relativePath)}";
+                    return $"{Path.Combine(topDirName, file.OldRelativePath)} -> {Path.Combine(topDirName, relativePath)}";
                 default:
                     throw new InvalidEnumArgumentException();
             }

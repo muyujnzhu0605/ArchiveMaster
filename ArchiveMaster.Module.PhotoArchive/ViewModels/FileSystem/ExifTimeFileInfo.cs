@@ -1,10 +1,10 @@
 namespace ArchiveMaster.ViewModels;
 
-public class ExifTimeFileInfo:SimpleFileInfo
+public class ExifTimeFileInfo : SimpleFileInfo
 {
-    public ExifTimeFileInfo(FileInfo file) : base(file)
+    public ExifTimeFileInfo(FileInfo file, string topDir) : base(file, topDir)
     {
-        
     }
+
     public DateTime? ExifTime { get; set; }
 }

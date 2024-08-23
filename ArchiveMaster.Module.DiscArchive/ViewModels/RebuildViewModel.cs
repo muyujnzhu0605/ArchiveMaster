@@ -23,7 +23,7 @@ public partial class RebuildViewModel(RebuildConfig config) : TwoStepViewModelBa
 
     protected override Task OnExecutingAsync(CancellationToken token)
     {
-        if (FileTree.Count == 0)
+        if (FileTree.Count == 0 && FileTree.Files.Count==0)
         {
             throw new Exception("没有任何需要重建的文件");
         }

@@ -222,7 +222,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfi
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
 
-            TryForFiles(files.Select(file => new RenameFileInfo(file)), (renameFile, s) =>
+            TryForFiles(files.Select(file => new RenameFileInfo(file, Config.Dir)), (renameFile, s) =>
             {
                 NotifyMessage($"正在处理文件{s.GetFileNumberMessage()}：{renameFile.Name}");
                 renameFiles.Add(renameFile);
@@ -295,6 +295,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfi
                 text = "";
             }
         }
+
         List<string> list = new List<string>();
         int left = 0;
         int right = 0;
@@ -344,7 +345,8 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfi
     {
         string name = file.Name;
         string matched = null;
-        if (Config.RenameMode is RenameMode.ReplaceMatched or RenameMode.RetainMatched or RenameMode.RetainMatchedExtension)
+        if (Config.RenameMode is RenameMode.ReplaceMatched or RenameMode.RetainMatched
+            or RenameMode.RetainMatchedExtension)
         {
             matched = Config.SearchMode == SearchMode.Regex
                 ? GetRegex(Config.SearchPattern).Match(name).Value

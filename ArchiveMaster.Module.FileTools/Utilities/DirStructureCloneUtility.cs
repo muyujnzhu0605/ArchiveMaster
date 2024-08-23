@@ -61,10 +61,9 @@ namespace ArchiveMaster.Utilities
                         RecurseSubdirectories = true,
                     });
 
-                TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p)), (file, s) =>
+                TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p, Config.SourceDir)), (file, s) =>
                 {
-                    NotifyMessage(
-                        $"正在处理{s.GetFileNumberMessage()}：{Path.GetRelativePath(Config.SourceDir, file.Path)}");
+                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.RelativePath}");
                     files.Add(file);
                 }, token, FilesLoopOptions.DoNothing());
             }, token);

@@ -12,10 +12,10 @@ namespace ArchiveMaster.ViewModels
         {
             IsDir = true;
         }
-        public SimpleDirInfo(DirectoryInfo dir) : base(dir)
+        public SimpleDirInfo(DirectoryInfo dir,string topDir) : base(dir,topDir)
         {
             var subFiles = dir.EnumerateFiles().ToList();
-            Subs = subFiles.Select(p => new SimpleFileInfo(p)).ToList();
+            Subs = subFiles.Select(p => new SimpleFileInfo(p,topDir)).ToList();
             FilesCount = subFiles.Count;
             if (FilesCount > 0)
             {

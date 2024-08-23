@@ -27,7 +27,7 @@ namespace ArchiveMaster.Utilities
                     .Where(p => p.LastWriteTime > Config.EarliestTime)
                     .Where(p => !blacks.IsInBlackList(p))
                     .OrderBy(p => p.LastWriteTime)
-                    .Select(p => new DiscFile(p));
+                    .Select(p => new DiscFile(p,Config.SourceDir));
 
                 packages.DiscFilePackages.Add(new DiscFilePackage());
                 long maxSize = 1L * 1024 * 1024 * Config.DiscSizeMB;

@@ -41,7 +41,7 @@ namespace ArchiveMaster.ViewModels
                     Title = "删除空目录",
                     Message = $"有{Utility.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
                     Detail = string.Join(Environment.NewLine,
-                        Utility.DeletingDirectories.Select(p => Path.Combine(p.TopDirectory, p.Path))),
+                        Utility.DeletingDirectories.Select(p => p.Path)),
                     Type = CommonDialogMessage.CommonDialogType.YesNo
                 }).Task;
                 if (result.Equals(true))

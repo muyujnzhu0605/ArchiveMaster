@@ -12,7 +12,7 @@
                 <Border Padding="8">
                     <Grid
                         ColumnDefinitions="Auto,8,*"
-                        RowDefinitions="Auto,8,Auto,8,Auto">
+                        RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">
                         <Grid.Styles>
                             <Style Selector="TextBlock.Title">
                                 <Setter Property="FontWeight" Value="Bold" />
@@ -28,18 +28,26 @@
                         <TextBlock
                             Grid.Row="2"
                             Classes="Title"
-                            Text="路径：" />
+                            Text="绝对路径：" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="2"
                             Text="{Binding Path}" />
-
                         <TextBlock
                             Grid.Row="4"
                             Classes="Title"
-                            Text="信息：" />
+                            Text="相对路径：" />
                         <TextBlock
                             Grid.Row="4"
+                            Grid.Column="2"
+                            Text="{Binding RelativePath}" />
+
+                        <TextBlock
+                            Grid.Row="6"
+                            Classes="Title"
+                            Text="信息：" />
+                        <TextBlock
+                            Grid.Row="6"
                             Grid.Column="2"
                             Text="{Binding Message}" />
 

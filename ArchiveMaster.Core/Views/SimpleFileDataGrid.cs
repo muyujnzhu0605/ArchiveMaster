@@ -140,7 +140,7 @@ public class SimpleFileDataGrid : DataGrid
         return new DataGridTextColumn()
         {
             Header = ColumnPathHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Path)),
+            Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
             IsReadOnly = true,
         };
     }
