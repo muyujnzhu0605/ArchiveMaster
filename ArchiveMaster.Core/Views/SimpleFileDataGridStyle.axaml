@@ -5,7 +5,7 @@
     <ControlTheme
         x:Key="{x:Type v:SimpleFileDataGrid}"
         BasedOn="{StaticResource {x:Type DataGrid}}"
-        TargetType="DataGrid">
+        TargetType="v:SimpleFileDataGrid">
 
         <Setter Property="Template">
             <ControlTemplate>
@@ -86,36 +86,41 @@
                                 IsVisible="{Binding !$parent[DataGrid].IsEnabled}" />
                         </Grid>
                     </Border>
-                    <StackPanel
+                    <Grid
                         Grid.Row="1"
-                        Margin="0,8,0,0"
-                        Orientation="Horizontal"
-                        Spacing="8">
-                        <StackPanel.Styles>
-                            <Style Selector="Button">
-                                <Setter Property="Padding" Value="6" />
-                            </Style>
-                            <Style Selector="ToggleButton">
-                                <Setter Property="Padding" Value="6" />
-                            </Style>
-                        </StackPanel.Styles>
-                        <Button
-                            Content="&#xE8B3;"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="全选" />
-                        <Button
-                            Content="&#xE8AB;"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="反选" />
-                        <Button
-                            Content="&#xE8E6;"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="清除" />
-                        <ToggleButton
-                            Content="&#xE762;"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="仅处理选中的行" />
-                    </StackPanel>
+                        ColumnDefinitions="Auto,8,*">
+                        <StackPanel
+                            Margin="0,8,0,0"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                            <Button
+                                Classes="Icon"
+                                Content="&#xE8B3;"
+                                FontFamily="{StaticResource IconFont}"
+                                ToolTip.Tip="全选" />
+                            <Button
+                                Classes="Icon"
+                                Content="&#xE8AB;"
+                                FontFamily="{StaticResource IconFont}"
+                                ToolTip.Tip="反选" />
+                            <Button
+                                Classes="Icon"
+                                Content="&#xE8E6;"
+                                FontFamily="{StaticResource IconFont}"
+                                ToolTip.Tip="清除" />
+                            <ToggleButton
+                                Classes="Icon"
+                                Content="&#xE762;"
+                                FontFamily="{StaticResource IconFont}"
+                                ToolTip.Tip="仅处理选中的行" />
+                        </StackPanel>
+                        <ContentControl
+                            Grid.Column="2"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding Footer}" />
+                    </Grid>
                 </Grid>
             </ControlTemplate>
         </Setter>

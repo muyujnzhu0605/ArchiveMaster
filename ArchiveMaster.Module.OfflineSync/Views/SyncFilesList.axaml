@@ -15,97 +15,96 @@
     <UserControl.Resources>
         <c:SyncFilePathConverter x:Key="SyncFilePathConverter" />
     </UserControl.Resources>
-    <Grid RowDefinitions="*,8,Auto">
+    <v:SimpleFileDataGrid
+        x:Name="dg"
+        AutoGenerateColumns="False"
+        CanUserReorderColumns="True"
+        CanUserResizeColumns="True"
+        ItemsSource="{Binding Files}">
+        <DataGrid.RowDetailsTemplate>
+            <DataTemplate>
+                <TextBlock
+                    Margin="8"
+                    IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"
+                    TextWrapping="Wrap">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0}{1}{2}">
+                            <Binding Path="TopDirectory" />
+                            <Binding Path="#root.DataContext.DirectorySeparatorChar" />
+                            <Binding Path="Path" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+        </DataGrid.RowDetailsTemplate>
 
-        <v:SimpleFileDataGrid
-            x:Name="dg"
-            AutoGenerateColumns="False"
-            CanUserReorderColumns="True"
-            CanUserResizeColumns="True"
-            ItemsSource="{Binding Files}">
-            <DataGrid.RowDetailsTemplate>
-                <DataTemplate>
-                    <TextBlock
-                        Margin="8"
-                        IsVisible="{Binding #dg.SelectedItem, Converter={StaticResource NotNullConverter}}"
-                        TextWrapping="Wrap">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}{0}{1}{2}">
-                                <Binding Path="TopDirectory" />
-                                <Binding Path="#root.DataContext.DirectorySeparatorChar" />
-                                <Binding Path="Path" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </DataTemplate>
-            </DataGrid.RowDetailsTemplate>
+        <DataGrid.Columns>
+            <DataGridTemplateColumn
+                CanUserResize="False"
+                Header="更新类型"
+                SortMemberPath="UpdateType">
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock
+                            Margin="16,0"
+                            VerticalAlignment="Center"
+                            Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}">
+                            <Interaction.Behaviors>
+                                <DataTriggerBehavior
+                                    Binding="{Binding UpdateType}"
+                                    Value="{x:Static enums:FileUpdateType.Add}">
+                                    <ChangePropertyAction
+                                        PropertyName="Foreground"
+                                        Value="Green" />
+                                </DataTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding UpdateType}"
+                                    Value="{x:Static enums:FileUpdateType.Delete}">
+                                    <ChangePropertyAction
+                                        PropertyName="Foreground"
+                                        Value="Red" />
+                                </DataTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding UpdateType}"
+                                    Value="{x:Static enums:FileUpdateType.Modify}">
+                                    <ChangePropertyAction
+                                        PropertyName="Foreground"
+                                        Value="Yellow" />
+                                </DataTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding UpdateType}"
+                                    Value="{x:Static enums:FileUpdateType.Move}">
+                                    <ChangePropertyAction
+                                        PropertyName="Foreground"
+                                        Value="Orange" />
+                                </DataTriggerBehavior>
+                            </Interaction.Behaviors>
+                        </TextBlock>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+        </DataGrid.Columns>
 
-            <DataGrid.Columns>
-                <DataGridTemplateColumn
-                    CanUserResize="False"
-                    Header="更新类型"
-                    SortMemberPath="UpdateType">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                Margin="16,0"
-                                VerticalAlignment="Center"
-                                Text="{Binding UpdateType, Converter={StaticResource DescriptionConverter}}">
-                                <Interaction.Behaviors>
-                                    <DataTriggerBehavior
-                                        Binding="{Binding UpdateType}"
-                                        Value="{x:Static enums:FileUpdateType.Add}">
-                                        <ChangePropertyAction
-                                            PropertyName="Foreground"
-                                            Value="Green" />
-                                    </DataTriggerBehavior>
-                                    <DataTriggerBehavior
-                                        Binding="{Binding UpdateType}"
-                                        Value="{x:Static enums:FileUpdateType.Delete}">
-                                        <ChangePropertyAction
-                                            PropertyName="Foreground"
-                                            Value="Red" />
-                                    </DataTriggerBehavior>
-                                    <DataTriggerBehavior
-                                        Binding="{Binding UpdateType}"
-                                        Value="{x:Static enums:FileUpdateType.Modify}">
-                                        <ChangePropertyAction
-                                            PropertyName="Foreground"
-                                            Value="Yellow" />
-                                    </DataTriggerBehavior>
-                                    <DataTriggerBehavior
-                                        Binding="{Binding UpdateType}"
-                                        Value="{x:Static enums:FileUpdateType.Move}">
-                                        <ChangePropertyAction
-                                            PropertyName="Foreground"
-                                            Value="Orange" />
-                                    </DataTriggerBehavior>
-                                </Interaction.Behaviors>
-                            </TextBlock>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </v:SimpleFileDataGrid>
+        <v:SimpleFileDataGrid.Footer>
 
-
-        <TextBlock
-            Grid.Row="2"
-            Margin="8,0"
-            VerticalAlignment="Center">
-            <Run Text="共新增文件" />
-            <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
-            <Run Text="个（" />
-            <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-            <Run Text="），修改文件" />
-            <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
-            <Run Text="个（" />
-            <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
-            <Run Text="），移动文件" />
-            <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
-            <Run Text="个，删除文件" />
-            <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
-            <Run Text="个" />
-        </TextBlock>
-    </Grid>
+            <TextBlock
+                Grid.Row="2"
+                Margin="8,0"
+                VerticalAlignment="Center">
+                <Run Text="共新增文件" />
+                <Run Text="{Binding AddedFileCount, Mode=OneWay}" />
+                <Run Text="个（" />
+                <Run Text="{Binding AddedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                <Run Text="），修改文件" />
+                <Run Text="{Binding ModifiedFileCount, Mode=OneWay}" />
+                <Run Text="个（" />
+                <Run Text="{Binding ModifiedFileLength, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
+                <Run Text="），移动文件" />
+                <Run Text="{Binding MovedFileCount, Mode=OneWay}" />
+                <Run Text="个，删除文件" />
+                <Run Text="{Binding DeletedFileCount, Mode=OneWay}" />
+                <Run Text="个" />
+            </TextBlock>
+        </v:SimpleFileDataGrid.Footer>
+    </v:SimpleFileDataGrid>
 </UserControl>

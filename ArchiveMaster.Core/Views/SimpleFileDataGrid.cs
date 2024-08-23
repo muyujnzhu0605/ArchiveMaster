@@ -3,6 +3,7 @@ using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -25,6 +26,16 @@ public class SimpleFileDataGrid : DataGrid
         CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] =
             new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking));
+    }
+
+    public static readonly StyledProperty<object> FooterProperty =
+        AvaloniaProperty.Register<SimpleFileDataGrid, object>(
+            nameof(Footer));
+
+    public object Footer
+    {
+        get => GetValue(FooterProperty);
+        set => SetValue(FooterProperty, value);
     }
 
     protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
@@ -192,6 +203,14 @@ public class SimpleFileDataGrid : DataGrid
                 .ToList();
             if (buttons.Count == 4)
             {
+                foreach (var btn in buttons)
+                {
+                    btn[!IsEnabledProperty] =
+                        new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking))
+                        {
+                            Converter = new InverseBoolConverter()
+                        };
+                }
                 var tbtn = (ToggleButton)buttons[3];
                 buttons[0].Click += (_, _) =>
                 {
@@ -218,7 +237,7 @@ public class SimpleFileDataGrid : DataGrid
         }
         else
         {
-            var stk= this.GetVisualDescendants()
+            var stk = this.GetVisualDescendants()
                 .OfType<StackPanel>()
                 .FirstOrDefault();
             if (stk != null)

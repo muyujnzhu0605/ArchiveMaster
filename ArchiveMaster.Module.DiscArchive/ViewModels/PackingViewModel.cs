@@ -102,12 +102,12 @@ public partial class PackingViewModel(PackingConfig config) : TwoStepViewModelBa
     [RelayCommand]
     private void SelectAll()
     {
-        DiscFilePackages.ForEach(p => p.IsChecked = true);
+        DiscFilePackages?.ForEach(p => p.IsChecked = true);
     }
 
     [RelayCommand]
     private void SelectNone()
     {
-        DiscFilePackages.ForEach(p => p.IsChecked = false);
+        DiscFilePackages?.ForEach(p => p.IsChecked = false);
     }
 }

@@ -203,14 +203,18 @@
                 HorizontalAlignment="Left"
                 ColumnDefinitions="Auto,8,Auto">
                 <Button
-                    Classes="Middle"
+                    Classes="Icon"
                     Command="{Binding SelectAllCommand}"
-                    Content="全选" />
+                    Content="&#xE8B3;"
+                    FontFamily="{StaticResource IconFont}"
+                    ToolTip.Tip="全选" />
                 <Button
                     Grid.Column="2"
-                    Classes="Middle"
+                    Classes="Icon"
                     Command="{Binding SelectNoneCommand}"
-                    Content="全不选" />
+                    Content="&#xE8E6;"
+                    FontFamily="{StaticResource IconFont}"
+                    ToolTip.Tip="清除" />
             </Grid>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
