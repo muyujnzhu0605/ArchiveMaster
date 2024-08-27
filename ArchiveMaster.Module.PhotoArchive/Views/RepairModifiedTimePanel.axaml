@@ -47,24 +47,14 @@
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid RowDefinitions="*,8,Auto">
-            <v:SimpleFileDataGrid
-                ColumnIsCheckedIndex="-1"
-                ItemsSource="{Binding Files}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn
-                        Binding="{Binding ExifTime}"
-                        Header="Exif时间" />
-                </DataGrid.Columns>
-            </v:SimpleFileDataGrid>
-            <TextBlock
-                Grid.Row="2"
-                IsVisible="{Binding Files, Converter={StaticResource NotNullConverter}}">
-                <Run Text="共" />
-                <Run Text="{Binding Files.Count}" />
-                <Run Text="个文件" />
-            </TextBlock>
-        </Grid>
-
+        <v:SimpleFileDataGrid
+            ColumnIsCheckedIndex="-1"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding ExifTime}"
+                    Header="Exif时间" />
+            </DataGrid.Columns>
+        </v:SimpleFileDataGrid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

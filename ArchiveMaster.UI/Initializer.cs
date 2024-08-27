@@ -6,6 +6,7 @@ using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
+using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

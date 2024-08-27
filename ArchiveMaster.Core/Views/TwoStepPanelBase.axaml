@@ -12,7 +12,7 @@
     <local:PanelBase.PanelContent>
         <Grid
             Margin="8"
-            RowDefinitions="Auto,8,Auto,8,*,8,Auto">
+            RowDefinitions="Auto,8,Auto,8,*,16,Auto">
 
             <ContentControl
                 Content="{Binding #root.ConfigsContent}"

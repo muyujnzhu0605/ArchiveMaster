@@ -182,7 +182,8 @@
                 ColumnPathIndex="1.2"
                 ColumnTimeIndex="2.4"
                 ItemsSource="{Binding Files}"
-                RowDetailsTemplate="{StaticResource DataGridDetailTemplate}">
+                RowDetailsTemplate="{StaticResource DataGridDetailTemplate}"
+                ShowCount="False">
                 <DataGrid.Resources>
                     <c:DirStructureSyncTypeDescriptionConverter x:Key="DirStructureSyncTypeDescriptionConverter" />
                 </DataGrid.Resources>

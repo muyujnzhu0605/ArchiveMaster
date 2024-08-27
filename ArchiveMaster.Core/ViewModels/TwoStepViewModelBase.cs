@@ -146,17 +146,23 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken token)
     {
+        Stopwatch sw=Stopwatch.StartNew();
         AppConfig.Instance.Save(false);
+        var a = sw.ElapsedMilliseconds;
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();
+        var b = sw.ElapsedMilliseconds;
         CanReset = false;
         ResetCommand.NotifyCanExecuteChanged();
         CanCancel = true;
         CancelCommand.NotifyCanExecuteChanged();
+        var c = sw.ElapsedMilliseconds;
 
         if (await TryRunAsync(async () =>
             {
+                var d = sw.ElapsedMilliseconds;
                 var u = CreateUtility();
+                var e = sw.ElapsedMilliseconds;
                 await OnInitializingAsync();
                 Config.Check();
                 await u.InitializeAsync(token);
@@ -198,6 +204,7 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     private async Task<bool> TryRunAsync(Func<Task> action, string errorTitle)
     {
         Progress = double.NaN;
+        Message = "正在处理";
         IsWorking = true;
         try
         {
