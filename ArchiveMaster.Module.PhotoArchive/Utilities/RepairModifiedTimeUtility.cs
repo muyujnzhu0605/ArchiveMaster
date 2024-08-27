@@ -32,7 +32,7 @@ namespace ArchiveMaster.Utilities
                 }
 
                 NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.Name}");
-                File.SetLastAccessTime(file.Path, file.ExifTime.Value);
+                File.SetLastWriteTime(file.Path, file.ExifTime.Value);
             }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
@@ -43,7 +43,8 @@ namespace ArchiveMaster.Utilities
             NotifyProgressIndeterminate();
             NotifyMessage("正在查找文件");
             var files = new DirectoryInfo(Config.Dir).EnumerateFiles("*", SearchOption.AllDirectories)
-                .Select(p => new ExifTimeFileInfo(p, Config.Dir));
+                .Select(p => new ExifTimeFileInfo(p, Config.Dir))
+                .ToList();
             return TryForFilesAsync(files, (file, s) =>
                 {
                     NotifyMessage($"正在扫描照片日期{s.GetFileNumberMessage()}");
@@ -63,7 +64,10 @@ namespace ArchiveMaster.Utilities
                         }
                     }
                 }, token,
-                FilesLoopOptions.Builder().WithMultiThreads(Config.ThreadCount).Catch((file, ex) =>
+                FilesLoopOptions.Builder()
+                    .AutoApplyFileNumberProgress()
+                    .WithMultiThreads(Config.ThreadCount)
+                    .Catch((file, ex) =>
                 {
                     Files.Add(file as ExifTimeFileInfo);
                 }).Build());
