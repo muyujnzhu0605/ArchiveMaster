@@ -3,9 +3,12 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:ctrl2="using:ArchiveMaster.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
@@ -32,76 +35,6 @@
                     FileNames="{Binding Config.TargetDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
-            <ctrl:FormItem Label="选项：">
-                <Grid ColumnDefinitions="64,8,1.5*,16,Auto,8,*,16,Auto,8,*,16,Auto,8,*,8,Auto">
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Text="起始日期：" />
-
-                    <TextBox
-                        Grid.Column="2"
-                        Text="{Binding Config.EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
-                    <TextBlock
-                        Grid.Column="4"
-                        VerticalAlignment="Center"
-                        Text="导出方式：" />
-                    <ComboBox
-                        Grid.Column="6"
-                        HorizontalAlignment="Stretch"
-                        ItemsSource="{Binding PackingTypes}"
-                        SelectedItem="{Binding Config.PackingType}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <TextBlock
-                        Grid.Column="8"
-                        VerticalAlignment="Center"
-                        Text="最大盘数：" />
-                    <NumericUpDown
-                        Grid.Column="10"
-                        HorizontalAlignment="Stretch"
-                        FormatString="0"
-                        Increment="1"
-                        Maximum="10000"
-                        Minimum="1"
-                        Value="{Binding Config.MaxDiscCount}" />
-
-                    <TextBlock
-                        Grid.Column="12"
-                        VerticalAlignment="Center"
-                        Text="单盘容量（MB）：" />
-                    <NumericUpDown
-                        x:Name="numDiscSize"
-                        Grid.Column="14"
-                        HorizontalAlignment="Stretch"
-                        FormatString="0"
-                        Increment="100"
-                        Maximum="1000000"
-                        Minimum="100"
-                        Value="{Binding Config.DiscSizeMB}" />
-                    <Button
-                        Grid.Column="16"
-                        Padding="27,6"
-                        Content="预设">
-                        <Button.Flyout>
-                            <MenuFlyout ItemsSource="{Binding DiscSizes}">
-                                <MenuFlyout.ItemContainerTheme>
-                                    <ControlTheme
-                                        BasedOn="{StaticResource {x:Type MenuItem}}"
-                                        TargetType="MenuItem">
-                                        <Setter Property="Header" Value="{Binding .}" />
-                                        <Setter Property="Command" Value="{Binding #root.DataContext.SetDiscSizeCommand}" />
-                                        <Setter Property="CommandParameter" Value="{Binding .}" />
-                                    </ControlTheme>
-                                </MenuFlyout.ItemContainerTheme>
-                            </MenuFlyout>
-                        </Button.Flyout>
-                    </Button>
-                </Grid>
-            </ctrl:FormItem>
 
             <ctrl:FormItem Label="黑名单：">
                 <Grid ColumnDefinitions="*,8,Auto">
@@ -118,7 +51,71 @@
                         IsChecked="{Binding Config.BlackListUseRegex}" />
                 </Grid>
             </ctrl:FormItem>
+            <ctrl:FormItem Label="选项：">
+                <ctrl2:FormItemGroup LabelWidth="NaN">
+                    <ctrl:FormItem Label="起始日期：">
+                        <TextBox
+                            Width="160"
+                            Text="{Binding Config.EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                    </ctrl:FormItem>
 
+                    <ctrl:FormItem Label="导出方式：">
+                        <ComboBox
+                            Width="140"
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{me:EnumValues enums:PackingType}"
+                            SelectedItem="{Binding Config.PackingType}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </ctrl:FormItem>
+
+                    <ctrl:FormItem Label="最大盘数：">
+                        <NumericUpDown
+                            Width="160"
+                            HorizontalAlignment="Stretch"
+                            FormatString="0"
+                            Increment="1"
+                            Maximum="10000"
+                            Minimum="1"
+                            Value="{Binding Config.MaxDiscCount}" />
+                    </ctrl:FormItem>
+                    <ctrl:FormItem Label="单盘容量（MB）：">
+                        <StackPanel Orientation="Horizontal">
+                            <NumericUpDown
+                                Width="160"
+                                HorizontalAlignment="Stretch"
+                                FormatString="0"
+                                Increment="100"
+                                Maximum="1000000"
+                                Minimum="100"
+                                Value="{Binding Config.DiscSizeMB}" />
+                            <Button
+                                Grid.Column="16"
+                                Padding="27,6"
+                                Content="预设">
+                                <Button.Flyout>
+                                    <MenuFlyout ItemsSource="{Binding DiscSizes}">
+                                        <MenuFlyout.ItemContainerTheme>
+                                            <ControlTheme
+                                                BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                TargetType="MenuItem">
+                                                <Setter Property="Header" Value="{Binding .}" />
+                                                <Setter Property="Command" Value="{Binding #root.DataContext.SetDiscSizeCommand}" />
+                                                <Setter Property="CommandParameter" Value="{Binding .}" />
+                                            </ControlTheme>
+                                        </MenuFlyout.ItemContainerTheme>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+
+                    </ctrl:FormItem>
+                </ctrl2:FormItemGroup>
+            </ctrl:FormItem>
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
@@ -206,14 +203,18 @@
                 HorizontalAlignment="Left"
                 ColumnDefinitions="Auto,8,Auto">
                 <Button
-                    Classes="Middle"
+                    Classes="Icon"
                     Command="{Binding SelectAllCommand}"
-                    Content="全选" />
+                    Content="&#xE8B3;"
+                    FontFamily="{StaticResource IconFont}"
+                    ToolTip.Tip="全选" />
                 <Button
                     Grid.Column="2"
-                    Classes="Middle"
+                    Classes="Icon"
                     Command="{Binding SelectNoneCommand}"
-                    Content="全不选" />
+                    Content="&#xE8E6;"
+                    FontFamily="{StaticResource IconFont}"
+                    ToolTip.Tip="清除" />
             </Grid>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>

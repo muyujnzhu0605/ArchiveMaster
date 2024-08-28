@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class UselessJpgCleanerViewModel : TwoStepViewModelBase<UselessJpgCleanerUtility>
+public partial class UselessJpgCleanerViewModel(UselessJpgCleanerConfig config)
+    : TwoStepViewModelBase<UselessJpgCleanerUtility, UselessJpgCleanerConfig>(config)
 {
-    public override UselessJpgCleanerConfig Config { get; } = AppConfig.Instance.Get<UselessJpgCleanerConfig>();
-
     [ObservableProperty]
     private List<SimpleFileInfo> deletingJpgFiles;
 

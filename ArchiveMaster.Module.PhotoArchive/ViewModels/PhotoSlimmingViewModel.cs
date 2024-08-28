@@ -12,10 +12,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimmingUtility>
+public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimmingUtility, PhotoSlimmingConfig>
 {
     [ObservableProperty]
     private bool canCancel;
@@ -37,21 +38,20 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     public override PhotoSlimmingConfig Config => SelectedConfig;
 
-    public PhotoSlimmingViewModel()
+    protected override PhotoSlimmingUtility CreateUtilityImplement()
     {
-        Configs = new ObservableCollection<PhotoSlimmingConfig>(
-            AppConfig.Instance.Get(nameof(PhotoSlimmingConfig)) as List<PhotoSlimmingConfig>);
+        return new PhotoSlimmingUtility(Config);
+    }
+
+    public PhotoSlimmingViewModel(PhotoSlimmingConfig config = null) : base(config)
+    {
+        Configs = Services.Provider.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
         if (Configs.Count == 0)
         {
             Configs.Add(new PhotoSlimmingConfig());
         }
 
         SelectedConfig = Configs[0];
-
-        AppConfig.Instance.BeforeSaving += (s, e) =>
-        {
-            AppConfig.Instance.Set(nameof(PhotoSlimmingConfig), new List<PhotoSlimmingConfig>(Configs));
-        };
     }
 
     public ObservableCollection<PhotoSlimmingConfig> Configs { get; set; }
@@ -76,7 +76,7 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
     {
         Progress = -1;
         Message = "正在生成统计信息";
-        Progress=Double.NaN;
+        Progress = Double.NaN;
         await Utility.CopyFiles.CreateRelativePathsAsync();
         await Utility.CompressFiles.CreateRelativePathsAsync();
         await Utility.DeleteFiles.CreateRelativePathsAsync();

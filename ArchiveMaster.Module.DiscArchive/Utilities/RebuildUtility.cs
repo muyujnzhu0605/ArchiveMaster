@@ -7,12 +7,12 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class RebuildUtility(RebuildConfig config) : DiscUtilityBase
+    public class RebuildUtility(RebuildConfig config) : DiscUtilityBase<RebuildConfig>(config)
     {
         private Dictionary<string, List<DiscFile>> files;
 
-        public override RebuildConfig Config { get; } = config;
         public FileSystemTree FileTree { get; private set; }
+        
         public List<RebuildError> rebuildErrors;
         public IReadOnlyList<RebuildError> RebuildErrors => rebuildErrors.AsReadOnly();
 
@@ -79,6 +79,7 @@ namespace ArchiveMaster.Utilities
 
                 foreach (var dir in files.Keys)
                 {
+                    token.ThrowIfCancellationRequested();
                     FilesLoopOptions options = FilesLoopOptions.Builder()
                         .SetCount(index, count)
                         .SetLength(currentLength, totalLength)

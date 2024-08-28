@@ -20,10 +20,8 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid>
+    <Grid Margin="8">
         <ScrollViewer
-            Grid.Row="2"
-            Margin="8"
             Classes.hidden="{Binding IsToolOpened}"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">
@@ -74,6 +72,11 @@
                                             FontFamily="{StaticResource IconFont}"
                                             FontSize="16"
                                             Text="&#xE10C;" />
+                                        <!-- <Button.Styles> -->
+                                        <!--     <Style Selector="StackPanel"> -->
+                                        <!--         <Setter Property="Spacing" Value="0" /> -->
+                                        <!--     </Style> -->
+                                        <!-- </Button.Styles> -->
                                         <Button.Flyout>
                                             <MenuFlyout ItemsSource="{Binding MenuItems}">
                                                 <MenuFlyout.ItemContainerTheme>
@@ -171,6 +174,5 @@
                 </Style>
             </ContentControl.Styles>
         </ContentControl>
-
     </Grid>
 </UserControl>

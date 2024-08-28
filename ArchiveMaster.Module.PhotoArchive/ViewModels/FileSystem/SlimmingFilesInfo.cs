@@ -57,7 +57,7 @@ namespace ArchiveMaster.ViewModels
             return Task.Run(() =>
             {
                 processingFilesRelativePaths = processingFiles
-                    .Select(p => Path.GetRelativePath(rootDir, p.Path) + (p.IsDir ? Path.DirectorySeparatorChar : ""))
+                    .Select(p =>p.RelativePath + (p.IsDir ? Path.DirectorySeparatorChar : ""))
                     .ToList();
             });
         }

@@ -2,6 +2,7 @@
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Content.Res;
 using Android.Graphics;
 using Android.Net;
 using Android.OS;
@@ -12,9 +13,14 @@ using Android.Widget;
 using ArchiveMaster.Platforms;
 using Avalonia;
 using Avalonia.Android;
+using Avalonia.Controls;
 using FzLib.Avalonia.Platforms;
+using Java.Interop;
+using Java.Lang;
 using System;
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using static Android.Views.View;
 using Environment = Android.OS.Environment;
 using Uri = Android.Net.Uri;
 
@@ -25,8 +31,17 @@ namespace ArchiveMaster.UI.Android;
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/icon",
     MainLauncher = true,
-    ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
-public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStorageService, IBackCommandService
+    ConfigurationChanges = ConfigChanges.Orientation
+                           | ConfigChanges.ScreenSize
+                           | ConfigChanges.UiMode
+                           | ConfigChanges.SmallestScreenSize
+                           | ConfigChanges.ScreenLayout
+                           | ConfigChanges.Keyboard
+                           | ConfigChanges.KeyboardHidden
+                           | ConfigChanges.Navigation
+)]
+public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStorageService, IBackCommandService,
+    IViewPadding
 {
     private const int REQUEST_MANAGE_EXTERNAL_STORAGE = 1024;
     private const int REQUEST_READ_AND_WRITE_EXTERNAL_STORAGE = 1025;
@@ -45,7 +60,6 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStor
                 intent.SetData(Uri.Parse("package:" + PackageName));
                 StartActivityForResult(intent, REQUEST_MANAGE_EXTERNAL_STORAGE);
             }
-
         }
     }
 
@@ -73,11 +87,14 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStor
     {
         this.backAction = backAction;
     }
+
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
-        Platforms.PlatformServices.Permissions = this;
-        Platforms.PlatformServices.BackCommand = this;
-        FzLib.Avalonia.Platforms.PlatformServices.StorageService = this;
+        Services.Builder.AddSingleton<IPermissionService>(this);
+        Services.Builder.AddSingleton<IBackCommandService>(this);
+        Services.Builder.AddSingleton<IViewPadding>(this);
+        PlatformServices.StorageService = this;
+
         return base.CustomizeAppBuilder(builder);
     }
 
@@ -90,7 +107,8 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStor
             {
                 // 权限已授予
                 Toast.MakeText(this, "权限已授予", ToastLength.Short).Show();
-                RequestPermissions([Manifest.Permission.ReadExternalStorage, Manifest.Permission.WriteExternalStorage], REQUEST_READ_AND_WRITE_EXTERNAL_STORAGE);
+                RequestPermissions([Manifest.Permission.ReadExternalStorage, Manifest.Permission.WriteExternalStorage],
+                    REQUEST_READ_AND_WRITE_EXTERNAL_STORAGE);
             }
             else
             {
@@ -101,7 +119,6 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStor
         }
         else
         {
-
         }
     }
 
@@ -111,5 +128,40 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStor
         Window.SetFlags(WindowManagerFlags.LayoutNoLimits, WindowManagerFlags.LayoutNoLimits);
         Window.ClearFlags(WindowManagerFlags.TranslucentStatus);
         Window.SetStatusBarColor(Color.Transparent);
+    }
+
+
+    public double GetNavBarHeight()
+    {
+        if (Build.VERSION.SdkInt >= (BuildVersionCodes)30)
+        {
+            return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.NavigationBars()).Bottom;
+        }
+
+        var orientation = Resources.Configuration.Orientation;
+        int resourceId =
+            Resources.GetIdentifier(
+                orientation == global::Android.Content.Res.Orientation.Portrait
+                    ? "navigation_bar_height"
+                    : "navigation_bar_height_landscape", "dimen", "android");
+        if (resourceId > 0)
+        {
+            return Resources.GetDimensionPixelSize(resourceId);
+        }
+
+        return 0;
+    }
+
+    public double GetTop()
+    {
+        var density = Resources.DisplayMetrics.ScaledDensity;
+        return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.StatusBars()).Top / density;
+    }
+
+    public double GetBottom()
+    {
+        var density = Resources.DisplayMetrics.ScaledDensity;
+        return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.NavigationBars()).Bottom /
+               density;
     }
 }

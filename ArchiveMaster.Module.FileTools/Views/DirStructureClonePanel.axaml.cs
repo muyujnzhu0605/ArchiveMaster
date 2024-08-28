@@ -8,15 +8,10 @@ namespace ArchiveMaster.Views
     /// </summary>
     public partial class DirStructureClonePanel : TwoStepPanelBase
     {
-        public DirStructureClonePanel( )
+        public DirStructureClonePanel(DirStructureCloneViewModel viewModel)
         {
-            ViewModel = new DirStructureCloneViewModel();
-            DataContext = ViewModel;
+            DataContext = viewModel;
             InitializeComponent();
         }
-
-        public DirStructureCloneViewModel ViewModel { get; }
     }
-
- 
 }

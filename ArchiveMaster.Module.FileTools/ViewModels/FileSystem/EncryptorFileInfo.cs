@@ -24,7 +24,7 @@ namespace ArchiveMaster.ViewModels
         private string targetRelativePath;
 
 
-        public EncryptorFileInfo(FileInfo file) : base(file)
+        public EncryptorFileInfo(FileInfo file, string topDir) : base(file, topDir)
         {
         }
     }

@@ -28,10 +28,6 @@
         </StackPanel>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <ListBox
-            x:Name="lstDirs"
-            Grid.Row="8"
-            DisplayMemberBinding="{Binding Name}"
-            ItemsSource="{Binding DeletingJpgFiles}" />
+        <v:SimpleFileDataGrid ItemsSource="{Binding DeletingJpgFiles}" />
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

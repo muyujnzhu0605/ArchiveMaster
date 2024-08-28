@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 
 namespace ArchiveMaster.Views;
 
-public partial class SyncFilesList : UserControl
+public partial class SyncFilesList : SimpleFileDataGrid
 {
     public SyncFilesList()
     {

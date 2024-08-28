@@ -13,11 +13,10 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class EncryptorUtility(EncryptorConfig config) : TwoStepUtilityBase
+    public class EncryptorUtility(EncryptorConfig config) : TwoStepUtilityBase<EncryptorConfig>(config)
     {
         public const string EncryptedFileExtension = ".ept";
         public const string DirectoryStructureFile = "$files$.txt";
-        public override EncryptorConfig Config { get; } = config;
         public List<EncryptorFileInfo> ProcessingFiles { get; set; }
         public int BufferSize { get; set; } = 1024 * 1024;
 
@@ -202,7 +201,7 @@ namespace ArchiveMaster.Utilities
                     IgnoreInaccessible = true,
                     RecurseSubdirectories = true,
                 })
-                .Select(p => new EncryptorFileInfo(p)), (file, s) =>
+                .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 var isEncrypted = IsEncryptedFile(file.Path);
                 file.IsFileNameEncrypted = isEncrypted && IsNameEncrypted(file.Name);

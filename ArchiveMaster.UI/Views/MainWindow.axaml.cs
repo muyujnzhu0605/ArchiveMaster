@@ -11,9 +11,11 @@ namespace ArchiveMaster.Views;
 
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainViewModel viewModel, MainView view)
     {
+        DataContext = viewModel;
         InitializeComponent();
+        Content = view;
         if (OperatingSystem.IsWindows() && Environment.OSVersion.Version.Major == 10)
         {
             //SetWin10TitleBar();
@@ -30,12 +32,12 @@ public partial class MainWindow : Window
                 new RowDefinition(1, GridUnitType.Star)
             ],
         };
-        
+
         // grid.Bind(Grid.BackgroundProperty, Resources.GetResourceObservable("Background0"));
 
         var content = Content as Control;
         Content = null;
-        Grid.SetRow(content,1);
+        Grid.SetRow(content, 1);
         grid.Children.Add(content);
         grid.Children.Add(new FzLib.Avalonia.Controls.WindowButtons()
         {
@@ -43,7 +45,7 @@ public partial class MainWindow : Window
         });
 
         Content = grid;
-        
+
         ExtendClientAreaToDecorationsHint = true;
         ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
     }

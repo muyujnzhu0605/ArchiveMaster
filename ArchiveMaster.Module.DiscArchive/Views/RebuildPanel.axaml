@@ -111,13 +111,16 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Binding="{Binding File.DiscName}"
-                            Header="光盘文件" />
+                            Header="光盘文件"
+                            IsReadOnly="True" />
                         <DataGridTextColumn
                             Binding="{Binding File.Path}"
-                            Header="目标目录" />
+                            Header="目标目录"
+                            IsReadOnly="True" />
                         <DataGridTextColumn
                             Binding="{Binding Error}"
-                            Header="错误信息" />
+                            Header="错误信息"
+                            IsReadOnly="True" />
 
                     </DataGrid.Columns>
                 </DataGrid>

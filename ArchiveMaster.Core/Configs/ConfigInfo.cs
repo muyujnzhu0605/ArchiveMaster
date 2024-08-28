@@ -9,12 +9,6 @@ namespace ArchiveMaster.Configs
         {
         }
 
-        public ConfigInfo(Type type, string key)
-        {
-            Type = type;
-            Key = key;
-        }
-
         public ConfigInfo(Type type)
         {
             Type = type;
@@ -23,6 +17,5 @@ namespace ArchiveMaster.Configs
 
         public Type Type { get; set; }
         public string Key { get; set; }
-        public object Config { get; set; }
     }
 }

@@ -1,6 +1,9 @@
+using System.Collections;
+using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -10,38 +13,121 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using FzLib.Avalonia.Converters;
 
 namespace ArchiveMaster.Views;
 
 public class SimpleFileDataGrid : DataGrid
 {
+    public static readonly StyledProperty<object> FooterProperty = AvaloniaProperty.Register<SimpleFileDataGrid, object>(
+            nameof(Footer));
+
+    public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
+        nameof(ShowCount), true);
+
     public SimpleFileDataGrid()
     {
-        CanUserReorderColumns = false;
-        CanUserResizeColumns = false;
-        CanUserSortColumns = false;
-        this[!IsReadOnlyProperty] = new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase>.IsWorking));
+        CanUserReorderColumns = true;
+        CanUserResizeColumns = true;
+        this[!IsReadOnlyProperty] =
+            new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking));
     }
-
-    protected override Type StyleKeyOverride => typeof(DataGrid);
+    public string ColumnIsCheckedHeader { get; init; } = "";
 
     public double ColumnIsCheckedIndex { get; init; } = 0.1;
-    public double ColumnStatusIndex { get; init; } = 0.2;
-    public double ColumnNameIndex { get; init; } = 0.3;
-    public double ColumnPathIndex { get; init; } = 0.4;
+
+    public string ColumnLengthHeader { get; init; } = "文件大小";
+
     public double ColumnLengthIndex { get; init; } = 0.5;
-    public double ColumnTimeIndex { get; init; } = 0.6;
+
+    public string ColumnMessageHeader { get; init; } = "信息";
 
     public double ColumnMessageIndex { get; init; } = 999;
 
-    public string ColumnIsCheckedHeader { get; init; } = "";
-    public string ColumnStatusHeader { get; init; } = "状态";
     public string ColumnNameHeader { get; init; } = "文件名";
+
+    public double ColumnNameIndex { get; init; } = 0.3;
+
     public string ColumnPathHeader { get; init; } = "路径";
-    public string ColumnLengthHeader { get; init; } = "文件大小";
+
+    public double ColumnPathIndex { get; init; } = 0.4;
+
+    public string ColumnStatusHeader { get; init; } = "状态";
+
+    public double ColumnStatusIndex { get; init; } = 0.2;
+
     public string ColumnTimeHeader { get; init; } = "修改时间";
-    public string ColumnMessageHeader { get; init; } = "信息";
+
+    public double ColumnTimeIndex { get; init; } = 0.6;
+
+    public object Footer
+    {
+        get => GetValue(FooterProperty);
+        set => SetValue(FooterProperty, value);
+    }
+
+    public bool ShowCount
+    {
+        get => GetValue(ShowCountProperty);
+        set => SetValue(ShowCountProperty, value);
+    }
+    protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        if (ColumnIsCheckedIndex >= 0)
+        {
+            var buttons = this.GetVisualDescendants()
+                .OfType<Button>()
+                .ToList();
+            if (buttons.Count == 4)
+            {
+                foreach (var btn in buttons)
+                {
+                    btn[!IsEnabledProperty] =
+                        new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking))
+                        {
+                            Converter = new InverseBoolConverter()
+                        };
+                }
+
+                var tbtn = (ToggleButton)buttons[3];
+                buttons[0].Click += (_, _) =>
+                {
+                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                    {
+                        file.IsChecked = true;
+                    }
+                };
+                buttons[1].Click += (_, _) =>
+                {
+                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                    {
+                        file.IsChecked = !file.IsChecked;
+                    }
+                };
+                buttons[2].Click += (_, _) =>
+                {
+                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                    {
+                        file.IsChecked = false;
+                    }
+                };
+            }
+        }
+        else
+        {
+            var stk = this
+                .GetVisualDescendants()
+                .OfType<StackPanel>()
+                .FirstOrDefault(p => p.Name == "stkSelectionButtons");
+            if (stk != null)
+            {
+                ((Grid)stk.Parent).Children.Remove(stk);
+            }
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -80,13 +166,40 @@ public class SimpleFileDataGrid : DataGrid
         }
     }
 
-    private DataGridColumn GetNameColumn()
+    private DataGridColumn GetIsCheckedColumn()
+    {
+        var column = new DataGridTemplateColumn
+        {
+            CanUserResize = false,
+            CanUserReorder = false,
+            CanUserSort = false,
+            Header = ColumnIsCheckedHeader
+        };
+        var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
+        {
+            var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
+
+            return new CheckBox()
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
+                [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
+                { Source = rootPanel, Converter = new InverseBoolConverter() },
+            };
+        });
+
+        column.CellTemplate = cellTemplate;
+        return column;
+    }
+
+    private DataGridColumn GetLengthColumn()
     {
         return new DataGridTextColumn()
         {
-            Header = ColumnNameHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Name)),
-            IsReadOnly = true
+            Header = ColumnLengthHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.Length))
+            { Converter = new FileLength2StringConverter(), Mode = BindingMode.OneWay },
+            IsReadOnly = true,
         };
     }
 
@@ -100,33 +213,21 @@ public class SimpleFileDataGrid : DataGrid
         };
     }
 
-    private DataGridColumn GetTimeColumn()
+    private DataGridColumn GetNameColumn()
     {
         return new DataGridTextColumn()
         {
-            Header = ColumnTimeHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Time)),
-            IsReadOnly = true,
+            Header = ColumnNameHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.Name)),
+            IsReadOnly = true
         };
     }
-
-    private DataGridColumn GetLengthColumn()
-    {
-        return new DataGridTextColumn()
-        {
-            Header = ColumnLengthHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Length))
-                { Converter = new FileLength2StringConverter(), Mode = BindingMode.OneWay },
-            IsReadOnly = true,
-        };
-    }
-
     private DataGridColumn GetPathColumn()
     {
         return new DataGridTextColumn()
         {
             Header = ColumnPathHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Path)),
+            Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
             IsReadOnly = true,
         };
     }
@@ -146,36 +247,20 @@ public class SimpleFileDataGrid : DataGrid
             Width = 8,
             Height = 8,
             [!Shape.FillProperty] = new Binding(nameof(SimpleFileInfo.Status))
-                { Converter = new ProcessStatusColorConverter() }
+            { Converter = new ProcessStatusColorConverter() }
         });
 
         column.CellTemplate = cellTemplate;
         return column;
     }
 
-    private DataGridColumn GetIsCheckedColumn()
+    private DataGridColumn GetTimeColumn()
     {
-        var column = new DataGridTemplateColumn
+        return new DataGridTextColumn()
         {
-            CanUserResize = false,
-            CanUserReorder = false,
-            CanUserSort = false,
-            Header = ColumnIsCheckedHeader
+            Header = ColumnTimeHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.Time)),
+            IsReadOnly = true,
         };
-        var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
-        {
-            var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
-
-            return new CheckBox()
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
-                [!IsEnabledProperty] = new Binding("DataContext.IsWorking")//执行命令时，这CheckBox不可以Enable
-                    { Source = rootPanel, Converter = new InverseBoolConverter() },
-            };
-        });
-
-        column.CellTemplate = cellTemplate;
-        return column;
     }
 }

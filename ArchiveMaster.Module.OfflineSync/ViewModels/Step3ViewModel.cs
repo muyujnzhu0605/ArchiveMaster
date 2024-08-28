@@ -10,15 +10,20 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel : OfflineSyncViewModelBase<Step3Utility, SyncFileInfo>
+    public partial class Step3ViewModel : OfflineSyncViewModelBase<Step3Utility, Step3Config, SyncFileInfo>
     {
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
         public override Step3Config Config =>
-            AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step3;
+            Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step3;
+        protected override Step3Utility CreateUtilityImplement()
+        {
+            return new Step3Utility(Config);
+        }
 
         protected override Task OnInitializedAsync()
         {
@@ -36,13 +41,13 @@ namespace ArchiveMaster.ViewModels
                     Title = "删除空目录",
                     Message = $"有{Utility.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
                     Detail = string.Join(Environment.NewLine,
-                        Utility.DeletingDirectories.Select(p => Path.Combine(p.TopDirectory, p.Path))),
+                        Utility.DeletingDirectories.Select(p => p.Path)),
                     Type = CommonDialogMessage.CommonDialogType.YesNo
                 }).Task;
                 if (result.Equals(true))
                 {
                     Utility.DeleteEmptyDirectories(Config.DeleteMode,
-                        AppConfig.Instance.Get<OfflineSyncConfig>().DeleteDirName);
+                        Services.Provider.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
                 }
             }
         }

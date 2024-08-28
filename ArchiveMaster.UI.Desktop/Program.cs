@@ -20,6 +20,7 @@ class Program
             .WriteTo.File("logs/logs.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
         Log.Information("程序启动");
+#if !DEBUG
         TaskScheduler.UnobservedTaskException += (s, e) =>
         {
             Log.Fatal(e.Exception, "未捕获的Task错误");
@@ -27,8 +28,10 @@ class Program
         };
         try
         {
-            BuildAvaloniaApp()
-                .StartWithClassicDesktopLifetime(args);
+#endif
+        BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
+#if !DEBUG
         }
         catch (Exception ex)
         {
@@ -38,6 +41,7 @@ class Program
         {
             Log.CloseAndFlush();
         }
+#endif
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

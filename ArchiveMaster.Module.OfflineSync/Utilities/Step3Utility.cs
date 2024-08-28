@@ -9,9 +9,8 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step3Utility(Step3Config config) : TwoStepUtilityBase
+    public class Step3Utility(Step3Config config) : TwoStepUtilityBase<Step3Config>(config)
     {
-        public override Step3Config Config { get; } = config;
         private readonly DateTime createTime = DateTime.Now;
         public List<SyncFileInfo> DeletingDirectories { get; private set; }
         public Dictionary<string, List<string>> LocalDirectories { get; private set; }
@@ -98,11 +97,9 @@ namespace ArchiveMaster.Utilities
 
                 TryForFiles(UpdateFiles, (file, s) =>
                 {
-                    ;
-
                     string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
-                    string target = Path.Combine(file.TopDirectory, file.Path);
-                    string oldPath = file.OldPath == null ? null : Path.Combine(file.TopDirectory, file.OldPath);
+                    string target =file.Path;
+                    string oldPath = file.OldRelativePath == null ? null : Path.Combine(file.TopDirectory, file.OldRelativePath);
                     if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) && !File.Exists(patch))
                     {
                         file.Warn("补丁文件不存在");
@@ -229,7 +226,7 @@ namespace ArchiveMaster.Utilities
                 TryForFiles(updateFiles.OrderByDescending(p => p.UpdateType).ToList(), (file, s) =>
                 {
                     //先处理移动，然后处理修改，这样能避免一些问题（2022-12-17）
-                    NotifyMessage($"正在处理{s}：{file.Path}");
+                    NotifyMessage($"正在处理{s}：{file.RelativePath}");
 
                     string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
                     if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) &&
@@ -238,8 +235,8 @@ namespace ArchiveMaster.Utilities
                         throw new Exception("补丁文件不存在");
                     }
 
-                    string target = Path.Combine(file.TopDirectory, file.Path);
-                    string oldPath = file.OldPath == null ? null : Path.Combine(file.TopDirectory, file.OldPath);
+                    string target = file.Path;
+                    string oldPath = file.OldRelativePath == null ? null : Path.Combine(file.TopDirectory, file.OldRelativePath);
                     if (!Directory.Exists(Path.GetDirectoryName(target)))
                     {
                         Directory.CreateDirectory(Path.GetDirectoryName(target));

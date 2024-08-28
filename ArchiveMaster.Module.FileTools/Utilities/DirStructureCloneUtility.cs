@@ -8,10 +8,10 @@ using Microsoft.Win32.SafeHandles;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureCloneUtility(DirStructureCloneConfig config) : TwoStepUtilityBase
+    public class DirStructureCloneUtility(DirStructureCloneConfig config)
+        : TwoStepUtilityBase<DirStructureCloneConfig>(config)
     {
         public IList<SimpleFileInfo> Files { get; private set; }
-        public override DirStructureCloneConfig Config { get; } = config;
 
         public override Task ExecuteAsync(CancellationToken token)
         {
@@ -36,7 +36,7 @@ namespace ArchiveMaster.Utilities
                 }
 
                 File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
-            }, token,FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
+            }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
         }
 
         public override async Task InitializeAsync(CancellationToken token)
@@ -61,10 +61,9 @@ namespace ArchiveMaster.Utilities
                         RecurseSubdirectories = true,
                     });
 
-                TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p)), (file, s) =>
+                TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p, Config.SourceDir)), (file, s) =>
                 {
-                    NotifyMessage(
-                        $"正在处理{s.GetFileNumberMessage()}：{Path.GetRelativePath(Config.SourceDir, file.Path)}");
+                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.RelativePath}");
                     files.Add(file);
                 }, token, FilesLoopOptions.DoNothing());
             }, token);

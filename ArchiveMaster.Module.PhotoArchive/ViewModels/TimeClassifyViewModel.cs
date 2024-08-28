@@ -9,10 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
-public partial class TimeClassifyViewModel : TwoStepViewModelBase<TimeClassifyUtility>
+public partial class TimeClassifyViewModel(TimeClassifyConfig config) : TwoStepViewModelBase<TimeClassifyUtility,TimeClassifyConfig>(config)
 {
-    public override TimeClassifyConfig Config { get;  } = AppConfig.Instance.Get(nameof(TimeClassifyConfig)) as TimeClassifyConfig;
-
     [ObservableProperty]
     private List<SimpleDirInfo> sameTimePhotosDirs;
 

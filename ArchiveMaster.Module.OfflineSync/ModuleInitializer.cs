@@ -19,6 +19,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
@@ -28,9 +29,24 @@ namespace ArchiveMaster
         public string ModuleName => "异地备份离线同步";
         public int Order => 3;
 
+        public void RegisterServices(IServiceCollection services)
+        {
+            services.AddTransient<Step1ViewModel>();
+            services.AddTransient<Step2ViewModel>();
+            services.AddTransient<Step3ViewModel>();
+
+            services.AddTransient<Step1Panel>();
+            services.AddTransient<Step2Panel>();
+            services.AddTransient<Step3Panel>();
+
+            services.AddTransient<Step1Utility>();
+            services.AddTransient<Step2Utility>();
+            services.AddTransient<Step3Utility>();
+        }
+
         public IList<ConfigInfo> Configs =>
         [
-            new ConfigInfo(type: typeof(OfflineSyncConfig), key: nameof(OfflineSyncConfig))
+            new ConfigInfo(typeof(OfflineSyncConfig))
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

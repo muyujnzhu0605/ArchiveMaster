@@ -9,7 +9,7 @@ using FzLib.Program;
 
 namespace ArchiveMaster.Utilities;
 
-public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
+public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfig>(config)
 {
     public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
         new Dictionary<string, Func<SimpleFileInfo, string, string>>()
@@ -160,7 +160,6 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
     private const string SubStringRegexString = @"(?<Direction>Left|Right)-(?<From>[0-9]+)-(?<Count>[0-9]+)";
     private static readonly Dictionary<string, Regex> regexes = new Dictionary<string, Regex>();
     private string[] replacePatterns;
-    public override RenameConfig Config { get; } = config;
     public IReadOnlyList<RenameFileInfo> Files { get; private set; }
 
     public override async Task ExecuteAsync(CancellationToken token = default)
@@ -223,7 +222,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
 
-            TryForFiles(files.Select(file => new RenameFileInfo(file)), (renameFile, s) =>
+            TryForFiles(files.Select(file => new RenameFileInfo(file, Config.Dir)), (renameFile, s) =>
             {
                 NotifyMessage($"正在处理文件{s.GetFileNumberMessage()}：{renameFile.Name}");
                 renameFiles.Add(renameFile);
@@ -296,6 +295,7 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
                 text = "";
             }
         }
+
         List<string> list = new List<string>();
         int left = 0;
         int right = 0;
@@ -345,7 +345,8 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase
     {
         string name = file.Name;
         string matched = null;
-        if (Config.RenameMode is RenameMode.ReplaceMatched or RenameMode.RetainMatched or RenameMode.RetainMatchedExtension)
+        if (Config.RenameMode is RenameMode.ReplaceMatched or RenameMode.RetainMatched
+            or RenameMode.RetainMatchedExtension)
         {
             matched = Config.SearchMode == SearchMode.Regex
                 ? GetRegex(Config.SearchPattern).Match(name).Value

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -6,6 +7,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
+    public partial class PhotoSlimmingCollectionConfig : ConfigBase
+    {
+        public ObservableCollection<PhotoSlimmingConfig> List { get; set; } = [new PhotoSlimmingConfig()];
+        public override void Check()
+        {
+            
+        }
+    }
     public partial class PhotoSlimmingConfig : ConfigBase
     {
         [ObservableProperty]

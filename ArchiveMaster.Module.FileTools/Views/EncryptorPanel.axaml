@@ -6,6 +6,7 @@
     xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:ctrl2="using:ArchiveMaster.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
@@ -74,35 +75,34 @@
                 </WrapPanel>
             </ct:FormItem>
             <ct:FormItem Label="选项：">
-                <WrapPanel>
+                <ctrl2:FormItemGroup>
                     <WrapPanel.Styles>
-                        <Style Selector="ct|FormItem">
-                            <Setter Property="LabelWidth" Value="NaN" />
-                            <Setter Property="Margin" Value="0,0,8,0" />
-                        </Style>
                         <Style Selector="CheckBox">
                             <Setter Property="Margin" Value="0,0,8,0" />
                         </Style>
                     </WrapPanel.Styles>
+
                     <ct:FormItem Label="填充模式：">
                         <ComboBox
+                            Width="128"
                             ItemsSource="{Binding PaddingModes}"
                             SelectedItem="{Binding Config.PaddingMode}" />
                     </ct:FormItem>
+
                     <ct:FormItem Label="加密算法：">
                         <ComboBox
                             ItemsSource="{Binding CipherModes}"
                             SelectedItem="{Binding Config.CipherMode}" />
                     </ct:FormItem>
 
-
                     <CheckBox
                         Content="删除处理前文件"
                         IsChecked="{Binding Config.DeleteSourceFiles}" />
+
                     <CheckBox
                         Content="覆盖已存在文件"
                         IsChecked="{Binding Config.OverwriteExistedFiles}" />
-                </WrapPanel>
+                </ctrl2:FormItemGroup>
             </ct:FormItem>
 
 
@@ -128,10 +128,11 @@
                     CanUserResize="False"
                     Header="已加密">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate x:DataType="vm:EncryptorFileInfo">
+                        <DataTemplate>
                             <Ellipse
                                 Width="8"
                                 Height="8"
+                                Fill="{DynamicResource Foreground0}"
                                 IsVisible="{Binding IsEncrypted}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

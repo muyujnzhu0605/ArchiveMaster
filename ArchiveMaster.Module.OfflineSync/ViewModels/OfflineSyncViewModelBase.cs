@@ -12,28 +12,38 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public abstract partial class OfflineSyncViewModelBase<TUtility, TFile> : TwoStepViewModelBase<TUtility>
-        where TUtility : TwoStepUtilityBase
+    public abstract partial class
+        OfflineSyncViewModelBase<TUtility, TConfig, TFile> : TwoStepViewModelBase<TUtility, TConfig>
+        where TUtility : TwoStepUtilityBase<TConfig>
+        where TConfig : ConfigBase
         where TFile : SimpleFileInfo
     {
-        public OfflineSyncViewModelBase() : base()
+        public OfflineSyncViewModelBase(TConfig config = null) : base(config)
         {
         }
 
-        public OfflineSyncViewModelBase(bool enableInitialize) : base(enableInitialize)
+        public OfflineSyncViewModelBase(bool enableInitialize, TConfig config = null) : base(config,
+            enableInitialize)
         {
         }
 
-        [ObservableProperty] 
-        [NotifyPropertyChangedFor(nameof(Config))]
-        private string configName = AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName;
+        [ObservableProperty] [NotifyPropertyChangedFor(nameof(Config))]
+        private string configName;
 
         [ObservableProperty]
-        private ObservableCollection<string> configNames = new ObservableCollection<string>(
-            AppConfig.Instance.Get<OfflineSyncConfig>().ConfigCollection.Keys);
+        private IList<string> configNames;
+
+        public override void OnEnter()
+        {
+            string currentName = Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
+
+            ConfigNames = Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
+            ConfigName = currentName;
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(AddedFileLength),
@@ -90,7 +100,8 @@ namespace ArchiveMaster.ViewModels
                 }).Task is string result)
             {
                 ConfigNames.Add(result);
-                AppConfig.Instance.Get<OfflineSyncConfig>().ConfigCollection.Add(result, new SingleConfig());
+                Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection
+                    .Add(result, new SingleConfig());
                 ConfigName = result;
             }
         }
@@ -137,9 +148,9 @@ namespace ArchiveMaster.ViewModels
 
         partial void OnConfigNameChanged(string oldValue, string newValue)
         {
-            if (AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName != newValue)
+            if (Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName != newValue)
             {
-                AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfigName = newValue;
+                Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName = newValue;
             }
 
             ResetCommand.Execute(null);
@@ -147,24 +158,38 @@ namespace ArchiveMaster.ViewModels
 
         partial void OnFilesChanged(ObservableCollection<TFile> value)
         {
+            if (value == null)
+            {
+                return;
+            }
+
             value.ForEach(p => AddFileCheckedNotify(p));
             value.CollectionChanged += (s, e) => throw new NotSupportedException("不允许对集合进行修改");
         }
 
         [RelayCommand]
-        private void RemoveConfig()
+        private async Task RemoveConfigAsync()
         {
             var name = ConfigName;
-            ConfigNames.Remove(name);
-            AppConfig.Instance.Get<OfflineSyncConfig>().ConfigCollection.Remove(name);
-            if (ConfigNames.Count == 0)
+            var result = await this.SendMessage(new CommonDialogMessage()
             {
-                ConfigNames.Add("默认");
-                ConfigName = "默认";
-            }
-            else
+                Type = CommonDialogMessage.CommonDialogType.YesNo,
+                Title = "删除配置",
+                Message = $"是否移除配置：{name}？"
+            }).Task;
+            if (result.Equals(true))
             {
-                ConfigName = ConfigNames[0];
+                ConfigNames.Remove(name);
+                Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Remove(name);
+                if (ConfigNames.Count == 0)
+                {
+                    ConfigNames.Add("默认");
+                    ConfigName = "默认";
+                }
+                else
+                {
+                    ConfigName = ConfigNames[0];
+                }
             }
         }
 
@@ -178,6 +203,11 @@ namespace ArchiveMaster.ViewModels
         private void SelectNone()
         {
             Files?.ForEach(p => p.IsChecked = false);
+        }
+
+        protected override void OnReset()
+        {
+            Files = new ObservableCollection<TFile>();
         }
     }
 }

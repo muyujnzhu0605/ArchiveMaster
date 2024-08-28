@@ -7,12 +7,10 @@ using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RebuildViewModel : TwoStepViewModelBase<RebuildUtility>
+public partial class RebuildViewModel(RebuildConfig config) : TwoStepViewModelBase<RebuildUtility,RebuildConfig>(config)
 {
     [ObservableProperty]
     private FileSystemTree fileTree;
-
-    public override RebuildConfig Config => AppConfig.Instance.Get<RebuildConfig>();
 
     [ObservableProperty]
     private IReadOnlyList<RebuildError> rebuildErrors;
@@ -25,7 +23,7 @@ public partial class RebuildViewModel : TwoStepViewModelBase<RebuildUtility>
 
     protected override Task OnExecutingAsync(CancellationToken token)
     {
-        if (FileTree.Count == 0)
+        if (FileTree.Count == 0 && FileTree.Files.Count==0)
         {
             throw new Exception("没有任何需要重建的文件");
         }

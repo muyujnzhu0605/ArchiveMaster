@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
@@ -45,5 +47,24 @@ namespace ArchiveMaster
         }
 
         private readonly string baseUrl = "avares://ArchiveMaster.Module.FileTools/Assets/";
+
+        public void RegisterServices(IServiceCollection services)
+        {
+            services.AddTransient<EncryptorViewModel>();
+            services.AddTransient<DirStructureCloneViewModel>();
+            services.AddTransient<DirStructureSyncViewModel>();
+            services.AddTransient<RenameViewModel>();
+            
+            services.AddTransient<EncryptorPanel>();
+            services.AddTransient<DirStructureClonePanel>();
+            services.AddTransient<DirStructureSyncPanel>();
+            services.AddTransient<RenamePanel>();
+            
+            services.AddTransient<EncryptorUtility>();
+            services.AddTransient<DirStructureCloneUtility>();
+            services.AddTransient<DirStructureSyncUtility>();
+            services.AddTransient<RenameUtility>();  
+            
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
@@ -7,18 +8,10 @@ namespace ArchiveMaster.Views
     /// </summary>
     public partial class DirStructureSyncPanel : TwoStepPanelBase
     {
-
-        public DirStructureSyncPanel( )
+        public DirStructureSyncPanel(DirStructureSyncViewModel viewModel)
         {
-            ViewModel = new ViewModels.DirStructureSyncViewModel();
-            DataContext = ViewModel;
+            DataContext = viewModel;
             InitializeComponent();
-
-           
         }
-
-        public ViewModels.DirStructureSyncViewModel ViewModel { get; }
-
-
     }
 }

@@ -11,13 +11,18 @@ using ArchiveMaster.Utilities;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step2ViewModel : OfflineSyncViewModelBase<Step2Utility, SyncFileInfo>
+    public partial class Step2ViewModel : OfflineSyncViewModelBase<Step2Utility, Step2Config, SyncFileInfo>
     {
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        public override Step2Config Config => AppConfig.Instance.Get<OfflineSyncConfig>().CurrentConfig.Step2;
+        public override Step2Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step2;
+        protected override Step2Utility CreateUtilityImplement()
+        {
+            return new Step2Utility(Config);
+        }
 
         [RelayCommand]
         private async Task BrowseLocalDirAsync()
@@ -87,7 +92,7 @@ namespace ArchiveMaster.ViewModels
 
         protected override async Task OnExecutedAsync(CancellationToken token)
         {
-            if (Files.Any(p=>p.Status==ProcessStatus.Error))
+            if (Files.Any(p => p.Status == ProcessStatus.Error))
             {
                 await this.ShowErrorAsync("导出失败", "导出完成，但部分文件出现错误");
             }
@@ -98,7 +103,7 @@ namespace ArchiveMaster.ViewModels
         {
             try
             {
-               Config.Check();
+                Config.Check();
 
                 string[] localSearchingDirs = Config.LocalDir.Split(new[] { '|', '\r', '\n' },
                     StringSplitOptions.RemoveEmptyEntries);
@@ -130,5 +135,5 @@ namespace ArchiveMaster.ViewModels
             Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
             return base.OnInitializedAsync();
         }
-    }
+        }
 }

@@ -2,14 +2,20 @@
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.Utilities
 {
-    public abstract class UtilityBase
+    public abstract class UtilityBase<TConfig> where TConfig : ConfigBase
     {
+        public UtilityBase(TConfig config)
+        {
+            Config = config;
+        }
+
         public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
         public event EventHandler<MessageUpdateEventArgs> MessageUpdate;
-        public abstract ConfigBase Config { get; }
+        public virtual TConfig Config { get; }
 
         protected void NotifyProgressIndeterminate()
         {
@@ -31,7 +37,7 @@ namespace ArchiveMaster.Utilities
             where T : SimpleFileInfo
         {
             FilesLoopStates states = null;
-            await Task.Run(() => { states=TryForFiles(files, body, cancellationToken, options); }, cancellationToken);
+            await Task.Run(() => { states = TryForFiles(files, body, cancellationToken, options); }, cancellationToken);
             return states;
         }
 
@@ -42,8 +48,8 @@ namespace ArchiveMaster.Utilities
         {
             options ??= FilesLoopOptions.DoNothing();
             var states = new FilesLoopStates(options);
-            
-            if (options.AutoApplyProgress == AutoApplyProgressMode.FileLength && options.TotalLength==0)
+
+            if (options.AutoApplyProgress == AutoApplyProgressMode.FileLength && options.TotalLength == 0)
             {
                 states.CanAccessTotalLength = true;
 
@@ -94,7 +100,7 @@ namespace ArchiveMaster.Utilities
                 case >= 2 or 0:
                     Parallel.ForEach(files, new ParallelOptions()
                     {
-                        MaxDegreeOfParallelism =options.Threads<=0?-1: options.Threads,
+                        MaxDegreeOfParallelism = options.Threads <= 0 ? -1 : options.Threads,
                         CancellationToken = cancellationToken
                     }, (file, s) =>
                     {
@@ -135,7 +141,7 @@ namespace ArchiveMaster.Utilities
             catch (Exception ex)
             {
                 file.Error(ex);
-                options.CatchAction?.Invoke(file,ex);
+                options.CatchAction?.Invoke(file, ex);
                 if (options.ThrowExceptions)
                 {
                     throw;

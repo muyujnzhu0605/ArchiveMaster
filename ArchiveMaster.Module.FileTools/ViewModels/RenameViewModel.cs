@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RenameViewModel : TwoStepViewModelBase<RenameUtility>
+public partial class RenameViewModel(RenameConfig config)
+    : TwoStepViewModelBase<RenameUtility, RenameConfig>(config)
 {
     [ObservableProperty]
     private ObservableCollection<RenameFileInfo> files;
@@ -27,8 +28,6 @@ public partial class RenameViewModel : TwoStepViewModelBase<RenameUtility>
 
     [ObservableProperty]
     private int matchedCount;
-
-    public override RenameConfig Config { get; } = AppConfig.Instance.Get<RenameConfig>();
 
     protected override Task OnInitializedAsync()
     {

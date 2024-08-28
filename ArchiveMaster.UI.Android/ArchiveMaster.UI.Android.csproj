@@ -8,9 +8,26 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+    <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
+
     <RunAOTCompilation>false</RunAOTCompilation>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
+  <ItemGroup>
+    <AndroidJavaSource Remove="obj\**" />
+    <AndroidLibrary Remove="obj\**" />
+    <AndroidNativeLibrary Remove="obj\**" />
+    <AvaloniaXaml Remove="obj\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <JavaSourceJar Remove="obj\**" />
+    <None Remove="obj\**" />
+    <ProguardConfiguration Remove="obj\**" />
+    <TransformFile Remove="obj\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\values-night\styles.xml" />
+  </ItemGroup>
 
   <ItemGroup>
     <AndroidResource Include="Icon.png">

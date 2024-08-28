@@ -7,10 +7,8 @@ using DiscUtils.Iso9660;
 
 namespace ArchiveMaster.Utilities
 {
-    public class PackingUtility(PackingConfig config) : DiscUtilityBase
+    public class PackingUtility(PackingConfig config) : DiscUtilityBase<PackingConfig>(config)
     {
-        public override PackingConfig Config { get; } = config;
-
         /// <summary>
         /// 光盘文件包
         /// </summary>
@@ -29,7 +27,7 @@ namespace ArchiveMaster.Utilities
                     .Where(p => p.LastWriteTime > Config.EarliestTime)
                     .Where(p => !blacks.IsInBlackList(p))
                     .OrderBy(p => p.LastWriteTime)
-                    .Select(p => new DiscFile(p));
+                    .Select(p => new DiscFile(p,Config.SourceDir));
 
                 packages.DiscFilePackages.Add(new DiscFilePackage());
                 long maxSize = 1L * 1024 * 1024 * Config.DiscSizeMB;
@@ -95,6 +93,7 @@ namespace ArchiveMaster.Utilities
                     .Sum(p => p.Files.Sum(q => q.Length));
                 foreach (var package in Packages.DiscFilePackages.Where(p => p.IsChecked && p.Index > 0))
                 {
+                    token.ThrowIfCancellationRequested();
                     string dir = Path.Combine(Config.TargetDir, package.Index.ToString());
                     Directory.CreateDirectory(dir);
                     string fileListName = $"filelist-{DateTime.Now:yyyyMMddHHmmss}.txt";

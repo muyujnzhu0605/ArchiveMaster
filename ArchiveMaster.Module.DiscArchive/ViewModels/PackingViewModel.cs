@@ -8,7 +8,7 @@ using FzLib.Avalonia.Messages;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
+public partial class PackingViewModel(PackingConfig config) : TwoStepViewModelBase<PackingUtility,PackingConfig>(config)
 {
     [ObservableProperty]
     private List<DiscFilePackage> discFilePackages;
@@ -19,17 +19,13 @@ public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
     [ObservableProperty]
     private DiscFilePackage selectedPackage;
 
-    public int[] DiscSizes { get; } = new int[] { 700, 4480, 8500, 23500 };
+    public int[] DiscSizes { get; } = [700, 4480, 8500, 23500];
 
     [RelayCommand]
     private void SetDiscSize(int size)
     {
         Config.DiscSizeMB = size;
     }
-
-    public IEnumerable PackingTypes => Enum.GetValues(typeof(PackingType));
-
-    public override PackingConfig Config { get; } = AppConfig.Instance.Get<PackingConfig>();
 
     protected override Task OnInitializedAsync()
     {
@@ -106,12 +102,12 @@ public partial class PackingViewModel : TwoStepViewModelBase<PackingUtility>
     [RelayCommand]
     private void SelectAll()
     {
-        DiscFilePackages.ForEach(p => p.IsChecked = true);
+        DiscFilePackages?.ForEach(p => p.IsChecked = true);
     }
 
     [RelayCommand]
     private void SelectNone()
     {
-        DiscFilePackages.ForEach(p => p.IsChecked = false);
+        DiscFilePackages?.ForEach(p => p.IsChecked = false);
     }
 }

@@ -29,23 +29,9 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid
-            Grid.Row="2"
-            RowDefinitions="*,8,Auto">
-            <v:SimpleFileDataGrid
-                ColumnIsCheckedIndex="-1"
-                ItemsSource="{Binding Files}" />
-            <StackPanel
-                Grid.Row="2"
-                Margin="8,0"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <TextBlock VerticalAlignment="Center">
-                    <Run Text="共" />
-                    <Run Text="{Binding Files.Count, Mode=OneWay}" />
-                    <Run Text="个文件" />
-                </TextBlock>
-            </StackPanel>
-        </Grid>
+        <v:SimpleFileDataGrid
+            ColumnIsCheckedIndex="-1"
+            ItemsSource="{Binding Files}" />
+
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

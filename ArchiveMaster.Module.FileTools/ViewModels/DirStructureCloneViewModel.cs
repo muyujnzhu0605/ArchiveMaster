@@ -5,11 +5,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DirStructureCloneViewModel : TwoStepViewModelBase<DirStructureCloneUtility>
+public partial class
+    DirStructureCloneViewModel(DirStructureCloneConfig config)
+    : TwoStepViewModelBase<DirStructureCloneUtility, DirStructureCloneConfig>(config)
 {
     [ObservableProperty]
     private ObservableCollection<SimpleFileInfo> files;
-    public override DirStructureCloneConfig Config { get; } = AppConfig.Instance.Get<DirStructureCloneConfig>();
 
     protected override Task OnInitializedAsync()
     {

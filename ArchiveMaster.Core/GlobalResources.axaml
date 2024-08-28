@@ -2,6 +2,9 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Converters">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Views/SimpleFileDataGridStyle.axaml" />
+    </ResourceDictionary.MergedDictionaries>
     <FontFamily x:Key="IconFont">avares://ArchiveMaster.Core/Assets/#Segoe Fluent Icons</FontFamily>
     <c:BitmapAssetValueConverter x:Key="BitmapAssetValueConverter" />
 </ResourceDictionary>

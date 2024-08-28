@@ -12,9 +12,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase
+    public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase<TimeClassifyConfig>(config)
     {
-        public override TimeClassifyConfig Config { get; } = config;
         public List<SimpleDirInfo> TargetDirs { get; set; }
 
         public override Task ExecuteAsync(CancellationToken token)
@@ -51,12 +50,12 @@ namespace ArchiveMaster.Utilities
             {
                 NotifyMessage("正在搜索文件");
                 files = new DirectoryInfo(Config.Dir).EnumerateFiles()
-                    .Select(p => new SimpleFileInfo(p))
+                    .Select(p => new SimpleFileInfo(p, Config.Dir))
                     .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
                     .ToList();
                 token.ThrowIfCancellationRequested();
                 subDirs = new DirectoryInfo(Config.Dir).EnumerateDirectories()
-                    .Select(p => new SimpleDirInfo(p))
+                    .Select(p => new SimpleDirInfo(p, Config.Dir))
                     .Where(p => p.FilesCount > 0)
                     .OrderBy(p => p.EarliestTime)
                     .ToList();
@@ -112,8 +111,8 @@ namespace ArchiveMaster.Utilities
             foreach (var dir in targetDirs)
             {
                 token.ThrowIfCancellationRequested();
-                dir.EarliestTime = dir.Subs.Select(p =>p.IsDir?(p as SimpleDirInfo).EarliestTime:p.Time)
-               .Min();
+                dir.EarliestTime = dir.Subs.Select(p => p.IsDir ? (p as SimpleDirInfo).EarliestTime : p.Time)
+                    .Min();
                 dir.LatestTime = dir.Subs.Select(p =>
                 {
                     return p switch

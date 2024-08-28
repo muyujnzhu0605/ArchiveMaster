@@ -13,9 +13,9 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureSyncUtility(DirStructureSyncConfig config) : TwoStepUtilityBase
+    public class DirStructureSyncUtility(DirStructureSyncConfig config)
+        : TwoStepUtilityBase<DirStructureSyncConfig>(config)
     {
-        public override DirStructureSyncConfig Config { get; } = config;
         public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();
         private readonly Dictionary<DateTime, object> modifiedTime2Template = new Dictionary<DateTime, object>();
@@ -48,7 +48,7 @@ namespace ArchiveMaster.Utilities
                         AttributesToSkip = 0,
                         RecurseSubdirectories = true,
                     })
-                    .Select(p => new SimpleFileInfo((p)))
+                    .Select(p => new SimpleFileInfo(p, Config.SourceDir))
                     .WithCancellationToken(token)
                     .ToList();
 
@@ -60,7 +60,7 @@ namespace ArchiveMaster.Utilities
                         return;
                     }
 
-                    NotifyMessage($"正在分析源文件{s.GetFileNumberMessage()}：{sourceFile.Path}");
+                    NotifyMessage($"正在分析源文件{s.GetFileNumberMessage()}：{sourceFile.RelativePath}");
                     matchedFiles.Clear();
                     tempFiles.Clear();
 
@@ -80,26 +80,17 @@ namespace ArchiveMaster.Utilities
                     foreach (var templateFile in matchedFiles)
                     {
                         //创建模板文件数据结构
-                        var template = new SimpleFileInfo() //模板文件
-                        {
-                            Path = Path.GetRelativePath(Config.TemplateDir, templateFile.Path),
-                            Name = templateFile.Name,
-                            Length = templateFile.Length,
-                            Time = templateFile.Time,
-                        };
+                        var template = new SimpleFileInfo(templateFile.FileSystemInfo, Config.TemplateDir); //模板文件
 
                         //创建模型
-                        var goHomeFile = new MatchingFileInfo() //源文件
-                        {
-                            Path = Path.GetRelativePath(Config.SourceDir, sourceFile.Path),
-                            Name = sourceFile.Name,
-                            Length = sourceFile.Length,
-                            Time = sourceFile.Time,
-                            MultipleMatches = matchedFiles.Count > 1,
-                            Template = template,
-                        };
+                        var goHomeFile =
+                            new MatchingFileInfo(sourceFile.FileSystemInfo as FileInfo, Config.SourceDir) //源文件
+                            {
+                                MultipleMatches = matchedFiles.Count > 1,
+                                Template = template,
+                            };
 
-                        goHomeFile.RightPosition = template.Path == goHomeFile.Path;
+                        goHomeFile.RightPosition = template.RelativePath == goHomeFile.RelativePath;
                         tempFiles.Add(goHomeFile);
                     }
 
@@ -205,7 +196,6 @@ namespace ArchiveMaster.Utilities
             return dateTime.AddTicks(-(dateTime.Ticks % OneSecond.Ticks));
         }
 
-
         private void CreateDictionaries(string dir, int maxTimeTolerance, CancellationToken token)
         {
             name2Template.Clear();
@@ -219,7 +209,7 @@ namespace ArchiveMaster.Utilities
                     RecurseSubdirectories = true,
                 })
                 .WithCancellationToken(token)
-                .Select(p => new SimpleFileInfo(p))
+                .Select(p => new SimpleFileInfo(p, dir))
                 .ToList();
 
             NotifyProgressIndeterminate();
@@ -228,7 +218,7 @@ namespace ArchiveMaster.Utilities
             {
                 token.ThrowIfCancellationRequested();
 
-                NotifyMessage($"正在分析模板文件：{file.Path}");
+                NotifyMessage($"正在分析模板文件：{file.RelativePath}");
                 SetOrAdd(name2Template, file.Name);
                 SetOrAdd(length2Template, file.Length);
                 for (int i = -maxTimeTolerance; i <= maxTimeTolerance; i++)
@@ -247,7 +237,7 @@ namespace ArchiveMaster.Utilities
                         }
                         else if (dic[key] is SimpleFileInfo f)
                         {
-                            dic[key] = new List<SimpleFileInfo>() { f, file };
+                            dic[key] = new List<SimpleFileInfo> { f, file };
                         }
                         else
                         {
@@ -271,17 +261,18 @@ namespace ArchiveMaster.Utilities
 
             string copyMoveText = Config.Copy ? "复制" : "移动";
             IEnumerable<MatchingFileInfo> files = ExecutingFiles;
-            long count = files.Sum(p => p.Length);
 
             if (!Config.Copy)
             {
                 files = files.Where(p => !p.RightPosition);
             }
 
+            files = files.ToList();
+            
             return TryForFilesAsync(files, (file, s) =>
             {
-                NotifyMessage($"正在{copyMoveText}{s.GetFileNumberMessage()}：{file.Path}");
-                string destFile = Path.Combine(Config.TargetDir, file.Template.Path);
+                NotifyMessage($"正在{copyMoveText}{s.GetFileNumberMessage()}：{file.RelativePath}");
+                string destFile = Path.Combine(Config.TargetDir, file.Template.RelativePath);
                 string destFileDir = Path.GetDirectoryName(destFile);
                 if (!Directory.Exists(destFileDir))
                 {
@@ -290,13 +281,13 @@ namespace ArchiveMaster.Utilities
 
                 if (Config.Copy)
                 {
-                    File.Copy(Path.Combine(Config.SourceDir, file.Path), destFile);
+                    File.Copy(Path.Combine(Config.SourceDir, file.RelativePath), destFile);
                 }
                 else
                 {
-                    File.Move(Path.Combine(Config.SourceDir, file.Path), destFile);
+                    File.Move(Path.Combine(Config.SourceDir, file.RelativePath), destFile);
                 }
-            }, token,FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
     }
 }

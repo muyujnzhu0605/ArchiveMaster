@@ -50,10 +50,26 @@
                 <Setter Property="Foreground" Value="White" />
             </Style>
         </Style>
+        <Style Selector="^.Icon">
+            <Setter Property="Padding" Value="6" />
+        </Style>
+
+    </Style>
+
+    <Style Selector="ToggleButton.Icon">
+        <Setter Property="Padding" Value="6" />
     </Style>
 
     <Style Selector="StackPanel">
         <Setter Property="Spacing" Value="8" />
+    </Style>
+
+    <Style Selector="NumericUpDown StackPanel">
+        <Setter Property="Spacing" Value="0" />
+    </Style>
+
+    <Style Selector="Button StackPanel">
+        <Setter Property="Spacing" Value="0" />
     </Style>
 
 </Styles>
