@@ -197,6 +197,7 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
         ExecuteCommand.NotifyCanExecuteChanged();
         InitializeCommand.NotifyCanExecuteChanged();
 
+        Message = "就绪";
         OnReset();
         DisposeUtility();
     }

@@ -53,7 +53,8 @@
             <DataGrid.Columns>
                 <DataGridTextColumn
                     Binding="{Binding ExifTime}"
-                    Header="Exif时间" />
+                    Header="Exif时间"
+                    IsReadOnly="True" />
             </DataGrid.Columns>
         </v:SimpleFileDataGrid>
     </v:TwoStepPanelBase.ResultsContent>

@@ -84,6 +84,7 @@
 
                     <ct:FormItem Label="填充模式：">
                         <ComboBox
+                            Width="128"
                             ItemsSource="{Binding PaddingModes}"
                             SelectedItem="{Binding Config.PaddingMode}" />
                     </ct:FormItem>

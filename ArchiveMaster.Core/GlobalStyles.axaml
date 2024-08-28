@@ -64,4 +64,12 @@
         <Setter Property="Spacing" Value="8" />
     </Style>
 
+    <Style Selector="NumericUpDown StackPanel">
+        <Setter Property="Spacing" Value="0" />
+    </Style>
+
+    <Style Selector="Button StackPanel">
+        <Setter Property="Spacing" Value="0" />
+    </Style>
+
 </Styles>
