@@ -8,6 +8,7 @@
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:local="clr-namespace:ArchiveMaster.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"
     d:DesignHeight="450"
@@ -19,6 +20,12 @@
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
+
+    <UserControl.Resources>
+        <sys:Double x:Key="BoxWidth">200</sys:Double>
+        <sys:Double x:Key="BoxHeight">280</sys:Double>
+        <sys:Boolean x:Key="ShowDescription">True</sys:Boolean>
+    </UserControl.Resources>
 
     <Grid Margin="8">
         <ScrollViewer
@@ -72,11 +79,6 @@
                                             FontFamily="{StaticResource IconFont}"
                                             FontSize="16"
                                             Text="&#xE10C;" />
-                                        <!-- <Button.Styles> -->
-                                        <!--     <Style Selector="StackPanel"> -->
-                                        <!--         <Setter Property="Spacing" Value="0" /> -->
-                                        <!--     </Style> -->
-                                        <!-- </Button.Styles> -->
                                         <Button.Flyout>
                                             <MenuFlyout ItemsSource="{Binding MenuItems}">
                                                 <MenuFlyout.ItemContainerTheme>
@@ -100,8 +102,8 @@
                                         <ItemsPanelTemplate>
                                             <WrapPanel
                                                 HorizontalAlignment="Center"
-                                                ItemHeight="280"
-                                                ItemWidth="200" />
+                                                ItemHeight="{DynamicResource BoxHeight}"
+                                                ItemWidth="{DynamicResource BoxWidth}" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
@@ -110,7 +112,8 @@
                                                 x:Name="tib"
                                                 Title="{Binding Title}"
                                                 Description="{Binding Description}"
-                                                Icon="{Binding IconUri}">
+                                                Icon="{Binding IconUri}"
+                                                ShowDescription="{DynamicResource ShowDescription}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior
                                                         EventName="Tapped"

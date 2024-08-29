@@ -22,6 +22,7 @@ using Avalonia.Interactivity;
 using ArchiveMaster.Platforms;
 using FzLib;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace ArchiveMaster.Views;
 
@@ -73,5 +74,22 @@ public partial class MainView : UserControl
     {
         base.OnLoaded(e);
         permissionService?.CheckPermissions();
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        if (Bounds.Width <= 420)
+        {
+            Resources["BoxWidth"] = 160d;
+            Resources["BoxHeight"] = 200d;
+            Resources["ShowDescription"] = false;
+        }
+        else
+        {
+            Resources["BoxWidth"] = 200d;
+            Resources["BoxHeight"] = 280d;
+            Resources["ShowDescription"] = true;
+        }
     }
 }

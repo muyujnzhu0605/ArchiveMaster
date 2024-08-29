@@ -12,13 +12,17 @@ namespace ArchiveMaster.Views
         public static readonly StyledProperty<string> IconProperty =
             AvaloniaProperty.Register<ToolItemBox, string>(nameof(Icon));
 
+        public static readonly StyledProperty<bool> ShowDescriptionProperty =
+            AvaloniaProperty.Register<ToolItemBox, bool>(nameof(ShowDescription), true);
+
         public static readonly StyledProperty<string> TitleProperty =
-            AvaloniaProperty.Register<ToolItemBox, string>(nameof(Title));
+                    AvaloniaProperty.Register<ToolItemBox, string>(nameof(Title));
 
         public ToolItemBox()
-        { 
+        {
             InitializeComponent();
         }
+
         public string Description
         {
             get => GetValue(DescriptionProperty);
@@ -30,6 +34,13 @@ namespace ArchiveMaster.Views
             get => GetValue(IconProperty);
             set => SetValue(IconProperty, value);
         }
+
+        public bool ShowDescription
+        {
+            get => GetValue(ShowDescriptionProperty);
+            set => SetValue(ShowDescriptionProperty, value);
+        }
+
         public string Title
         {
             get => GetValue(TitleProperty);
