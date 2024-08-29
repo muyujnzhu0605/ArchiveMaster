@@ -20,7 +20,7 @@
         <StyleInclude Source="Styles.axaml" />
     </v:OfflineSyncPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Orientation="Vertical">
+        <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="本地补丁目录：">
                 <ctrl:FilePickerTextBox
                     ButtonContent="浏览.."
@@ -58,7 +58,7 @@
                         Text="删除的文件或更新前的旧文件会移动到根目录下此名的文件夹中" />
                 </StackPanel>
             </ctrl:FormItem>
-        </StackPanel>
+        </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <v:SyncFilesList />

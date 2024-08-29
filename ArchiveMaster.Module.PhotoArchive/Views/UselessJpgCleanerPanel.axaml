@@ -12,20 +12,17 @@
     x:DataType="vm:UselessJpgCleanerViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Orientation="Vertical">
-            <ct:FilePickerTextBox
-                FileNames="{Binding Config.Dir}"
-                Label="目录："
-                Type="OpenFolder" />
-            <StackPanel Orientation="Horizontal">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Text="RAW文件后缀：" />
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="RAW文件后缀：">
                 <TextBox Text="{Binding Config.RawExtension}" />
-
-            </StackPanel>
-
-        </StackPanel>
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <v:SimpleFileDataGrid ItemsSource="{Binding DeletingJpgFiles}" />

@@ -13,32 +13,23 @@
     x:DataType="vm:TimeClassifyViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Orientation="Vertical">
-            <ct:FilePickerTextBox
-                FileNames="{Binding Config.Dir}"
-                Label="目录："
-                Type="OpenFolder" />
-            <StackPanel Orientation="Horizontal">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Text="最小时间间隔：" />
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="最小间隔（分）：">
                 <NumericUpDown
-                    Width="120"
                     FormatString="0"
                     Maximum="1440"
                     Minimum="1"
                     Value="{Binding Config.MinTimeInterval, Converter={StaticResource TimeSpanNumberConverter}, ConverterParameter=m}" />
-                <TextBlock
-                    VerticalAlignment="Center"
-                    Text="分钟" />
-            </StackPanel>
-
-        </StackPanel>
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid
-            Grid.Row="8"
-            ColumnDefinitions="*,8,*">
+        <Grid ColumnDefinitions="*,8,*">
             <gb:GroupBox Header="按修改时间分类的目录">
                 <ListBox
                     x:Name="lstDirs"

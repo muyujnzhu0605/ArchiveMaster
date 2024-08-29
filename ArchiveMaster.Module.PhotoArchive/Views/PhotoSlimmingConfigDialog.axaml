@@ -22,17 +22,18 @@
             <Setter Property="LabelWidth" Value="128" />
         </Style>
     </dialog:DialogHost.Styles>
+
     <ScrollViewer
         HorizontalScrollBarVisibility="Disabled"
         VerticalScrollBarVisibility="Auto">
-        <StackPanel Orientation="Vertical">
+        <StackPanel>
             <ct:FormItem
                 Margin="8,0,0,0"
                 Label="配置名称：">
                 <TextBox Text="{Binding Config.Name}" />
             </ct:FormItem>
             <gb:GroupBox Header="目录和文件">
-                <StackPanel Orientation="Vertical">
+                <ct:StackFormItemGroup>
                     <ct:FormItem Label="源目录：">
                         <ct:FilePickerTextBox
                             Grid.Row="2"
@@ -68,10 +69,12 @@
                     <ct:FormItem Label="目标文件夹名：">
                         <TextBox Text="{Binding Config.FolderNameTemplate}" />
                     </ct:FormItem>
-                </StackPanel>
+                </ct:StackFormItemGroup>
             </gb:GroupBox>
+
+
             <gb:GroupBox Header="文件筛选">
-                <StackPanel Orientation="Vertical">
+                <ct:StackFormItemGroup>
                     <ct:FormItem Label="匹配条件（正则）：">
                         <TextBox Text="{Binding Config.WhiteList}" />
                     </ct:FormItem>
@@ -92,12 +95,12 @@
                         Opacity="0.7"
                         Text="需要压缩的图像的后缀名。使用逗号分隔。"
                         TextWrapping="Wrap" />
-
-
-                </StackPanel>
+                </ct:StackFormItemGroup>
             </gb:GroupBox>
+
+
             <gb:GroupBox Header="图像压缩">
-                <StackPanel Orientation="Vertical">
+                <ct:StackFormItemGroup>
                     <ct:FormItem Label="最大长边像素：">
                         <NumericUpDown
                             Increment="10"
@@ -131,8 +134,7 @@
                             Minimum="1"
                             Value="{Binding Config.Thread}" />
                     </ct:FormItem>
-
-                </StackPanel>
+                </ct:StackFormItemGroup>
             </gb:GroupBox>
 
         </StackPanel>

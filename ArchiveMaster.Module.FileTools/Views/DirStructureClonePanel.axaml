@@ -15,7 +15,7 @@
     x:DataType="vm:DirStructureCloneViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Margin="8">
+        <ctrl:StackFormItemGroup>
             <ctrl:FilePickerTextBox
                 FileNames="{Binding Config.SourceDir}"
                 Label="模板目录："
@@ -24,8 +24,7 @@
                 FileNames="{Binding Config.TargetDir}"
                 Label="目标目录："
                 Type="OpenFolder" />
-
-        </StackPanel>
+        </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>

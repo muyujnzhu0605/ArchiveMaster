@@ -6,7 +6,6 @@
     xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
-    xmlns:ctrl2="using:ArchiveMaster.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
@@ -24,7 +23,7 @@
         </Style>
     </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Orientation="Vertical">
+        <ct:StackFormItemGroup>
             <ct:FormItem Label="原始目录：">
                 <ct:FilePickerTextBox
                     FileNames="{Binding Config.RawDir}"
@@ -48,13 +47,8 @@
             </ct:FormItem>
 
             <ct:FormItem Label="加解密项目：">
+                <ct:WrapFormItemGroup>
 
-                <WrapPanel>
-                    <WrapPanel.Styles>
-                        <Style Selector="CheckBox">
-                            <Setter Property="Margin" Value="0,0,8,0" />
-                        </Style>
-                    </WrapPanel.Styles>
                     <CheckBox
                         Content="文件内容"
                         IsChecked="True"
@@ -72,16 +66,10 @@
                         Content="目录结构（包括文件和文件夹名）"
                         IsChecked="{Binding Config.EncryptDirectoryStructure}"
                         ToolTip.Tip="使用单独的文件记录加密后的文件名，防止加密后文件名超过系统支持的最大长度" />
-                </WrapPanel>
+                </ct:WrapFormItemGroup>
             </ct:FormItem>
             <ct:FormItem Label="选项：">
-                <ctrl2:FormItemGroup>
-                    <WrapPanel.Styles>
-                        <Style Selector="CheckBox">
-                            <Setter Property="Margin" Value="0,0,8,0" />
-                        </Style>
-                    </WrapPanel.Styles>
-
+                <ctrl:WrapFormItemGroup>
                     <ct:FormItem Label="填充模式：">
                         <ComboBox
                             Width="128"
@@ -102,7 +90,7 @@
                     <CheckBox
                         Content="覆盖已存在文件"
                         IsChecked="{Binding Config.OverwriteExistedFiles}" />
-                </ctrl2:FormItemGroup>
+                </ctrl:WrapFormItemGroup>
             </ct:FormItem>
 
 
@@ -114,7 +102,7 @@
                     <RadioButton Content="解密" />
                 </StackPanel>
             </ct:FormItem>
-        </StackPanel>
+        </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <v:SimpleFileDataGrid
