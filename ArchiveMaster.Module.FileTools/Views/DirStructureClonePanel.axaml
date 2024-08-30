@@ -16,14 +16,25 @@
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
-            <ctrl:FilePickerTextBox
-                FileNames="{Binding Config.SourceDir}"
-                Label="模板目录："
-                Type="OpenFolder" />
-            <ctrl:FilePickerTextBox
-                FileNames="{Binding Config.TargetDir}"
-                Label="目标目录："
-                Type="OpenFolder" />
+            <ctrl:FormItem Label="模板目录：">
+                <ctrl:FilePickerTextBox
+                    FileNames="{Binding Config.SourceDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem
+                Description="生成一个新的目录，目录中文件与模板一致，但大小为0"
+                Label="稀疏文件目录导出：">
+                <ctrl:FilePickerTextBox
+                    FileNames="{Binding Config.TargetDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem
+                Description="导出为一个包含文件基本信息的JSON文件"
+                Label="结构文件导出：">
+                <ctrl:FilePickerTextBox
+                    FileNames="{Binding Config.TargetFile}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
 

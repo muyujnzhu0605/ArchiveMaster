@@ -12,7 +12,7 @@ namespace ArchiveMaster.ViewModels;
 public partial class TimeClassifyViewModel(TimeClassifyConfig config) : TwoStepViewModelBase<TimeClassifyUtility,TimeClassifyConfig>(config)
 {
     [ObservableProperty]
-    private List<SimpleDirInfo> sameTimePhotosDirs;
+    private List<FilesTimeDirInfo> sameTimePhotosDirs;
 
     protected override Task OnInitializedAsync()
     {

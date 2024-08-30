@@ -4,6 +4,7 @@ using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
 using Avalonia.Controls.Platform;
+using FzLib.IO;
 using Microsoft.Win32.SafeHandles;
 
 namespace ArchiveMaster.Utilities
@@ -13,39 +14,48 @@ namespace ArchiveMaster.Utilities
     {
         public IList<SimpleFileInfo> Files { get; private set; }
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override async Task ExecuteAsync(CancellationToken token)
         {
-            return TryForFilesAsync(Files, (file, s) =>
+            SimpleDirInfo rootDir = new SimpleDirInfo();
+            
+            await TryForFilesAsync(Files, (file, s) =>
             {
-                string relativePath = Path.GetRelativePath(Config.SourceDir, file.Path);
-                string newPath = Path.Combine(Config.TargetDir, relativePath);
-                FileInfo newFile = new FileInfo(newPath);
-                if (!newFile.Directory.Exists)
+                NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
+
+                if (!string.IsNullOrWhiteSpace(Config.TargetDir))
                 {
-                    newFile.Directory.Create();
+                    CreateSparseFile(file);
                 }
 
-                NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{relativePath}");
-
-
-                using (FileStream fs = File.Create(newPath))
+                if (!string.IsNullOrWhiteSpace(Config.TargetFile))
                 {
-                    MarkAsSparseFile(fs.SafeFileHandle);
-                    fs.SetLength(file.Length);
-                    fs.Seek(-1, SeekOrigin.End);
+                    rootDir.
                 }
-
-                File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
+                
             }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
+        }
+
+        private void CreateSparseFile(SimpleFileInfo file)
+        {
+            string newPath = Path.Combine(Config.TargetDir, file.RelativePath);
+            FileInfo newFile = new FileInfo(newPath);
+            if (!newFile.Directory.Exists)
+            {
+                newFile.Directory.Create();
+            }
+
+            using (FileStream fs = File.Create(newPath))
+            {
+                MarkAsSparseFile(fs.SafeFileHandle);
+                fs.SetLength(file.Length);
+                fs.Seek(-1, SeekOrigin.End);
+            }
+
+            File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
         }
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            if (!OperatingSystem.IsWindows())
-            {
-                throw new NotSupportedException("仅支持Windows");
-            }
-
             List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
             NotifyMessage("正在枚举文件");

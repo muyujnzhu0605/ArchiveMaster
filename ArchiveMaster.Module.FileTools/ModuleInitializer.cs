@@ -33,7 +33,7 @@ namespace ArchiveMaster
                 new ToolPanelInfo(typeof(EncryptorPanel), "文件加密解密", "使用AES加密方法，对文件进行加密或解密", baseUrl + "encrypt.svg"),
                 new ToolPanelInfo(typeof(DirStructureSyncPanel), "目录结构同步", "以一个目录为模板，将另一个目录中的文件同步到与模板内相同文件一直的位置",
                     baseUrl + "sync.svg"),
-                new ToolPanelInfo(typeof(DirStructureClonePanel), "目录结构克隆", "以一个目录为模板，生成一个新的目录，目录中文件与模板一致，但大小为0",
+                new ToolPanelInfo(typeof(DirStructureClonePanel), "目录结构克隆", "以一个目录为模板，导出一个新的稀疏文件目录，或包含文件结构的JSON文件",
                     baseUrl + "directory.svg"),
                 new ToolPanelInfo(typeof(RenamePanel), "批量重命名", "批量对一个目录中的文件或文件夹按规则进行重命名操作",
                     baseUrl + "rename.svg"),
