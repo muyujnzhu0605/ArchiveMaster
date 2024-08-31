@@ -13,10 +13,11 @@ namespace ArchiveMaster.Utilities
         : TwoStepUtilityBase<DirStructureCloneConfig>(config)
     {
         public IList<SimpleFileInfo> Files { get; private set; }
+        public TreeDirInfo RootDir { get; private set; }
 
         public override async Task ExecuteAsync(CancellationToken token)
         {
-            SimpleDirInfo rootDir = new SimpleDirInfo();
+            //SimpleDirInfo rootDir = new SimpleDirInfo();
             
             await TryForFilesAsync(Files, (file, s) =>
             {
@@ -29,7 +30,7 @@ namespace ArchiveMaster.Utilities
 
                 if (!string.IsNullOrWhiteSpace(Config.TargetFile))
                 {
-                    rootDir.
+                    //rootDir.
                 }
                 
             }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
@@ -63,6 +64,7 @@ namespace ArchiveMaster.Utilities
 
             await Task.Run(() =>
             {
+                RootDir = TreeDirInfo.BuildTree(config.SourceDir);
                 var fileInfos = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", new EnumerationOptions()
                     {

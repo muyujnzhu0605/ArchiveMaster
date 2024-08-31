@@ -20,7 +20,8 @@ namespace ArchiveMaster.Views;
 
 public class SimpleFileDataGrid : DataGrid
 {
-    public static readonly StyledProperty<object> FooterProperty = AvaloniaProperty.Register<SimpleFileDataGrid, object>(
+    public static readonly StyledProperty<object> FooterProperty =
+        AvaloniaProperty.Register<SimpleFileDataGrid, object>(
             nameof(Footer));
 
     public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
@@ -33,33 +34,34 @@ public class SimpleFileDataGrid : DataGrid
         this[!IsReadOnlyProperty] =
             new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking));
     }
-    public string ColumnIsCheckedHeader { get; init; } = "";
 
-    public double ColumnIsCheckedIndex { get; init; } = 0.1;
+    public virtual string ColumnIsCheckedHeader { get; init; } = "";
 
-    public string ColumnLengthHeader { get; init; } = "文件大小";
+    public virtual double ColumnIsCheckedIndex { get; init; } = 0.1;
 
-    public double ColumnLengthIndex { get; init; } = 0.5;
+    public virtual string ColumnLengthHeader { get; init; } = "文件大小";
 
-    public string ColumnMessageHeader { get; init; } = "信息";
+    public virtual double ColumnLengthIndex { get; init; } = 0.5;
 
-    public double ColumnMessageIndex { get; init; } = 999;
+    public virtual string ColumnMessageHeader { get; init; } = "信息";
 
-    public string ColumnNameHeader { get; init; } = "文件名";
+    public virtual double ColumnMessageIndex { get; init; } = 999;
 
-    public double ColumnNameIndex { get; init; } = 0.3;
+    public virtual string ColumnNameHeader { get; init; } = "文件名";
 
-    public string ColumnPathHeader { get; init; } = "路径";
+    public virtual double ColumnNameIndex { get; init; } = 0.3;
 
-    public double ColumnPathIndex { get; init; } = 0.4;
+    public virtual string ColumnPathHeader { get; init; } = "路径";
 
-    public string ColumnStatusHeader { get; init; } = "状态";
+    public virtual double ColumnPathIndex { get; init; } = 0.4;
 
-    public double ColumnStatusIndex { get; init; } = 0.2;
+    public virtual string ColumnStatusHeader { get; init; } = "状态";
 
-    public string ColumnTimeHeader { get; init; } = "修改时间";
+    public virtual double ColumnStatusIndex { get; init; } = 0.2;
 
-    public double ColumnTimeIndex { get; init; } = 0.6;
+    public virtual string ColumnTimeHeader { get; init; } = "修改时间";
+
+    public virtual double ColumnTimeIndex { get; init; } = 0.6;
 
     public object Footer
     {
@@ -72,7 +74,9 @@ public class SimpleFileDataGrid : DataGrid
         get => GetValue(ShowCountProperty);
         set => SetValue(ShowCountProperty, value);
     }
+
     protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -166,7 +170,7 @@ public class SimpleFileDataGrid : DataGrid
         }
     }
 
-    private DataGridColumn GetIsCheckedColumn()
+    protected virtual DataGridColumn GetIsCheckedColumn()
     {
         var column = new DataGridTemplateColumn
         {
@@ -184,7 +188,7 @@ public class SimpleFileDataGrid : DataGrid
                 HorizontalAlignment = HorizontalAlignment.Center,
                 [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
                 [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                { Source = rootPanel, Converter = new InverseBoolConverter() },
+                    { Source = rootPanel, Converter = new InverseBoolConverter() },
             };
         });
 
@@ -192,18 +196,18 @@ public class SimpleFileDataGrid : DataGrid
         return column;
     }
 
-    private DataGridColumn GetLengthColumn()
+    protected virtual DataGridColumn GetLengthColumn()
     {
         return new DataGridTextColumn()
         {
             Header = ColumnLengthHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Length))
-            { Converter = new FileLength2StringConverter(), Mode = BindingMode.OneWay },
+                { Converter = new FileLength2StringConverter(), Mode = BindingMode.OneWay },
             IsReadOnly = true,
         };
     }
 
-    private DataGridColumn GetMessageColumn()
+    protected virtual DataGridColumn GetMessageColumn()
     {
         return new DataGridTextColumn()
         {
@@ -213,7 +217,7 @@ public class SimpleFileDataGrid : DataGrid
         };
     }
 
-    private DataGridColumn GetNameColumn()
+    protected virtual DataGridColumn GetNameColumn()
     {
         return new DataGridTextColumn()
         {
@@ -222,7 +226,8 @@ public class SimpleFileDataGrid : DataGrid
             IsReadOnly = true
         };
     }
-    private DataGridColumn GetPathColumn()
+
+    protected virtual DataGridColumn GetPathColumn()
     {
         return new DataGridTextColumn()
         {
@@ -232,7 +237,7 @@ public class SimpleFileDataGrid : DataGrid
         };
     }
 
-    private DataGridColumn GetProcessStatusColumn()
+    protected virtual DataGridColumn GetProcessStatusColumn()
     {
         var column = new DataGridTemplateColumn
         {
@@ -247,14 +252,14 @@ public class SimpleFileDataGrid : DataGrid
             Width = 8,
             Height = 8,
             [!Shape.FillProperty] = new Binding(nameof(SimpleFileInfo.Status))
-            { Converter = new ProcessStatusColorConverter() }
+                { Converter = new ProcessStatusColorConverter() }
         });
 
         column.CellTemplate = cellTemplate;
         return column;
     }
 
-    private DataGridColumn GetTimeColumn()
+    protected virtual DataGridColumn GetTimeColumn()
     {
         return new DataGridTextColumn()
         {

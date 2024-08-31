@@ -36,6 +36,7 @@ namespace ArchiveMaster.ViewModels
         [property: JsonIgnore]
         [ObservableProperty]
         private FileSystemInfo fileSystemInfo;
+        
 
         [JsonIgnore]
         public string RelativePath

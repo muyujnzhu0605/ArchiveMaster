@@ -39,9 +39,9 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <v:SimpleFileDataGrid
+        <v:TreeFileDataGrid
             ColumnIsCheckedIndex="-1"
-            ItemsSource="{Binding Files}" />
+            ItemsSource="{Binding TreeFiles}" />
 
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

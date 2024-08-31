@@ -4,6 +4,13 @@
     xmlns:c="using:FzLib.Avalonia.Converters"
     xmlns:ctrl="using:FzLib.Avalonia.Controls"
     xmlns:v="using:ArchiveMaster.Views">
+    <SolidColorBrush
+        x:Key="DataGridCellFocusVisualPrimaryBrush"
+        Color="Transparent" />
+    <SolidColorBrush
+        x:Key="DataGridCellFocusVisualSecondaryBrush"
+        Color="Transparent" />
+
     <ControlTheme
         x:Key="{x:Type v:SimpleFileDataGrid}"
         BasedOn="{StaticResource {x:Type DataGrid}}"
@@ -183,5 +190,13 @@
                 </Grid>
             </ControlTemplate>
         </Setter>
+    </ControlTheme>
+
+
+    <ControlTheme
+        x:Key="{x:Type v:TreeFileDataGrid}"
+        BasedOn="{StaticResource {x:Type v:SimpleFileDataGrid}}"
+        TargetType="v:TreeFileDataGrid">
+        <Setter Property="RowDetailsTemplate" Value="{x:Null}" />
     </ControlTheme>
 </ResourceDictionary>
