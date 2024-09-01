@@ -70,10 +70,14 @@ public partial class MainView : UserControl
         });
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
         permissionService?.CheckPermissions();
+        if (AppConfig.Instance.LoadError != null)
+        {
+            await this.ShowErrorDialogAsync("加载配置失败", AppConfig.Instance.LoadError);
+        }
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)

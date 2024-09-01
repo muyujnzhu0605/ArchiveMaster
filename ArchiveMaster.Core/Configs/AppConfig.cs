@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace ArchiveMaster.Configs
 {
@@ -30,14 +31,17 @@ namespace ArchiveMaster.Configs
         public static AppConfig Instance { get; } = new AppConfig();
 
         public bool DebugMode { get; set; }
+
 // #if DEBUG
 //             = true;
 // #endif
         public int DebugModeLoopDelay { get; set; } = 30;
 
+        public Exception LoadError { get; private set; }
+
         public static void RegisterConfig(ConfigInfo config)
         {
-            configs.Add(config.Key,config);
+            configs.Add(config.Key, config);
         }
 
         public void Load()
@@ -68,9 +72,16 @@ namespace ArchiveMaster.Configs
 
                 foreach (var config in configs.Values)
                 {
-                    if (fileConfigs.ContainsKey(config.Key))
+                    if (fileConfigs.TryGetValue(config.Key, out object obj) && obj != null)
                     {
-                        Services.Builder.AddSingleton(config.Type, fileConfigs[config.Key]);
+                        try
+                        {
+                            Services.Builder.AddSingleton(config.Type, obj);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, $"加载单个配置{config.Key}失败");
+                        }
                     }
                     else
                     {
@@ -80,11 +91,16 @@ namespace ArchiveMaster.Configs
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "加载配置失败");
+                LoadError = new Exception("加载配置文件失败，将重置配置", ex);
+                foreach (var config in configs.Values)
+                {
+                    Services.Builder.AddSingleton(config.Type);
+                }
             }
 
             isLoaded = true;
         }
-
         public void Save(bool raiseEvent = true)
         {
             if (raiseEvent)
