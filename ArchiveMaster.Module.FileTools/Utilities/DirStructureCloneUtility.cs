@@ -1,5 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
@@ -12,28 +15,37 @@ namespace ArchiveMaster.Utilities
     public class DirStructureCloneUtility(DirStructureCloneConfig config)
         : TwoStepUtilityBase<DirStructureCloneConfig>(config)
     {
-        public IList<SimpleFileInfo> Files { get; private set; }
         public TreeDirInfo RootDir { get; private set; }
 
         public override async Task ExecuteAsync(CancellationToken token)
         {
-            //SimpleDirInfo rootDir = new SimpleDirInfo();
-            
-            await TryForFilesAsync(Files, (file, s) =>
+            await Task.Run(() =>
             {
-                NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
-
-                if (!string.IsNullOrWhiteSpace(Config.TargetDir))
+                var flatten = RootDir.Flatten().ToList();
+                TryForFiles(flatten, (file, s) =>
                 {
-                    CreateSparseFile(file);
-                }
+                    NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
+
+                    if (!string.IsNullOrWhiteSpace(Config.TargetDir))
+                    {
+                        CreateSparseFile(file);
+                    }
+                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
+
 
                 if (!string.IsNullOrWhiteSpace(Config.TargetFile))
                 {
-                    //rootDir.
+                    NotifyMessage($"正在创建目录结构文件");
+                    NotifyProgressIndeterminate();
+                    var json = JsonSerializer.Serialize(RootDir, new JsonSerializerOptions()
+                    {
+                        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                        WriteIndented = true,
+                        MaxDepth = 64
+                    });
+                    File.WriteAllText(Config.TargetFile, json);
                 }
-                
-            }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
+            }, token);
         }
 
         private void CreateSparseFile(SimpleFileInfo file)
@@ -55,31 +67,14 @@ namespace ArchiveMaster.Utilities
             File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override Task InitializeAsync(CancellationToken token)
         {
             List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
             NotifyMessage("正在枚举文件");
             NotifyProgressIndeterminate();
 
-            await Task.Run(() =>
-            {
-                RootDir = TreeDirInfo.BuildTree(config.SourceDir);
-                var fileInfos = new DirectoryInfo(Config.SourceDir)
-                    .EnumerateFiles("*", new EnumerationOptions()
-                    {
-                        IgnoreInaccessible = true,
-                        AttributesToSkip = 0,
-                        RecurseSubdirectories = true,
-                    });
-
-                TryForFiles(fileInfos.Select(p => new SimpleFileInfo(p, Config.SourceDir)), (file, s) =>
-                {
-                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.RelativePath}");
-                    files.Add(file);
-                }, token, FilesLoopOptions.DoNothing());
-            }, token);
-            Files = files;
+            return Task.Run(() => { RootDir = TreeDirInfo.BuildTree(config.SourceDir); }, token);
         }
 
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]

@@ -33,7 +33,9 @@
                 Label="结构文件导出：">
                 <ctrl:FilePickerTextBox
                     FileNames="{Binding Config.TargetFile}"
-                    Type="OpenFolder" />
+                    SaveFileSuggestedFileName="目录结构.json"
+                    StringFileTypeFilter="JSON文件;*.json;application/json;"
+                    Type="SaveFile" />
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>

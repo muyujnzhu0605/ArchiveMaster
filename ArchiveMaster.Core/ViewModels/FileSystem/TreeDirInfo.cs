@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using ArchiveMaster.Basic;
 
 namespace ArchiveMaster.ViewModels
@@ -14,15 +15,17 @@ namespace ArchiveMaster.ViewModels
         {
         }
 
+        
+        [JsonIgnore]
         public IList<TreeFileDirInfo> Subs { get; } = new List<TreeFileDirInfo>();
 
         public IList<TreeFileInfo> SubFiles { get; } = new List<TreeFileInfo>();
-
         public IList<TreeDirInfo> SubDirs { get; } = new List<TreeDirInfo>();
 
         public int SubFileCount { get; set; }
         public int SubFolderCount { get; set; }
 
+        [JsonIgnore]
         public bool IsExpanded { get; set; }
 
         public static TreeDirInfo BuildTree(string rootDir)
@@ -87,6 +90,36 @@ namespace ArchiveMaster.ViewModels
             }
 
             return index;
+        }
+
+        public IEnumerable<SimpleFileInfo> Flatten(bool includingDir = false)
+        {
+            Stack<TreeDirInfo> stack = new Stack<TreeDirInfo>();
+            stack.Push(this);
+            // List<SimpleFileInfo> files = new List<SimpleFileInfo>();
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (includingDir)
+                {
+                    yield return current;
+                    // files.Add(current);
+                }
+
+                foreach (var subFile in current.SubFiles)
+                {
+                    yield return subFile;
+                    // files.Add(subFile);
+                }
+
+
+                foreach (var subDir in current.SubDirs.Reverse())
+                {
+                    stack.Push(subDir);
+                }
+            }
+
+            // return files;
         }
     }
 }

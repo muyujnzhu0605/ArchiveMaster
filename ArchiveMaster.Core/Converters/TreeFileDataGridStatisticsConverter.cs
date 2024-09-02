@@ -9,6 +9,10 @@ public class TreeFileDataGridStatisticsConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
+        if (value == null)
+        {
+            return null;
+        }
         if (value is not IEnumerable e)
         {
             throw new Exception("数据类型必须为IEnumerable<TreeDirInfo>");

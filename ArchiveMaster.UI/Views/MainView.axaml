@@ -112,7 +112,9 @@
                                                 x:Name="tib"
                                                 Title="{Binding Title}"
                                                 Description="{Binding Description}"
+                                                Focusable="{Binding !#root.DataContext.IsToolOpened}"
                                                 Icon="{Binding IconUri}"
+                                                KeyDown="ToolItem_OnKeyDown"
                                                 ShowDescription="{DynamicResource ShowDescription}">
                                                 <Interaction.Behaviors>
                                                     <EventTriggerBehavior
@@ -157,8 +159,10 @@
             </Panel>
         </ScrollViewer>
         <ContentControl
+            x:Name="mainContent"
             Classes.hidden="{Binding !IsToolOpened}"
-            Content="{Binding MainContent}">
+            Content="{Binding MainContent}"
+            Focusable="{Binding IsToolOpened}">
             <ContentControl.Styles>
                 <Style Selector="ContentControl">
                     <Setter Property="Opacity" Value="1" />

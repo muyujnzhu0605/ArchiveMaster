@@ -96,4 +96,13 @@ public partial class MainView : UserControl
             Resources["ShowDescription"] = true;
         }
     }
+
+    private void ToolItem_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            TopLevel.GetTopLevel(this).FocusManager.ClearFocus();
+            (DataContext as MainViewModel).EnterToolCommand.Execute((sender as ToolItemBox).DataContext);
+        }
+    }
 }

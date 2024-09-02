@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
@@ -16,12 +17,14 @@ public partial class TreeFileDirInfo : SimpleFileInfo
         Parent = parent;
     }
 
+    [property: JsonIgnore] 
     [ObservableProperty]
     private int index;
 
     [ObservableProperty]
     private int depth;
 
+    [property: JsonIgnore] 
     [ObservableProperty]
     private TreeDirInfo parent;
 
