@@ -12,9 +12,6 @@ public partial class
 {
     [ObservableProperty]
     private ObservableCollection<SimpleFileInfo> files;
-        
-    [ObservableProperty]
-    private TreeDirInfo root;
     
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles ;
@@ -22,8 +19,9 @@ public partial class
     protected override Task OnInitializedAsync()
     {
         Files = new ObservableCollection<SimpleFileInfo>(Utility.Files);
-        Root = Utility.RootDir;
-        TreeFiles = new BulkObservableCollection<SimpleFileInfo>() { Root };
+        var files = new BulkObservableCollection<SimpleFileInfo>();
+        files.AddRange(Utility.RootDir.Subs);
+        TreeFiles = files;
         return base.OnInitializedAsync();
     }
 

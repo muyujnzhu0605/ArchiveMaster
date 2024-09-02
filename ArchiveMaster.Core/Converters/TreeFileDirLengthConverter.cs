@@ -15,9 +15,9 @@ public class TreeFileDirLengthConverter : IValueConverter
             return null;
         }
         var fileOrDir = value as TreeFileDirInfo ?? throw new Exception("值必须为TreeFileDirInfo类型");
-        if (fileOrDir.IsDir)
+        if (fileOrDir.IsDir && fileOrDir is TreeDirInfo dir)
         {
-            return "文件夹";
+            return $"{dir.SubFolderCount}个子文件夹，{dir.SubFileCount}个子文件";
         }
 
         return NumberConverter.ByteToFitString(fileOrDir.Length);

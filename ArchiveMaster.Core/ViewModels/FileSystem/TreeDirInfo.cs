@@ -20,6 +20,9 @@ namespace ArchiveMaster.ViewModels
 
         public IList<TreeDirInfo> SubDirs { get; } = new List<TreeDirInfo>();
 
+        public int SubFileCount { get; set; }
+        public int SubFolderCount { get; set; }
+
         public bool IsExpanded { get; set; }
 
         public static TreeDirInfo BuildTree(string rootDir)
@@ -32,11 +35,19 @@ namespace ArchiveMaster.ViewModels
         private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex)
         {
             int index = initialIndex;
+            int count = 0;
             foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateFiles())
             {
                 var childDir = new TreeFileInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
                 parentDir.SubFiles.Add(childDir);
                 parentDir.Subs.Add(childDir);
+                count++;
+            }
+
+            while (parentDir != null)
+            {
+                parentDir.SubFileCount += count;
+                parentDir = parentDir.Parent;
             }
 
             return index;
@@ -47,14 +58,17 @@ namespace ArchiveMaster.ViewModels
             int tempIndex = EnumerateDirs(dir, 0);
             EnumerateFiles(dir, tempIndex);
         }
+
         private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex)
         {
             int index = initialIndex;
+            int count = 0;
             foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateDirectories())
             {
                 var childDir = new TreeDirInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
                 parentDir.SubDirs.Add(childDir);
                 parentDir.Subs.Add(childDir);
+
                 try
                 {
                     EnumerateDirsAndFiles(childDir);
@@ -62,6 +76,14 @@ namespace ArchiveMaster.ViewModels
                 catch (UnauthorizedAccessException ex)
                 {
                 }
+
+                count++;
+            }
+
+            while (parentDir != null)
+            {
+                parentDir.SubFolderCount += count;
+                parentDir = parentDir.Parent;
             }
 
             return index;

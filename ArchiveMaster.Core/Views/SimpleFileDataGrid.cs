@@ -132,29 +132,30 @@ public class SimpleFileDataGrid : DataGrid
             }
         }
     }
+    
+   protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
+    [
+        (ColumnIsCheckedIndex, GetIsCheckedColumn),
+        (ColumnStatusIndex, GetProcessStatusColumn),
+        (ColumnNameIndex, GetNameColumn),
+        (ColumnPathIndex, GetPathColumn),
+        (ColumnLengthIndex, GetLengthColumn),
+        (ColumnTimeIndex, GetTimeColumn),
+        (ColumnMessageIndex, GetMessageColumn),
+    ];
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        (double Index, Func<DataGridColumn> Func)[] items =
-        [
-            (ColumnIsCheckedIndex, GetIsCheckedColumn),
-            (ColumnStatusIndex, GetProcessStatusColumn),
-            (ColumnNameIndex, GetNameColumn),
-            (ColumnPathIndex, GetPathColumn),
-            (ColumnLengthIndex, GetLengthColumn),
-            (ColumnTimeIndex, GetTimeColumn),
-            (ColumnMessageIndex, GetMessageColumn),
-        ];
-
+      
         //插入的，从后往前插，这样不会打乱顺序
-        var ordered1 = items
+        var ordered1 = PresetColumns
             .Where(p => p.Index >= 0)
             .Where(p => p.Index < Columns.Count)
             .OrderByDescending(p => p.Index);
 
         //追加的，按序号从小到大调用Add方法
-        var ordered2 = items
+        var ordered2 = PresetColumns
             .Where(p => p.Index >= 0)
             .Where(p => p.Index >= Columns.Count)
             .OrderBy(p => p.Index);

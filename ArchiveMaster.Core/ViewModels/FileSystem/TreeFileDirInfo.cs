@@ -24,4 +24,9 @@ public partial class TreeFileDirInfo : SimpleFileInfo
 
     [ObservableProperty]
     private TreeDirInfo parent;
+
+    public bool IsLast()
+    {
+        return Index == Parent.Subs.Count - 1;
+    }
 }
