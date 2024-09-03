@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
@@ -19,6 +20,7 @@ using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using FzLib.Avalonia.Converters;
+using Serilog;
 
 namespace ArchiveMaster.Views;
 
@@ -44,25 +46,41 @@ public class TreeFileDataGrid : SimpleFileDataGrid
 
     private void DataGridDoubleTapped(object sender, TappedEventArgs e)
     {
-        if (!(e.Source is Visual { DataContext: TreeDirInfo dir }))
+        if (e.Source is Visual { DataContext: TreeDirInfo dir })
         {
-            return;
-        }
+            if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+            {
+                return;
+            }
 
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
-        {
-            return;
-        }
-
-        if (!dir.IsExpanded)
-        {
-            items.InsertRange(items.IndexOf(dir) + 1, dir.Subs);
-            dir.IsExpanded = true;
+            if (!dir.IsExpanded)
+            {
+                items.InsertRange(items.IndexOf(dir) + 1, dir.Subs);
+                dir.IsExpanded = true;
+            }
+            else
+            {
+                items.RemoveRange(items.IndexOf(dir) + 1, dir.Subs.Count);
+                dir.IsExpanded = false;
+            }
         }
         else
         {
-            items.RemoveRange(items.IndexOf(dir) + 1, dir.Subs.Count);
-            dir.IsExpanded = false;
+            if (e.Source is Visual { DataContext: TreeFileInfo file })
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(file.Path)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                catch(Exception ex)
+                {
+                    Log.Error(ex,"打开文件失败");
+                }
+            }
+
         }
     }
 

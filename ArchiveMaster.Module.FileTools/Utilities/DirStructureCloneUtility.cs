@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
+using System.Xml.Serialization;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
@@ -21,17 +22,15 @@ namespace ArchiveMaster.Utilities
         {
             await Task.Run(() =>
             {
-                var flatten = RootDir.Flatten().ToList();
-                TryForFiles(flatten, (file, s) =>
+                if (!string.IsNullOrWhiteSpace(Config.TargetDir))
                 {
-                    NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
-
-                    if (!string.IsNullOrWhiteSpace(Config.TargetDir))
+                    var flatten = RootDir.Flatten().ToList();
+                    TryForFiles(flatten, (file, s) =>
                     {
+                        NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
                         CreateSparseFile(file);
-                    }
-                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
-
+                    }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
+                }
 
                 if (!string.IsNullOrWhiteSpace(Config.TargetFile))
                 {
@@ -41,7 +40,7 @@ namespace ArchiveMaster.Utilities
                     {
                         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
                         WriteIndented = true,
-                        MaxDepth = 64
+                        MaxDepth = 64,
                     });
                     File.WriteAllText(Config.TargetFile, json);
                 }

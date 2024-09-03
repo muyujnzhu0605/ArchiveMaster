@@ -15,7 +15,7 @@ namespace ArchiveMaster.ViewModels
         {
         }
 
-        
+
         [JsonIgnore]
         public IList<TreeFileDirInfo> Subs { get; } = new List<TreeFileDirInfo>();
 
@@ -78,6 +78,11 @@ namespace ArchiveMaster.ViewModels
                 }
                 catch (UnauthorizedAccessException ex)
                 {
+                    childDir.Warn("没有访问权限");
+                }
+                catch (Exception ex)
+                {
+                    childDir.Warn("枚举子文件和目录失败：" + ex.Message);
                 }
 
                 count++;
