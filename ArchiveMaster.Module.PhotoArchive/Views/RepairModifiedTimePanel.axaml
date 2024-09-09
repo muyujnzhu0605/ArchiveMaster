@@ -13,38 +13,34 @@
     x:DataType="vm:RepairModifiedTimeViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Orientation="Vertical">
-            <ct:FilePickerTextBox
-                Grid.Row="2"
-                FileNames="{Binding Config.Dir}"
-                Label="目录："
-                Type="OpenFolder" />
-            <StackPanel
-                Grid.Row="4"
-                Orientation="Horizontal">
-                <TextBlock Text="线程数：" />
-                <NumericUpDown
-                    Width="120"
-                    Maximum="16"
-                    Minimum="1"
-                    Value="{Binding Config.ThreadCount}" />
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Label="线程数：">
+                        <NumericUpDown
+                            Width="120"
+                            Maximum="16"
+                            Minimum="1"
+                            Value="{Binding Config.ThreadCount}" />
+                    </ct:FormItem>
 
-            </StackPanel>
-            <StackPanel
-                Grid.Row="6"
-                Orientation="Horizontal">
-                <TextBlock Text="最长容忍差异时间：" />
-                <NumericUpDown
-                    Width="120"
-                    FormatString="0"
-                    Maximum="86400"
-                    Minimum="1"
-                    Value="{Binding Config.MaxDurationTolerance, Converter={StaticResource TimeSpanNumberConverter}, ConverterParameter=s}" />
-                <TextBlock Text="秒" />
+                    <ct:FormItem Label="最长容忍差异时间（秒）：">
+                        <NumericUpDown
+                            Width="120"
+                            FormatString="0"
+                            Maximum="86400"
+                            Minimum="1"
+                            Value="{Binding Config.MaxDurationTolerance, Converter={StaticResource TimeSpanNumberConverter}, ConverterParameter=s}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
 
-            </StackPanel>
-
-        </StackPanel>
+        </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <v:SimpleFileDataGrid

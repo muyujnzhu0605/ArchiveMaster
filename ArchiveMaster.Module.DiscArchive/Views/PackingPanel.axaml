@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
-    xmlns:ctrl2="using:ArchiveMaster.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
@@ -19,12 +18,7 @@
     ExecuteButtonContent="导出"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Margin="8">
-            <StackPanel.Styles>
-                <Style Selector="ctrl|FormItem">
-                    <Setter Property="LabelWidth" Value="84" />
-                </Style>
-            </StackPanel.Styles>
+        <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="源目录：">
                 <ctrl:FilePickerTextBox
                     FileNames="{Binding Config.SourceDir}"
@@ -52,7 +46,7 @@
                 </Grid>
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
-                <ctrl2:FormItemGroup LabelWidth="NaN">
+                <ctrl:WrapFormItemGroup>
                     <ctrl:FormItem Label="起始日期：">
                         <TextBox
                             Width="160"
@@ -114,9 +108,9 @@
                         </StackPanel>
 
                     </ctrl:FormItem>
-                </ctrl2:FormItemGroup>
+                </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
-        </StackPanel>
+        </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid

@@ -47,7 +47,7 @@
             Cursor="Hand">
             <Grid
                 Margin="16"
-                RowDefinitions="*,8,Auto,8,80">
+                RowDefinitions="*,8,Auto,8,Auto">
                 <Svg
                     Width="80"
                     Height="80"
@@ -61,7 +61,9 @@
                     Text="{Binding #root.Title}" />
                 <TextBlock
                     Grid.Row="4"
+                    Height="80"
                     HorizontalAlignment="Center"
+                    IsVisible="{Binding #root.ShowDescription}"
                     Opacity="0.8"
                     Text="{Binding #root.Description}"
                     TextWrapping="Wrap" />

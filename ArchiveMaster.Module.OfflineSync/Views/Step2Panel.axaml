@@ -24,7 +24,7 @@
     </v:OfflineSyncPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <Grid ColumnDefinitions="*,8,*">
-            <StackPanel Margin="8">
+            <ctrl:StackFormItemGroup>
                 <ctrl:FormItem Label="异地快照文件：">
                     <ctrl:FilePickerTextBox
                         FileNames="{Binding Config.OffsiteSnapshot}"
@@ -101,8 +101,8 @@
                         </ToolTip.Tip>
                     </ComboBox>
                 </ctrl:FormItem>
+            </ctrl:StackFormItemGroup>
 
-            </StackPanel>
             <gb:GroupBox
                 Grid.Column="2"
                 Header="目录匹配">

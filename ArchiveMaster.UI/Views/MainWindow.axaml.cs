@@ -20,6 +20,10 @@ public partial class MainWindow : Window
         {
             //SetWin10TitleBar();
         }
+#if !DEBUG
+        MinWidth = 640;
+        MinHeight = 400;
+#endif
     }
 
     private void SetWin10TitleBar()

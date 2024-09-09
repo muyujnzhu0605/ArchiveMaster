@@ -63,5 +63,29 @@ namespace ArchiveMaster.Views
             get => GetValue(StopButtonContentProperty);
             set => SetValue(StopButtonContentProperty, value);
         }
+
+        protected override void OnSizeChanged(SizeChangedEventArgs e)
+        {
+            base.OnSizeChanged(e);
+            if (Bounds.Width < 500)
+            {
+                Resources["ShowSingleLine"] = false;
+                Resources["ShowTwoLines"] = true;
+            }
+            else
+            {
+                Resources["ShowSingleLine"] = true;
+                Resources["ShowTwoLines"] = false;
+            }
+
+            if (Bounds.Height < 700)
+            {
+                Resources["ConfigMaxHeight"] = 200d;
+            }
+            else
+            {
+                Resources["ConfigMaxHeight"] = 300d;
+            }
+        }
     }
 }

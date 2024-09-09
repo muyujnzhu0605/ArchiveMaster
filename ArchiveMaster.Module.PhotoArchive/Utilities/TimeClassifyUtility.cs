@@ -14,7 +14,7 @@ namespace ArchiveMaster.Utilities
 {
     public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase<TimeClassifyConfig>(config)
     {
-        public List<SimpleDirInfo> TargetDirs { get; set; }
+        public List<FilesTimeDirInfo> TargetDirs { get; set; }
 
         public override Task ExecuteAsync(CancellationToken token)
         {
@@ -43,8 +43,8 @@ namespace ArchiveMaster.Utilities
         public override async Task InitializeAsync(CancellationToken token)
         {
             List<SimpleFileInfo> files = null;
-            List<SimpleDirInfo> subDirs = null;
-            List<SimpleDirInfo> targetDirs = new List<SimpleDirInfo>();
+            List<FilesTimeDirInfo> subDirs = null;
+            List<FilesTimeDirInfo> targetDirs = new List<FilesTimeDirInfo>();
 
             await Task.Run(() =>
             {
@@ -55,7 +55,7 @@ namespace ArchiveMaster.Utilities
                     .ToList();
                 token.ThrowIfCancellationRequested();
                 subDirs = new DirectoryInfo(Config.Dir).EnumerateDirectories()
-                    .Select(p => new SimpleDirInfo(p, Config.Dir))
+                    .Select(p => new FilesTimeDirInfo(p, Config.Dir))
                     .Where(p => p.FilesCount > 0)
                     .OrderBy(p => p.EarliestTime)
                     .ToList();
@@ -81,7 +81,7 @@ namespace ArchiveMaster.Utilities
                         //如果和上一个的时间间隔超过了阈值，那么新建目录存放
                         if (file.Time - time > Config.MinTimeInterval)
                         {
-                            SimpleDirInfo newDir = new SimpleDirInfo();
+                            FilesTimeDirInfo newDir = new FilesTimeDirInfo();
                             targetDirs.Add(newDir);
                         }
 
@@ -93,7 +93,7 @@ namespace ArchiveMaster.Utilities
                     {
                         if (dir.EarliestTime - time > Config.MinTimeInterval)
                         {
-                            SimpleDirInfo newDir = new SimpleDirInfo();
+                            FilesTimeDirInfo newDir = new FilesTimeDirInfo();
                             targetDirs.Add(newDir);
                         }
 
@@ -111,13 +111,13 @@ namespace ArchiveMaster.Utilities
             foreach (var dir in targetDirs)
             {
                 token.ThrowIfCancellationRequested();
-                dir.EarliestTime = dir.Subs.Select(p => p.IsDir ? (p as SimpleDirInfo).EarliestTime : p.Time)
+                dir.EarliestTime = dir.Subs.Select(p => p.IsDir ? (p as FilesTimeDirInfo).EarliestTime : p.Time)
                     .Min();
                 dir.LatestTime = dir.Subs.Select(p =>
                 {
                     return p switch
                     {
-                        SimpleDirInfo d => d.EarliestTime,
+                        FilesTimeDirInfo d => d.EarliestTime,
                         SimpleFileInfo f => f.Time,
                         _ => throw new NotImplementedException()
                     };

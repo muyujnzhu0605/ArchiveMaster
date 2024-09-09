@@ -36,6 +36,7 @@ namespace ArchiveMaster.ViewModels
         [property: JsonIgnore]
         [ObservableProperty]
         private FileSystemInfo fileSystemInfo;
+        
 
         [JsonIgnore]
         public string RelativePath
@@ -78,13 +79,16 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
+        [JsonIgnore]
         public string Message => message;
 
+        [JsonIgnore]
         public bool IsCompleted => status == ProcessStatus.Completed;
 
         [JsonIgnore]
         public ProcessStatus Status => status;
 
+        [JsonIgnore]
         public bool Exists => File.Exists(Path);
 
         public void Complete()

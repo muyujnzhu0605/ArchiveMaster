@@ -27,7 +27,7 @@
                 Grid.Column="2"
                 Margin="0,4,0,0"
                 Text="{Binding #root.Description}"
-                TextTrimming="CharacterEllipsis" />
+                TextWrapping="Wrap" />
             <Button
                 Grid.RowSpan="99"
                 Width="36"

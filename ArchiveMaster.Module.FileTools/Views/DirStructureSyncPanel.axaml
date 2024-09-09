@@ -110,30 +110,27 @@
     </UserControl.Resources>
 
     <v:TwoStepPanelBase.ConfigsContent>
-        <StackPanel Margin="8">
-            <StackPanel.Styles>
-                <Style Selector="ctrl|FormItem">
-                    <Setter Property="LabelWidth" Value="96" />
-                </Style>
-            </StackPanel.Styles>
+        <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="模板目录：">
                 <ctrl:FilePickerTextBox
                     FileNames="{Binding Config.TemplateDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
+
             <ctrl:FormItem Label="源目录：">
                 <ctrl:FilePickerTextBox
                     FileNames="{Binding Config.SourceDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
+
             <ctrl:FormItem Label="目标目录：">
                 <ctrl:FilePickerTextBox
                     FileNames="{Binding Config.TargetDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
+
             <ctrl:FormItem Label="黑名单：">
                 <Grid ColumnDefinitions="*,8,Auto">
-
                     <TextBox
                         AcceptsReturn="True"
                         MaxLines="5"
@@ -146,8 +143,9 @@
                         IsChecked="{Binding Config.BlackListUseRegex}" />
                 </Grid>
             </ctrl:FormItem>
+
             <ctrl:FormItem Label="文件匹配选项：">
-                <StackPanel Orientation="Horizontal">
+                <ctrl:WrapFormItemGroup>
                     <CheckBox
                         Content="匹配文件名"
                         IsChecked="{Binding Config.CompareName}" />
@@ -157,17 +155,17 @@
                     <CheckBox
                         Content="匹配修改时间"
                         IsChecked="{Binding CompareModifiedTime}" />
-                </StackPanel>
+                </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
+
             <ctrl:FormItem Label="操作选项：">
-                <StackPanel Orientation="Horizontal">
+                <ctrl:WrapFormItemGroup>
                     <CheckBox
                         Content="建立副本"
                         IsChecked="{Binding Config.Copy}" />
-
-                </StackPanel>
+                </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
-        </StackPanel>
+        </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid

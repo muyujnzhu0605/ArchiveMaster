@@ -226,7 +226,7 @@ namespace ArchiveMaster.Utilities
                 TryForFiles(updateFiles.OrderByDescending(p => p.UpdateType).ToList(), (file, s) =>
                 {
                     //先处理移动，然后处理修改，这样能避免一些问题（2022-12-17）
-                    NotifyMessage($"正在处理{s}：{file.RelativePath}");
+                    NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.RelativePath}");
 
                     string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
                     if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) &&

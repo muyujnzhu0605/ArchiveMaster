@@ -29,4 +29,8 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mapster" />
+  </ItemGroup>
 </Project>

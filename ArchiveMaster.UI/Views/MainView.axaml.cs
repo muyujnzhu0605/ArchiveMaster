@@ -22,6 +22,7 @@ using Avalonia.Interactivity;
 using ArchiveMaster.Platforms;
 using FzLib;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace ArchiveMaster.Views;
 
@@ -69,9 +70,39 @@ public partial class MainView : UserControl
         });
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
+    protected override async void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
         permissionService?.CheckPermissions();
+        if (AppConfig.Instance.LoadError != null)
+        {
+            await this.ShowErrorDialogAsync("加载配置失败", AppConfig.Instance.LoadError);
+        }
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        if (Bounds.Width <= 420)
+        {
+            Resources["BoxWidth"] = 160d;
+            Resources["BoxHeight"] = 200d;
+            Resources["ShowDescription"] = false;
+        }
+        else
+        {
+            Resources["BoxWidth"] = 200d;
+            Resources["BoxHeight"] = 280d;
+            Resources["ShowDescription"] = true;
+        }
+    }
+
+    private void ToolItem_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            TopLevel.GetTopLevel(this).FocusManager.ClearFocus();
+            (DataContext as MainViewModel).EnterToolCommand.Execute((sender as ToolItemBox).DataContext);
+        }
     }
 }

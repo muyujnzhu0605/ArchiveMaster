@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Converters">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="Views/SimpleFileDataGridStyle.axaml" />
+        <ResourceInclude Source="Views/FileDataGridStyle.axaml" />
     </ResourceDictionary.MergedDictionaries>
     <FontFamily x:Key="IconFont">avares://ArchiveMaster.Core/Assets/#Segoe Fluent Icons</FontFamily>
     <c:BitmapAssetValueConverter x:Key="BitmapAssetValueConverter" />
