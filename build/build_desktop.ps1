@@ -1,7 +1,6 @@
 ﻿$rawDir = Get-Location
 
 try {
-    $c = $true
     $s = $true
     if (-not (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
         throw "未安装.NET SDK"
@@ -12,11 +11,11 @@ try {
     if ([string]::IsNullOrEmpty($publishDirectory)) {
         $publishDirectory = "Publish"
     }
-    else{
+    else {
         $publishDirectory.Trim('"')
     }
 
-    if  (Test-Path $publishDirectory -PathType Container) {
+    if (Test-Path $publishDirectory -PathType Container) {
         Remove-Item -r $publishDirectory 
     }
 
@@ -27,15 +26,29 @@ try {
     Clear-Host
 
     Write-Output "正在发布win-x64"
-    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o "$publishDirectory/win-x64" --self-contained $c /p:PublishSingleFile=$s
+    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o "$publishDirectory/win-x64" /p:PublishSingleFile=$s
     Move-Item "$publishDirectory/win-x64/ArchiveMaster.UI.Desktop.exe" "$publishDirectory/win-x64/ArchiveMaster.exe"
+
     Write-Output "正在发布linux-x64"
-    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o "$publishDirectory/linux-x64" --self-contained $c /p:PublishSingleFile=$s
- #   Move-Item "$publishDirectory/linux-x64/ArchiveMaster.UI.Desktop" "$publishDirectory/win-x64/ArchiveMaster.exe"
+    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o "$publishDirectory/linux-x64" /p:PublishSingleFile=$s
+    Move-Item "$publishDirectory/linux-x64/ArchiveMaster.UI.Desktop" "$publishDirectory/linux-x64/ArchiveMaster"
 
     Write-Output "正在发布macos-x64"
-    dotnet publish ArchiveMaster.UI.Desktop -r osx-x64 -c Release -o "$publishDirectory/macos-x64" --self-contained $c /p:PublishSingleFile=$s
-#    Move-Item "$publishDirectory/macos-x64/ArchiveMaster.UI.Desktop" "$publishDirectory/win-x64/ArchiveMaster.exe"
+    dotnet publish ArchiveMaster.UI.Desktop -r osx-x64 -c Release -o "$publishDirectory/macos-x64" /p:PublishSingleFile=$s
+    Move-Item "$publishDirectory/macos-x64/ArchiveMaster.UI.Desktop" "$publishDirectory/macos-x64/ArchiveMaster"
+
+    
+    Write-Output "正在发布win-x64-self-contained"
+    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o "$publishDirectory/win-x64-self-contained" --self-contained true /p:PublishSingleFile=$s
+    Move-Item "$publishDirectory/win-x64-self-contained/ArchiveMaster.UI.Desktop.exe" "$publishDirectory/win-x64-self-contained/ArchiveMaster.exe"
+
+    Write-Output "正在发布linux-x64-self-contained"
+    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o "$publishDirectory/linux-x64-self-contained" --self-contained true /p:PublishSingleFile=$s
+    Move-Item "$publishDirectory/linux-x64-self-contained/ArchiveMaster.UI.Desktop" "$publishDirectory/linux-x64-self-contained/ArchiveMaster"
+
+    Write-Output "正在发布macos-x64-self-contained"
+    dotnet publish ArchiveMaster.UI.Desktop -r osx-x64 -c Release -o "$publishDirectory/macos-x64-self-contained" --self-contained true /p:PublishSingleFile=$s
+    Move-Item "$publishDirectory/macos-x64-self-contained/ArchiveMaster.UI.Desktop" "$publishDirectory/macos-x64-self-contained/ArchiveMaster"
    
     Write-Output "操作完成"
 
