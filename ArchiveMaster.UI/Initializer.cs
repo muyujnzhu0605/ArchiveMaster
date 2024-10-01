@@ -34,6 +34,7 @@ public class Initializer
         new PhotoArchiveModuleInitializer(),
         new OfflineSyncModuleInitializer(),
         new DiscArchiveModuleInitializer(),
+        new FileBackupperModuleInitializer(),
     ];
 
     private void InitializeModules()

@@ -1,0 +1,6 @@
+@ArchiveMaster.Service_HostAddress = http://localhost:5113
+
+GET {{ArchiveMaster.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
