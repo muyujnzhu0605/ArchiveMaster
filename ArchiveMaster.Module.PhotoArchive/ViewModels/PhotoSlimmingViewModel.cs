@@ -35,15 +35,17 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     [ObservableProperty]
     private ObservableCollection<string> errorMessages;
+    private readonly AppConfig appConfig;
 
     public override PhotoSlimmingConfig Config => SelectedConfig;
 
     protected override PhotoSlimmingUtility CreateUtilityImplement()
     {
-        return new PhotoSlimmingUtility(Config);
+        return new PhotoSlimmingUtility(Config, appConfig);
     }
 
-    public PhotoSlimmingViewModel(PhotoSlimmingConfig config = null) : base(config)
+    public PhotoSlimmingViewModel(AppConfig appConfig, PhotoSlimmingConfig config = null)
+        : base(config, appConfig)
     {
         Configs = Services.Provider.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
         if (Configs.Count == 0)
@@ -52,6 +54,7 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
         }
 
         SelectedConfig = Configs[0];
+        this.appConfig = appConfig;
     }
 
     public ObservableCollection<PhotoSlimmingConfig> Configs { get; set; }

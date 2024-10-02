@@ -8,8 +8,8 @@ using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DirStructureSyncViewModel(DirStructureSyncConfig config)
-    : TwoStepViewModelBase<DirStructureSyncUtility, DirStructureSyncConfig>(config)
+public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, AppConfig appConfig)
+    : TwoStepViewModelBase<DirStructureSyncUtility, DirStructureSyncConfig>(config, appConfig)
 {
     [ObservableProperty]
     private bool displayMultipleMatches = true;

@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class UselessJpgCleanerViewModel(UselessJpgCleanerConfig config)
-    : TwoStepViewModelBase<UselessJpgCleanerUtility, UselessJpgCleanerConfig>(config)
+public partial class UselessJpgCleanerViewModel(UselessJpgCleanerConfig config, AppConfig appConfig)
+    : TwoStepViewModelBase<UselessJpgCleanerUtility, UselessJpgCleanerConfig>(config, appConfig)
 {
     [ObservableProperty]
     private List<SimpleFileInfo> deletingJpgFiles;

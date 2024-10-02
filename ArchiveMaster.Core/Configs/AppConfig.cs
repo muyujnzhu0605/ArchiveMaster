@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace ArchiveMaster.Configs
@@ -23,34 +24,46 @@ namespace ArchiveMaster.Configs
             WriteIndented = true,
         };
 
-        private static Dictionary<string, ConfigInfo> configs = new Dictionary<string, ConfigInfo>();
+        private Dictionary<string, ConfigInfo> configs = new Dictionary<string, ConfigInfo>();
 
-        private bool isLoaded = false;
         public event EventHandler BeforeSaving;
-
-        public static AppConfig Instance { get; } = new AppConfig();
 
         public bool DebugMode { get; set; }
 
-// #if DEBUG
-//             = true;
-// #endif
+        // #if DEBUG
+        //             = true;
+        // #endif
+
         public int DebugModeLoopDelay { get; set; } = 30;
 
         public Exception LoadError { get; private set; }
 
-        public static void RegisterConfig(ConfigInfo config)
+        public void RegisterConfig(ConfigInfo config)
         {
             configs.Add(config.Key, config);
         }
 
-        public void Load()
+        public void Save(bool raiseEvent = true)
         {
-            if (isLoaded)
+            if (raiseEvent)
             {
-                return;
+                BeforeSaving?.Invoke(this, EventArgs.Empty);
             }
 
+            try
+            {
+                var json = JsonSerializer.Serialize(
+                    configs.Values.ToDictionary(p => p.Key, p => Services.Provider.GetRequiredService(p.Type)),
+                    jsonOptions);
+                File.WriteAllText(configFile, json);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public void Load(IServiceCollection services)
+        {
             try
             {
                 Dictionary<string, object> fileConfigs = new Dictionary<string, object>();
@@ -76,7 +89,7 @@ namespace ArchiveMaster.Configs
                     {
                         try
                         {
-                            Services.Builder.AddSingleton(config.Type, obj);
+                            services.AddSingleton(config.Type, obj);
                         }
                         catch (Exception ex)
                         {
@@ -85,7 +98,7 @@ namespace ArchiveMaster.Configs
                     }
                     else
                     {
-                        Services.Builder.AddSingleton(config.Type);
+                        services.AddSingleton(config.Type);
                     }
                 }
             }
@@ -95,28 +108,8 @@ namespace ArchiveMaster.Configs
                 LoadError = new Exception("加载配置文件失败，将重置配置", ex);
                 foreach (var config in configs.Values)
                 {
-                    Services.Builder.AddSingleton(config.Type);
+                    services.AddSingleton(config.Type);
                 }
-            }
-
-            isLoaded = true;
-        }
-        public void Save(bool raiseEvent = true)
-        {
-            if (raiseEvent)
-            {
-                BeforeSaving?.Invoke(this, EventArgs.Empty);
-            }
-
-            try
-            {
-                var json = JsonSerializer.Serialize(
-                    configs.Values.ToDictionary(p => p.Key, p => Services.Provider.GetRequiredService(p.Type)),
-                    jsonOptions);
-                File.WriteAllText(configFile, json);
-            }
-            catch (Exception ex)
-            {
             }
         }
     }

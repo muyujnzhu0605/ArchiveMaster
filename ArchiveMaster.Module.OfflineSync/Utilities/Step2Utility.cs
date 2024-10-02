@@ -18,7 +18,8 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step2Utility(Step2Config config) : TwoStepUtilityBase<Step2Config>(config)
+    public class Step2Utility(Step2Config config, AppConfig appConfig) :
+        TwoStepUtilityBase<Step2Config>(config, appConfig)
     {
         public override Step2Config Config { get; } = config;
         public Dictionary<string, List<string>> LocalDirectories { get; } = new Dictionary<string, List<string>>();
@@ -119,7 +120,7 @@ namespace ArchiveMaster.Utilities
 
                             break;
                         case ExportMode.Copy:
-                            copy:
+                        copy:
                             int tryCount = 10;
 
                             while (--tryCount > 0)

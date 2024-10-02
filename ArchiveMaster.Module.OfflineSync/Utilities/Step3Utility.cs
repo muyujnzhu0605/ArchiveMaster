@@ -9,7 +9,8 @@ using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
 {
-    public class Step3Utility(Step3Config config) : TwoStepUtilityBase<Step3Config>(config)
+    public class Step3Utility(Step3Config config, AppConfig appConfig)
+        : TwoStepUtilityBase<Step3Config>(config, appConfig)
     {
         private readonly DateTime createTime = DateTime.Now;
         public List<SyncFileInfo> DeletingDirectories { get; private set; }
@@ -98,7 +99,7 @@ namespace ArchiveMaster.Utilities
                 TryForFiles(UpdateFiles, (file, s) =>
                 {
                     string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
-                    string target =file.Path;
+                    string target = file.Path;
                     string oldPath = file.OldRelativePath == null ? null : Path.Combine(file.TopDirectory, file.OldRelativePath);
                     if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) && !File.Exists(patch))
                     {
@@ -201,7 +202,7 @@ namespace ArchiveMaster.Utilities
                 }
 
                 DeletingDirectories.AddRange(deletingDirsInThisTopDir.Select(p => new SyncFileInfo()
-                    { Path = p, TopDirectory = topDir }));
+                { Path = p, TopDirectory = topDir }));
             }
         }
 

@@ -8,7 +8,8 @@ using FzLib.Avalonia.Messages;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PackingViewModel(PackingConfig config) : TwoStepViewModelBase<PackingUtility,PackingConfig>(config)
+public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
+    : TwoStepViewModelBase<PackingUtility, PackingConfig>(config, appConfig)
 {
     [ObservableProperty]
     private List<DiscFilePackage> discFilePackages;
@@ -68,7 +69,7 @@ public partial class PackingViewModel(PackingConfig config) : TwoStepViewModelBa
                         var dir = Path.Combine(Config.TargetDir, index.ToString());
                         if (Directory.Exists(dir))
                         {
-                            Directory.Delete(dir,true);
+                            Directory.Delete(dir, true);
                         }
                     }
                 }
@@ -86,10 +87,10 @@ public partial class PackingViewModel(PackingConfig config) : TwoStepViewModelBa
 
     protected override async Task OnExecutedAsync(CancellationToken token)
     {
-        if (Enumerable.Where<DiscFilePackage>(DiscFilePackages, p=>p.IsChecked)
-            .Any(p => p.Files.Any(q => q.Status==ProcessStatus.Error)))
+        if (Enumerable.Where<DiscFilePackage>(DiscFilePackages, p => p.IsChecked)
+            .Any(p => p.Files.Any(q => q.Status == ProcessStatus.Error)))
         {
-            await this.ShowErrorAsync("导出可能失败","部分文件导出失败，请检查");
+            await this.ShowErrorAsync("导出可能失败", "部分文件导出失败，请检查");
         }
 
     }

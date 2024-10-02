@@ -13,8 +13,8 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureSyncUtility(DirStructureSyncConfig config)
-        : TwoStepUtilityBase<DirStructureSyncConfig>(config)
+    public class DirStructureSyncUtility(DirStructureSyncConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<DirStructureSyncConfig>(config, appConfig)
     {
         public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();
@@ -268,7 +268,7 @@ namespace ArchiveMaster.Utilities
             }
 
             files = files.ToList();
-            
+
             return TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在{copyMoveText}{s.GetFileNumberMessage()}：{file.RelativePath}");

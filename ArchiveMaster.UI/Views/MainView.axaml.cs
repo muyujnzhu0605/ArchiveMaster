@@ -28,12 +28,16 @@ namespace ArchiveMaster.Views;
 
 public partial class MainView : UserControl
 {
+    private readonly AppConfig appConfig;
     private readonly IPermissionService permissionService;
     private CancellationTokenSource loadingToken = null;
 
-    public MainView(MainViewModel viewModel, Initializer initializer, IViewPadding viewPadding = null,
+    public MainView(MainViewModel viewModel,
+        AppConfig appConfig,
+        IViewPadding viewPadding = null,
         IPermissionService permissionService = null)
     {
+        this.appConfig = appConfig;
         this.permissionService = permissionService;
         DataContext = viewModel;
 
@@ -44,7 +48,7 @@ public partial class MainView : UserControl
             Padding = new Thickness(0, viewPadding.GetTop(), 0, viewPadding.GetBottom());
         }
 
-        initializer.ModuleInitializers.ForEach(p => p.RegisterMessages(this));
+        Initializer.ModuleInitializers.ForEach(p => p.RegisterMessages(this));
     }
 
     private void RegisterMessages()
@@ -74,9 +78,9 @@ public partial class MainView : UserControl
     {
         base.OnLoaded(e);
         permissionService?.CheckPermissions();
-        if (AppConfig.Instance.LoadError != null)
+        if (appConfig.LoadError != null)
         {
-            await this.ShowErrorDialogAsync("加载配置失败", AppConfig.Instance.LoadError);
+            await this.ShowErrorDialogAsync("加载配置失败", appConfig.LoadError);
         }
     }
 

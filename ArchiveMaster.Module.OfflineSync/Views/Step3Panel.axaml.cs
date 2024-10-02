@@ -11,14 +11,10 @@ namespace ArchiveMaster.Views
     public partial class Step3Panel : OfflineSyncPanelBase
     {
 
-        public Step3Panel( )
+        public Step3Panel(Step3ViewModel viewModel)
         {
-            ViewModel = new Step3ViewModel();
-            DataContext = ViewModel;
+            DataContext = viewModel;
             InitializeComponent();
-        }
-
-        public Step3ViewModel ViewModel { get; }
-        
+        }        
     }
 }

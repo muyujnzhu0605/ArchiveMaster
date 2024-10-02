@@ -7,11 +7,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace ArchiveMaster.ViewModels;
 
 public partial class
-    DirStructureCloneViewModel(DirStructureCloneConfig config)
-    : TwoStepViewModelBase<DirStructureCloneUtility, DirStructureCloneConfig>(config)
+    DirStructureCloneViewModel(DirStructureCloneConfig config, AppConfig appConfig)
+    : TwoStepViewModelBase<DirStructureCloneUtility, DirStructureCloneConfig>(config, appConfig)
 {
     [ObservableProperty]
-    private BulkObservableCollection<SimpleFileInfo> treeFiles ;
+    private BulkObservableCollection<SimpleFileInfo> treeFiles;
 
     protected override Task OnInitializedAsync()
     {

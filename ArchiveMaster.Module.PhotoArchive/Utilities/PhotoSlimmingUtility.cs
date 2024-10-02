@@ -24,7 +24,7 @@ namespace ArchiveMaster.Utilities
         private readonly Regex rWhite;
         private ConcurrentBag<string> errorMessages;
 
-        public PhotoSlimmingUtility(PhotoSlimmingConfig config) : base(config)
+        public PhotoSlimmingUtility(PhotoSlimmingConfig config, AppConfig appConfig) : base(config, appConfig)
         {
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
             rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);

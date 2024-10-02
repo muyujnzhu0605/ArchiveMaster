@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Model;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.Utilities
 {
@@ -21,6 +22,7 @@ namespace ArchiveMaster.Utilities
 
         public static async Task TestAllAsync()
         {
+            var appConfig = Services.Provider.GetRequiredService<AppConfig>();
             string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             string localDir = Path.Combine(dir, "local");
             string remoteDir = Path.Combine(dir, "remote");
@@ -39,7 +41,7 @@ namespace ArchiveMaster.Utilities
                     SyncDirs = syncDirs,
                     OutputFile = Path.GetTempFileName()
                 };
-                Step1Utility u1 = new Step1Utility(c1);
+                Step1Utility u1 = new Step1Utility(c1, appConfig);
                 await u1.ExecuteAsync();
 
                 string[] searchingDirs =
@@ -57,7 +59,7 @@ namespace ArchiveMaster.Utilities
                 };
                 var match = await Step2Utility.MatchLocalAndOffsiteDirsAsync(c2.OffsiteSnapshot, searchingDirs);
                 c2.MatchingDirs = new ObservableCollection<LocalAndOffsiteDir>(match);
-                Step2Utility u2 = new Step2Utility(c2);
+                Step2Utility u2 = new Step2Utility(c2, appConfig);
                 await u2.InitializeAsync();
 
                 Check(u2.UpdateFiles != null);
@@ -83,7 +85,7 @@ namespace ArchiveMaster.Utilities
                     PatchDir = c2.PatchDir,
                     DeleteMode = DeleteMode.MoveToDeletedFolder,
                 };
-                Step3Utility u3 = new Step3Utility(c3);
+                Step3Utility u3 = new Step3Utility(c3, appConfig);
                 await u3.InitializeAsync();
                 await u3.ExecuteAsync();
                 u3.AnalyzeEmptyDirectories(CancellationToken.None);

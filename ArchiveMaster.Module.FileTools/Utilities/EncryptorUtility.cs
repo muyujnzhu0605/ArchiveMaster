@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class EncryptorUtility(EncryptorConfig config) : TwoStepUtilityBase<EncryptorConfig>(config)
+    public class EncryptorUtility(EncryptorConfig config, AppConfig appConfig) : TwoStepUtilityBase<EncryptorConfig>(config, appConfig)
     {
         public const string EncryptedFileExtension = ".ept";
         public const string DirectoryStructureFile = "$files$.txt";

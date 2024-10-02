@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RepairModifiedTimeViewModel(RepairModifiedTimeConfig config)
-    : TwoStepViewModelBase<RepairModifiedTimeUtility, RepairModifiedTimeConfig>(config)
+public partial class RepairModifiedTimeViewModel(RepairModifiedTimeConfig config, AppConfig appConfig)
+    : TwoStepViewModelBase<RepairModifiedTimeUtility, RepairModifiedTimeConfig>(config, appConfig)
 {
     [ObservableProperty]
-    private List<ExifTimeFileInfo> files=new List<ExifTimeFileInfo>();
+    private List<ExifTimeFileInfo> files = new List<ExifTimeFileInfo>();
 
     protected override Task OnInitializedAsync()
     {

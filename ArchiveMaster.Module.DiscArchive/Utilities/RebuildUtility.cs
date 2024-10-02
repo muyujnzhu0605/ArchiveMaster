@@ -7,12 +7,12 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class RebuildUtility(RebuildConfig config) : DiscUtilityBase<RebuildConfig>(config)
+    public class RebuildUtility(RebuildConfig config, AppConfig appConfig) : DiscUtilityBase<RebuildConfig>(config, appConfig)
     {
         private Dictionary<string, List<DiscFile>> files;
 
         public FileSystemTree FileTree { get; private set; }
-        
+
         public List<RebuildError> rebuildErrors;
         public IReadOnlyList<RebuildError> RebuildErrors => rebuildErrors.AsReadOnly();
 

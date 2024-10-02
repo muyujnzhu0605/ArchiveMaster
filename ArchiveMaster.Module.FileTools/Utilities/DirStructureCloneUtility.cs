@@ -13,8 +13,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureCloneUtility(DirStructureCloneConfig config)
-        : TwoStepUtilityBase<DirStructureCloneConfig>(config)
+    public class DirStructureCloneUtility(DirStructureCloneConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<DirStructureCloneConfig>(config, appConfig)
     {
         public TreeDirInfo RootDir { get; private set; }
 

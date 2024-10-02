@@ -16,7 +16,7 @@ public partial class App : Application
 {
     public override void Initialize()
     {
-        new Initializer().Initialize();
+        Initializer.Initialize();
 
         AvaloniaXamlLoader.Load(this);
         if (OperatingSystem.IsWindows())
@@ -43,10 +43,10 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
+    private async void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         Exit?.Invoke(sender, e);
-        AppConfig.Instance.Save();
+        await Initializer.AppHost.StopAsync();
     }
 
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;

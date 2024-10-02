@@ -7,7 +7,7 @@ namespace ArchiveMaster.Utilities
 {
     public abstract class TwoStepUtilityBase<TConfig> : UtilityBase<TConfig> where TConfig : ConfigBase
     {
-        public TwoStepUtilityBase(TConfig config) : base(config)
+        public TwoStepUtilityBase(TConfig config, AppConfig appConfig) : base(config, appConfig)
         {
         }
 

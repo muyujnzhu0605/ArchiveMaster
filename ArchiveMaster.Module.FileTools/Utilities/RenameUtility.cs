@@ -9,7 +9,7 @@ using FzLib.Program;
 
 namespace ArchiveMaster.Utilities;
 
-public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfig>(config)
+public class RenameUtility(RenameConfig config, AppConfig appConfig) : TwoStepUtilityBase<RenameConfig>(config, appConfig)
 {
     public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
         new Dictionary<string, Func<SimpleFileInfo, string, string>>()

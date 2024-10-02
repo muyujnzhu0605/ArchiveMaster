@@ -19,8 +19,9 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     where TUtility : TwoStepUtilityBase<TConfig>
     where TConfig : ConfigBase
 {
-    public TwoStepViewModelBase(TConfig config, bool enableInitialize = true) : base(config)
+    public TwoStepViewModelBase(TConfig config, AppConfig appConfig, bool enableInitialize = true) : base(config)
     {
+        this.appConfig = appConfig;
         EnableInitialize = enableInitialize;
         CanInitialize = enableInitialize;
         CanExecute = !enableInitialize;
@@ -41,8 +42,10 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     [ObservableProperty]
     private string message = "就绪";
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
+    private readonly AppConfig appConfig;
 
     public bool EnableInitialize { get; }
 
@@ -146,8 +149,8 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken token)
     {
-        Stopwatch sw=Stopwatch.StartNew();
-        AppConfig.Instance.Save(false);
+        Stopwatch sw = Stopwatch.StartNew();
+        appConfig.Save(false);
         var a = sw.ElapsedMilliseconds;
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();

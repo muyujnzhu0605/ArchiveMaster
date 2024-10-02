@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step1ViewModel() : OfflineSyncViewModelBase<Step1Utility, Step1Config, SimpleFileInfo>(false)
+    public partial class Step1ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step1Utility, Step1Config, SimpleFileInfo>(appConfig, false)
     {
         [ObservableProperty]
         private string selectedSyncDir;
@@ -21,7 +21,7 @@ namespace ArchiveMaster.ViewModels
         public override Step1Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step1;
         protected override Step1Utility CreateUtilityImplement()
         {
-            return new Step1Utility(Config);
+            return new Step1Utility(Config, appConfig);
         }
 
         public string SnapshotSuggestedFileName => $"异地备份（{DateTime.Now:yyyyMMdd-HHmmss}）";
@@ -141,11 +141,11 @@ namespace ArchiveMaster.ViewModels
             try
             {
                 if (await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
-                    {
-                        Type = InputDialogMessage.InputDialogType.Text,
-                        Title = "输入目录",
-                        Message = "请输入欲加入的目录地址"
-                    }).Task is string result)
+                {
+                    Type = InputDialogMessage.InputDialogType.Text,
+                    Title = "输入目录",
+                    Message = "请输入欲加入的目录地址"
+                }).Task is string result)
                 {
                     AddSyncDir(result);
                 }

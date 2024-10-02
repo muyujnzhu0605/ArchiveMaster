@@ -20,9 +20,18 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    public MainViewModel(Initializer initializer, IBackCommandService backCommandService = null)
+    [ObservableProperty]
+    private bool isToolOpened;
+
+    [ObservableProperty]
+    private object mainContent;
+
+    [ObservableProperty]
+    private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
+
+    public MainViewModel(AppConfig appConfig, IBackCommandService backCommandService = null)
     {
-        foreach (var view in initializer.Views)
+        foreach (var view in Initializer.Views)
         {
             PanelGroups.Add(view);
         }
@@ -37,16 +46,9 @@ public partial class MainViewModel : ObservableObject
 
             return false;
         });
+        BackCommandService = backCommandService;
     }
-
-    [ObservableProperty]
-    private object mainContent;
-
-    [ObservableProperty]
-    private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
-
-    [ObservableProperty]
-    private bool isToolOpened;
+    public IBackCommandService BackCommandService { get; }
 
     [RelayCommand]
     private void EnterTool(ToolPanelInfo panelInfo)
