@@ -7,5 +7,9 @@ namespace ArchiveMaster.Service.Controllers;
 [Route("[controller]")]
 public class ConfigController : ControllerBase
 {
-  
+    [HttpGet]
+    public string A()
+    {
+        return "hello";
+    }
 }

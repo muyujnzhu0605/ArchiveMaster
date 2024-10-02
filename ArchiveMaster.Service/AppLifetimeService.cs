@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Service;
 
-public class AppLifetimeService:IHostedService
+public class AppLifetimeService : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {

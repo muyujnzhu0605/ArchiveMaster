@@ -9,27 +9,33 @@ using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster
 {
-    public class FileBackupperModuleInitializer : IModuleInitializer
+    public class FileBackupperModuleInitializer : IModuleInitializer, IServiceModuleInitializer
     {
         public string ModuleName => "文件备份工具";
-        
-        public int Order => 5;
+
+        public int Order =>
+#if DEBUG
+            0;
+#else
+            5;
+#endif
 
         public IList<ConfigInfo> Configs =>
         [
             new ConfigInfo(typeof(FileBackupperConfig)),
         ];
-        
+
         public void RegisterServices(IServiceCollection services)
         {
             services.AddTransient<BackupperTasksViewModel>();
 
             services.AddTransient<BackupperTasksPanel>();
-
         }
+
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
@@ -46,5 +52,9 @@ namespace ArchiveMaster
         }
 
         private readonly string baseUrl = "avares://ArchiveMaster.Module.FileBackupper/Assets/";
+
+        public void AddServices(IServiceCollection services)
+        {
+        }
     }
 }

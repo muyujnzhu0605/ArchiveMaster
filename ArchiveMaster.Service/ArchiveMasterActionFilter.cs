@@ -6,10 +6,8 @@ using FrpGUI;
 
 namespace ArchiveMaster.Service;
 
-public class ArchiveMasterActionFilter(AppConfig config) : IActionFilter
+public class ArchiveMasterActionFilter : IActionFilter
 {
-    private readonly AppConfig config = config;
-
     public void OnActionExecuting(ActionExecutingContext context)
     {
         // var token = config.Token;

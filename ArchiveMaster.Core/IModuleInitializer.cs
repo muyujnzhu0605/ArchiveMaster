@@ -1,7 +1,9 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster
 {
@@ -13,5 +15,10 @@ namespace ArchiveMaster
         public string ModuleName { get; }
         public int Order { get; }
         public void RegisterServices(IServiceCollection services);
+    }
+
+    public interface IServiceModuleInitializer
+    {
+        public void AddServices(IServiceCollection services);
     }
 }

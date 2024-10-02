@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.Offlin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.DiscArchive", "ArchiveMaster.Module.DiscArchive\ArchiveMaster.Module.DiscArchive.csproj", "{33A2EC38-172C-4DA8-BF1D-865072142C22}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{0F004A9D-6953-45C4-804E-31474873B19D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "#", "#", "{0F004A9D-6953-45C4-804E-31474873B19D}"
 	ProjectSection(SolutionItems) = preProject
 		build\build_android.ps1 = build\build_android.ps1
 		build\build_desktop.ps1 = build\build_desktop.ps1
@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.UI.Android", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.FileBackupper", "ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj", "{3CFF1F9D-1903-411F-96B0-6904CABEA9D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Service", "ArchiveMaster.Service\ArchiveMaster.Service.csproj", "{71F392F2-E958-4109-8757-E8A324333A40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Service", "ArchiveMaster.Service\ArchiveMaster.Service.csproj", "{71F392F2-E958-4109-8757-E8A324333A40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{C4072B96-4E0F-46D1-8C0A-85E327F35C40}"
 EndProject
@@ -93,14 +93,14 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {1FDF463E-CFE7-477B-94E8-5D38744ECC9A}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{33A2EC38-172C-4DA8-BF1D-865072142C22} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
-		{3CFF1F9D-1903-411F-96B0-6904CABEA9D0} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
+		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 		{4D36C3E2-E53A-4E9E-850E-5D43B90BDBBA} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 		{98187AB8-D1E4-4806-8CF4-A45EE7EAE33D} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
-		{B650BAE5-6F4E-4AAC-BE9F-550CB919240A} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
+		{33A2EC38-172C-4DA8-BF1D-865072142C22} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
+		{3CFF1F9D-1903-411F-96B0-6904CABEA9D0} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1FDF463E-CFE7-477B-94E8-5D38744ECC9A}
 	EndGlobalSection
 EndGlobal

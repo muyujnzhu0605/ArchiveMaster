@@ -33,15 +33,18 @@ internal class Program
 
         // Add services to the container.
 
-        builder.Services.AddControllers(o =>
-            {
-                o.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
-                o.Filters.Add(app.Services.GetRequiredService<ArchiveMasterActionFilter>());
-            }).AddApplicationPart(typeof(FileBackupperModuleInitializer).Assembly)
-            .AddJsonOptions(o => { o.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All); });
+        var mvcBuilder = builder.Services.AddControllers(o =>
+               {
+                   o.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+                   o.Filters.Add(app.Services.GetRequiredService<ArchiveMasterActionFilter>());
+               })
+               .AddJsonOptions(o => { o.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All); });
+
+        new Initializer().Initialize(builder.Services, mvcBuilder);
 
         builder.Services.AddTransient<ArchiveMasterActionFilter>();
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
         // builder.Services.AddSwaggerGen(p =>
         // {
         //     var basePath = Path.GetDirectoryName(typeof(Program).Assembly.Location);//��ȡӦ�ó�������Ŀ¼�����ԣ����ܹ���Ŀ¼Ӱ�죬������ô˷�����ȡ·����

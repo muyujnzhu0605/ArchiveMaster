@@ -7,6 +7,7 @@ using System.Text;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
@@ -41,5 +42,25 @@ namespace ArchiveMaster.ViewModels
         private ObservableCollection<BackupperTask> tasks
             = new ObservableCollection<BackupperTask>(
                 Services.Provider.GetRequiredService<FileBackupperConfig>().Tasks);
+
+        [ObservableProperty]
+        private BackupperTask selectedTask;
+
+        [RelayCommand]
+        private void AddTask()
+        {
+            var task = new BackupperTask();
+            Tasks.Add(task);
+            SelectedTask = task;
+        }
+
+        [RelayCommand]
+        private void DeleteSelectedTask()
+        {
+            if (SelectedTask != null)
+            {
+                Tasks.Remove(SelectedTask);
+            }
+        }
     }
 }
