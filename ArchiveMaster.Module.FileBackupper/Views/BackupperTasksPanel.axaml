@@ -15,50 +15,162 @@
     d:DesignWidth="800"
     x:DataType="vm:BackupperTasksViewModel"
     mc:Ignorable="d">
-    <v:PanelBase.PanelContent />
-    <Grid ColumnDefinitions="*,8,*">
-        <Grid RowDefinitions="*,8,Auto">
-            <ListBox
-                ItemsSource="{Binding Tasks}"
-                SelectedItem="{Binding SelectedTask}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="c:BackupperTask">
-                        <Grid
-                            ColumnDefinitions="*,8,*"
-                            RowDefinitions="Auto,4,Auto">
-                            <TextBlock Text="{Binding Name}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+    <v:PanelBase.PanelContent>
+        <Grid ColumnDefinitions="*,16,*">
+            <Grid RowDefinitions="*,8,Auto">
+                <ListBox
+                    ItemsSource="{Binding Tasks}"
+                    SelectedItem="{Binding SelectedTask}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="c:BackupperTask">
+                            <Grid
+                                ColumnDefinitions="*,8,*"
+                                RowDefinitions="Auto,4,Auto">
+                                <TextBlock Text="{Binding Name}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
-            <StackPanel
-                Grid.Row="2"
-                Margin="0,0,8,0"
-                Orientation="Horizontal"
-                Spacing="8">
-                <Button
-                    Classes="Icon"
-                    Command="{Binding AddTaskCommand}"
-                    Content="&#xE710;"
-                    FontFamily="{StaticResource IconFont}"
-                    ToolTip.Tip="新增" />
-                <Button
-                    Classes="Icon"
-                    Command="{Binding DeleteSelectedTaskCommand}"
-                    Content="&#xE74D;"
-                    FontFamily="{StaticResource IconFont}"
-                    IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
-                    ToolTip.Tip="删除" />
-            </StackPanel>
+                <StackPanel
+                    Grid.Row="2"
+                    Margin="0,0,8,0"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding AddTaskCommand}"
+                        Content="&#xE710;"
+                        FontFamily="{StaticResource IconFont}"
+                        ToolTip.Tip="新增" />
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding DeleteSelectedTaskCommand}"
+                        Content="&#xE74D;"
+                        FontFamily="{StaticResource IconFont}"
+                        IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
+                        ToolTip.Tip="删除" />
+                </StackPanel>
 
+            </Grid>
+
+
+            <ctrl:StackFormItemGroup
+                Grid.Column="2"
+                IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}">
+                <TextBlock
+                    FontWeight="Bold"
+                    Text="基本信息" />
+                <ctrl:FormItem Label="任务名：">
+                    <TextBox Text="{Binding SelectedTask.Name}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem Label="备份文件存放目录：">
+                    <TextBox Text="{Binding SelectedTask.BackupDir}" />
+                </ctrl:FormItem>
+
+                <TextBlock
+                    Margin="0,8,0,0"
+                    FontWeight="Bold"
+                    Text="备份内容" />
+                <ctrl:FormItem Label="备份文件列表：">
+                    <Grid
+                        ColumnDefinitions="*,8,Auto"
+                        RowDefinitions="Auto,8,Auto,8,Auto,*">
+                        <ListBox
+                            Grid.RowSpan="99"
+                            BorderThickness="1"
+                            ItemsSource="{Binding SelectedTask.IncludingFiles}"
+                            SelectedItem="{Binding SelectedIncludingFile}" />
+                        <Button
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding BrowseIncludingFileCommand}"
+                            Content="&#xE8E5;"
+                            FontFamily="{StaticResource IconFont}"
+                            ToolTip.Tip="浏览并新增备份文件" />
+                        <Button
+                            Grid.Row="2"
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding InputIncludingFileCommand}"
+                            Content="&#xE92E;"
+                            FontFamily="{StaticResource IconFont}"
+                            ToolTip.Tip="输入以新增备份文件" />
+                        <Button
+                            Grid.Row="4"
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding RemoveIncludingFileCommand}"
+                            Content="&#xE74D;"
+                            FontFamily="{StaticResource IconFont}"
+                            IsEnabled="{Binding SelectedIncludingFile, Converter={StaticResource NotNullConverter}}"
+                            ToolTip.Tip="移除选中的备份文件" />
+                    </Grid>
+                </ctrl:FormItem>
+                <ctrl:FormItem Label="备份文件夹列表：">
+                    <Grid
+                        ColumnDefinitions="*,8,Auto"
+                        RowDefinitions="Auto,8,Auto,8,Auto,*">
+                        <ListBox
+                            Grid.RowSpan="99"
+                            BorderThickness="1"
+                            ItemsSource="{Binding SelectedTask.IncludingFolders}"
+                            SelectedItem="{Binding SelectedIncludingFolder}" />
+                        <Button
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding BrowseIncludingFolderCommand}"
+                            Content="&#xED25;"
+                            FontFamily="{StaticResource IconFont}"
+                            ToolTip.Tip="浏览并新增备份文件" />
+                        <Button
+                            Grid.Row="2"
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding InputIncludingFolderCommand}"
+                            Content="&#xE92E;"
+                            FontFamily="{StaticResource IconFont}"
+                            ToolTip.Tip="输入以新增备份文件" />
+                        <Button
+                            Grid.Row="4"
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding RemoveIncludingFolderCommand}"
+                            Content="&#xE74D;"
+                            FontFamily="{StaticResource IconFont}"
+                            IsEnabled="{Binding SelectedIncludingFolder, Converter={StaticResource NotNullConverter}}"
+                            ToolTip.Tip="移除选中的备份文件" />
+                    </Grid>
+                </ctrl:FormItem>
+
+                <ctrl:FormItem Label="黑名单：">
+                    <v:BlackListTextBox
+                        Text="{Binding SelectedTask.BlackList}"
+                        UseRegex="{Binding SelectedTask.BlackListUseRegex}" />
+                </ctrl:FormItem>
+
+
+                <TextBlock
+                    Margin="0,8,0,0"
+                    FontWeight="Bold"
+                    Text="备份方式" />
+                <ctrl:FormItem Label="定时备份：">
+                    <Grid ColumnDefinitions="Auto,8,*">
+                        <CheckBox IsChecked="{Binding SelectedTask.ByTimeInterval}" />
+                        <TextBox
+                            Grid.Column="2"
+                            IsEnabled="{Binding SelectedTask.ByTimeInterval}"
+                            Text="{Binding SelectedTask.TimeInterval}" />
+                    </Grid>
+                </ctrl:FormItem>
+                <ctrl:FormItem Label="实时备份：">
+                    <CheckBox
+                        Content="监测文件和目录的改动"
+                        IsChecked="{Binding SelectedTask.ByWatching}" />
+                </ctrl:FormItem>
+
+
+            </ctrl:StackFormItemGroup>
         </Grid>
-
-
-        <ctrl:StackFormItemGroup Grid.Column="2">
-            <ctrl:FormItem Label="任务名：">
-                <TextBox Text="{Binding Name}" />
-            </ctrl:FormItem>
-        </ctrl:StackFormItemGroup>
-    </Grid>
+    </v:PanelBase.PanelContent>
 </v:PanelBase>

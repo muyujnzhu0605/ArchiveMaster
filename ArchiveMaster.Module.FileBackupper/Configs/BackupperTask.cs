@@ -10,6 +10,9 @@ public partial class BackupperTask : ObservableObject
 
     [ObservableProperty]
     private string blackList;
+    
+    [ObservableProperty]
+    private bool blackListUseRegex;
 
     [ObservableProperty]
     private bool byTimeInterval = true;

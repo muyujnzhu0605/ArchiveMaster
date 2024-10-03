@@ -18,7 +18,7 @@ namespace ArchiveMaster.ViewModels
     public partial class Step2ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step2Utility, Step2Config, SyncFileInfo>(appConfig)
     {
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        public override Step2Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step2;
+        public override Step2Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
         protected override Step2Utility CreateUtilityImplement()
         {
             return new Step2Utility(Config, appConfig);

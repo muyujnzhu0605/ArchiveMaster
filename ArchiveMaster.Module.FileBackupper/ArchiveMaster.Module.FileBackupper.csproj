@@ -14,9 +14,9 @@
     <None Remove="obj\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+<!--  <ItemGroup>-->
+<!--    <FrameworkReference Include="Microsoft.AspNetCore.App" />-->
+<!--  </ItemGroup>-->
 
   <ItemGroup>
     <Folder Include="Enums\" />

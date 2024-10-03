@@ -66,13 +66,14 @@
         </Setter>
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid RowDefinitions="*,8,Auto">
-                    <Border
-                        x:Name="DataGridBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
+                <Border
+                    x:Name="DataGridBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid RowDefinitions="*,8,Auto">
+
                         <Grid
                             ClipToBounds="True"
                             ColumnDefinitions="Auto,*,Auto"
@@ -142,53 +143,55 @@
                                 IsHitTestVisible="False"
                                 IsVisible="{Binding !$parent[DataGrid].IsEnabled}" />
                         </Grid>
-                    </Border>
-                    <Grid
-                        Grid.Row="2"
-                        ColumnDefinitions="Auto,0,Auto,16,*">
-                        <StackPanel
-                            x:Name="stkSelectionButtons"
-                            Margin="0,0,8,0"
-                            Orientation="Horizontal"
-                            Spacing="8">
-                            <Button
-                                Classes="Icon"
-                                Content="&#xE8B3;"
-                                FontFamily="{StaticResource IconFont}"
-                                ToolTip.Tip="全选" />
-                            <Button
-                                Classes="Icon"
-                                Content="&#xE8AB;"
-                                FontFamily="{StaticResource IconFont}"
-                                ToolTip.Tip="反选" />
-                            <Button
-                                Classes="Icon"
-                                Content="&#xE8E6;"
-                                FontFamily="{StaticResource IconFont}"
-                                ToolTip.Tip="清除" />
-                            <ToggleButton
-                                Classes="Icon"
-                                Content="&#xE762;"
-                                FontFamily="{StaticResource IconFont}"
-                                ToolTip.Tip="仅处理选中的行" />
-                        </StackPanel>
-                        <ContentControl
-                            Grid.Column="2"
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Center"
-                            IsVisible="{Binding $parent[DataGrid].ShowCount}">
-                            <TextBlock
-                                IsVisible="{Binding $parent[DataGrid].ItemsSource, Converter={StaticResource NotNullConverter}}"
-                                Text="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}" />
-                        </ContentControl>
-                        <ContentControl
-                            Grid.Column="4"
-                            Margin="0,8,0,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Content="{TemplateBinding Footer}" />
+
+                        <Grid
+                            Grid.Row="2"
+                            Margin="4"
+                            ColumnDefinitions="Auto,0,Auto,16,*">
+                            <StackPanel
+                                x:Name="stkSelectionButtons"
+                                Margin="0,0,8,0"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <Button
+                                    Classes="Icon"
+                                    Content="&#xE8B3;"
+                                    FontFamily="{StaticResource IconFont}"
+                                    ToolTip.Tip="全选" />
+                                <Button
+                                    Classes="Icon"
+                                    Content="&#xE8AB;"
+                                    FontFamily="{StaticResource IconFont}"
+                                    ToolTip.Tip="反选" />
+                                <Button
+                                    Classes="Icon"
+                                    Content="&#xE8E6;"
+                                    FontFamily="{StaticResource IconFont}"
+                                    ToolTip.Tip="清除" />
+                                <ToggleButton
+                                    Classes="Icon"
+                                    Content="&#xE762;"
+                                    FontFamily="{StaticResource IconFont}"
+                                    ToolTip.Tip="仅处理选中的行" />
+                            </StackPanel>
+                            <ContentControl
+                                Grid.Column="2"
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding $parent[DataGrid].ShowCount}">
+                                <TextBlock
+                                    IsVisible="{Binding $parent[DataGrid].ItemsSource, Converter={StaticResource NotNullConverter}}"
+                                    Text="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}" />
+                            </ContentControl>
+                            <ContentControl
+                                Grid.Column="4"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Content="{TemplateBinding Footer}" />
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Border>
             </ControlTemplate>
         </Setter>
     </ControlTheme>
@@ -201,13 +204,14 @@
         <Setter Property="RowDetailsTemplate" Value="{x:Null}" />
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid RowDefinitions="*,8,Auto">
-                    <Border
-                        x:Name="DataGridBorder"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{TemplateBinding CornerRadius}">
+                <Border
+                    x:Name="DataGridBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid RowDefinitions="*,8,Auto">
+
                         <Grid
                             ClipToBounds="True"
                             ColumnDefinitions="Auto,*,Auto"
@@ -277,30 +281,31 @@
                                 IsHitTestVisible="False"
                                 IsVisible="{Binding !$parent[DataGrid].IsEnabled}" />
                         </Grid>
-                    </Border>
-                    <Grid
-                        Grid.Row="2"
-                        ColumnDefinitions="Auto,16,*">
+                        <Grid
+                            Grid.Row="2"
+                            Margin="4"
+                            ColumnDefinitions="Auto,16,*">
 
-                        <ContentControl
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Center"
-                            IsVisible="{Binding $parent[DataGrid].ShowCount}">
-                            <ContentControl.Resources>
-                                <c2:TreeFileDataGridStatisticsConverter x:Key="TreeFileDataGridStatisticsConverter" />
-                            </ContentControl.Resources>
-                            <TextBlock
-                                IsVisible="{Binding $parent[DataGrid].ItemsSource, Converter={StaticResource NotNullConverter}}"
-                                Text="{Binding $parent[DataGrid].ItemsSource, Converter={StaticResource TreeFileDataGridStatisticsConverter}}" />
-                        </ContentControl>
-                        <ContentControl
-                            Grid.Column="2"
-                            Margin="0,8,0,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Content="{TemplateBinding Footer}" />
+                            <ContentControl
+                                Margin="0,0,8,0"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding $parent[DataGrid].ShowCount}">
+                                <ContentControl.Resources>
+                                    <c2:TreeFileDataGridStatisticsConverter x:Key="TreeFileDataGridStatisticsConverter" />
+                                </ContentControl.Resources>
+                                <TextBlock
+                                    IsVisible="{Binding $parent[DataGrid].ItemsSource, Converter={StaticResource NotNullConverter}}"
+                                    Text="{Binding $parent[DataGrid].ItemsSource, Converter={StaticResource TreeFileDataGridStatisticsConverter}}" />
+                            </ContentControl>
+                            <ContentControl
+                                Grid.Column="2"
+                                Margin="0,8,0,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Content="{TemplateBinding Footer}" />
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Border>
             </ControlTemplate>
         </Setter>
     </ControlTheme>

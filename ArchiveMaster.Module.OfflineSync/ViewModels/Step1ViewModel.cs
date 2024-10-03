@@ -18,7 +18,7 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private string selectedSyncDir;
 
-        public override Step1Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step1;
+        public override Step1Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step1;
         protected override Step1Utility CreateUtilityImplement()
         {
             return new Step1Utility(Config, appConfig);
@@ -87,7 +87,7 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand]
         private async Task BrowseDirAsync()
         {
-            var storageProvider = WeakReferenceMessenger.Default.Send(new GetStorageProviderMessage()).StorageProvider;
+            var storageProvider = this.SendMessage(new GetStorageProviderMessage()).StorageProvider;
             var files = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
             {
                 AllowMultiple = true,
@@ -140,7 +140,7 @@ namespace ArchiveMaster.ViewModels
         {
             try
             {
-                if (await WeakReferenceMessenger.Default.Send(new InputDialogMessage()
+                if (await this.SendMessage(new InputDialogMessage()
                 {
                     Type = InputDialogMessage.InputDialogType.Text,
                     Title = "输入目录",

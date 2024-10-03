@@ -41,6 +41,7 @@ public static class Initializer
             throw new InvalidOperationException("已经初始化");
         }
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        
         var builder = Host.CreateApplicationBuilder();
         var config = new AppConfig();
         InitializeModules(builder.Services, config);
