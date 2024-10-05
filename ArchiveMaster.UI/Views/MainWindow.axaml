@@ -1,10 +1,11 @@
-<Window
+<v:ExtendedWindow
     x:Class="ArchiveMaster.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:FzLib.Avalonia.Controls"
     xmlns:views="clr-namespace:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     Title="文件归档大师"
@@ -12,4 +13,14 @@
     Height="800"
     Icon="/Assets/icon_light.ico"
     WindowStartupLocation="CenterScreen"
-    mc:Ignorable="d" />
+    mc:Ignorable="d">
+    <v:ExtendedWindow.TitleBarFooter>
+        <StackPanel Orientation="Horizontal">
+            <Button
+                Margin="0,-4"
+                Classes="Icon"
+                Click="LightDarkButton_OnClick"
+                Content="{StaticResource BlueLight}" />
+        </StackPanel>
+    </v:ExtendedWindow.TitleBarFooter>
+</v:ExtendedWindow>

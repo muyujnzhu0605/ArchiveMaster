@@ -38,11 +38,11 @@
             <Button
                 Grid.Column="2"
                 Command="{Binding AddConfigCommand}"
-                Content="&#xE109;" />
+                Content="{StaticResource Add}" />
             <Button
                 Grid.Column="4"
                 Command="{Binding RemoveConfigCommand}"
-                Content="&#xE107;" />
+                Content="{StaticResource Delete}" />
         </Grid>
     </v:PanelBase.RightTopContent>
 </v:TwoStepPanelBase>

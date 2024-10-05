@@ -189,14 +189,14 @@
                 <Button
                     Classes="Icon"
                     Command="{Binding SelectAllCommand}"
-                    Content="&#xE8B3;"
+                    Content="{StaticResource SelectAll}"
                     FontFamily="{StaticResource IconFont}"
                     ToolTip.Tip="全选" />
                 <Button
                     Grid.Column="2"
                     Classes="Icon"
                     Command="{Binding SelectNoneCommand}"
-                    Content="&#xE8E6;"
+                    Content="{StaticResource ClearSelection}"
                     FontFamily="{StaticResource IconFont}"
                     ToolTip.Tip="清除" />
             </Grid>

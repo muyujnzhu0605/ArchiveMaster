@@ -2,14 +2,17 @@
 using ArchiveMaster.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Messaging;
+using FzLib.Avalonia.Controls;
 
 namespace ArchiveMaster.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ExtendedWindow
 {
     public MainWindow(MainViewModel viewModel, MainView view)
     {
@@ -52,5 +55,17 @@ public partial class MainWindow : Window
 
         ExtendClientAreaToDecorationsHint = true;
         ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
+    }
+
+    private void LightDarkButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (App.Current.ActualThemeVariant == ThemeVariant.Light)
+        {
+            App.Current.RequestedThemeVariant=ThemeVariant.Dark;
+        }
+        else
+        {
+            App.Current.RequestedThemeVariant=ThemeVariant.Light;
+        }
     }
 }

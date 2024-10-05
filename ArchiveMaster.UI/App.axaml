@@ -13,7 +13,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://FzLib.Avalonia/Resources.axaml" />
-                <ResourceInclude Source="avares://ArchiveMaster.Core/Brushes.axaml" />
                 <ResourceInclude Source="avares://ArchiveMaster.Core/GlobalResources.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

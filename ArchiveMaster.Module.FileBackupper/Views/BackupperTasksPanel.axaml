@@ -40,13 +40,13 @@
                     <Button
                         Classes="Icon"
                         Command="{Binding AddTaskCommand}"
-                        Content="&#xE710;"
+                        Content="{StaticResource Add}"
                         FontFamily="{StaticResource IconFont}"
                         ToolTip.Tip="新增" />
                     <Button
                         Classes="Icon"
                         Command="{Binding DeleteSelectedTaskCommand}"
-                        Content="&#xE74D;"
+                        Content="{StaticResource Delete}"
                         FontFamily="{StaticResource IconFont}"
                         IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
                         ToolTip.Tip="删除" />
@@ -85,7 +85,7 @@
                             Grid.Column="2"
                             Classes="Icon"
                             Command="{Binding BrowseIncludingFileCommand}"
-                            Content="&#xE8E5;"
+                            Content="{StaticResource OpenFile}"
                             FontFamily="{StaticResource IconFont}"
                             ToolTip.Tip="浏览并新增备份文件" />
                         <Button
@@ -93,7 +93,7 @@
                             Grid.Column="2"
                             Classes="Icon"
                             Command="{Binding InputIncludingFileCommand}"
-                            Content="&#xE92E;"
+                            Content="{StaticResource KeyboardStandard}"
                             FontFamily="{StaticResource IconFont}"
                             ToolTip.Tip="输入以新增备份文件" />
                         <Button
@@ -101,7 +101,7 @@
                             Grid.Column="2"
                             Classes="Icon"
                             Command="{Binding RemoveIncludingFileCommand}"
-                            Content="&#xE74D;"
+                            Content="{StaticResource Delete}"
                             FontFamily="{StaticResource IconFont}"
                             IsEnabled="{Binding SelectedIncludingFile, Converter={StaticResource NotNullConverter}}"
                             ToolTip.Tip="移除选中的备份文件" />
@@ -120,7 +120,7 @@
                             Grid.Column="2"
                             Classes="Icon"
                             Command="{Binding BrowseIncludingFolderCommand}"
-                            Content="&#xED25;"
+                            Content="{StaticResource OpenFolderHorizontal}"
                             FontFamily="{StaticResource IconFont}"
                             ToolTip.Tip="浏览并新增备份文件" />
                         <Button
@@ -128,7 +128,7 @@
                             Grid.Column="2"
                             Classes="Icon"
                             Command="{Binding InputIncludingFolderCommand}"
-                            Content="&#xE92E;"
+                            Content="{StaticResource KeyboardStandard}"
                             FontFamily="{StaticResource IconFont}"
                             ToolTip.Tip="输入以新增备份文件" />
                         <Button
@@ -136,7 +136,7 @@
                             Grid.Column="2"
                             Classes="Icon"
                             Command="{Binding RemoveIncludingFolderCommand}"
-                            Content="&#xE74D;"
+                            Content="{StaticResource Delete}"
                             FontFamily="{StaticResource IconFont}"
                             IsEnabled="{Binding SelectedIncludingFolder, Converter={StaticResource NotNullConverter}}"
                             ToolTip.Tip="移除选中的备份文件" />
