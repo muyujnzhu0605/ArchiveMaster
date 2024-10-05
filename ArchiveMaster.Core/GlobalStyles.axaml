@@ -67,55 +67,9 @@
 
     </Style>
 
-    <!-- <Style Selector="ListBox"> -->
-    <!--     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" /> -->
-    <!--     <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" /> -->
-    <!--     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" /> -->
-    <!--     <Style Selector="^:pointerover"> -->
-    <!--         <Style Selector="^ /template/ Border#border"> -->
-    <!--             <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" /> -->
-    <!--             ~1~ <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" /> @1@ -->
-    <!--         </Style> -->
-    <!--     </Style> -->
-    <!--     <Style Selector="^:disabled"> -->
-    <!--         <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" /> -->
-    <!--    -->
-    <!--         <Style Selector="^ /template/ Border#border"> -->
-    <!--             <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" /> -->
-    <!--             <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" /> -->
-    <!--         </Style> -->
-    <!--     </Style> -->
-    <!-- </Style> -->
-    <Style Selector=":is(ListBox)">
+    <Style Selector=":is(ListBox), :is(DataGrid), :is(TreeView)">
         <Setter Property="Background" Value="{DynamicResource Background2}" />
     </Style>
-
-    <Style Selector=":is(DataGrid)">
-        <Setter Property="Background" Value="{DynamicResource Background2}" />
-    </Style>
-
-
-    <!-- <Style Selector=":is(DataGrid)"> -->
-    <!--     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" /> -->
-    <!--     <Setter Property="Background" Value="Transparent" /> -->
-    <!--     ~1~ <Setter Property="Grid.RowSpan" Value="99" /> @1@ -->
-    <!--     <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" /> -->
-    <!--     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" /> -->
-    <!--     <Style Selector="^:pointerover"> -->
-    <!--         <Style Selector="^ /template/ Border#DataGridBorder"> -->
-    <!--             <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" /> -->
-    <!--             ~1~ <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" /> @1@ -->
-    <!--         </Style> -->
-    <!--     </Style> -->
-    <!--     <Style Selector="^:disabled"> -->
-    <!--         <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" /> -->
-    <!--    -->
-    <!--         <Style Selector="^ /template/ Border#border"> -->
-    <!--             <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" /> -->
-    <!--             <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" /> -->
-    <!--         </Style> -->
-    <!--     </Style> -->
-    <!-- </Style> -->
 
     <Style Selector="ToggleButton.Icon">
         <Setter Property="Padding" Value="6" />
