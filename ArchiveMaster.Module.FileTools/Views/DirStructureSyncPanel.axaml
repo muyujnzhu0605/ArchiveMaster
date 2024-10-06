@@ -142,10 +142,10 @@
                         IsChecked="{Binding Config.CompareName}" />
                     <CheckBox
                         Content="匹配文件大小"
-                        IsChecked="{Binding CompareLength}" />
+                        IsChecked="{Binding Config.CompareLength}" />
                     <CheckBox
                         Content="匹配修改时间"
-                        IsChecked="{Binding CompareModifiedTime}" />
+                        IsChecked="{Binding Config.CompareModifiedTime}" />
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
 
