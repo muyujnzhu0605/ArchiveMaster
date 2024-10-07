@@ -64,83 +64,16 @@
                 <ctrl:FormItem Label="任务名：">
                     <TextBox Text="{Binding SelectedTask.Name}" />
                 </ctrl:FormItem>
-                <ctrl:FormItem Label="备份文件存放目录：">
-                    <TextBox Text="{Binding SelectedTask.BackupDir}" />
+                <ctrl:FormItem Label="需要备份的目录：">
+                    <ctrl:FilePickerTextBox
+                        FileNames="{Binding SelectedTask.SourceDir}"
+                        Type="OpenFolder" />
                 </ctrl:FormItem>
 
-                <TextBlock
-                    Margin="0,8,0,0"
-                    FontWeight="Bold"
-                    Text="备份内容" />
-                <ctrl:FormItem Label="备份文件列表：">
-                    <Grid
-                        ColumnDefinitions="*,8,Auto"
-                        RowDefinitions="Auto,8,Auto,8,Auto,*">
-                        <ListBox
-                            Grid.RowSpan="99"
-                            BorderThickness="1"
-                            ItemsSource="{Binding SelectedTask.IncludingFiles}"
-                            SelectedItem="{Binding SelectedIncludingFile}" />
-                        <Button
-                            Grid.Column="2"
-                            Classes="Icon"
-                            Command="{Binding BrowseIncludingFileCommand}"
-                            Content="{StaticResource OpenFile}"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="浏览并新增备份文件" />
-                        <Button
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Classes="Icon"
-                            Command="{Binding InputIncludingFileCommand}"
-                            Content="{StaticResource KeyboardStandard}"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="输入以新增备份文件" />
-                        <Button
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Classes="Icon"
-                            Command="{Binding RemoveIncludingFileCommand}"
-                            Content="{StaticResource Delete}"
-                            FontFamily="{StaticResource IconFont}"
-                            IsEnabled="{Binding SelectedIncludingFile, Converter={StaticResource NotNullConverter}}"
-                            ToolTip.Tip="移除选中的备份文件" />
-                    </Grid>
-                </ctrl:FormItem>
-                <ctrl:FormItem Label="备份文件夹列表：">
-                    <Grid
-                        ColumnDefinitions="*,8,Auto"
-                        RowDefinitions="Auto,8,Auto,8,Auto,*">
-                        <ListBox
-                            Grid.RowSpan="99"
-                            BorderThickness="1"
-                            ItemsSource="{Binding SelectedTask.IncludingFolders}"
-                            SelectedItem="{Binding SelectedIncludingFolder}" />
-                        <Button
-                            Grid.Column="2"
-                            Classes="Icon"
-                            Command="{Binding BrowseIncludingFolderCommand}"
-                            Content="{StaticResource OpenFolderHorizontal}"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="浏览并新增备份文件" />
-                        <Button
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Classes="Icon"
-                            Command="{Binding InputIncludingFolderCommand}"
-                            Content="{StaticResource KeyboardStandard}"
-                            FontFamily="{StaticResource IconFont}"
-                            ToolTip.Tip="输入以新增备份文件" />
-                        <Button
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Classes="Icon"
-                            Command="{Binding RemoveIncludingFolderCommand}"
-                            Content="{StaticResource Delete}"
-                            FontFamily="{StaticResource IconFont}"
-                            IsEnabled="{Binding SelectedIncludingFolder, Converter={StaticResource NotNullConverter}}"
-                            ToolTip.Tip="移除选中的备份文件" />
-                    </Grid>
+                <ctrl:FormItem Label="备份文件存放目录：">
+                    <ctrl:FilePickerTextBox
+                        FileNames="{Binding SelectedTask.BackupDir}"
+                        Type="OpenFolder" />
                 </ctrl:FormItem>
 
                 <ctrl:FormItem Label="黑名单：">
@@ -169,6 +102,9 @@
                         IsChecked="{Binding SelectedTask.ByWatching}" />
                 </ctrl:FormItem>
 
+                <Button
+                    Command="{Binding TestFullBackupCommand}"
+                    Content="测试全量备份" />
 
             </ctrl:StackFormItemGroup>
         </Grid>

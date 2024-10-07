@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
 using static System.Net.Mime.MediaTypeNames;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Utilities
@@ -216,7 +217,7 @@ namespace ArchiveMaster.Utilities
             int index = 0;
             NotifyProgressIndeterminate();
             NotifyMessage($"正在初始化");
-            var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
+            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
             await Task.Run(() =>
             {
                 var step1Model = ZipUtility.ReadFromZip<Step1Model>(Config.OffsiteSnapshot);

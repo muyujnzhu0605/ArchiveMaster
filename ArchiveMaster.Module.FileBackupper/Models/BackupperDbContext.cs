@@ -23,7 +23,9 @@ public class BackupperDbContext : DbContext
 
     public DbSet<BackupSnapshotEntity> Snapshots { get; set; }
 
-    public DbSet<BackupFileEntity> Files { get; set; }
+    public DbSet<FileRecordEntity> Records { get; set; }
+    
+    public DbSet<PhysicalFileEntity> Files { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -32,9 +34,17 @@ public class BackupperDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<BackupFileEntity>()
+        modelBuilder.Entity<FileRecordEntity>()
             .HasOne(b => b.Snapshot)
-            .WithMany() // 这里根据你的需求决定，如果 `BackupSnapshotEntity` 也有对应的 BackupFiles，可以添加 WithMany(b => b.BackupFiles)
+            .WithMany() 
             .HasForeignKey(b => b.SnapshotId);
+        modelBuilder.Entity<FileRecordEntity>()
+            .HasOne(b => b.PhysicalFile)
+            .WithMany() 
+            .HasForeignKey(b => b.PhysicalFileId);
+        modelBuilder.Entity<PhysicalFileEntity>()
+            .HasOne(b=>b.FullSnapshot)
+            .WithMany()
+            .HasForeignKey(b => b.FullSnapshotId);
     }
 }

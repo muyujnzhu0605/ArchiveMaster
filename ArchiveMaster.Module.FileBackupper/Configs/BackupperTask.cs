@@ -21,10 +21,7 @@ public partial class BackupperTask : ObservableObject
     private bool byWatching = true;
 
     [ObservableProperty]
-    private ObservableCollection<string> includingFiles = new ObservableCollection<string>();
-
-    [ObservableProperty]
-    private ObservableCollection<string> includingFolders = new ObservableCollection<string>();
+    private string sourceDir;
 
     [ObservableProperty]
     private string name = "新备份任务";

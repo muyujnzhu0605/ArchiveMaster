@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Helpers;
 
 namespace ArchiveMaster.Utilities
 {
@@ -196,11 +197,7 @@ namespace ArchiveMaster.Utilities
             NotifyMessage("正在枚举文件");
 
             await TryForFilesAsync(new DirectoryInfo(sourceDir)
-                .EnumerateFiles("*", new EnumerationOptions()
-                {
-                    IgnoreInaccessible = true,
-                    RecurseSubdirectories = true,
-                })
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
                 .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 var isEncrypted = IsEncryptedFile(file.Path);

@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using DiscUtils.Iso9660;
 
@@ -16,7 +17,7 @@ namespace ArchiveMaster.Utilities
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
+            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
             DiscFilePackageCollection packages = new DiscFilePackageCollection();
             NotifyMessage("正在搜索文件");
 

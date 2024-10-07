@@ -1,16 +1,16 @@
 using System.Text.RegularExpressions;
 using ArchiveMaster.ViewModels;
 
-namespace ArchiveMaster.Utilities;
+namespace ArchiveMaster.Helpers;
 
-public class BlackListUtility
+public class BlackListHelper
 {
     private readonly string blackList;
     private readonly bool blackListUseRegex;
     private readonly string[] blackStrings;
     private readonly Regex[] blackRegexs;
 
-    public BlackListUtility(string blackList, bool blackListUseRegex)
+    public BlackListHelper(string blackList, bool blackListUseRegex)
     {
         this.blackList = blackList;
         this.blackListUseRegex = blackListUseRegex;
