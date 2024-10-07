@@ -37,7 +37,7 @@ namespace ArchiveMaster.ViewModels
                         @"C:\Users\autod\Desktop\备份文件1",
                         @"C:\Users\autod\Desktop\备份文件2"
                     },
-                    BackupDirs = @"C:\Users\autod\Desktop\备份文件夹",
+                    BackupDir = @"C:\Users\autod\Desktop\备份文件夹",
                     BlackList = "黑名单",
                     BlackListUseRegex = true
                 });

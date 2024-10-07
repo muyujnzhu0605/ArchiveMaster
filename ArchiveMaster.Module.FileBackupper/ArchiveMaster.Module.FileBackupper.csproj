@@ -19,13 +19,15 @@
 <!--  </ItemGroup>-->
 
   <ItemGroup>
-    <Folder Include="Enums\" />
-    <Folder Include="Utilities\" />
     <Folder Include="ViewModels\FileSystem\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
   </ItemGroup>
 
 </Project>

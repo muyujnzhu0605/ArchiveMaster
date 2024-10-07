@@ -6,7 +6,7 @@ namespace ArchiveMaster.Configs;
 public partial class BackupperTask : ObservableObject
 {
     [ObservableProperty]
-    private string backupDirs;
+    private string backupDir;
 
     [ObservableProperty]
     private string blackList;
