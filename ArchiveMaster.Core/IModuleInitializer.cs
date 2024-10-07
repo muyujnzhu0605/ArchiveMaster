@@ -16,9 +16,4 @@ namespace ArchiveMaster
         public int Order { get; }
         public void RegisterServices(IServiceCollection services);
     }
-
-    public interface IServiceModuleInitializer
-    {
-        public void AddServices(IServiceCollection services);
-    }
 }

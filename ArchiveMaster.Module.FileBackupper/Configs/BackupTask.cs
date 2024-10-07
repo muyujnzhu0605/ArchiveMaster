@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace ArchiveMaster.Configs;
 
-public partial class BackupperTask : ObservableObject
+public partial class BackupTask : ConfigBase
 {
     [ObservableProperty]
     private string backupDir;
@@ -28,4 +28,9 @@ public partial class BackupperTask : ObservableObject
 
     [ObservableProperty]
     private TimeSpan timeInterval = TimeSpan.FromHours(1);
+
+    public override void Check()
+    {
+        
+    }
 }

@@ -20,4 +20,5 @@ public class FileRecordEntity : EntityBase
     public string Message { get; set; }
     public ProcessStatus Status { get; set; }
     public int SnapshotId { get; set; }
+    public FileRecordType Type { get; set; }
 }

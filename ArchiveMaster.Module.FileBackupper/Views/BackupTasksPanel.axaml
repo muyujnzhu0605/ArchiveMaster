@@ -1,5 +1,5 @@
 ﻿<v:PanelBase
-    x:Class="ArchiveMaster.Views.BackupperTasksPanel"
+    x:Class="ArchiveMaster.Views.BackupTasksPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Configs"
@@ -13,7 +13,7 @@
     xmlns:vm="using:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="vm:BackupperTasksViewModel"
+    x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
         <Grid ColumnDefinitions="*,16,*">
@@ -22,7 +22,7 @@
                     ItemsSource="{Binding Tasks}"
                     SelectedItem="{Binding SelectedTask}">
                     <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="c:BackupperTask">
+                        <DataTemplate x:DataType="c:BackupTask">
                             <Grid
                                 ColumnDefinitions="*,8,*"
                                 RowDefinitions="Auto,4,Auto">

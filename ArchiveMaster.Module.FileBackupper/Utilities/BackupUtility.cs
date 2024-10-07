@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArchiveMaster.Utilities;
 
-public class FileBackupperUtility(BackupperTask task)
+public class BackupUtility(BackupTask task)
 {
-    public BackupperTask Task { get; } = task;
+    public BackupTask Task { get; } = task;
     private bool initialized = false;
 
     public async Task InitializeAsync()
@@ -73,6 +73,7 @@ public class FileBackupperUtility(BackupperTask task)
                     PhysicalFile = physicalFile,
                     Snapshot = snapshot,
                     RawFileRelativePath = rawRelativeFilePath,
+                    Type = FileRecordType.Created
                 };
                 db.Records.Add(record);
             }

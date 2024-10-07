@@ -12,6 +12,10 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
+    <Compile Update="Views\RestorePanel.axaml.cs">
+      <DependentUpon>BackupperLogPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 <!--  <ItemGroup>-->
@@ -19,7 +23,6 @@
 <!--  </ItemGroup>-->
 
   <ItemGroup>
-    <Folder Include="Enums\" />
     <Folder Include="ViewModels\FileSystem\" />
   </ItemGroup>
 

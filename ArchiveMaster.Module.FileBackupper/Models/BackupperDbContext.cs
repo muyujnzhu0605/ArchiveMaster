@@ -10,7 +10,7 @@ public class BackupperDbContext : DbContext
 {
     private readonly string connectionString;
 
-    public BackupperDbContext(BackupperTask task)
+    public BackupperDbContext(BackupTask task)
     {
         if (!Directory.Exists(task.BackupDir))
         {
@@ -26,6 +26,8 @@ public class BackupperDbContext : DbContext
     public DbSet<FileRecordEntity> Records { get; set; }
     
     public DbSet<PhysicalFileEntity> Files { get; set; }
+    
+    public DbSet<BackupLogEntity> Logs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -46,5 +48,9 @@ public class BackupperDbContext : DbContext
             .HasOne(b=>b.FullSnapshot)
             .WithMany()
             .HasForeignKey(b => b.FullSnapshotId);
+        modelBuilder.Entity<BackupLogEntity>()
+            .HasOne(b=>b.Snapshot)
+            .WithMany()
+            .HasForeignKey(b => b.SnapshotId);
     }
 }

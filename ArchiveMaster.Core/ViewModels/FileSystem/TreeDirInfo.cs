@@ -31,16 +31,25 @@ namespace ArchiveMaster.ViewModels
         public static TreeDirInfo BuildTree(string rootDir)
         {
             TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
-            EnumerateDirsAndFiles(root);
+            EnumerateDirsAndFiles(root, CancellationToken.None);
             return root;
         }
 
-        private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex)
+        public static async Task<TreeDirInfo> BuildTreeAsync(string rootDir,
+            CancellationToken cancellationToken = default)
+        {
+            TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
+            await Task.Run(() => EnumerateDirsAndFiles(root, cancellationToken), cancellationToken);
+            return root;
+        }
+
+        private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex, CancellationToken cancellationToken)
         {
             int index = initialIndex;
             int count = 0;
             foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateFiles())
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var childDir = new TreeFileInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
                 parentDir.SubFiles.Add(childDir);
                 parentDir.Subs.Add(childDir);
@@ -56,25 +65,26 @@ namespace ArchiveMaster.ViewModels
             return index;
         }
 
-        private static void EnumerateDirsAndFiles(TreeDirInfo dir)
+        private static void EnumerateDirsAndFiles(TreeDirInfo dir, CancellationToken cancellationToken)
         {
-            int tempIndex = EnumerateDirs(dir, 0);
-            EnumerateFiles(dir, tempIndex);
+            int tempIndex = EnumerateDirs(dir, 0, cancellationToken);
+            EnumerateFiles(dir, tempIndex, cancellationToken);
         }
 
-        private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex)
+        private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex, CancellationToken cancellationToken)
         {
             int index = initialIndex;
             int count = 0;
             foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateDirectories())
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var childDir = new TreeDirInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
                 parentDir.SubDirs.Add(childDir);
                 parentDir.Subs.Add(childDir);
 
                 try
                 {
-                    EnumerateDirsAndFiles(childDir);
+                    EnumerateDirsAndFiles(childDir, cancellationToken);
                 }
                 catch (UnauthorizedAccessException ex)
                 {

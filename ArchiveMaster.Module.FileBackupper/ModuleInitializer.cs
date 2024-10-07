@@ -13,9 +13,9 @@ using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster
 {
-    public class FileBackupperModuleInitializer : IModuleInitializer, IServiceModuleInitializer
+    public class FileBackupperModuleInitializer : IModuleInitializer
     {
-        public string ModuleName => "文件备份工具";
+        public string ModuleName => "文件备份服务";
 
         public int Order =>
 #if DEBUG
@@ -31,17 +31,16 @@ namespace ArchiveMaster
 
         public void RegisterServices(IServiceCollection services)
         {
-            services.AddTransient<BackupperTasksViewModel>();
-
-            services.AddTransient<BackupperTasksPanel>();
+            services.AddViewAndViewModel<BackupTasksPanel,BackupTasksViewModel>();
+            services.AddViewAndViewModel<RestorePanel,RestoreViewModel>();
         }
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(BackupperTasksPanel), "任务列表", "备份任务的管理", baseUrl + "disc.svg"),
-                //
+                new ToolPanelInfo(typeof(BackupTasksPanel), "任务列表", "备份任务的管理以及日志查看", baseUrl + "backup.svg"),
+                new ToolPanelInfo(typeof(RestorePanel), "文件恢复", "恢复已备份的文件", baseUrl + "recovery.svg"),
             },
             GroupName = ModuleName
         };
@@ -52,9 +51,5 @@ namespace ArchiveMaster
         }
 
         private readonly string baseUrl = "avares://ArchiveMaster.Module.FileBackupper/Assets/";
-
-        public void AddServices(IServiceCollection services)
-        {
-        }
     }
 }

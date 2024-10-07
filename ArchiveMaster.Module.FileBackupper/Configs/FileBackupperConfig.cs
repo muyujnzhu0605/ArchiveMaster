@@ -4,7 +4,7 @@ namespace ArchiveMaster.Configs;
 
 public partial class FileBackupperConfig : ConfigBase
 {
-    public List<BackupperTask> Tasks { get; set; } = new List<BackupperTask>();
+    public List<BackupTask> Tasks { get; set; } = new List<BackupTask>();
 
     public override void Check()
     {

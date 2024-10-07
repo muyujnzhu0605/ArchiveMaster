@@ -28,11 +28,6 @@ public static class Initializer
         new FileBackupperModuleInitializer(),
     ];
 
-    public static IServiceModuleInitializer[] ModuleServiceInitializers { get; } =
-    [
-        new FileBackupperModuleInitializer(),
-    ];
-
     public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
     public static void Initialize()
     {
@@ -58,11 +53,6 @@ public static class Initializer
     private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
     {
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
-
-        foreach (var moduleInitializer in ModuleServiceInitializers)
-        {
-            moduleInitializer.AddServices(services);
-        }
 
         foreach (var moduleInitializer in ModuleInitializers)
         {

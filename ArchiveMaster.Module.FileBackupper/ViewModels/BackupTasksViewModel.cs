@@ -16,15 +16,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class BackupperTasksViewModel : ViewModelBase
+    public partial class BackupTasksViewModel : ViewModelBase
     {
-        public BackupperTasksViewModel(FileBackupperConfig config)
+        private AppConfig appConfig;
+
+        public BackupTasksViewModel(FileBackupperConfig config, AppConfig appConfig)
         {
-            Tasks = new ObservableCollection<BackupperTask>(config.Tasks);
+            this.appConfig = appConfig;
 #if DEBUG
-            if (Tasks.Count == 0)
+            if (config.Tasks.Count == 0)
             {
-                Tasks.Add(new BackupperTask()
+                config.Tasks.Add(new BackupTask()
                 {
                     Name = "任务名",
                     SourceDir = @"C:\Users\autod\Desktop\备份源目录",
@@ -33,19 +35,22 @@ namespace ArchiveMaster.ViewModels
                     BlackListUseRegex = true
                 });
             }
+
+            appConfig.Save();
 #endif
+            Tasks = new ObservableCollection<BackupTask>(config.Tasks);
         }
 
         [ObservableProperty]
-        private ObservableCollection<BackupperTask> tasks;
+        private ObservableCollection<BackupTask> tasks;
 
         [ObservableProperty]
-        private BackupperTask selectedTask;
+        private BackupTask selectedTask;
 
         [RelayCommand]
         private void AddTask()
         {
-            var task = new BackupperTask();
+            var task = new BackupTask();
             Tasks.Add(task);
             SelectedTask = task;
         }
@@ -60,7 +65,7 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand]
         private async Task TestFullBackupAsync()
         {
-            FileBackupperUtility utility = new FileBackupperUtility(SelectedTask);
+            BackupUtility utility = new BackupUtility(SelectedTask);
             await utility.InitializeAsync();
             await utility.FullBackupAsync(false);
         }
