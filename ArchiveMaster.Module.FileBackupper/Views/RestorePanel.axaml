@@ -28,6 +28,7 @@
             <ctrl:FormItem Label="快照：">
                 <ComboBox
                     HorizontalAlignment="Stretch"
+                    IsEnabled="{Binding IsSnapshotComboBoxEnable}"
                     ItemsSource="{Binding Snapshots}"
                     SelectedItem="{Binding SelectedSnapshot}">
                     <ComboBox.ItemTemplate>
@@ -50,6 +51,6 @@
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
+        <v:TreeFileDataGrid ItemsSource="{Binding TreeFiles}" />
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

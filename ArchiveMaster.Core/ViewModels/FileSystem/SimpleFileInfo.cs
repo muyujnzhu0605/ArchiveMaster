@@ -1,7 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
+﻿using ArchiveMaster.Enums;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json.Serialization;
-using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels
 {
@@ -19,13 +18,13 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RelativePath))]
         private string path;
-        
+
         [ObservableProperty]
         private DateTime time;
-        
+
         [ObservableProperty]
         private bool isDir;
-        
+
         [ObservableProperty]
         private long length;
 
@@ -36,7 +35,6 @@ namespace ArchiveMaster.ViewModels
         [property: JsonIgnore]
         [ObservableProperty]
         private FileSystemInfo fileSystemInfo;
-        
 
         [JsonIgnore]
         public string RelativePath
@@ -57,7 +55,16 @@ namespace ArchiveMaster.ViewModels
         {
         }
 
-        public SimpleFileInfo(FileSystemInfo file,string topDir)
+        public SimpleFileInfo(SimpleFileInfo template)
+        {
+            Name = template.Name;
+            Path = template.Path;
+            TopDirectory = template.TopDirectory;
+            Time = template.Time;
+            Length = template.Length;
+        }
+
+        public SimpleFileInfo(FileSystemInfo file, string topDir)
         {
             ArgumentNullException.ThrowIfNull(file);
             FileSystemInfo = file;

@@ -10,11 +10,12 @@ public class FileRecordEntity : EntityBase
     /// 原始文件的相对路径
     /// </summary>
     public string RawFileRelativePath { get; set; }
-    
+
     /// <summary>
     /// 对应的物理文件信息
     /// </summary>
     public PhysicalFileEntity PhysicalFile { get; set; }
+
     public int PhysicalFileId { get; set; }
 
     public string Message { get; set; }

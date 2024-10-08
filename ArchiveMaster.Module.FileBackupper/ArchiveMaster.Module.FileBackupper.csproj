@@ -23,10 +23,6 @@
 <!--  </ItemGroup>-->
 
   <ItemGroup>
-    <Folder Include="ViewModels\FileSystem\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
 

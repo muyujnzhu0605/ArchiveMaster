@@ -1,35 +1,36 @@
-using System.Security.Cryptography;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace ArchiveMaster.Utilities;
 
-public class BackupUtility(BackupTask task)
+public class BackupUtility(BackupTask backupTask)
 {
-    public BackupTask Task { get; } = task;
+    public BackupTask BackupTask { get; } = backupTask;
     private bool initialized = false;
 
-    public async Task InitializeAsync()
+    private void Initialize(BackupperDbContext db)
     {
-        await using var db = new BackupperDbContext(Task);
-        await db.Database.EnsureCreatedAsync();
-        initialized = true;
+        if (!initialized)
+        {
+            db.Database.EnsureCreated();
+            initialized = true;
+        }
     }
 
-    public async Task FullBackupAsync(bool isVirtual)
+    public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
         if (!initialized)
         {
             throw new InvalidOperationException("还未初始化");
         }
 
-        await System.Threading.Tasks.Task.Run(async () =>
+        await Task.Run(async () =>
         {
-            using var db = new BackupperDbContext(Task);
-            BlackListHelper blacks = new BlackListHelper(Task.BlackList, Task.BlackListUseRegex);
+            await using var db = new BackupperDbContext(BackupTask);
+            Initialize(db);
+            BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
             BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
             {
                 StartTime = DateTime.Now,
@@ -38,33 +39,32 @@ public class BackupUtility(BackupTask task)
             };
             db.Snapshots.Add(snapshot);
 
-            var files = new DirectoryInfo(Task.SourceDir)
+            var files = new DirectoryInfo(BackupTask.SourceDir)
                 .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                .WithCancellationToken(cancellationToken)
                 .Where(p => blacks.IsNotInBlackList(p))
                 .ToList();
             foreach (var file in files)
             {
-                string fileName = isVirtual ? null : Guid.NewGuid().ToString("N");
-                string rawRelativeFilePath = Path.GetRelativePath(Task.SourceDir, file.FullName);
-                string sha1;
-                if (isVirtual)
+                cancellationToken.ThrowIfCancellationRequested();
+                string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
+
+                string backupFileName = null;
+                string sha1 = null;
+
+                if (!isVirtual)
                 {
-                    sha1 = await FileHashHelper.ComputeSha1Async(file.FullName);
-                }
-                else
-                {
-                    string backupFilePath = Path.Combine(Task.BackupDir, fileName);
+                    backupFileName = isVirtual ? null : Guid.NewGuid().ToString("N");
+                    string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
                     sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath);
                 }
 
                 PhysicalFileEntity physicalFile = new PhysicalFileEntity
                 {
-                    FileName = fileName,
+                    FileName = backupFileName,
                     Hash = sha1,
                     Length = file.Length,
                     Time = file.LastWriteTime,
-                    RefCount = 1,
-                    FullSnapshot = snapshot,
                 };
                 db.Files.Add(physicalFile);
 
@@ -78,7 +78,66 @@ public class BackupUtility(BackupTask task)
                 db.Records.Add(record);
             }
 
-            await db.SaveChangesAsync();
-        });
+            snapshot.EndTime = DateTime.Now;
+            await db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
+    }
+
+    public async Task IncrementalBackupAsync(CancellationToken cancellationToken = default)
+    {
+        if (!initialized)
+        {
+            throw new InvalidOperationException("还未初始化");
+        }
+
+        await Task.Run(async () =>
+        {
+            await using var db = new BackupperDbContext(BackupTask);
+            Initialize(db);
+
+            BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
+            BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
+            {
+                StartTime = DateTime.Now,
+                IsFull = false,
+                IsVirtual = false
+            };
+            db.Snapshots.Add(snapshot);
+            throw new NotImplementedException();
+            var files = new DirectoryInfo(BackupTask.SourceDir)
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                .WithCancellationToken(cancellationToken)
+                .Where(p => blacks.IsNotInBlackList(p))
+                .ToList();
+            foreach (var file in files)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
+
+                FileRecordEntity record = new FileRecordEntity()
+                {
+                    Snapshot = snapshot,
+                    RawFileRelativePath = rawRelativeFilePath,
+                    Type = FileRecordType.Created
+                };
+                db.Records.Add(record);
+
+                string backupFileName = Guid.NewGuid().ToString("N");
+                string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
+                string sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath);
+
+                PhysicalFileEntity physicalFile = new PhysicalFileEntity
+                {
+                    FileName = backupFileName,
+                    Hash = sha1,
+                    Length = file.Length,
+                    Time = file.LastWriteTime,
+                };
+                record.PhysicalFile = physicalFile;
+                db.Files.Add(physicalFile);
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+        }, cancellationToken);
     }
 }

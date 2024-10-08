@@ -1,18 +1,9 @@
-﻿using ArchiveMaster.ViewModels;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO.Compression;
-using System.Reflection;
-using System.Text;
-using ArchiveMaster.Configs;
-using ArchiveMaster.Messages;
+﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
-using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using FzLib.Avalonia.Messages;
-using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace ArchiveMaster.ViewModels
 {
@@ -66,7 +57,6 @@ namespace ArchiveMaster.ViewModels
         private async Task TestFullBackupAsync()
         {
             BackupUtility utility = new BackupUtility(SelectedTask);
-            await utility.InitializeAsync();
             await utility.FullBackupAsync(false);
         }
     }

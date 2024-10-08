@@ -1,8 +1,5 @@
-using System.Diagnostics;
 using ArchiveMaster.Configs;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 namespace ArchiveMaster.Models;
 
@@ -24,9 +21,9 @@ public class BackupperDbContext : DbContext
     public DbSet<BackupSnapshotEntity> Snapshots { get; set; }
 
     public DbSet<FileRecordEntity> Records { get; set; }
-    
+
     public DbSet<PhysicalFileEntity> Files { get; set; }
-    
+
     public DbSet<BackupLogEntity> Logs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -38,18 +35,14 @@ public class BackupperDbContext : DbContext
     {
         modelBuilder.Entity<FileRecordEntity>()
             .HasOne(b => b.Snapshot)
-            .WithMany() 
+            .WithMany()
             .HasForeignKey(b => b.SnapshotId);
         modelBuilder.Entity<FileRecordEntity>()
             .HasOne(b => b.PhysicalFile)
-            .WithMany() 
-            .HasForeignKey(b => b.PhysicalFileId);
-        modelBuilder.Entity<PhysicalFileEntity>()
-            .HasOne(b=>b.FullSnapshot)
             .WithMany()
-            .HasForeignKey(b => b.FullSnapshotId);
+            .HasForeignKey(b => b.PhysicalFileId);
         modelBuilder.Entity<BackupLogEntity>()
-            .HasOne(b=>b.Snapshot)
+            .HasOne(b => b.Snapshot)
             .WithMany()
             .HasForeignKey(b => b.SnapshotId);
     }
