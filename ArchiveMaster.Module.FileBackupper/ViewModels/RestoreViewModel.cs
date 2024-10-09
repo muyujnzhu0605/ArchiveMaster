@@ -51,6 +51,7 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
 
     protected override Task OnInitializedAsync()
     {
+        Utility.RootDir.Reorder();
         var files = new BulkObservableCollection<SimpleFileInfo>();
         files.AddRange(Utility.RootDir.Subs);
         TreeFiles = files;

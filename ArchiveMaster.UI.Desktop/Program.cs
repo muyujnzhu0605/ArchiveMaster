@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Dialogs;
 using Avalonia.Svg.Skia;
 using Serilog;
 
-namespace ArchiveMaster.Desktop;
+namespace ArchiveMaster.UI.Desktop;
 
 class Program
 {

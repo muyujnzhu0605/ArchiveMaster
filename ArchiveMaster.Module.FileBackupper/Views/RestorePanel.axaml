@@ -51,6 +51,16 @@
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <v:TreeFileDataGrid ItemsSource="{Binding TreeFiles}" />
+        <v:TreeFileDataGrid ItemsSource="{Binding TreeFiles}">
+            <v:TreeFileDataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <ContextMenu>
+                            <MenuItem Header="另存为" />
+                        </ContextMenu>
+                    </Setter>
+                </Style>
+            </v:TreeFileDataGrid.Styles>
+        </v:TreeFileDataGrid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

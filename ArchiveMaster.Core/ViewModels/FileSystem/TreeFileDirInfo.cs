@@ -5,6 +5,17 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TreeFileDirInfo : SimpleFileInfo
 {
+    [ObservableProperty]
+    private int depth;
+
+    [property: JsonIgnore]
+    [ObservableProperty]
+    private int index;
+
+    [property: JsonIgnore]
+    [ObservableProperty]
+    private TreeDirInfo parent;
+
     internal TreeFileDirInfo()
     {
     }
@@ -24,18 +35,6 @@ public partial class TreeFileDirInfo : SimpleFileInfo
         Index = index;
         Parent = parent;
     }
-
-    [property: JsonIgnore]
-    [ObservableProperty]
-    private int index;
-
-    [ObservableProperty]
-    private int depth;
-
-    [property: JsonIgnore]
-    [ObservableProperty]
-    private TreeDirInfo parent;
-
     public bool IsLast()
     {
         return Index == Parent.Subs.Count - 1;

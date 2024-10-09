@@ -2,7 +2,7 @@ using ArchiveMaster.Models;
 
 namespace ArchiveMaster.ViewModels.FileSystem;
 
-public class BackupFile : SimpleFileInfo
+public class BackupFile : TreeFileInfo
 {
     public BackupFile(FileRecordEntity record)
     {
