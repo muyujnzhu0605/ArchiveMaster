@@ -5,6 +5,11 @@ using ArchiveMaster.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
+using ArchiveMaster.ViewModels.FileSystem;
+using ArchiveMaster.Views;
+using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.Input;
+using FzLib.Avalonia.Messages;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -14,10 +19,12 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
     private bool isSnapshotComboBoxEnable;
 
     [ObservableProperty]
-    private BackupSnapshotEntity selectedSnapshot;
+    private SimpleFileInfo selectedFile;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Config))]
+    private BackupSnapshotEntity selectedSnapshot;
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(Config))]
     private BackupTask selectedTask;
 
     [ObservableProperty]
@@ -28,7 +35,6 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
 
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
-
     public RestoreViewModel(AppConfig appConfig) : base(null, appConfig)
     {
     }
@@ -64,7 +70,7 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
         return Task.CompletedTask;
     }
 
-     async partial void OnSelectedTaskChanged(BackupTask value)
+    async partial void OnSelectedTaskChanged(BackupTask value)
     {
         IsSnapshotComboBoxEnable = false;
         var utility = CreateUtilityImplement();
@@ -75,5 +81,45 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
         }
 
         IsSnapshotComboBoxEnable = true;
+    }
+
+    [RelayCommand]
+    private async Task SaveAsAsync()
+    {
+        if (SelectedFile is BackupFile file)
+        {
+            if (file.RecordEntity.PhysicalFile == null)
+            {
+                await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
+                return;
+            }
+
+            var extension = Path.GetExtension(file.Name).TrimStart('.');
+            var saveFile = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.SaveFilePickerAsync(
+                new FilePickerSaveOptions()
+                {
+                    DefaultExtension = extension,
+                    SuggestedFileName = file.Name,
+                    FileTypeChoices =
+                    [
+                        new FilePickerFileType($"{extension}文件")
+                            { Patterns = [$"*.{(extension.Length == 0 ? "*" : extension)}"] }
+                    ]
+                });
+            var path = saveFile?.TryGetLocalPath();
+            if (path != null)
+            {
+                var dialog = new FileProgressDialog();
+                this.SendMessage(new DialogHostMessage(dialog));
+                string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
+                if (!File.Exists(backupFile))
+                {
+                    await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
+                    return;
+                }
+
+                await dialog.CopyFileAsync(backupFile, path);
+            }
+        }
     }
 }

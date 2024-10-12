@@ -7,25 +7,10 @@ namespace ArchiveMaster.Utilities;
 
 public class BackupUtility(BackupTask backupTask)
 {
-    public BackupTask BackupTask { get; } = backupTask;
     private bool initialized = false;
-
-    private void Initialize(BackupperDbContext db)
-    {
-        if (!initialized)
-        {
-            db.Database.EnsureCreated();
-            initialized = true;
-        }
-    }
-
+    public BackupTask BackupTask { get; } = backupTask;
     public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
-        if (!initialized)
-        {
-            throw new InvalidOperationException("还未初始化");
-        }
-
         await Task.Run(async () =>
         {
             await using var db = new BackupperDbContext(BackupTask);
@@ -85,11 +70,6 @@ public class BackupUtility(BackupTask backupTask)
 
     public async Task IncrementalBackupAsync(CancellationToken cancellationToken = default)
     {
-        if (!initialized)
-        {
-            throw new InvalidOperationException("还未初始化");
-        }
-
         await Task.Run(async () =>
         {
             await using var db = new BackupperDbContext(BackupTask);
@@ -139,5 +119,14 @@ public class BackupUtility(BackupTask backupTask)
 
             await db.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
+    }
+
+    private void Initialize(BackupperDbContext db)
+    {
+        if (!initialized)
+        {
+            db.Database.EnsureCreated();
+            initialized = true;
+        }
     }
 }

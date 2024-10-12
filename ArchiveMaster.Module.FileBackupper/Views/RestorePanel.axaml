@@ -12,6 +12,7 @@
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:RestoreViewModel"
@@ -51,12 +52,16 @@
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <v:TreeFileDataGrid ItemsSource="{Binding TreeFiles}">
+        <v:TreeFileDataGrid
+            ItemsSource="{Binding TreeFiles}"
+            SelectedItem="{Binding SelectedFile}">
             <v:TreeFileDataGrid.Styles>
                 <Style Selector="DataGridRow">
                     <Setter Property="ContextMenu">
                         <ContextMenu>
-                            <MenuItem Header="另存为" />
+                            <MenuItem
+                                Command="{Binding #root.DataContext.SaveAsCommand}"
+                                Header="另存为" />
                         </ContextMenu>
                     </Setter>
                 </Style>

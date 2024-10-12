@@ -62,7 +62,7 @@
                     Minimum="0"
                     ProgressTextFormat="{}{1:0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
-                    Value="{Binding Progress}">
+                    Value="{Binding Value}">
                     <ProgressBar.Styles>
                         <Style Selector="ProgressBar:horizontal">
                             <Setter Property="MinWidth" Value="72" />
@@ -114,7 +114,7 @@
                     Minimum="0"
                     ProgressTextFormat="{}{1:0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
-                    Value="{Binding Progress}">
+                    Value="{Binding Value}">
                     <ProgressBar.Styles>
                         <Style Selector="ProgressBar:horizontal">
                             <Setter Property="MinWidth" Value="72" />
