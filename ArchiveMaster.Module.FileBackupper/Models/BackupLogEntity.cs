@@ -4,8 +4,11 @@ namespace ArchiveMaster.Models;
 
 public class BackupLogEntity : EntityBase
 {
-    public int SnapshotId { get; set; }
-    public BackupSnapshotEntity Snapshot { get; set; }
+    public int? SnapshotId { get; set; }
+    public virtual BackupSnapshotEntity Snapshot { get; set; }
     public string Message { get; set; }
+    public string Detail { get; set; }
     public LogLevel Type { get; set; }
+    
+    public DateTime Time { get; set; } = DateTime.Now;
 }

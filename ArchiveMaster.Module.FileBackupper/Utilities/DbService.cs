@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.Utilities;
 
@@ -42,19 +44,20 @@ public class DbService : IDisposable, IAsyncDisposable
         }
     }
 
-    public void AddFileRecord(FileRecordEntity record)
+    public async Task LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
+        string detail = null)
     {
-        db.Records.Add(record);
-    }
-
-    public void AddPhysicalFile(PhysicalFileEntity file)
-    {
-        db.Files.Add(file);
-    }
-
-    public void AddSnapshot(BackupSnapshotEntity snapshot)
-    {
-        db.Snapshots.Add(snapshot);
+        await using var tempDb = new BackupperDbContext(BackupTask);
+        BackupLogEntity log = new BackupLogEntity()
+        {
+            Message = message,
+            Type = logLevel,
+            SnapshotId = snapshot?.Id,
+            Detail = detail
+        };
+        Debug.WriteLine($"{DateTime.Now}\t\t{message}");
+        tempDb.Logs.Add(log);
+        await tempDb.SaveChangesAsync();
     }
 
     public void Dispose()
@@ -169,9 +172,22 @@ public class DbService : IDisposable, IAsyncDisposable
         return query.FirstOrDefault();
     }
 
-    public Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(CancellationToken token)
+    public Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(bool? isFull = null, bool? isVirtual = null,
+        CancellationToken token = default)
     {
-        return db.Snapshots.ToListAsync(token);
+        IQueryable<BackupSnapshotEntity> query = db.Snapshots;
+        query = query.Where(p => p.EndTime != default);
+        if (isFull.HasValue)
+        {
+            query = query.Where(p => p.IsFull == isFull);
+        }
+
+        if (isVirtual.HasValue)
+        {
+            query = query.Where(p => p.IsVirtual == isVirtual);
+        }
+
+        return query.ToListAsync(token);
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken)

@@ -75,7 +75,7 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
     {
         IsSnapshotComboBoxEnable = CanInitialize = false;
         await using var db = new DbService(value);
-        Snapshots = new ObservableCollection<BackupSnapshotEntity>(await db.GetSnapshotsAsync(default));
+        Snapshots = new ObservableCollection<BackupSnapshotEntity>(await db.GetSnapshotsAsync());
         if (Snapshots.Count > 0)
         {
             SelectedSnapshot = Snapshots[^1];

@@ -33,6 +33,8 @@ namespace ArchiveMaster
         {
             services.AddViewAndViewModel<BackupTasksPanel,BackupTasksViewModel>();
             services.AddViewAndViewModel<RestorePanel,RestoreViewModel>();
+
+            services.AddHostedService<BackupBackgroundService>();
         }
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

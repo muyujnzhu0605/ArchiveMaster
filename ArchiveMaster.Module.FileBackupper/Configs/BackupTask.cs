@@ -29,6 +29,9 @@ public partial class BackupTask : ConfigBase
     [ObservableProperty]
     private TimeSpan timeInterval = TimeSpan.FromHours(1);
 
+    [ObservableProperty]
+    private bool isDefaultVirtualBackup;
+
     public override void Check()
     {
         
