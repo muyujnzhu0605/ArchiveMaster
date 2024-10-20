@@ -73,15 +73,15 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
 
     async partial void OnSelectedTaskChanged(BackupTask value)
     {
-        IsSnapshotComboBoxEnable = false;
-        var utility = CreateUtilityImplement();
-        Snapshots = new ObservableCollection<BackupSnapshotEntity>(await utility.GetSnapshotsAsync(default));
+        IsSnapshotComboBoxEnable = CanInitialize = false;
+        await using var db = new DbService(value);
+        Snapshots = new ObservableCollection<BackupSnapshotEntity>(await db.GetSnapshotsAsync(default));
         if (Snapshots.Count > 0)
         {
             SelectedSnapshot = Snapshots[^1];
         }
 
-        IsSnapshotComboBoxEnable = true;
+        IsSnapshotComboBoxEnable = CanInitialize = true;
     }
 
     [RelayCommand]
@@ -94,37 +94,6 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
         else if (SelectedFile is TreeDirInfo dir)
         {
             await SaveFolder(dir);
-        }
-    }
-
-    private async Task SaveFolder(TreeDirInfo dir)
-    {
-        var folders = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.OpenFolderPickerAsync(
-            new FolderPickerOpenOptions());
-        if (folders is { Count: 1 })
-        {
-            var rootDir = folders[0].TryGetLocalPath();
-            var dialog = new FileProgressDialog();
-            this.SendMessage(new DialogHostMessage(dialog));
-            var files = dir.Flatten();
-            List<string> sourcePaths = new List<string>();
-            List<string> destinationPaths = new List<string>();
-            foreach (var file in files.Cast<BackupFile>())
-            {
-                string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
-                string destinationPath =
-                    Path.Combine(rootDir, Path.GetRelativePath(dir.RelativePath, file.RelativePath));
-                sourcePaths.Add(backupFile);
-                destinationPaths.Add(destinationPath);
-
-                if (!File.Exists(backupFile))
-                {
-                    await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
-                    return;
-                }
-            }
-            
-            await dialog.CopyFilesAsync(sourcePaths, destinationPaths);
         }
     }
 
@@ -161,6 +130,37 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
             }
 
             await dialog.CopyFileAsync(backupFile, path);
+        }
+    }
+
+    private async Task SaveFolder(TreeDirInfo dir)
+    {
+        var folders = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions());
+        if (folders is { Count: 1 })
+        {
+            var rootDir = folders[0].TryGetLocalPath();
+            var dialog = new FileProgressDialog();
+            this.SendMessage(new DialogHostMessage(dialog));
+            var files = dir.Flatten();
+            List<string> sourcePaths = new List<string>();
+            List<string> destinationPaths = new List<string>();
+            foreach (var file in files.Cast<BackupFile>())
+            {
+                string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
+                string destinationPath =
+                    Path.Combine(rootDir, Path.GetRelativePath(dir.RelativePath, file.RelativePath));
+                sourcePaths.Add(backupFile);
+                destinationPaths.Add(destinationPath);
+
+                if (!File.Exists(backupFile))
+                {
+                    await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
+                    return;
+                }
+            }
+
+            await dialog.CopyFilesAsync(sourcePaths, destinationPaths);
         }
     }
 }

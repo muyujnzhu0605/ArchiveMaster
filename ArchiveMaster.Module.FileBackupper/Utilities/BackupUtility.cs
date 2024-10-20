@@ -8,15 +8,13 @@ namespace ArchiveMaster.Utilities;
 
 public class BackupUtility(BackupTask backupTask)
 {
-    private bool initialized = false;
     public BackupTask BackupTask { get; } = backupTask;
 
     public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
         await Task.Run(async () =>
         {
-            await using var db = new BackupperDbContext(BackupTask);
-            Initialize(db);
+            await using var db = new DbService(BackupTask);
             BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
             BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
             {
@@ -24,7 +22,7 @@ public class BackupUtility(BackupTask backupTask)
                 IsFull = true,
                 IsVirtual = isVirtual
             };
-            db.Snapshots.Add(snapshot);
+            db.AddSnapshot(snapshot);
 
             var files = new DirectoryInfo(BackupTask.SourceDir)
                 .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
@@ -53,7 +51,7 @@ public class BackupUtility(BackupTask backupTask)
                     Length = file.Length,
                     Time = file.LastWriteTime,
                 };
-                db.Files.Add(physicalFile);
+                db.Add(physicalFile);
 
                 FileRecordEntity record = new FileRecordEntity()
                 {
@@ -62,7 +60,7 @@ public class BackupUtility(BackupTask backupTask)
                     RawFileRelativePath = rawRelativeFilePath,
                     Type = FileRecordType.Created
                 };
-                db.Records.Add(record);
+                db.Add(record);
                 
                 Debug.WriteLine($"文件{rawRelativeFilePath}已备份");
             }
@@ -76,8 +74,7 @@ public class BackupUtility(BackupTask backupTask)
     {
         await Task.Run(async () =>
         {
-            await using var db = new BackupperDbContext(BackupTask);
-            Initialize(db);
+            await using var db = new DbService(BackupTask);
 
             BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
             BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
@@ -86,9 +83,9 @@ public class BackupUtility(BackupTask backupTask)
                 IsFull = false,
                 IsVirtual = false
             };
-            db.Snapshots.Add(snapshot);
+            db.Add(snapshot);
 
-            var latestFiles = RestoreUtility.GetLatestFiles(db, snapshot).ToDictionary(p => p.RawFileRelativePath);
+            var latestFiles = db.GetLatestFiles(snapshot).ToDictionary(p => p.RawFileRelativePath);
 
             var files = new DirectoryInfo(BackupTask.SourceDir)
                 .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
@@ -138,7 +135,7 @@ public class BackupUtility(BackupTask backupTask)
         }, cancellationToken);
     }
 
-    private async Task CreateNewBackupFile(BackupperDbContext db, BackupSnapshotEntity snapshot,
+    private async Task CreateNewBackupFile(DbService db, BackupSnapshotEntity snapshot,
         FileInfo file, FileRecordType recordType)
     {
         string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
@@ -146,11 +143,7 @@ public class BackupUtility(BackupTask backupTask)
         var backupFileName = Guid.NewGuid().ToString("N");
         string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
         var sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath);
-        var physicalFile = db.Files
-            .Where(p => p.Hash == sha1)
-            .Where(p => p.Time == file.LastWriteTime)
-            .Where(p => p.Length == file.Length)
-            .FirstOrDefault(p => true);
+        var physicalFile = db.GetSameFile(file.LastWriteTime, file.Length, sha1);
         if (physicalFile != null) //已经存在一样的物理文件了，那就把刚刚备份的文件给删掉
         {
             File.Delete(backupFilePath);
@@ -164,7 +157,7 @@ public class BackupUtility(BackupTask backupTask)
                 Length = file.Length,
                 Time = file.LastWriteTime,
             };
-            db.Files.Add(physicalFile);
+            db.Add(physicalFile);
         }
 
         FileRecordEntity record = new FileRecordEntity()
@@ -174,15 +167,7 @@ public class BackupUtility(BackupTask backupTask)
             RawFileRelativePath = rawRelativeFilePath,
             Type = recordType
         };
-        db.Records.Add(record);
+        db.Add(record);
     }
 
-    private void Initialize(BackupperDbContext db)
-    {
-        if (!initialized)
-        {
-            db.Database.EnsureCreated();
-            initialized = true;
-        }
-    }
 }
