@@ -35,6 +35,7 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
 
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
+
     public RestoreViewModel(AppConfig appConfig) : base(null, appConfig)
     {
     }
@@ -88,38 +89,78 @@ public partial class RestoreViewModel : TwoStepViewModelBase<RestoreUtility, Bac
     {
         if (SelectedFile is BackupFile file)
         {
-            if (file.RecordEntity.PhysicalFile == null)
-            {
-                await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
-                return;
-            }
+            await SaveFile(file);
+        }
+        else if (SelectedFile is TreeDirInfo dir)
+        {
+            await SaveFolder(dir);
+        }
+    }
 
-            var extension = Path.GetExtension(file.Name).TrimStart('.');
-            var saveFile = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.SaveFilePickerAsync(
-                new FilePickerSaveOptions()
-                {
-                    DefaultExtension = extension,
-                    SuggestedFileName = file.Name,
-                    FileTypeChoices =
-                    [
-                        new FilePickerFileType($"{extension}文件")
-                            { Patterns = [$"*.{(extension.Length == 0 ? "*" : extension)}"] }
-                    ]
-                });
-            var path = saveFile?.TryGetLocalPath();
-            if (path != null)
+    private async Task SaveFolder(TreeDirInfo dir)
+    {
+        var folders = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions());
+        if (folders is { Count: 1 })
+        {
+            var rootDir = folders[0].TryGetLocalPath();
+            var dialog = new FileProgressDialog();
+            this.SendMessage(new DialogHostMessage(dialog));
+            var files = dir.Flatten();
+            List<string> sourcePaths = new List<string>();
+            List<string> destinationPaths = new List<string>();
+            foreach (var file in files.Cast<BackupFile>())
             {
-                var dialog = new FileProgressDialog();
-                this.SendMessage(new DialogHostMessage(dialog));
                 string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
+                string destinationPath =
+                    Path.Combine(rootDir, Path.GetRelativePath(dir.RelativePath, file.RelativePath));
+                sourcePaths.Add(backupFile);
+                destinationPaths.Add(destinationPath);
+
                 if (!File.Exists(backupFile))
                 {
                     await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
                     return;
                 }
-
-                await dialog.CopyFileAsync(backupFile, path);
             }
+            
+            await dialog.CopyFilesAsync(sourcePaths, destinationPaths);
+        }
+    }
+
+    private async Task SaveFile(BackupFile file)
+    {
+        if (file.RecordEntity.PhysicalFile == null)
+        {
+            await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
+            return;
+        }
+
+        var extension = Path.GetExtension(file.Name).TrimStart('.');
+        var saveFile = await this.SendMessage(new GetStorageProviderMessage()).StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions()
+            {
+                DefaultExtension = extension,
+                SuggestedFileName = file.Name,
+                FileTypeChoices =
+                [
+                    new FilePickerFileType($"{extension}文件")
+                        { Patterns = [$"*.{(extension.Length == 0 ? "*" : extension)}"] }
+                ]
+            });
+        var path = saveFile?.TryGetLocalPath();
+        if (path != null)
+        {
+            var dialog = new FileProgressDialog();
+            this.SendMessage(new DialogHostMessage(dialog));
+            string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
+            if (!File.Exists(backupFile))
+            {
+                await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
+                return;
+            }
+
+            await dialog.CopyFileAsync(backupFile, path);
         }
     }
 }

@@ -265,7 +265,11 @@ public class SimpleFileDataGrid : DataGrid
         return new DataGridTextColumn()
         {
             Header = ColumnTimeHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Time)),
+            Binding = new Binding(nameof(SimpleFileInfo.Time))
+            {
+                Converter = new FileTimeConverter(),
+                Mode = BindingMode.OneWay
+            },
             IsReadOnly = true,
         };
     }

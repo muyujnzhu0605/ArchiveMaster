@@ -10,7 +10,9 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid RowDefinitions="Auto,8,Auto">
-        <TextBlock Text="{Binding #root.Message}" />
+        <TextBlock
+            Text="{Binding #root.Message}"
+            TextTrimming="CharacterEllipsis" />
         <ProgressBar
             Grid.Row="2"
             Maximum="{Binding #root.Maximum}"
