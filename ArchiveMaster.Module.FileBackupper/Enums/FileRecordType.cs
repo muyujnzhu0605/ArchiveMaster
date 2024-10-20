@@ -4,6 +4,5 @@ public enum FileRecordType
 {
     Created,
     Modified,
-    Deleted,
-    Moved
+    Deleted
 }

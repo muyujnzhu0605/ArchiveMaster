@@ -14,9 +14,9 @@ public class FileRecordEntity : EntityBase
     /// <summary>
     /// 对应的物理文件信息
     /// </summary>
-    public PhysicalFileEntity PhysicalFile { get; set; }
+    public virtual PhysicalFileEntity PhysicalFile { get; set; }
 
-    public int PhysicalFileId { get; set; }
+    public int? PhysicalFileId { get; set; }
 
     public string Message { get; set; }
     public ProcessStatus Status { get; set; }

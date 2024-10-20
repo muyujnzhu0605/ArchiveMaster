@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
@@ -9,6 +10,7 @@ public class BackupUtility(BackupTask backupTask)
 {
     private bool initialized = false;
     public BackupTask BackupTask { get; } = backupTask;
+
     public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
         await Task.Run(async () =>
@@ -61,6 +63,8 @@ public class BackupUtility(BackupTask backupTask)
                     Type = FileRecordType.Created
                 };
                 db.Records.Add(record);
+                
+                Debug.WriteLine($"文件{rawRelativeFilePath}已备份");
             }
 
             snapshot.EndTime = DateTime.Now;
@@ -83,7 +87,9 @@ public class BackupUtility(BackupTask backupTask)
                 IsVirtual = false
             };
             db.Snapshots.Add(snapshot);
-            throw new NotImplementedException();
+
+            var latestFiles = RestoreUtility.GetLatestFiles(db, snapshot).ToDictionary(p => p.RawFileRelativePath);
+
             var files = new DirectoryInfo(BackupTask.SourceDir)
                 .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
                 .WithCancellationToken(cancellationToken)
@@ -94,31 +100,81 @@ public class BackupUtility(BackupTask backupTask)
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
 
+                if (latestFiles.TryGetValue(rawRelativeFilePath, out var latestFile)) //存在数据库中
+                {
+                    if (latestFile.PhysicalFile.Time == file.LastWriteTime &&
+                        latestFile.PhysicalFile.Length == file.Length) //文件没有发生改变
+                    {
+                    }
+                    else //文件发生改变
+                    {
+                        Debug.WriteLine($"文件{rawRelativeFilePath}发生改变");
+                        await CreateNewBackupFile(db, snapshot, file, FileRecordType.Modified);
+                    }
+
+                    latestFiles.Remove(rawRelativeFilePath);
+                }
+                else //文件有新增
+                {
+                    Debug.WriteLine($"文件{rawRelativeFilePath}新增");
+                    await CreateNewBackupFile(db, snapshot, file, FileRecordType.Created);
+                }
+            }
+
+            foreach (var deletingFilePath in latestFiles.Keys) //存在于数据库但不存在于磁盘中的文件，表示已删除
+            {
+                Debug.WriteLine($"文件{deletingFilePath}被删除");
                 FileRecordEntity record = new FileRecordEntity()
                 {
                     Snapshot = snapshot,
-                    RawFileRelativePath = rawRelativeFilePath,
-                    Type = FileRecordType.Created
+                    RawFileRelativePath = deletingFilePath,
+                    Type = FileRecordType.Deleted
                 };
-                db.Records.Add(record);
-
-                string backupFileName = Guid.NewGuid().ToString("N");
-                string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
-                string sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath);
-
-                PhysicalFileEntity physicalFile = new PhysicalFileEntity
-                {
-                    FileName = backupFileName,
-                    Hash = sha1,
-                    Length = file.Length,
-                    Time = file.LastWriteTime,
-                };
-                record.PhysicalFile = physicalFile;
-                db.Files.Add(physicalFile);
+                db.Add(record);
             }
-
+            
+            snapshot.EndTime = DateTime.Now;
             await db.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
+    }
+
+    private async Task CreateNewBackupFile(BackupperDbContext db, BackupSnapshotEntity snapshot,
+        FileInfo file, FileRecordType recordType)
+    {
+        string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
+
+        var backupFileName = Guid.NewGuid().ToString("N");
+        string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
+        var sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath);
+        var physicalFile = db.Files
+            .Where(p => p.Hash == sha1)
+            .Where(p => p.Time == file.LastWriteTime)
+            .Where(p => p.Length == file.Length)
+            .FirstOrDefault(p => true);
+        if (physicalFile != null) //已经存在一样的物理文件了，那就把刚刚备份的文件给删掉
+        {
+            File.Delete(backupFilePath);
+        }
+        else //没有相同的物理备份文件
+        {
+            physicalFile = new PhysicalFileEntity
+            {
+                FileName = backupFileName,
+                Hash = sha1,
+                Length = file.Length,
+                Time = file.LastWriteTime,
+            };
+            db.Files.Add(physicalFile);
+        }
+
+        FileRecordEntity record = new FileRecordEntity()
+        {
+            PhysicalFile = physicalFile,
+            Snapshot = snapshot,
+            RawFileRelativePath = rawRelativeFilePath,
+            Type = recordType
+        };
+        db.Records.Add(record);
     }
 
     private void Initialize(BackupperDbContext db)

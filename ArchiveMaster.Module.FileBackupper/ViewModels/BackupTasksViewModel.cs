@@ -59,5 +59,12 @@ namespace ArchiveMaster.ViewModels
             BackupUtility utility = new BackupUtility(SelectedTask);
             await utility.FullBackupAsync(false);
         }
+
+        [RelayCommand]
+        private async Task TestIncrementalBackupAsync()
+        {
+            BackupUtility utility = new BackupUtility(SelectedTask);
+            await utility.IncrementalBackupAsync();
+        }
     }
 }
