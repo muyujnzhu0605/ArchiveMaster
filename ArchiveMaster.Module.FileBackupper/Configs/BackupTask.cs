@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace ArchiveMaster.Configs;
 
@@ -31,6 +32,10 @@ public partial class BackupTask : ConfigBase
 
     [ObservableProperty]
     private bool isDefaultVirtualBackup;
+
+    [ObservableProperty] 
+    [property: JsonIgnore]
+    private bool isBackingUp;
 
     public override void Check()
     {

@@ -1,15 +1,18 @@
 using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Models;
+using Avalonia.Controls;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace ArchiveMaster.Utilities;
 
 public class BackupBackgroundService : IHostedService
 {
     private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-    private CancellationToken cancellationToken;
+
+    private readonly CancellationToken cancellationToken;
     public FileBackupperConfig Config { get; }
 
     public bool IsBackingUp { get; private set; }
@@ -57,7 +60,7 @@ public class BackupBackgroundService : IHostedService
                 }
 
                 //开始备份
-                using var db = new DbService(task);
+                await using var db = new DbService(task);
                 await db.LogAsync(LogLevel.Information, $"根据间隔时间备份规则，已到应备份时间");
                 BackupUtility utility = new BackupUtility(task);
                 List<BackupSnapshotEntity> snapshots = await db.GetSnapshotsAsync(true, token: cancellationToken);
@@ -77,7 +80,7 @@ public class BackupBackgroundService : IHostedService
         }
         catch (Exception ex)
         {
-            
+            Log.Error(ex, "备份任务执行出错");
         }
         finally
         {
@@ -87,6 +90,11 @@ public class BackupBackgroundService : IHostedService
 
     public Task StartAsync(CancellationToken _)
     {
+        if (Design.IsDesignMode)
+        {
+            return Task.CompletedTask;
+        }
+
         timer = new Timer(_ =>
         {
             if (!IsBackingUp)

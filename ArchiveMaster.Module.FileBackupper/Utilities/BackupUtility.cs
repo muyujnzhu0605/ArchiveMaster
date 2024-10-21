@@ -13,11 +13,16 @@ public class BackupUtility(BackupTask backupTask)
 
     public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
+        if (BackupTask.IsBackingUp)
+        {
+            throw new InvalidOperationException("任务正在备份中，无法进行备份");
+        }
         await Task.Run(async () =>
         {
             await using var db = new DbService(BackupTask);
             try
             {
+                BackupTask.IsBackingUp = true;
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
                     StartTime = DateTime.Now,
@@ -30,7 +35,7 @@ public class BackupUtility(BackupTask backupTask)
 
                 var files = GetSourceFiles(cancellationToken);
                 await db.LogAsync(LogLevel.Information, $"完成枚举磁盘文件，共{files.Count}个", snapshot);
-               
+
                 foreach (var file in files)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -73,10 +78,15 @@ public class BackupUtility(BackupTask backupTask)
             }
             catch (OperationCanceledException)
             {
+                await db.LogAsync(LogLevel.Error, $"备份被中止");
             }
             catch (Exception ex)
             {
                 await db.LogAsync(LogLevel.Error, $"全量备份过程中出现错误：{ex.Message}", detail: ex.ToString());
+            }
+            finally
+            {
+                BackupTask.IsBackingUp = false;
             }
         }, cancellationToken);
     }
@@ -94,11 +104,16 @@ public class BackupUtility(BackupTask backupTask)
 
     public async Task IncrementalBackupAsync(CancellationToken cancellationToken = default)
     {
+        if (BackupTask.IsBackingUp)
+        {
+            throw new InvalidOperationException("任务正在备份中，无法进行备份");
+        }
         await Task.Run(async () =>
         {
             await using var db = new DbService(BackupTask);
             try
             {
+                BackupTask.IsBackingUp = true;
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
                     StartTime = DateTime.Now,
@@ -125,7 +140,7 @@ public class BackupUtility(BackupTask backupTask)
                     {
                         if (latestFile.PhysicalFile.Time == file.LastWriteTime &&
                             latestFile.PhysicalFile.Length == file.Length) //文件没有发生改变
-                        {                   
+                        {
                             await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}未发生改变", snapshot);
                         }
                         else //文件发生改变
@@ -160,10 +175,15 @@ public class BackupUtility(BackupTask backupTask)
             }
             catch (OperationCanceledException)
             {
+                await db.LogAsync(LogLevel.Error, $"备份被中止");
             }
             catch (Exception ex)
             {
                 await db.LogAsync(LogLevel.Error, $"增量备份过程中出现错误：{ex.Message}", detail: ex.ToString());
+            }
+            finally
+            {
+                BackupTask.IsBackingUp = false;
             }
         }, cancellationToken);
     }

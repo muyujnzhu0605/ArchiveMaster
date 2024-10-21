@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Utilities;
+using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -31,8 +32,9 @@ namespace ArchiveMaster
 
         public void RegisterServices(IServiceCollection services)
         {
-            services.AddViewAndViewModel<BackupTasksPanel,BackupTasksViewModel>();
-            services.AddViewAndViewModel<RestorePanel,RestoreViewModel>();
+            services.AddViewAndViewModel<BackupTasksPanel, BackupTasksViewModel>();
+            services.AddViewAndViewModel<RestorePanel, RestoreViewModel>();
+            services.AddViewAndViewModel<BackupStatusPanel, BackupStatusViewModel>();
 
             services.AddHostedService<BackupBackgroundService>();
         }
@@ -41,8 +43,10 @@ namespace ArchiveMaster
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(BackupTasksPanel), "任务列表", "备份任务的管理以及日志查看", baseUrl + "backup.svg"),
+                new ToolPanelInfo(typeof(BackupTasksPanel), "备份任务配置", "备份任务的管理以及日志查看", baseUrl + "backup.svg"),
                 new ToolPanelInfo(typeof(RestorePanel), "文件恢复", "恢复已备份的文件", baseUrl + "recovery.svg"),
+                new ToolPanelInfo(typeof(BackupStatusPanel), "状态和日志", "控制后台备份，查看当前状态，查看任务日志",
+                    baseUrl + "configuration.svg"),
             },
             GroupName = ModuleName
         };

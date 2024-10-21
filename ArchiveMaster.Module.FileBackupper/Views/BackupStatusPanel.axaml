@@ -1,0 +1,65 @@
+﻿<v:PanelBase
+    x:Class="ArchiveMaster.Views.BackupStatusPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:ArchiveMaster.Configs"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:BackupTasksViewModel"
+    mc:Ignorable="d">
+    <v:PanelBase.PanelContent>
+        <Grid RowDefinitions="Auto,8,*,8,Auto">
+            <g:GroupBox Header="总开关">
+                <ToggleSwitch
+                    IsChecked="{Binding Config.EnableBackgroundBackup}"
+                    OffContent="禁止后台自动备份"
+                    OnContent="开启后台自动备份" />
+            </g:GroupBox>
+            <g:GroupBox
+                Grid.Row="2"
+                Header="任务状态">
+                <DataGrid ItemsSource="{Binding Tasks}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Binding="{Binding Name}"
+                            Header="任务名" />
+                        <DataGridTextColumn
+                            Binding="{Binding SourceDir}"
+                            Header="需要备份的目录" />
+                        <DataGridTextColumn
+                            Binding="{Binding BackupDir}"
+                            Header="备份文件存放目录" />
+                        <DataGridTemplateColumn Header="状态">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="就绪">
+                                        <Interaction.Behaviors>
+                                            <DataTriggerBehavior
+                                                Binding="{Binding IsBackingUp}"
+                                                Value="True">
+                                                <ChangePropertyAction
+                                                    PropertyName="Text"
+                                                    Value="正在备份" />
+                                                <ChangePropertyAction
+                                                    PropertyName="Foreground"
+                                                    Value="Green" />
+                                            </DataTriggerBehavior>
+                                        </Interaction.Behaviors>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </g:GroupBox>
+        </Grid>
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

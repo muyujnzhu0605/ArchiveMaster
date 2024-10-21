@@ -16,6 +16,10 @@
       <DependentUpon>BackupperLogPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\BackupStatusPanel.axaml.cs">
+      <DependentUpon>BackupStatusPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 <!--  <ItemGroup>-->
