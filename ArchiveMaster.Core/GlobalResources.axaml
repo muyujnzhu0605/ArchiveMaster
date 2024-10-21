@@ -8,4 +8,5 @@
         <ResourceInclude Source="Brushes.axaml" />
     </ResourceDictionary.MergedDictionaries>
     <c:BitmapAssetValueConverter x:Key="BitmapAssetValueConverter" />
+    <c:DateTimeConverter x:Key="DateTimeConverter" />
 </ResourceDictionary>

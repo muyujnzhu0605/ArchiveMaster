@@ -19,46 +19,14 @@
         <Grid RowDefinitions="Auto,8,*,8,Auto">
             <g:GroupBox Header="总开关">
                 <ToggleSwitch
-                    IsChecked="{Binding Config.EnableBackgroundBackup}"
+                    IsChecked="{Binding AppConfig.EnableBackgroundBackup}"
                     OffContent="禁止后台自动备份"
                     OnContent="开启后台自动备份" />
             </g:GroupBox>
             <g:GroupBox
                 Grid.Row="2"
                 Header="任务状态">
-                <DataGrid ItemsSource="{Binding Tasks}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Binding="{Binding Name}"
-                            Header="任务名" />
-                        <DataGridTextColumn
-                            Binding="{Binding SourceDir}"
-                            Header="需要备份的目录" />
-                        <DataGridTextColumn
-                            Binding="{Binding BackupDir}"
-                            Header="备份文件存放目录" />
-                        <DataGridTemplateColumn Header="状态">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="就绪">
-                                        <Interaction.Behaviors>
-                                            <DataTriggerBehavior
-                                                Binding="{Binding IsBackingUp}"
-                                                Value="True">
-                                                <ChangePropertyAction
-                                                    PropertyName="Text"
-                                                    Value="正在备份" />
-                                                <ChangePropertyAction
-                                                    PropertyName="Foreground"
-                                                    Value="Green" />
-                                            </DataTriggerBehavior>
-                                        </Interaction.Behaviors>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <v:BackupTaskDataGrid ItemsSource="{Binding Tasks}" />
             </g:GroupBox>
         </Grid>
     </v:PanelBase.PanelContent>

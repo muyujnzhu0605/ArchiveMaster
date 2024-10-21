@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
+using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
@@ -57,7 +58,11 @@ public partial class MainViewModel : ObservableObject
         {
             panelInfo.PanelInstance = Services.Provider.GetService(panelInfo.PanelType) as PanelBase ??
                                       throw new Exception($"无法找到{panelInfo.PanelType}服务");
-            panelInfo.PanelInstance.RequestClosing += (s, e) => { IsToolOpened = false; };
+            panelInfo.PanelInstance.RequestClosing += (s, e) =>
+            {
+                IsToolOpened = false;
+                ((s as StyledElement)?.DataContext as ViewModelBase)?.OnExit();
+            };
             panelInfo.PanelInstance.Title = panelInfo.Title;
             panelInfo.PanelInstance.Description = panelInfo.Description;
         }

@@ -9,11 +9,16 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class BackupTasksViewModel : ViewModelBase
     {
-        private AppConfig appConfig;
+        [ObservableProperty]
+        private BackupTask selectedTask;
+
+        [ObservableProperty]
+        private ObservableCollection<BackupTask> tasks;
 
         public BackupTasksViewModel(FileBackupperConfig config, AppConfig appConfig)
         {
-            this.appConfig = appConfig;
+            Config = config;
+            AppConfig = appConfig;
 #if DEBUG
             if (config.Tasks.Count == 0)
             {
@@ -32,11 +37,18 @@ namespace ArchiveMaster.ViewModels
             Tasks = new ObservableCollection<BackupTask>(config.Tasks);
         }
 
-        [ObservableProperty]
-        private ObservableCollection<BackupTask> tasks;
+        public AppConfig AppConfig { get; }
+        public FileBackupperConfig Config { get; }
+        public override async void OnEnter()
+        {
+            Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
+            await Tasks.UpdateStatusAsync();
+        }
 
-        [ObservableProperty]
-        private BackupTask selectedTask;
+        public override void OnExit()
+        {
+            Config.Tasks = Tasks.ToList();
+        }
 
         [RelayCommand]
         private void AddTask()

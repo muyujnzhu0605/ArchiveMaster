@@ -13,16 +13,17 @@ public class BackupUtility(BackupTask backupTask)
 
     public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
-        if (BackupTask.IsBackingUp)
+        if (BackupTask.Status is BackupTaskStatus.FullBackingUp or BackupTaskStatus.IncrementBackingUp)
         {
             throw new InvalidOperationException("任务正在备份中，无法进行备份");
         }
+
         await Task.Run(async () =>
         {
             await using var db = new DbService(BackupTask);
             try
             {
-                BackupTask.IsBackingUp = true;
+                BackupTask.BeginBackup(true);
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
                     StartTime = DateTime.Now,
@@ -86,34 +87,24 @@ public class BackupUtility(BackupTask backupTask)
             }
             finally
             {
-                BackupTask.IsBackingUp = false;
+                BackupTask.EndBackup(false);
             }
         }, cancellationToken);
     }
 
-    private List<FileInfo> GetSourceFiles(CancellationToken cancellationToken)
-    {
-        BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
-        var files = new DirectoryInfo(BackupTask.SourceDir)
-            .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-            .WithCancellationToken(cancellationToken)
-            .Where(p => blacks.IsNotInBlackList(p))
-            .ToList();
-        return files;
-    }
-
     public async Task IncrementalBackupAsync(CancellationToken cancellationToken = default)
     {
-        if (BackupTask.IsBackingUp)
+        if (BackupTask.Status is BackupTaskStatus.FullBackingUp or BackupTaskStatus.IncrementBackingUp)
         {
             throw new InvalidOperationException("任务正在备份中，无法进行备份");
         }
+
         await Task.Run(async () =>
         {
             await using var db = new DbService(BackupTask);
             try
             {
-                BackupTask.IsBackingUp = true;
+                BackupTask.BeginBackup(false);
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
                     StartTime = DateTime.Now,
@@ -130,6 +121,7 @@ public class BackupUtility(BackupTask backupTask)
                 var files = GetSourceFiles(cancellationToken);
                 await db.LogAsync(LogLevel.Information, $"完成枚举磁盘文件，共{files.Count}个", snapshot);
 
+                bool hasChanged = false;//是否有文件增删改
                 foreach (var file in files)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -145,6 +137,7 @@ public class BackupUtility(BackupTask backupTask)
                         }
                         else //文件发生改变
                         {
+                            hasChanged = true;
                             await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已修改", snapshot);
                             await CreateNewBackupFile(db, snapshot, file, FileRecordType.Modified);
                         }
@@ -153,6 +146,7 @@ public class BackupUtility(BackupTask backupTask)
                     }
                     else //文件有新增
                     {
+                        hasChanged = true;
                         await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已新增", snapshot);
                         await CreateNewBackupFile(db, snapshot, file, FileRecordType.Created);
                     }
@@ -160,6 +154,7 @@ public class BackupUtility(BackupTask backupTask)
 
                 foreach (var deletingFilePath in latestFiles.Keys) //存在于数据库但不存在于磁盘中的文件，表示已删除
                 {
+                    hasChanged = true;
                     await db.LogAsync(LogLevel.Information, $"文件{deletingFilePath}已删除", snapshot);
                     FileRecordEntity record = new FileRecordEntity()
                     {
@@ -171,6 +166,12 @@ public class BackupUtility(BackupTask backupTask)
                 }
 
                 snapshot.EndTime = DateTime.Now;
+
+                if (!hasChanged)
+                {
+                    //没有任何文件改变，那这个快照是没有意义的。但是因为日志关联了这个快照，所以不能直接删除，采用软删除。
+                    snapshot.IsDeleted = true;
+                }
                 await db.SaveChangesAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -183,7 +184,7 @@ public class BackupUtility(BackupTask backupTask)
             }
             finally
             {
-                BackupTask.IsBackingUp = false;
+                BackupTask.EndBackup(false);
             }
         }, cancellationToken);
     }
@@ -221,5 +222,16 @@ public class BackupUtility(BackupTask backupTask)
             Type = recordType
         };
         db.Add(record);
+    }
+
+    private List<FileInfo> GetSourceFiles(CancellationToken cancellationToken)
+    {
+        BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
+        var files = new DirectoryInfo(BackupTask.SourceDir)
+            .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+            .WithCancellationToken(cancellationToken)
+            .Where(p => blacks.IsNotInBlackList(p))
+            .ToList();
+        return files;
     }
 }

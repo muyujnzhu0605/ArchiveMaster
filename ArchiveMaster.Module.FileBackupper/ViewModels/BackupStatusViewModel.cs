@@ -11,21 +11,25 @@ namespace ArchiveMaster.ViewModels
     {
         private AppConfig appConfig;
 
-        public BackupStatusViewModel(FileBackupperConfig config, AppConfig appConfig )
-        {
-            Config = config;
-            this.appConfig = appConfig;
-            Tasks = new ObservableCollection<BackupTask>(config.Tasks);
-        }
+        [ObservableProperty]
+        private BackupTask selectedTask;
 
         [ObservableProperty]
         private ObservableCollection<BackupTask> tasks;
 
-        [ObservableProperty]
-        private BackupTask selectedTask;
-        
+        public BackupStatusViewModel(FileBackupperConfig config, AppConfig appConfig)
+        {
+            Config = config;
+            this.appConfig = appConfig;
+        }
         public FileBackupperConfig Config { get; }
-        
+
+        public override async void OnEnter()
+        {
+            Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
+            await Tasks.UpdateStatusAsync();
+        }
+
         [RelayCommand]
         private async Task TestFullBackupAsync()
         {

@@ -15,4 +15,8 @@ public abstract partial class ViewModelBase : ObservableObject
     {
         
     }
+    public virtual void OnExit()
+    {
+        
+    }
 }

@@ -20,6 +20,10 @@
       <DependentUpon>BackupStatusPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\BackupTaskDataGrid.axaml.cs">
+      <DependentUpon>BackupTaskDataGrid.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 <!--  <ItemGroup>-->

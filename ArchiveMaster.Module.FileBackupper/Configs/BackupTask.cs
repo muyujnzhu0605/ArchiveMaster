@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using ArchiveMaster.Enums;
+using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Configs;
 
@@ -22,23 +24,39 @@ public partial class BackupTask : ConfigBase
     private bool byWatching = true;
 
     [ObservableProperty]
-    private string sourceDir;
+    private bool isDefaultVirtualBackup;
+
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private DateTime lastBackupTime;
+
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private DateTime lastFullBackupTime;
+
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private string message;
 
     [ObservableProperty]
     private string name = "新备份任务";
 
     [ObservableProperty]
-    private TimeSpan timeInterval = TimeSpan.FromHours(1);
+    [property: JsonIgnore]
+    private int snapshotCount;
 
     [ObservableProperty]
-    private bool isDefaultVirtualBackup;
-
-    [ObservableProperty] 
+    private string sourceDir;
+    [ObservableProperty]
     [property: JsonIgnore]
-    private bool isBackingUp;
+    private BackupTaskStatus status = BackupTaskStatus.Ready;
 
+    [ObservableProperty]
+    private TimeSpan timeInterval = TimeSpan.FromHours(1);
     public override void Check()
     {
-        
+       CheckDir(SourceDir,"需要备份的目录");
+       CheckDir(BackupDir,"备份文件存放目录");
+       CheckEmpty(Name,"备份任务名");
     }
 }

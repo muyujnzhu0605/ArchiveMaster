@@ -267,7 +267,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnTimeHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Time))
             {
-                Converter = new FileTimeConverter(),
+                Converter = new DateTimeConverter(),
                 Mode = BindingMode.OneWay
             },
             IsReadOnly = true,
