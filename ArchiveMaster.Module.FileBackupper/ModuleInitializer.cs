@@ -43,10 +43,12 @@ namespace ArchiveMaster
         {
             Panels =
             {
+                
                 new ToolPanelInfo(typeof(BackupTasksPanel), "备份任务配置", "备份任务的管理以及日志查看", baseUrl + "backup.svg"),
-                new ToolPanelInfo(typeof(RestorePanel), "文件恢复", "恢复已备份的文件", baseUrl + "recovery.svg"),
-                new ToolPanelInfo(typeof(BackupStatusPanel), "状态和日志", "控制后台备份，查看当前状态，查看任务日志",
+                new ToolPanelInfo(typeof(BackupStatusPanel), "备份管理中心", "控制后台备份，查看当前状态，查看任务日志",
                     baseUrl + "configuration.svg"),
+                new ToolPanelInfo(typeof(RestorePanel), "文件恢复", "恢复已备份的文件", baseUrl + "restore.svg"),
+                
             },
             GroupName = ModuleName
         };

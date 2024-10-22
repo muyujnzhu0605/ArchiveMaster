@@ -2,7 +2,7 @@
     x:Class="ArchiveMaster.Views.BackupStatusPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:c="using:ArchiveMaster.Configs"
+    xmlns:c="using:ArchiveMaster.Converters"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
@@ -26,50 +26,113 @@
             <g:GroupBox
                 Grid.Row="2"
                 Header="备份快照">
-                <DataGrid
-                    IsReadOnly="True"
-                    ItemsSource="{Binding Snapshots}"
-                    SelectedItem="{Binding SelectedSnapShot}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
-                            Header="开始时间" />
-                        <DataGridTextColumn
-                            Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
-                            Header="完成时间" />
-                        <DataGridTemplateColumn
-                            CanUserResize="False"
-                            Header="类型">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel
-                                        Margin="4,0"
-                                        Orientation="Horizontal"
-                                        Spacing="8">
-                                        <TextBlock
-                                            IsVisible="{Binding Snapshot.IsFull}"
-                                            Text="全量" />
-                                        <TextBlock
-                                            IsVisible="{Binding !Snapshot.IsFull}"
-                                            Text="增量" />
-                                        <TextBlock
-                                            IsVisible="{Binding Snapshot.IsVirtual}"
-                                            Text="虚拟" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn
-                            Binding="{Binding CreatedFileCount}"
-                            Header="新增文件数" />
-                        <DataGridTextColumn
-                            Binding="{Binding DeletedFileCount}"
-                            Header="删除文件数" />
-                        <DataGridTextColumn
-                            Binding="{Binding ModifiedFileCount}"
-                            Header="修改文件数" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+                    <TabItem Header="快照">
+                        <DataGrid
+                            IsReadOnly="True"
+                            ItemsSource="{Binding Snapshots}"
+                            SelectedItem="{Binding SelectedSnapShot}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
+                                    Header="开始时间" />
+                                <DataGridTextColumn
+                                    Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
+                                    Header="完成时间" />
+                                <DataGridTemplateColumn
+                                    CanUserResize="False"
+                                    Header="类型">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Margin="4,0"
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                                <TextBlock
+                                                    IsVisible="{Binding Snapshot.IsFull}"
+                                                    Text="全量" />
+                                                <TextBlock
+                                                    IsVisible="{Binding !Snapshot.IsFull}"
+                                                    Text="增量" />
+                                                <TextBlock
+                                                    IsVisible="{Binding Snapshot.IsVirtual}"
+                                                    Text="虚拟" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn
+                                    Binding="{Binding CreatedFileCount}"
+                                    Header="新增文件数" />
+                                <DataGridTextColumn
+                                    Binding="{Binding DeletedFileCount}"
+                                    Header="删除文件数" />
+                                <DataGridTextColumn
+                                    Binding="{Binding ModifiedFileCount}"
+                                    Header="修改文件数" />
+                                <DataGridTemplateColumn
+                                    CanUserResize="False"
+                                    Header="操作">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                                <Button
+                                                    Classes="Link"
+                                                    Command="{Binding $parent[DataGrid].DataContext.JumpToLogsBySnapshotCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Content="日志" />
+                                                <Button
+                                                    Classes="Link"
+                                                    Content="查看文件" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </TabItem>
+                    <TabItem Header="日志">
+                        <DataGrid
+                            IsReadOnly="True"
+                            ItemsSource="{Binding Logs}">
+                            <DataGrid.Resources>
+                                <c:LogLevelConverter x:Key="LogLevelConverter" />
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Binding="{Binding Type, Converter={StaticResource LogLevelConverter}, Mode=OneWay}"
+                                    Header="类型" />
+                                <DataGridTextColumn
+                                    Binding="{Binding Time, Converter={StaticResource DateTimeConverter}}"
+                                    Header="时间" />
+                                <DataGridTextColumn
+                                    Binding="{Binding Message}"
+                                    Header="信息" />
+                                <DataGridTemplateColumn
+                                    CanUserResize="False"
+                                    Header="操作">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                                <Button
+                                                    Classes="Link"
+                                                    Command="{Binding $parent[DataGrid].DataContext.ShowDetailCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Content="详情"
+                                                    IsVisible="{Binding Detail, Converter={StaticResource NotNullConverter}}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                    </TabItem>
+                </TabControl>
             </g:GroupBox>
         </Grid>
     </v:PanelBase.PanelContent>

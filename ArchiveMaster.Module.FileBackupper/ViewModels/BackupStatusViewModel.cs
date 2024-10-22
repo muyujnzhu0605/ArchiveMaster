@@ -4,7 +4,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using ArchiveMaster.Converters;
 using ArchiveMaster.Models;
+using FzLib.Avalonia.Messages;
+using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.ViewModels
 {
@@ -15,6 +18,8 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private BackupTask selectedTask;
 
+        [ObservableProperty]
+        private int selectedTabIndex;
 
         async partial void OnSelectedTaskChanged(BackupTask value)
         {
@@ -45,6 +50,9 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<BackupTask> tasks;
+
+        [ObservableProperty]
+        private ObservableCollection<BackupLogEntity> logs;
 
         [ObservableProperty]
         private ObservableCollection<BackupSnapshotWithFileCount> snapshots;
@@ -81,6 +89,26 @@ namespace ArchiveMaster.ViewModels
         {
             BackupUtility utility = new BackupUtility(SelectedTask);
             await utility.IncrementalBackupAsync();
+        }
+
+        [RelayCommand]
+        private async Task JumpToLogsBySnapshotAsync(BackupSnapshotWithFileCount snapshot)
+        {
+            SelectedTabIndex = 1;
+            await using var db = new DbService(SelectedTask);
+            Logs = new ObservableCollection<BackupLogEntity>(await db.GetLogsAsync(snapshot.Snapshot.Id));
+        }
+
+        [RelayCommand]
+        private Task ShowDetailAsync(BackupLogEntity log)
+        {
+            return this.SendMessage(new CommonDialogMessage()
+            {
+                Type = CommonDialogMessage.CommonDialogType.Ok,
+                Message = log.Message,
+                Title = LogLevelConverter.GetDescription(log.Type),
+                Detail = log.Detail
+            }).Task;
         }
     }
 }

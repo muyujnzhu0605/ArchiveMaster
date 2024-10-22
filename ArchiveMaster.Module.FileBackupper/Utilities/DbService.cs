@@ -222,6 +222,24 @@ public class DbService : IDisposable, IAsyncDisposable
         return db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<List<BackupLogEntity>> GetLogsAsync(int? snapshotId = null, LogLevel? type = null)
+    {
+        await InitializeAsync();
+        IQueryable<BackupLogEntity> query = db.Logs;
+        if (snapshotId.HasValue)
+        {
+            query = query.Where(p => p.SnapshotId == snapshotId.Value);
+        }
+
+        if (type.HasValue)
+        {
+            query = query.Where(p => p.Type == type.Value);
+        }
+
+        query = query.OrderBy(p => p.Time);
+        return await query.ToListAsync();
+    }
+
     private IQueryable<BackupSnapshotEntity> GetValidSnapshots()
     {
         return db.Snapshots
