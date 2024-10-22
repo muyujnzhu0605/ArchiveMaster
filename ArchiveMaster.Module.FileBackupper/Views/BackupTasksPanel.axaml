@@ -16,8 +16,20 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid ColumnDefinitions="*,16,*">
-            <Grid RowDefinitions="*,8,Auto">
+        <Grid
+            ColumnDefinitions="*,16,*"
+            RowDefinitions="Auto,8,*">
+            <g:GroupBox
+                Grid.ColumnSpan="3"
+                Header="总开关">
+                <ToggleSwitch
+                    IsChecked="{Binding Config.EnableBackgroundBackup}"
+                    OffContent="禁止后台自动备份"
+                    OnContent="开启后台自动备份" />
+            </g:GroupBox>
+            <Grid
+                Grid.Row="2"
+                RowDefinitions="*,8,Auto">
                 <v:BackupTaskDataGrid
                     ItemsSource="{Binding Tasks}"
                     SelectedItem="{Binding SelectedTask}" />
@@ -46,6 +58,7 @@
 
 
             <ctrl:StackFormItemGroup
+                Grid.Row="2"
                 Grid.Column="2"
                 IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}">
                 <TextBlock

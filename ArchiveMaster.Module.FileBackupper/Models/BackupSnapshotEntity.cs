@@ -15,7 +15,7 @@ public class BackupSnapshotEntity : EntityBase
     /// <summary>
     /// 备份开始的时间
     /// </summary>
-    public DateTime StartTime { get; set; }
+    public DateTime BeginTime { get; set; }
 
     /// <summary>
     /// 备份开始的时间

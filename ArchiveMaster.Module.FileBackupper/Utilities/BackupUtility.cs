@@ -26,7 +26,7 @@ public class BackupUtility(BackupTask backupTask)
                 BackupTask.BeginBackup(true);
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
-                    StartTime = DateTime.Now,
+                    BeginTime = DateTime.Now,
                     IsFull = true,
                     IsVirtual = isVirtual
                 };
@@ -107,7 +107,7 @@ public class BackupUtility(BackupTask backupTask)
                 BackupTask.BeginBackup(false);
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
-                    StartTime = DateTime.Now,
+                    BeginTime = DateTime.Now,
                     IsFull = false,
                     IsVirtual = false
                 };

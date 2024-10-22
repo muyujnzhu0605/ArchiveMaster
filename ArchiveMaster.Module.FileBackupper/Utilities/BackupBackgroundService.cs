@@ -27,8 +27,13 @@ public class BackupBackgroundService : IHostedService
         cancellationToken = cancellationTokenSource.Token;
     }
 
-    private async void CheckTasksAndExecute()
+    private async Task CheckTasksAndExecuteAsync()
     {
+        if (!Config.EnableBackgroundBackup)
+        {
+            return;
+        }
+
         if (IsBackingUp)
         {
             throw new InvalidOperationException("正在备份，无法进行新一轮的检查和执行");
@@ -39,6 +44,11 @@ public class BackupBackgroundService : IHostedService
         {
             foreach (var task in Config.Tasks.Where(p => p.ByTimeInterval).ToList())
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 if (!Config.Tasks.Contains(task))
                 {
                     continue; //防止在长时间备份时，任务被删除
@@ -95,20 +105,19 @@ public class BackupBackgroundService : IHostedService
             return Task.CompletedTask;
         }
 
-        timer = new Timer(_ =>
+
+        return Task.Factory.StartNew(async () =>
         {
-            if (!IsBackingUp)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                Debug.WriteLine($"开始检查任务，时间为{DateTime.Now}");
-                CheckTasksAndExecute();
+                await CheckTasksAndExecuteAsync();
+                await Task.Delay(60 * 1000, cancellationToken);
             }
-        }, null, 0, 60 * 1000);
-        return Task.CompletedTask;
+        }, TaskCreationOptions.LongRunning);
     }
 
     public async Task StopAsync(CancellationToken _)
     {
         await cancellationTokenSource.CancelAsync();
-        await timer.DisposeAsync();
     }
 }

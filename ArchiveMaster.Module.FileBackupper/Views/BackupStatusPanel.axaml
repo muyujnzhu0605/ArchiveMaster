@@ -16,17 +16,60 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid RowDefinitions="Auto,8,*,8,Auto">
-            <g:GroupBox Header="总开关">
-                <ToggleSwitch
-                    IsChecked="{Binding AppConfig.EnableBackgroundBackup}"
-                    OffContent="禁止后台自动备份"
-                    OnContent="开启后台自动备份" />
+        <Grid RowDefinitions="*,8,*">
+            <g:GroupBox Header="任务状态">
+                <v:BackupTaskDataGrid
+                    IsEnabled="{Binding CanSelectTasks}"
+                    ItemsSource="{Binding Tasks}"
+                    SelectedItem="{Binding SelectedTask}" />
             </g:GroupBox>
             <g:GroupBox
                 Grid.Row="2"
-                Header="任务状态">
-                <v:BackupTaskDataGrid ItemsSource="{Binding Tasks}" />
+                Header="备份快照">
+                <DataGrid
+                    IsReadOnly="True"
+                    ItemsSource="{Binding Snapshots}"
+                    SelectedItem="{Binding SelectedSnapShot}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
+                            Header="开始时间" />
+                        <DataGridTextColumn
+                            Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
+                            Header="完成时间" />
+                        <DataGridTemplateColumn
+                            CanUserResize="False"
+                            Header="类型">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel
+                                        Margin="4,0"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <TextBlock
+                                            IsVisible="{Binding Snapshot.IsFull}"
+                                            Text="全量" />
+                                        <TextBlock
+                                            IsVisible="{Binding !Snapshot.IsFull}"
+                                            Text="增量" />
+                                        <TextBlock
+                                            IsVisible="{Binding Snapshot.IsVirtual}"
+                                            Text="虚拟" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn
+                            Binding="{Binding CreatedFileCount}"
+                            Header="新增文件数" />
+                        <DataGridTextColumn
+                            Binding="{Binding DeletedFileCount}"
+                            Header="删除文件数" />
+                        <DataGridTextColumn
+                            Binding="{Binding ModifiedFileCount}"
+                            Header="修改文件数" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </g:GroupBox>
         </Grid>
     </v:PanelBase.PanelContent>
