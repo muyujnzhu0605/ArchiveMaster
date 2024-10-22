@@ -12,11 +12,7 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
-    <Compile Update="Views\RestorePanel.axaml.cs">
-      <DependentUpon>BackupperLogPanel.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\BackupStatusPanel.axaml.cs">
+    <Compile Update="Views\BackupManageCenterPanel.axaml.cs">
       <DependentUpon>BackupStatusPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

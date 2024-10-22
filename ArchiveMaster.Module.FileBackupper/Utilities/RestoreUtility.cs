@@ -7,37 +7,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArchiveMaster.Utilities;
 
-public class RestoreUtility(BackupTask task, AppConfig appConfig) : TwoStepUtilityBase<BackupTask>(task, appConfig)
+public class RestoreUtility(BackupTask task)
 {
-    public TreeDirInfo RootDir { get; private set; }
-
-    public int? SnapShotId { get; set; }
-
-    public override Task ExecuteAsync(CancellationToken token = default)
+    public async Task<TreeDirInfo> GetSnapshotFileTreeAsync(int snapshotId, CancellationToken token = default)
     {
-        return Task.CompletedTask;
-    }
-
-    public override async Task InitializeAsync(CancellationToken token = default)
-    {
-        if (!SnapShotId.HasValue)
-        {
-            throw new InvalidOperationException("还未设置快照ID");
-        }
-
         await using var db = new DbService(task);
+        TreeDirInfo tree = null;
         await Task.Run(() =>
         {
-            var fileRecords = db.GetLatestFiles(SnapShotId.Value);
+            var fileRecords = db.GetLatestFiles(snapshotId);
 
-            TreeDirInfo tree = TreeDirInfo.CreateEmptyTree();
+            tree = TreeDirInfo.CreateEmptyTree();
 
             foreach (var record in fileRecords.Select(p => new BackupFile(p)))
             {
                 tree.AddFile(record);
             }
-
-            RootDir = tree;
         }, token);
+        return tree;
     }
 }

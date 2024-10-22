@@ -33,16 +33,19 @@ namespace ArchiveMaster.ViewModels
 
         private TreeDirInfo()
         {
+            IsDir = true;
         }
 
         private TreeDirInfo(SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
             : base(dir, parent, depth, index)
         {
+            IsDir = true;
         }
 
         private TreeDirInfo(DirectoryInfo dir, string topDir, TreeDirInfo parent, int depth, int index)
             : base(dir, topDir, parent, depth, index)
         {
+            IsDir = true;
         }
 
         /// <summary>
@@ -306,6 +309,11 @@ namespace ArchiveMaster.ViewModels
                 subs.Clear();
                 subs.AddRange(subDirs);
                 subs.AddRange(subFiles);
+            }
+
+            for (int i = 0; i < subs.Count; i++)
+            {
+                subs[i].Index = i;
             }
         }
 

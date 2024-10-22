@@ -33,8 +33,7 @@ namespace ArchiveMaster
         public void RegisterServices(IServiceCollection services)
         {
             services.AddViewAndViewModel<BackupTasksPanel, BackupTasksViewModel>();
-            services.AddViewAndViewModel<RestorePanel, RestoreViewModel>();
-            services.AddViewAndViewModel<BackupStatusPanel, BackupStatusViewModel>();
+            services.AddViewAndViewModel<BackupManageCenterPanel, BackupManageCenterViewModel>();
 
             services.AddHostedService<BackupBackgroundService>();
         }
@@ -45,9 +44,8 @@ namespace ArchiveMaster
             {
                 
                 new ToolPanelInfo(typeof(BackupTasksPanel), "备份任务配置", "备份任务的管理以及日志查看", baseUrl + "backup.svg"),
-                new ToolPanelInfo(typeof(BackupStatusPanel), "备份管理中心", "控制后台备份，查看当前状态，查看任务日志",
+                new ToolPanelInfo(typeof(BackupManageCenterPanel), "备份管理中心", "控制后台备份，查看当前状态，查看任务日志",
                     baseUrl + "configuration.svg"),
-                new ToolPanelInfo(typeof(RestorePanel), "文件恢复", "恢复已备份的文件", baseUrl + "restore.svg"),
                 
             },
             GroupName = ModuleName

@@ -13,12 +13,35 @@ public class FileProgressDialog : ProgressDialog
         Width = 600;
     }
 
-    public async Task CopyFilesAsync(IList<string> sourcePaths, IList<string> destinationPaths,
+    public async Task CopyFileAsync(string sourcePath, string destinationPath, DateTime time,
         int bufferSize = 128 * 1024)
     {
-        if (sourcePaths.Count != destinationPaths.Count)
+        Message = "正在复制" + Path.GetFileName(destinationPath);
+        cts = new CancellationTokenSource();
+        var buffer = new byte[bufferSize];
+
+        Maximum = new FileInfo(sourcePath).Length;
+        try
         {
-            throw new ArgumentException("源和目标数量不同");
+            await CopyFileAsync(sourcePath, destinationPath, time, buffer);
+            OnCopyComplete();
+        }
+        catch (OperationCanceledException)
+        {
+            OnCopyCanceled(destinationPath);
+        }
+        catch (Exception ex)
+        {
+            OnCopyError(ex);
+        }
+    }
+
+    public async Task CopyFilesAsync(IList<string> sourcePaths, IList<string> destinationPaths, IList<DateTime> times,
+            int bufferSize = 128 * 1024)
+    {
+        if (sourcePaths.Count != destinationPaths.Count || sourcePaths.Count != times.Count)
+        {
+            throw new ArgumentException("源、目标或时间的数量不同");
         }
 
         cts = new CancellationTokenSource();
@@ -31,7 +54,7 @@ public class FileProgressDialog : ProgressDialog
             for (; i < sourcePaths.Count; i++)
             {
                 Message = "正在复制" + Path.GetFileName(destinationPaths[i]);
-                await CopyFileAsync(sourcePaths[i], destinationPaths[i], buffer);
+                await CopyFileAsync(sourcePaths[i], destinationPaths[i], times[i], buffer);
             }
 
             OnCopyComplete();
@@ -46,12 +69,42 @@ public class FileProgressDialog : ProgressDialog
         }
     }
 
-    private void OnCopyError(Exception ex)
+    protected override void OnCloseButtonClick()
     {
-        Title = "错误";
-        Message = ex.Message;
-        CloseButtonContent = "取消";
+        Close();
+    }
+
+    protected override void OnSecondaryButtonClick()
+    {
         SecondaryButtonContent = null;
+        cts?.Cancel();
+    }
+
+    private async Task CopyFileAsync(string sourcePath, string destinationPath, DateTime time, byte[] buffer)
+    {
+        var destDir = new FileInfo(destinationPath).Directory;
+        if (!destDir.Exists)
+        {
+            destDir.Create();
+        }
+
+        await using var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
+        await using (var destinationStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write))
+        {
+            int bytesRead;
+
+            while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                cts.Token.ThrowIfCancellationRequested();
+                await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cts.Token);
+                Value += bytesRead;
+#if DEBUG
+                await Task.Delay(100);
+#endif
+            }
+        }
+
+        File.SetLastWriteTime(destinationPath, time);
     }
 
     private void OnCopyCanceled(string destinationPath)
@@ -77,60 +130,11 @@ public class FileProgressDialog : ProgressDialog
         Message = "完成";
     }
 
-    public async Task CopyFileAsync(string sourcePath, string destinationPath, int bufferSize = 128 * 1024)
+    private void OnCopyError(Exception ex)
     {
-        Message = "正在复制" + Path.GetFileName(destinationPath);
-        cts = new CancellationTokenSource();
-        var buffer = new byte[bufferSize];
-
-        Maximum = new FileInfo(sourcePath).Length;
-        try
-        {
-            await CopyFileAsync(sourcePath, destinationPath, buffer);
-            OnCopyComplete();
-        }
-        catch (OperationCanceledException)
-        {
-            OnCopyCanceled(destinationPath);
-        }
-        catch (Exception ex)
-        {
-            OnCopyError(ex);
-        }
-    }
-
-    private async Task CopyFileAsync(string sourcePath, string destinationPath, byte[] buffer)
-    {
-        var destDir = new FileInfo(destinationPath).Directory;
-        if (!destDir.Exists)
-        {
-            destDir.Create();
-        }
-
-        await using var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
-        await using var destinationStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write);
-        int bytesRead;
-
-        while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-        {
-            cts.Token.ThrowIfCancellationRequested();
-            await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cts.Token);
-            Value += bytesRead;
-#if DEBUG
-            await Task.Delay(100);
-#endif
-        }
-    }
-
-    protected override void OnCloseButtonClick()
-    {
-        Close();
-    }
-
-
-    protected override void OnSecondaryButtonClick()
-    {
+        Title = "错误";
+        Message = ex.Message;
+        CloseButtonContent = "取消";
         SecondaryButtonContent = null;
-        cts?.Cancel();
     }
 }

@@ -3,9 +3,9 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class BackupStatusPanel : PanelBase
+    public partial class BackupManageCenterPanel : PanelBase
     {
-        public BackupStatusPanel()
+        public BackupManageCenterPanel()
         {
             InitializeComponent();
         }
