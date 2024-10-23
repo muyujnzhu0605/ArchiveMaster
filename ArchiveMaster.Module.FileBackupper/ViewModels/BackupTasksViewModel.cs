@@ -64,19 +64,5 @@ namespace ArchiveMaster.ViewModels
             Debug.Assert(SelectedTask != null);
             Tasks.Remove(SelectedTask);
         }
-
-        [RelayCommand]
-        private async Task TestFullBackupAsync()
-        {
-            BackupUtility utility = new BackupUtility(SelectedTask);
-            await utility.FullBackupAsync(false);
-        }
-
-        [RelayCommand]
-        private async Task TestIncrementalBackupAsync()
-        {
-            BackupUtility utility = new BackupUtility(SelectedTask);
-            await utility.IncrementalBackupAsync();
-        }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Converters;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
@@ -203,17 +204,10 @@ namespace ArchiveMaster.ViewModels
         }
 
         [RelayCommand]
-        private async Task TestFullBackupAsync()
+        private async Task MakeBackupAsync()
         {
             BackupUtility utility = new BackupUtility(SelectedTask);
-            await utility.FullBackupAsync(false);
-        }
-
-        [RelayCommand]
-        private async Task TestIncrementalBackupAsync()
-        {
-            BackupUtility utility = new BackupUtility(SelectedTask);
-            await utility.IncrementalBackupAsync();
+            await utility.BackupAsync(SnapshotType.Full);
         }
     }
 }

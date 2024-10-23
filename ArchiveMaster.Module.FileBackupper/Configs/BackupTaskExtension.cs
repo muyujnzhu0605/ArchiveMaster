@@ -35,7 +35,7 @@ public static class BackupTaskExtension
                 task.LastBackupTime = snapshots[^1].EndTime;
                 for (int i = snapshots.Count - 1; i >= 0; i--)
                 {
-                    if (snapshots[i].IsFull)
+                    if (snapshots[i].Type is SnapshotType.Full or SnapshotType.VirtualFull)
                     {
                         task.LastFullBackupTime = snapshots[i].EndTime;
                     }

@@ -73,21 +73,21 @@ public class DbService : IDisposable, IAsyncDisposable
         Initialize();
         BackupSnapshotEntity fullSnapshot;
         List<BackupSnapshotEntity> incrementalSnapshots = new List<BackupSnapshotEntity>();
-        if (snapshot.IsFull)
+        if (snapshot.Type is SnapshotType.Full or SnapshotType.VirtualFull)
         {
             fullSnapshot = snapshot;
         }
         else
         {
             fullSnapshot = GetValidSnapshots()
-                               .Where(p => p.IsFull)
+                               .Where(p => p.Type == SnapshotType.Full || p.Type == SnapshotType.VirtualFull)
                                .Where(p => p.BeginTime < snapshot.BeginTime)
                                .OrderByDescending(p => p.BeginTime)
                                .FirstOrDefault()
                            ?? throw new KeyNotFoundException(
                                $"找不到该{nameof(BackupSnapshotEntity)}对应的全量备份{nameof(BackupSnapshotEntity)}");
             incrementalSnapshots.AddRange(GetValidSnapshots()
-                .Where(p => !p.IsFull)
+                .Where(p => p.Type == SnapshotType.Increment)
                 .Where(p => p.BeginTime > fullSnapshot.EndTime)
                 .Where(p => p.EndTime < snapshot.BeginTime)
                 .OrderByDescending(p => p.BeginTime)
@@ -160,12 +160,11 @@ public class DbService : IDisposable, IAsyncDisposable
         return query.FirstOrDefault();
     }
 
-    public async Task<List<BackupSnapshotWithFileCount>> GetSnapshotsWithFilesAsync(bool? isFull = null,
-        bool? isVirtual = null,
+    public async Task<List<BackupSnapshotWithFileCount>> GetSnapshotsWithFilesAsync(SnapshotType? type = null,
         CancellationToken token = default)
     {
         await InitializeAsync(token);
-        var query = GetSnapshotsQuery(isFull, isVirtual).Select(s => new BackupSnapshotWithFileCount()
+        var query = GetSnapshotsQuery(type).Select(s => new BackupSnapshotWithFileCount()
         {
             Snapshot = s,
             CreatedFileCount = db.Records.Count(p => p.Type == FileRecordType.Created && p.SnapshotId == s.Id),
@@ -175,17 +174,12 @@ public class DbService : IDisposable, IAsyncDisposable
         return await query.ToListAsync(token).ConfigureAwait(false);
     }
 
-    private IQueryable<BackupSnapshotEntity> GetSnapshotsQuery(bool? isFull, bool? isVirtual)
+    private IQueryable<BackupSnapshotEntity> GetSnapshotsQuery(SnapshotType? type = null)
     {
         IQueryable<BackupSnapshotEntity> query = GetValidSnapshots();
-        if (isFull.HasValue)
+        if (type.HasValue)
         {
-            query = query.Where(p => p.IsFull == isFull);
-        }
-
-        if (isVirtual.HasValue)
-        {
-            query = query.Where(p => p.IsVirtual == isVirtual);
+            query = query.Where(p => p.Type == type);
         }
 
         query = query.OrderBy(p => p.BeginTime);
@@ -193,11 +187,11 @@ public class DbService : IDisposable, IAsyncDisposable
     }
 
 
-    public async Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(bool? isFull = null, bool? isVirtual = null,
+    public async Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(SnapshotType? type = null,
         CancellationToken token = default)
     {
         await InitializeAsync(token);
-        return await GetSnapshotsQuery(isFull, isVirtual).ToListAsync(token).ConfigureAwait(false);
+        return await GetSnapshotsQuery(type).ToListAsync(token).ConfigureAwait(false);
     }
 
     public async Task LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,

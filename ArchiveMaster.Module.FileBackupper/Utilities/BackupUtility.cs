@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
@@ -11,7 +12,18 @@ public class BackupUtility(BackupTask backupTask)
 {
     public BackupTask BackupTask { get; } = backupTask;
 
-    public async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
+    public Task BackupAsync(SnapshotType type, CancellationToken cancellationToken = default)
+    {
+        return type switch
+        {
+            SnapshotType.Full => FullBackupAsync(false, cancellationToken),
+            SnapshotType.VirtualFull => FullBackupAsync(true, cancellationToken),
+            SnapshotType.Increment => IncrementalBackupAsync(cancellationToken),
+            _ => throw new InvalidEnumArgumentException()
+        };
+    }
+
+    private async Task FullBackupAsync(bool isVirtual, CancellationToken cancellationToken = default)
     {
         if (BackupTask.Status is BackupTaskStatus.FullBackingUp or BackupTaskStatus.IncrementBackingUp)
         {
@@ -27,8 +39,7 @@ public class BackupUtility(BackupTask backupTask)
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
                     BeginTime = DateTime.Now,
-                    IsFull = true,
-                    IsVirtual = isVirtual
+                    Type = isVirtual ? SnapshotType.VirtualFull : SnapshotType.Full
                 };
                 db.Add(snapshot);
                 await db.SaveChangesAsync(cancellationToken);
@@ -92,7 +103,7 @@ public class BackupUtility(BackupTask backupTask)
         }, cancellationToken);
     }
 
-    public async Task IncrementalBackupAsync(CancellationToken cancellationToken = default)
+    private async Task IncrementalBackupAsync(CancellationToken cancellationToken = default)
     {
         if (BackupTask.Status is BackupTaskStatus.FullBackingUp or BackupTaskStatus.IncrementBackingUp)
         {
@@ -108,8 +119,7 @@ public class BackupUtility(BackupTask backupTask)
                 BackupSnapshotEntity snapshot = new BackupSnapshotEntity()
                 {
                     BeginTime = DateTime.Now,
-                    IsFull = false,
-                    IsVirtual = false
+                    Type = SnapshotType.Increment
                 };
                 db.Add(snapshot);
                 await db.SaveChangesAsync(cancellationToken);
@@ -121,7 +131,7 @@ public class BackupUtility(BackupTask backupTask)
                 var files = GetSourceFiles(cancellationToken);
                 await db.LogAsync(LogLevel.Information, $"完成枚举磁盘文件，共{files.Count}个", snapshot);
 
-                bool hasChanged = false;//是否有文件增删改
+                bool hasChanged = false; //是否有文件增删改
                 foreach (var file in files)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -172,6 +182,7 @@ public class BackupUtility(BackupTask backupTask)
                     //没有任何文件改变，那这个快照是没有意义的。但是因为日志关联了这个快照，所以不能直接删除，采用软删除。
                     snapshot.IsDeleted = true;
                 }
+
                 await db.SaveChangesAsync(cancellationToken);
             }
             catch (OperationCanceledException)

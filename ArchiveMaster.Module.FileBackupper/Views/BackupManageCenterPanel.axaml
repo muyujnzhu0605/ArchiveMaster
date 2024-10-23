@@ -16,15 +16,21 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid RowDefinitions="*,8,2*">
-            <g:GroupBox Header="任务状态">
+        <Grid RowDefinitions="Auto,8,*,8,2*">
+            <ToggleSwitch
+                IsChecked="{Binding Config.EnableBackgroundBackup}"
+                OffContent="自动备份总开关"
+                OnContent="自动备份总开关" />
+            <g:GroupBox
+                Grid.Row="2"
+                Header="任务状态">
                 <v:BackupTaskDataGrid
                     IsEnabled="{Binding CanSelectTasks}"
                     ItemsSource="{Binding Tasks}"
                     SelectedItem="{Binding SelectedTask}" />
             </g:GroupBox>
             <TabControl
-                Grid.Row="2"
+                Grid.Row="4"
                 SelectedIndex="{Binding SelectedTabIndex}">
                 <TabItem Header="快照">
                     <DataGrid

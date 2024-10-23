@@ -35,6 +35,7 @@ namespace ArchiveMaster
             services.AddViewAndViewModel<BackupTasksPanel, BackupTasksViewModel>();
             services.AddViewAndViewModel<BackupManageCenterPanel, BackupManageCenterViewModel>();
 
+            services.AddSingleton<BackupService>();
             services.AddHostedService<BackupBackgroundService>();
         }
 
