@@ -41,6 +41,11 @@ public static class BackupTaskExtension
                     }
                 }
             }
+
+            if (task.Status == BackupTaskStatus.Error)
+            {
+                task.Status = BackupTaskStatus.Ready;
+            }
         }
         catch (Exception ex)
         {

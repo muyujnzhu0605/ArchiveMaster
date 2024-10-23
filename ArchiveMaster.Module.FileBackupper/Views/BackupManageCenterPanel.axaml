@@ -5,8 +5,10 @@
     xmlns:c="using:ArchiveMaster.Converters"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
     xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
@@ -31,6 +33,7 @@
             </g:GroupBox>
             <TabControl
                 Grid.Row="4"
+                IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
                 SelectedIndex="{Binding SelectedTabIndex}">
                 <TabItem Header="快照">
                     <DataGrid
@@ -102,6 +105,7 @@
                 </TabItem>
                 <TabItem Header="文件列表">
                     <v:TreeFileDataGrid
+                        ColumnIsCheckedIndex="-1"
                         ItemsSource="{Binding TreeFiles}"
                         RootDepth="0"
                         SelectedItem="{Binding SelectedFile}">
@@ -157,6 +161,53 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
+                </TabItem>
+                <TabItem Header="操作">
+                    <StackPanel>
+                        <g:GroupBox Header="立即备份">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button
+                                        Command="{Binding MakeBackupCommand}"
+                                        Content="全量备份">
+                                        <Button.CommandParameter>
+                                            <e:SnapshotType>Full</e:SnapshotType>
+                                        </Button.CommandParameter>
+                                    </Button>
+                                    <Button
+                                        Command="{Binding MakeBackupCommand}"
+                                        Content="虚拟全量备份">
+                                        <Button.CommandParameter>
+                                            <e:SnapshotType>VirtualFull</e:SnapshotType>
+                                        </Button.CommandParameter>
+                                    </Button>
+                                    <Button
+                                        Command="{Binding MakeBackupCommand}"
+                                        Content="增量备份">
+                                        <Button.CommandParameter>
+                                            <e:SnapshotType>Increment</e:SnapshotType>
+                                        </Button.CommandParameter>
+                                    </Button>
+                                    <Button
+                                        Command="{Binding CancelMakingBackupCommand}"
+                                        Content="取消备份"
+                                        IsEnabled="{Binding MakeBackupCommand.IsRunning}" />
+                                </StackPanel>
+                                <TextBlock>
+                                    <Run FontWeight="Bold">全量备份：</Run>
+                                    <Run>完整备份每一个文件</Run>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Run FontWeight="Bold">虚拟全量备份：</Run>
+                                    <Run>类似全量备份，但仅将元数据写入数据库，不进行真正的文件复制</Run>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Run FontWeight="Bold">增量备份：</Run>
+                                    <Run>在已有全量快照的前提下，仅备份和记录与上一个快照有差异的部分</Run>
+                                </TextBlock>
+                            </StackPanel>
+                        </g:GroupBox>
+                    </StackPanel>
                 </TabItem>
             </TabControl>
         </Grid>

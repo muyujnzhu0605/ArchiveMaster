@@ -18,8 +18,9 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class BackupManageCenterViewModel : ViewModelBase
     {
-        private AppConfig appConfig;
+        private readonly BackupService backupService;
 
+        private AppConfig appConfig;
         [ObservableProperty]
         private bool canSelectTasks = true;
 
@@ -37,6 +38,7 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private BackupTask selectedTask;
+
         [ObservableProperty]
         private ObservableCollection<BackupSnapshotWithFileCount> snapshots;
 
@@ -46,10 +48,11 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private BulkObservableCollection<SimpleFileInfo> treeFiles;
 
-        public BackupManageCenterViewModel(FileBackupperConfig config, AppConfig appConfig)
+        public BackupManageCenterViewModel(FileBackupperConfig config, AppConfig appConfig, BackupService backupService)
         {
             Config = config;
             this.appConfig = appConfig;
+            this.backupService = backupService;
         }
 
         public FileBackupperConfig Config { get; }
@@ -58,6 +61,12 @@ namespace ArchiveMaster.ViewModels
         {
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
+        }
+
+        [RelayCommand]
+        private void CancelMakingBackup()
+        {
+            MakeBackupCommand.Cancel();
         }
 
         [RelayCommand]
@@ -79,6 +88,13 @@ namespace ArchiveMaster.ViewModels
 
             TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
             TreeFiles.Add(tree);
+        }
+
+        [RelayCommand(IncludeCancelCommand = true)]
+        private async Task MakeBackupAsync(SnapshotType type, CancellationToken cancellationToken)
+        {
+            BackupUtility utility = new BackupUtility(SelectedTask);
+            await backupService.MakeABackupAsync(SelectedTask, type, cancellationToken);
         }
 
         async partial void OnSelectedTaskChanged(BackupTask value)
@@ -106,6 +122,7 @@ namespace ArchiveMaster.ViewModels
                 }
             }
         }
+
         [RelayCommand]
         private async Task SaveAsAsync()
         {
@@ -201,13 +218,6 @@ namespace ArchiveMaster.ViewModels
                 Title = LogLevelConverter.GetDescription(log.Type),
                 Detail = log.Detail
             }).Task;
-        }
-
-        [RelayCommand]
-        private async Task MakeBackupAsync()
-        {
-            BackupUtility utility = new BackupUtility(SelectedTask);
-            await utility.BackupAsync(SnapshotType.Full);
         }
     }
 }

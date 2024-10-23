@@ -8,54 +8,19 @@ namespace ArchiveMaster.Utilities;
 
 public class BackupService
 {
-    private readonly Dictionary<BackupTask, DateTime> lastBackupTimes = new Dictionary<BackupTask, DateTime>();
+    private CancellationToken ct;
 
-    public FileBackupperConfig Config { get; }
-
+    private CancellationTokenSource cts;
     public BackupService(FileBackupperConfig config)
     {
         Config = config;
     }
 
+    public FileBackupperConfig Config { get; }
+
+    public bool IsAutoBackingUp { get; private set; }
+
     public bool IsBackingUp { get; private set; }
-
-    private CancellationTokenSource cts;
-    private CancellationToken ct;
-
-    public async void StartAutoBackup()
-    {
-        cts = new CancellationTokenSource();
-        ct = cts.Token;
-        Task.Factory.StartNew(async () =>
-        {
-            try
-            {
-                while (!ct.IsCancellationRequested)
-                {
-                    await CheckAndBackupAllAsync();
-                    await Task.Delay(60 * 1000, ct);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "循环备份任务执行出错");
-            }
-        }, TaskCreationOptions.LongRunning);
-    }
-
-    public void Stop()
-    {
-        cts?.Cancel();
-    }
-
-    public Task StopAsync()
-    {
-        return cts?.CancelAsync() ?? Task.CompletedTask;
-    }
-
     public async Task CheckAndBackupAllAsync()
     {
         if (!Config.EnableBackgroundBackup)
@@ -65,13 +30,17 @@ public class BackupService
 
         if (IsBackingUp)
         {
-            throw new InvalidOperationException("正在备份，无法进行新一轮的检查和执行");
+            Log.Information("正在备份，无法进行新一轮的检查和执行");
+            return;
         }
 
         IsBackingUp = true;
         try
         {
-            foreach (var task in Config.Tasks.Where(p => p.ByTimeInterval).ToList())
+            foreach (var task in Config.Tasks
+                         .Where(p => p.Status == BackupTaskStatus.Ready)
+                         .Where(p => p.ByTimeInterval)
+                         .ToList())
             {
                 ct.ThrowIfCancellationRequested();
 
@@ -87,12 +56,10 @@ public class BackupService
                     interval = TimeSpan.FromMinutes(1);
                 }
 
-                if (lastBackupTimes.TryGetValue(task, out var lastBackupTime))
+
+                if (task.LastBackupTime + interval > DateTime.Now) //下一次备份时间还没到
                 {
-                    if (lastBackupTime + interval > DateTime.Now) //下一次备份时间还没到
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 //开始备份
@@ -112,13 +79,78 @@ public class BackupService
                 {
                     await utility.BackupAsync(SnapshotType.Increment, ct);
                 }
-
-                lastBackupTimes[task] = lastBackupTime;
             }
         }
         finally
         {
             IsBackingUp = false;
         }
+    }
+
+    public async Task MakeABackupAsync(BackupTask task, SnapshotType type, CancellationToken cancellationToken)
+    {
+        if (IsBackingUp)
+        {
+            throw new InvalidOperationException("存在正在进行的备份任务，无法开始新的备份");
+        }
+
+        IsBackingUp = true;
+        try
+        {
+            await using var db = new DbService(task);
+            BackupUtility utility = new BackupUtility(task);
+            await utility.BackupAsync(type, cancellationToken);
+            var hasFullSnapshot = (await db.GetSnapshotsAsync(SnapshotType.Full, token: ct)).Count != 0
+                                  || (await db.GetSnapshotsAsync(SnapshotType.VirtualFull, token: ct)).Count != 0;
+        }
+        finally
+        {
+            IsBackingUp = false;
+        }
+    }
+
+    public async void StartAutoBackup()
+    {
+        cts = new CancellationTokenSource();
+        ct = cts.Token;
+        Task.Factory.StartNew(async () =>
+        {
+            try
+            {
+                foreach (var task in Config.Tasks)
+                {
+                    await task.UpdateStatusAsync();
+                }
+
+                IsAutoBackingUp = true;
+                while (!ct.IsCancellationRequested)
+                {
+                    await CheckAndBackupAllAsync();
+                    await Task.Delay(60 * 1000, ct);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Log.Information("循环备份任务被取消");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "循环备份任务执行出错");
+            }
+            finally
+            {
+                IsAutoBackingUp = false;
+            }
+        }, TaskCreationOptions.LongRunning);
+    }
+
+    public void Stop()
+    {
+        cts?.Cancel();
+    }
+
+    public Task StopAsync()
+    {
+        return cts?.CancelAsync() ?? Task.CompletedTask;
     }
 }
