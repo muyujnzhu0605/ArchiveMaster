@@ -41,24 +41,6 @@
                         ItemsSource="{Binding Snapshots}"
                         SelectedItem="{Binding SelectedSnapShot}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn
-                                Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
-                                Header="开始时间" />
-                            <DataGridTextColumn
-                                Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
-                                Header="完成时间" />
-                            <DataGridTextColumn
-                                Binding="{Binding Snapshot.Type, Converter={StaticResource DescriptionConverter}}"
-                                Header="完成时间" />
-                            <DataGridTextColumn
-                                Binding="{Binding CreatedFileCount}"
-                                Header="新增文件数" />
-                            <DataGridTextColumn
-                                Binding="{Binding DeletedFileCount}"
-                                Header="删除文件数" />
-                            <DataGridTextColumn
-                                Binding="{Binding ModifiedFileCount}"
-                                Header="修改文件数" />
                             <DataGridTemplateColumn
                                 CanUserResize="False"
                                 Header="操作">
@@ -87,6 +69,24 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
+                                Header="开始时间" />
+                            <DataGridTextColumn
+                                Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
+                                Header="完成时间" />
+                            <DataGridTextColumn
+                                Binding="{Binding Snapshot.Type, Converter={StaticResource DescriptionConverter}}"
+                                Header="完成时间" />
+                            <DataGridTextColumn
+                                Binding="{Binding CreatedFileCount}"
+                                Header="新增文件数" />
+                            <DataGridTextColumn
+                                Binding="{Binding DeletedFileCount}"
+                                Header="删除文件数" />
+                            <DataGridTextColumn
+                                Binding="{Binding ModifiedFileCount}"
+                                Header="修改文件数" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
@@ -96,18 +96,33 @@
                         ItemsSource="{Binding TreeFiles}"
                         RootDepth="0"
                         SelectedItem="{Binding SelectedFile}">
-                        <v:TreeFileDataGrid.Styles>
-                            <Style Selector="DataGridRow">
-                                <Setter Property="ContextMenu">
-                                    <ContextMenu>
-                                        <MenuItem
-                                            Command="{Binding $parent[TabItem].DataContext.SaveAsCommand}"
-                                            CommandParameter="{Binding .}"
-                                            Header="另存为" />
-                                    </ContextMenu>
-                                </Setter>
-                            </Style>
-                        </v:TreeFileDataGrid.Styles>
+                        <v:TreeFileDataGrid.Columns>
+                            <DataGridTemplateColumn
+                                CanUserResize="False"
+                                Header="操作">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel
+                                            Orientation="Horizontal"
+                                            Spacing="8">
+                                            <DropDownButton
+                                                Classes="Link"
+                                                Content="操作">
+                                                <DropDownButton.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuItem
+                                                            Command="{Binding $parent[TabItem].DataContext.SaveAsCommand}"
+                                                            CommandParameter="{Binding .}"
+                                                            Header="另存为" />
+                                                        <MenuItem Header="历史记录" />
+                                                    </MenuFlyout>
+                                                </DropDownButton.Flyout>
+                                            </DropDownButton>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </v:TreeFileDataGrid.Columns>
                     </v:TreeFileDataGrid>
                 </TabItem>
                 <TabItem Header="日志">

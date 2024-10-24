@@ -15,6 +15,10 @@ namespace ArchiveMaster;
 
 public partial class App : Application
 {
+    private bool isMainWindowOpened = false;
+
+    public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
+
     public override void Initialize()
     {
         Initializer.Initialize();
@@ -48,14 +52,6 @@ public partial class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
-
-    private static MainWindow SetNewMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
-    {
-        desktop.MainWindow = Services.Provider.GetRequiredService<MainWindow>();
-        desktop.MainWindow.Closed += (s, e) => desktop.MainWindow = null;
-        return desktop.MainWindow as MainWindow;
-    }
-
     private async void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         Exit?.Invoke(sender, e);
@@ -70,29 +66,49 @@ public partial class App : Application
         }
     }
 
+    private MainWindow SetNewMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        //由于MainWindow的new需要一定时间，有时候连续调用就会导致重复创建，因此单独建立一个字段来记录
+        if (isMainWindowOpened)
+        {
+            throw new InvalidOperationException("MainWindow已创建");
+        }
+
+        isMainWindowOpened = true;
+        desktop.MainWindow = Services.Provider.GetRequiredService<MainWindow>();
+        desktop.MainWindow.Closed += (s, e) =>
+        {
+            desktop.MainWindow = null;
+            isMainWindowOpened = false;
+        };
+        return desktop.MainWindow as MainWindow;
+    }
     private void TrayIcon_Clicked(object sender, EventArgs e)
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             if (desktop.MainWindow is MainWindow m)
             {
-                if (!m.IsVisible) //最小化
+                if (m.WindowState == WindowState.Minimized) //最小化
                 {
-                    m.Show();
+                    m.BringToFront();
                 }
-                else //正在显示，直接关窗口
-                {
-                    if (ViewModelBase.Current?.IsWorking ?? false)
-                    {
-                        return;
-                    }
-
-                    desktop.MainWindow.Close();
-                }
+                // else //正在显示，直接关窗口
+                // {
+                //     if (ViewModelBase.Current?.IsWorking ?? false)
+                //     {
+                //         return;
+                //     }
+                //
+                //     desktop.MainWindow.Close();
+                // }
             }
             else //关了窗口，重新开一个新的
             {
-                SetNewMainWindow(desktop).Show();
+                if (!isMainWindowOpened)
+                {
+                    SetNewMainWindow(desktop).Show();
+                }
             }
         }
         else
@@ -100,6 +116,4 @@ public partial class App : Application
             throw new PlatformNotSupportedException();
         }
     }
-
-    public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
 }

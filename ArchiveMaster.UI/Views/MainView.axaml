@@ -152,6 +152,11 @@
                                 <ctrl:FormItem Label="调试模式循环延迟（毫秒）：">
                                     <TextBox Text="{Binding Path=AppConfig.DebugModeLoopDelay}" />
                                 </ctrl:FormItem>
+                                <CheckBox
+                                    Command="{Binding SetAutoStartCommand}"
+                                    CommandParameter="{Binding $self.IsChecked, Mode=OneWay}"
+                                    Content="开机自启"
+                                    IsChecked="{Binding IsAutoStart}" />
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>

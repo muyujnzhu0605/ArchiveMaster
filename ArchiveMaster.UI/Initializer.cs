@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
+using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using FzLib.Avalonia.Dialogs;
@@ -20,7 +21,7 @@ public static class Initializer
     public static IHost AppHost { get; private set; }
 
     public static IModuleInitializer[] ModuleInitializers { get; } =
-        [
+    [
         new FileToolsModuleInitializer(),
         new PhotoArchiveModuleInitializer(),
         new OfflineSyncModuleInitializer(),
@@ -29,14 +30,16 @@ public static class Initializer
     ];
 
     public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
+
     public static void Initialize()
     {
-        if(AppHost!=null)
+        if (AppHost != null)
         {
             throw new InvalidOperationException("已经初始化");
         }
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        
+
         var builder = Host.CreateApplicationBuilder();
         var config = new AppConfig();
         InitializeModules(builder.Services, config);
@@ -46,10 +49,12 @@ public static class Initializer
         builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddHostedService<AppLifetime>();
+        builder.Services.TryAddStartupManager();
         AppHost = builder.Build();
         Services.Initialize(AppHost.Services);
         AppHost.Start();
     }
+
     private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
     {
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();

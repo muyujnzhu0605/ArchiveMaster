@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
+using ArchiveMaster.Utilities;
 using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,11 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    private readonly IStartupManager startupManager;
+
+    [ObservableProperty]
+    private bool isAutoStart;
+
     [ObservableProperty]
     private bool isToolOpened;
 
@@ -30,9 +36,10 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
-
-    public MainViewModel(AppConfig appConfig, IBackCommandService backCommandService = null)
+    public MainViewModel(AppConfig appConfig, IStartupManager startupManager,
+        IBackCommandService backCommandService = null)
     {
+        this.startupManager = startupManager;
         foreach (var view in Initializer.Views)
         {
             PanelGroups.Add(view);
@@ -49,6 +56,8 @@ public partial class MainViewModel : ObservableObject
             return false;
         });
         BackCommandService = backCommandService;
+        
+        IsAutoStart = startupManager.IsStartupEnabled();
     }
 
     public IBackCommandService BackCommandService { get; }
@@ -80,5 +89,18 @@ public partial class MainViewModel : ObservableObject
         (panelInfo.PanelInstance.DataContext as ViewModelBase)?.OnEnter();
         MainContent = panelInfo.PanelInstance;
         IsToolOpened = true;
+    }
+
+    [RelayCommand]
+    private void SetAutoStart(bool autoStart)
+    {
+        if (autoStart)
+        {
+            startupManager.EnableStartup("s");
+        }
+        else
+        {
+            startupManager.DisableStartup();
+        }
     }
 }
