@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
 using Avalonia.Controls;
@@ -13,10 +14,10 @@ public abstract partial class ViewModelBase : ObservableObject
 
     public virtual void OnEnter()
     {
-        
     }
-    public virtual void OnExit()
+
+    public virtual Task OnExitAsync(CancelEventArgs args)
     {
-        
+        return Task.CompletedTask;
     }
 }

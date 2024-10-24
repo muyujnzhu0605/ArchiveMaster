@@ -3,7 +3,10 @@ using ArchiveMaster.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using ArchiveMaster.Enums;
+using FzLib.Avalonia.Messages;
 
 namespace ArchiveMaster.ViewModels
 {
@@ -14,6 +17,33 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<BackupTask> tasks;
+
+        [ObservableProperty]
+        private bool canSaveConfig = false;
+
+        partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
+        {
+            if (newValue != null)
+            {
+                newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
+            }
+
+            if (oldValue != null)
+            {
+                oldValue.PropertyChanged -= SelectedBackupTaskPropertyChanged;
+            }
+        }
+
+        private void SelectedBackupTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            NotifyCanSaveConfig();
+        }
+
+        private void NotifyCanSaveConfig(bool canSave = true)
+        {
+            CanSaveConfig = canSave;
+            SaveCommand.NotifyCanExecuteChanged();
+        }
 
         public BackupTasksViewModel(FileBackupperConfig config, AppConfig appConfig)
         {
@@ -34,20 +64,16 @@ namespace ArchiveMaster.ViewModels
 
             appConfig.Save();
 #endif
-            Tasks = new ObservableCollection<BackupTask>(config.Tasks);
         }
 
         public AppConfig AppConfig { get; }
         public FileBackupperConfig Config { get; }
+
         public override async void OnEnter()
         {
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
-        }
-
-        public override void OnExit()
-        {
-            Config.Tasks = Tasks.ToList();
+            NotifyCanSaveConfig(false);
         }
 
         [RelayCommand]
@@ -56,6 +82,7 @@ namespace ArchiveMaster.ViewModels
             var task = new BackupTask();
             Tasks.Add(task);
             SelectedTask = task;
+            NotifyCanSaveConfig();
         }
 
         [RelayCommand]
@@ -63,6 +90,33 @@ namespace ArchiveMaster.ViewModels
         {
             Debug.Assert(SelectedTask != null);
             Tasks.Remove(SelectedTask);
+            NotifyCanSaveConfig();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSaveConfig))]
+        private void Save()
+        {
+            Config.Tasks = Tasks.Select(p => p.Clone() as BackupTask).ToList();
+            AppConfig.Save();
+            NotifyCanSaveConfig(false);
+        }
+
+        public override async Task OnExitAsync(CancelEventArgs args)
+        {
+            if (!CanSaveConfig)
+            {
+                return;
+            }
+
+            if ((await this.SendMessage(new CommonDialogMessage()
+                {
+                    Type = CommonDialogMessage.CommonDialogType.YesNo,
+                    Title = "保存配置",
+                    Message = "有未保存的配置，是否保存？"
+                }).Task).Equals(true))
+            {
+                Save();
+            }
         }
     }
 }

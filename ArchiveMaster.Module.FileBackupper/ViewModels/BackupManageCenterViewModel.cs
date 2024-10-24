@@ -3,6 +3,7 @@ using ArchiveMaster.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Converters;
@@ -21,6 +22,7 @@ namespace ArchiveMaster.ViewModels
         private readonly BackupService backupService;
 
         private AppConfig appConfig;
+
         [ObservableProperty]
         private bool canSelectTasks = true;
 
@@ -93,24 +95,34 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand(IncludeCancelCommand = true)]
         private async Task MakeBackupAsync(SnapshotType type, CancellationToken cancellationToken)
         {
-            BackupUtility utility = new BackupUtility(SelectedTask);
-            await backupService.MakeABackupAsync(SelectedTask, type, cancellationToken);
+            try
+            {
+                await backupService.MakeABackupAsync(SelectedTask, type, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await this.ShowErrorAsync("备份失败", ex);
+            }
         }
 
-        async partial void OnSelectedTaskChanged(BackupTask value)
+        async partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
         {
             Snapshots = null;
             Logs = null;
             TreeFiles = null;
 
-            if (value != null)
+            if (oldValue != null)
+            {
+                oldValue.PropertyChanged -= SelectedBackupTaskPropertyChanged;
+            }
+
+            if (newValue != null)
             {
                 try
                 {
                     CanSelectTasks = false;
-                    DbService db = new DbService(value);
-                    Snapshots = new ObservableCollection<BackupSnapshotWithFileCount>(
-                        await db.GetSnapshotsWithFilesAsync());
+                    await UpdateSnapshots(newValue);
+                    newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
                 }
                 catch (Exception ex)
                 {
@@ -120,6 +132,22 @@ namespace ArchiveMaster.ViewModels
                 {
                     CanSelectTasks = true;
                 }
+            }
+        }
+
+        private async Task UpdateSnapshots(BackupTask newValue)
+        {
+            DbService db = new DbService(newValue);
+            Snapshots = new ObservableCollection<BackupSnapshotWithFileCount>(
+                await db.GetSnapshotsWithFilesAsync());
+        }
+
+        private async void SelectedBackupTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(BackupTask.Status) 
+                && (sender as BackupTask)?.Status == BackupTaskStatus.Ready)
+            {
+                await UpdateSnapshots((BackupTask)sender);
             }
         }
 

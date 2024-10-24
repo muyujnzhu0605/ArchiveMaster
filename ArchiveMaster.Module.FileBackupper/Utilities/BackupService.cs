@@ -6,7 +6,7 @@ using Serilog;
 
 namespace ArchiveMaster.Utilities;
 
-public class BackupService
+public partial class BackupService
 {
     private CancellationToken ct;
 

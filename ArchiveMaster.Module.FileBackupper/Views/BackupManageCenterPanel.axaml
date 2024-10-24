@@ -47,28 +47,9 @@
                             <DataGridTextColumn
                                 Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
                                 Header="完成时间" />
-                            <DataGridTemplateColumn
-                                CanUserResize="False"
-                                Header="类型">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel
-                                            Margin="4,0"
-                                            Orientation="Horizontal"
-                                            Spacing="8">
-                                            <TextBlock
-                                                IsVisible="{Binding Snapshot.IsFull}"
-                                                Text="全量" />
-                                            <TextBlock
-                                                IsVisible="{Binding !Snapshot.IsFull}"
-                                                Text="增量" />
-                                            <TextBlock
-                                                IsVisible="{Binding Snapshot.IsVirtual}"
-                                                Text="虚拟" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
+                            <DataGridTextColumn
+                                Binding="{Binding Snapshot.Type, Converter={StaticResource DescriptionConverter}}"
+                                Header="完成时间" />
                             <DataGridTextColumn
                                 Binding="{Binding CreatedFileCount}"
                                 Header="新增文件数" />
@@ -86,16 +67,22 @@
                                         <StackPanel
                                             Orientation="Horizontal"
                                             Spacing="8">
-                                            <Button
+                                            <DropDownButton
                                                 Classes="Link"
-                                                Command="{Binding $parent[DataGrid].DataContext.JumpToLogsBySnapshotCommand}"
-                                                CommandParameter="{Binding .}"
-                                                Content="日志" />
-                                            <Button
-                                                Classes="Link"
-                                                Command="{Binding $parent[DataGrid].DataContext.JumpToRestoreBySnapshotCommand}"
-                                                CommandParameter="{Binding .}"
-                                                Content="查看文件" />
+                                                Content="操作">
+                                                <DropDownButton.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuItem
+                                                            Command="{Binding $parent[DataGrid].DataContext.JumpToLogsBySnapshotCommand}"
+                                                            CommandParameter="{Binding .}"
+                                                            Header="日志" />
+                                                        <MenuItem
+                                                            Command="{Binding $parent[DataGrid].DataContext.JumpToRestoreBySnapshotCommand}"
+                                                            CommandParameter="{Binding .}"
+                                                            Header="查看文件" />
+                                                    </MenuFlyout>
+                                                </DropDownButton.Flyout>
+                                            </DropDownButton>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

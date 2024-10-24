@@ -16,7 +16,9 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid ColumnDefinitions="*,16,*">
+        <Grid
+            ColumnDefinitions="*,16,*"
+            RowDefinitions="*,8,Auto">
 
             <Grid RowDefinitions="*,8,Auto">
                 <v:BackupTaskDataGrid
@@ -92,8 +94,17 @@
                         Content="监测文件和目录的改动"
                         IsChecked="{Binding SelectedTask.ByWatching}" />
                 </ctrl:FormItem>
-
+                <CheckBox
+                    Content="默认进行虚拟备份"
+                    IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}" />
             </ctrl:StackFormItemGroup>
+
+            <Button
+                Grid.Row="2"
+                Grid.ColumnSpan="99"
+                HorizontalAlignment="Center"
+                Command="{Binding SaveCommand}"
+                Content="保存" />
         </Grid>
     </v:PanelBase.PanelContent>
 </v:PanelBase>

@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,6 +50,7 @@ public partial class MainViewModel : ObservableObject
         });
         BackCommandService = backCommandService;
     }
+
     public IBackCommandService BackCommandService { get; }
 
     [RelayCommand]
@@ -58,10 +60,18 @@ public partial class MainViewModel : ObservableObject
         {
             panelInfo.PanelInstance = Services.Provider.GetService(panelInfo.PanelType) as PanelBase ??
                                       throw new Exception($"无法找到{panelInfo.PanelType}服务");
-            panelInfo.PanelInstance.RequestClosing += (s, e) =>
+            panelInfo.PanelInstance.RequestClosing += async (s, e) =>
             {
-                IsToolOpened = false;
-                ((s as StyledElement)?.DataContext as ViewModelBase)?.OnExit();
+                CancelEventArgs args = new CancelEventArgs();
+                if ((s as StyledElement)?.DataContext is ViewModelBase vm)
+                {
+                    await vm.OnExitAsync(args);
+                }
+
+                if (!args.Cancel)
+                {
+                    IsToolOpened = false;
+                }
             };
             panelInfo.PanelInstance.Title = panelInfo.Title;
             panelInfo.PanelInstance.Description = panelInfo.Description;
