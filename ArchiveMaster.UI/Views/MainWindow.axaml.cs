@@ -61,11 +61,20 @@ public partial class MainWindow : ExtendedWindow
     {
         if (App.Current.ActualThemeVariant == ThemeVariant.Light)
         {
-            App.Current.RequestedThemeVariant=ThemeVariant.Dark;
+            App.Current.RequestedThemeVariant = ThemeVariant.Dark;
         }
         else
         {
-            App.Current.RequestedThemeVariant=ThemeVariant.Light;
+            App.Current.RequestedThemeVariant = ThemeVariant.Light;
+        }
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        if (ViewModelBase.Current?.IsWorking ?? false)
+        {
+            e.Cancel = true;
         }
     }
 }

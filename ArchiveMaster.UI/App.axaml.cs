@@ -8,6 +8,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using System;
 using System.Text;
+using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster;
@@ -32,8 +33,13 @@ public partial class App : Application
         BindingPlugins.DataValidators.RemoveAt(0);
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = Services.Provider.GetRequiredService<MainWindow>();
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.Exit += Desktop_Exit;
+
+            if (!(desktop.Args is { Length: > 0 } && desktop.Args[0] == "s"))
+            {
+                SetNewMainWindow(desktop);
+            }
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
@@ -43,10 +49,56 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    private static MainWindow SetNewMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        desktop.MainWindow = Services.Provider.GetRequiredService<MainWindow>();
+        desktop.MainWindow.Closed += (s, e) => desktop.MainWindow = null;
+        return desktop.MainWindow as MainWindow;
+    }
+
     private async void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         Exit?.Invoke(sender, e);
         await Initializer.AppHost.StopAsync();
+    }
+
+    private void ExitMenuItem_Click(object sender, EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
+
+    private void TrayIcon_Clicked(object sender, EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            if (desktop.MainWindow is MainWindow m)
+            {
+                if (!m.IsVisible) //最小化
+                {
+                    m.Show();
+                }
+                else //正在显示，直接关窗口
+                {
+                    if (ViewModelBase.Current?.IsWorking ?? false)
+                    {
+                        return;
+                    }
+
+                    desktop.MainWindow.Close();
+                }
+            }
+            else //关了窗口，重新开一个新的
+            {
+                SetNewMainWindow(desktop).Show();
+            }
+        }
+        else
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;

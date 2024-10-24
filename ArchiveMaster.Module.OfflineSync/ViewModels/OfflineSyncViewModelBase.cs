@@ -40,6 +40,7 @@ namespace ArchiveMaster.ViewModels
 
         public override void OnEnter()
         {
+            base.OnEnter();
             string currentName = Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
 
             ConfigNames = Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();

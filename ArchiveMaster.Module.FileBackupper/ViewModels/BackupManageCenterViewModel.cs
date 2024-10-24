@@ -61,6 +61,7 @@ namespace ArchiveMaster.ViewModels
 
         public override async void OnEnter()
         {
+            base.OnEnter();
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
         }
