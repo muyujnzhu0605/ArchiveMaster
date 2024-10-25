@@ -8,6 +8,8 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using FzLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +25,7 @@ public partial class App : Application
     public override void Initialize()
     {
         Initializer.Initialize();
-
+        
         AvaloniaXamlLoader.Load(this);
         if (OperatingSystem.IsWindows())
         {

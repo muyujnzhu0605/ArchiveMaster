@@ -11,6 +11,7 @@ public partial class BackupService
     private CancellationToken ct;
 
     private CancellationTokenSource cts;
+
     public BackupService(FileBackupperConfig config)
     {
         Config = config;
@@ -21,6 +22,7 @@ public partial class BackupService
     public bool IsAutoBackingUp { get; private set; }
 
     public bool IsBackingUp { get; private set; }
+
     public async Task CheckAndBackupAllAsync()
     {
         if (!Config.EnableBackgroundBackup)
@@ -39,7 +41,7 @@ public partial class BackupService
         {
             foreach (var task in Config.Tasks
                          .Where(p => p.Status == BackupTaskStatus.Ready)
-                         .Where(p=>p.EnableAutoBackup)
+                         .Where(p => p.EnableAutoBackup)
                          .Where(p => p.ByTimeInterval)
                          .ToList())
             {
@@ -99,10 +101,18 @@ public partial class BackupService
         try
         {
             await using var db = new DbService(task);
+            if (type == SnapshotType.Increment)
+            {
+                var hasFullSnapshot = (await db.GetSnapshotsAsync(SnapshotType.Full, token: ct)).Count != 0
+                                      || (await db.GetSnapshotsAsync(SnapshotType.VirtualFull, token: ct)).Count != 0;
+                if (!hasFullSnapshot)
+                {
+                    throw new ArgumentException("没有找到全量备份，无法进行增量备份");
+                }
+            }
+
             BackupUtility utility = new BackupUtility(task);
             await utility.BackupAsync(type, cancellationToken);
-            var hasFullSnapshot = (await db.GetSnapshotsAsync(SnapshotType.Full, token: ct)).Count != 0
-                                  || (await db.GetSnapshotsAsync(SnapshotType.VirtualFull, token: ct)).Count != 0;
         }
         finally
         {

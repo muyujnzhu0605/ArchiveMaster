@@ -5,6 +5,7 @@ using ArchiveMaster.Models;
 using ArchiveMaster.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -24,18 +25,13 @@ public partial class BackupManageCenterViewModel
             TreeFiles = null;
             return;
         }
+
         await TryDoAsync("加载快照文件和日志", async () =>
         {
-            await using var db = new DbService(SelectedTask);
-            Logs = new ObservableCollection<BackupLogEntity>(await db.GetLogsAsync(value.Snapshot.Id));
-
-            var utility = new RestoreUtility(SelectedTask);
-            var tree = await utility.GetSnapshotFileTreeAsync(value.Snapshot.Id);
-            tree.Reorder();
-            tree.Name = $"快照{value.Snapshot.BeginTime}";
-
-            TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
-            TreeFiles.Add(tree);
+            LogSearchText = null;
+            LogType = LogLevel.None;
+            await LoadLogsAsync();
+            await LoadFilesAsync();
         });
     }
 

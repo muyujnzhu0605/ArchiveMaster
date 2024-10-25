@@ -4,12 +4,41 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:l="using:Microsoft.Extensions.Logging"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
+    <Grid RowDefinitions="Auto,8,*">
+        <Grid ColumnDefinitions="Auto,8,Auto,32,*,8,Auto,32,Auto,8,Auto,8,Auto">
+            <TextBlock Text="类型：" />
+            <ComboBox
+                Grid.Column="2"
+                DisplayMemberBinding="{Binding ., Converter={StaticResource StringReplaceConverter}, ConverterParameter='Trace:细节;Debug:调试;Information:信息;Warning:警告;Error:错误;Critical:关键;None:全部'}"
+                ItemsSource="{me:EnumValues l:LogLevel}"
+                SelectedItem="{Binding LogType}" />
+            <TextBox
+                Grid.Column="4"
+                Text="{Binding LogSearchText}" />
+            <Button
+                Grid.Column="6"
+                Classes="Icon"
+                Command="{Binding SearchLogsCommand}"
+                Content="{StaticResource Search}" />
+            <TextBlock
+                Grid.Column="8"
+                Text="第" />
+            <ComboBox
+                Grid.Column="10"
+                ItemsSource="{Binding LogPages}"
+                SelectedItem="{Binding LogPage}" />
+            <TextBlock
+                Grid.Column="12"
+                Text="页" />
+        </Grid>
         <DataGrid
+            Grid.Row="2"
             IsReadOnly="True"
             ItemsSource="{Binding Logs}">
             <DataGrid.Resources>

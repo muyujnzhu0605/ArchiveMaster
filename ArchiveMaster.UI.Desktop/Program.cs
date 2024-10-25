@@ -41,6 +41,11 @@ class Program
             Log.Fatal(e.Exception, "未捕获的Task错误");
             Log.CloseAndFlush();
         };
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+        {
+            Log.Fatal(e.ExceptionObject as Exception, "未捕获的AppDomain异常");
+            Log.CloseAndFlush();
+        };
         try
         {
 #endif

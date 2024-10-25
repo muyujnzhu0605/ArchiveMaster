@@ -18,7 +18,7 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid RowDefinitions="Auto,8,*,8,2*">
+        <Grid RowDefinitions="Auto,8,*,8,2*,8,Auto">
             <ToggleSwitch
                 IsChecked="{Binding Config.EnableBackgroundBackup}"
                 OffContent="自动备份总开关"
@@ -47,6 +47,10 @@
                     <v:BackupTaskOperationPanel />
                 </TabItem>
             </TabControl>
+            <TextBlock
+                Grid.Row="6"
+                HorizontalAlignment="Right"
+                Text="{Binding SelectedSnapshot.Snapshot.BeginTime, StringFormat='当前选择的快照：{0}'}" />
         </Grid>
     </v:PanelBase.PanelContent>
 </v:PanelBase>

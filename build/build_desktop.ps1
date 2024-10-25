@@ -1,7 +1,53 @@
-﻿$rawDir = Get-Location
+﻿<#
+.SYNOPSIS
+    发布 ArchiveMaster 应用程序到指定的目录，并支持 Windows、Linux 和 macOS。
+
+.DESCRIPTION
+    此脚本根据提供的参数发布 ArchiveMaster 应用程序。支持单文件发布，并根据参数发布自包含或不带运行时的版本。
+
+.PARAMETER -w
+    发布 Windows 版本 (win-x64)。
+
+.PARAMETER -l
+    发布 Linux 版本 (linux-x64)。
+
+.PARAMETER -m
+    发布 macOS 版本 (osx-x64)。
+
+.PARAMETER -s
+    发布自包含版本 (Self-contained)，将包含.NET运行时。
+
+.PARAMETER --all
+    发布所有平台的版本 (Windows, Linux, macOS)。
+
+.EXAMPLE
+    .\Publish.ps1 -w -s
+    发布自包含的 Windows 版本。
+
+.EXAMPLE
+    .\Publish.ps1 --all
+    发布所有平台的不带运行时的版本。
+
+.EXAMPLE
+    .\Publish.ps1 -l -m
+    发布 Linux 和 macOS 版本，不带运行时。
+
+.NOTES
+    脚本需在支持.NET SDK 的环境下运行。
+
+#>
+
+param (
+    [switch]$w,
+    [switch]$l,
+    [switch]$m,
+    [switch]$s,
+    [switch]$all
+)
+
+$rawDir = Get-Location
 
 try {
-    $s = $true
     if (-not (Get-Command "dotnet" -ErrorAction SilentlyContinue)) {
         throw "未安装.NET SDK"
     }
@@ -12,46 +58,35 @@ try {
         $publishDirectory = "Publish"
     }
     else {
-        $publishDirectory.Trim('"')
+        $publishDirectory = $publishDirectory.Trim('"')
     }
 
-    Set-Location $PSScriptRoot/..
+    Set-Location "$PSScriptRoot/.."
 
     if (Test-Path $publishDirectory -PathType Container) {
-        Remove-Item -r $publishDirectory 
+        Remove-Item -r $publishDirectory
     }
 
     New-Item -Path $publishDirectory -ItemType Directory | Out-Null
-    
     Clear-Host
 
-    Write-Output "正在发布win-x64"
-    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o "$publishDirectory/win-x64" /p:PublishSingleFile=$s --no-self-contained
-    Move-Item "$publishDirectory/win-x64/ArchiveMaster.UI.Desktop.exe" "$publishDirectory/win-x64/ArchiveMaster.exe"
+    $platforms = @()
+    if ($w -or $all) { $platforms += "win-x64" }
+    if ($l -or $all) { $platforms += "linux-x64" }
+    if ($m -or $all) { $platforms += "osx-x64" }
 
-    Write-Output "正在发布linux-x64"
-    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o "$publishDirectory/linux-x64" /p:PublishSingleFile=$s --no-self-contained
-    Move-Item "$publishDirectory/linux-x64/ArchiveMaster.UI.Desktop" "$publishDirectory/linux-x64/ArchiveMaster"
+    foreach ($platform in $platforms) {
+        $selfContained = if ($s) { "--self-contained" } else { "--no-self-contained" }
 
-    Write-Output "正在发布macos-x64"
-    dotnet publish ArchiveMaster.UI.Desktop -r osx-x64 -c Release -o "$publishDirectory/macos-x64" /p:PublishSingleFile=$s --no-self-contained
-    Move-Item "$publishDirectory/macos-x64/ArchiveMaster.UI.Desktop" "$publishDirectory/macos-x64/ArchiveMaster"
+        Write-Output "正在发布$platform"
+        dotnet publish ArchiveMaster.UI.Desktop -r $platform -c Release -o "$publishDirectory/$platform" $selfContained /p:PublishSingleFile=true
 
-    
-    Write-Output "正在发布win-x64-self-contained"
-    dotnet publish ArchiveMaster.UI.Desktop -r win-x64 -c Release -o "$publishDirectory/win-x64-self-contained" --self-contained /p:PublishSingleFile=$s
-    Move-Item "$publishDirectory/win-x64-self-contained/ArchiveMaster.UI.Desktop.exe" "$publishDirectory/win-x64-self-contained/ArchiveMaster.exe"
+        $outputFile = if ($platform -eq "win-x64") { "ArchiveMaster.exe" } else { "ArchiveMaster" }
+        $sourceFile = if ($platform -eq "win-x64") { "$publishDirectory/$platform/ArchiveMaster.UI.Desktop.exe" } else { "$publishDirectory/$platform/ArchiveMaster.UI.Desktop" }
+        Move-Item $sourceFile "$publishDirectory/$platform/$outputFile"
+    }
 
-    Write-Output "正在发布linux-x64-self-contained"
-    dotnet publish ArchiveMaster.UI.Desktop -r linux-x64 -c Release -o "$publishDirectory/linux-x64-self-contained" --self-contained /p:PublishSingleFile=$s
-    Move-Item "$publishDirectory/linux-x64-self-contained/ArchiveMaster.UI.Desktop" "$publishDirectory/linux-x64-self-contained/ArchiveMaster"
-
-    Write-Output "正在发布macos-x64-self-contained"
-    dotnet publish ArchiveMaster.UI.Desktop -r osx-x64 -c Release -o "$publishDirectory/macos-x64-self-contained" --self-contained /p:PublishSingleFile=$s
-    Move-Item "$publishDirectory/macos-x64-self-contained/ArchiveMaster.UI.Desktop" "$publishDirectory/macos-x64-self-contained/ArchiveMaster"
-   
     Write-Output "操作完成"
-
     Invoke-Item $publishDirectory
 }
 catch {

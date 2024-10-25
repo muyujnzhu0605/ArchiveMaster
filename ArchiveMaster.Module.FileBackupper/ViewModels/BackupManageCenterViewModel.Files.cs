@@ -3,6 +3,7 @@ using System.ComponentModel;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
 using Avalonia.Platform.Storage;
@@ -32,6 +33,17 @@ public partial class BackupManageCenterViewModel
                 await SaveFolder(dir);
                 break;
         }
+    }
+
+    private async Task LoadFilesAsync()
+    {
+        var utility = new RestoreUtility(SelectedTask);
+        var tree = await utility.GetSnapshotFileTreeAsync(SelectedSnapshot.Snapshot.Id);
+        tree.Reorder();
+        tree.Name = $"快照{SelectedSnapshot.Snapshot.BeginTime}";
+
+        TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
+        TreeFiles.Add(tree);
     }
 
     private async Task SaveFile(BackupFile file)

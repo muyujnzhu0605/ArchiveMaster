@@ -234,7 +234,7 @@ public class DbService : IDisposable, IAsyncDisposable
         };
         //Debug.WriteLine($"{DateTime.Now}\t\t{message}");
         logs.Add(log);
-        if (forceSave || logs.Count > 100)
+        if (forceSave || logs.Count >= 1000)
         {
             Debug.WriteLine("保存日志");
             logDb.Logs.AddRange(logs);
@@ -248,7 +248,7 @@ public class DbService : IDisposable, IAsyncDisposable
         return db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<List<BackupLogEntity>> GetLogsAsync(int? snapshotId = null, LogLevel? type = null)
+    public async Task<List<BackupLogEntity>> GetLogsAsync(int? snapshotId = null, LogLevel? type = null,string searchText=null)
     {
         await InitializeAsync();
         IQueryable<BackupLogEntity> query = db.Logs;
@@ -257,9 +257,14 @@ public class DbService : IDisposable, IAsyncDisposable
             query = query.Where(p => p.SnapshotId == snapshotId.Value);
         }
 
-        if (type.HasValue)
+        if (type.HasValue && type.Value is not LogLevel.None)
         {
             query = query.Where(p => p.Type == type.Value);
+        }
+
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            query = query.Where(p => p.Message.Contains(searchText));
         }
 
         query = query.OrderBy(p => p.Time);

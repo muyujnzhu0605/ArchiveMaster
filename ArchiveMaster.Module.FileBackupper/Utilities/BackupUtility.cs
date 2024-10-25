@@ -133,6 +133,7 @@ public partial class BackupService
                 catch (Exception ex)
                 {
                     await db.LogAsync(LogLevel.Error, $"全量备份过程中出现错误：{ex.Message}", detail: ex.ToString());
+                    throw;
                 }
                 finally
                 {
@@ -185,7 +186,7 @@ public partial class BackupService
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
-                        await db.LogAsync(LogLevel.Information, $"开始备份{rawRelativeFilePath}", snapshot);
+                        // await db.LogAsync(LogLevel.Information, $"开始备份{rawRelativeFilePath}", snapshot);
 
                         if (latestFiles.TryGetValue(rawRelativeFilePath, out var latestFile)) //存在数据库中
                         {
@@ -229,8 +230,8 @@ public partial class BackupService
                     if (!hasChanged)
                     {
                         //没有任何文件改变，那这个快照是没有意义的。但是因为日志关联了这个快照，所以不能直接删除，采用软删除。
-                        snapshot.IsDeleted = true;
-                        await db.LogAsync(LogLevel.Information, "没有文件改变，快照已软删除");
+                        // snapshot.IsDeleted = true;
+                        await db.LogAsync(LogLevel.Information, "没有文件改变");
                     }
 
                     await db.SaveChangesAsync(cancellationToken);
@@ -244,6 +245,7 @@ public partial class BackupService
                 catch (Exception ex)
                 {
                     await db.LogAsync(LogLevel.Error, $"增量备份过程中出现错误：{ex.Message}", detail: ex.ToString());
+                    throw;
                 }
                 finally
                 {
