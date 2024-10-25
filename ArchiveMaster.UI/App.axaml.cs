@@ -53,6 +53,7 @@ public partial class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
     private async void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
         TrayIcon.GetIcons(this)?[0]?.Dispose();
@@ -87,6 +88,7 @@ public partial class App : Application
         };
         return desktop.MainWindow as MainWindow;
     }
+
     private void TrayIcon_Clicked(object sender, EventArgs e)
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

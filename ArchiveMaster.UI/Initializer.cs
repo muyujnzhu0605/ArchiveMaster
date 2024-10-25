@@ -17,20 +17,9 @@ namespace ArchiveMaster;
 
 public static class Initializer
 {
-    private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
     private static bool stopped = false;
+    private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
     public static IHost AppHost { get; private set; }
-
-    public static Task StopAsync()
-    {
-        if (!stopped)
-        {
-            stopped = true;
-            return AppHost.StopAsync();
-        }
-
-        return Task.CompletedTask;
-    }
 
     public static IModuleInitializer[] ModuleInitializers { get; } =
     [
@@ -42,6 +31,17 @@ public static class Initializer
     ];
 
     public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
+
+    public static void ClearViewsInstance()
+    {
+        foreach (var group in views)
+        {
+            foreach (var panel in group.Panels)
+            {
+                panel.PanelInstance = null;
+            }
+        }
+    }
 
     public static void Initialize()
     {
@@ -65,6 +65,17 @@ public static class Initializer
         AppHost = builder.Build();
         Services.Initialize(AppHost.Services);
         AppHost.Start();
+    }
+
+    public static Task StopAsync()
+    {
+        if (!stopped)
+        {
+            stopped = true;
+            return AppHost.StopAsync();
+        }
+
+        return Task.CompletedTask;
     }
 
     private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
@@ -97,16 +108,5 @@ public static class Initializer
         }
 
         views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
-    }
-
-    public static void ClearViewsInstance()
-    {
-        foreach (var group in views)
-        {
-            foreach (var panel in group.Panels)
-            {
-                panel.PanelInstance = null;
-            }
-        }
     }
 }
