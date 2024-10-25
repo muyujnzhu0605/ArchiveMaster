@@ -39,6 +39,7 @@ public partial class BackupService
         {
             foreach (var task in Config.Tasks
                          .Where(p => p.Status == BackupTaskStatus.Ready)
+                         .Where(p=>p.EnableAutoBackup)
                          .Where(p => p.ByTimeInterval)
                          .ToList())
             {

@@ -41,9 +41,5 @@ public class BackupperDbContext : DbContext
             .HasOne(b => b.PhysicalFile)
             .WithMany()
             .HasForeignKey(b => b.PhysicalFileId);
-        modelBuilder.Entity<BackupLogEntity>()
-            .HasOne(b => b.Snapshot)
-            .WithMany()
-            .HasForeignKey(b => b.SnapshotId);
     }
 }

@@ -192,7 +192,7 @@ public partial class BackupService
                             if (latestFile.PhysicalFile.Time == file.LastWriteTime &&
                                 latestFile.PhysicalFile.Length == file.Length) //文件没有发生改变
                             {
-                                await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}未发生改变", snapshot);
+                                //await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}未发生改变", snapshot);
                             }
                             else //文件发生改变
                             {

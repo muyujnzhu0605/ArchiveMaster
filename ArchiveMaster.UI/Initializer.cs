@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
 using ArchiveMaster.Utilities;
@@ -17,8 +18,19 @@ namespace ArchiveMaster;
 public static class Initializer
 {
     private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
-
+    private static bool stopped = false;
     public static IHost AppHost { get; private set; }
+
+    public static Task StopAsync()
+    {
+        if (!stopped)
+        {
+            stopped = true;
+            return AppHost.StopAsync();
+        }
+
+        return Task.CompletedTask;
+    }
 
     public static IModuleInitializer[] ModuleInitializers { get; } =
     [
@@ -85,5 +97,16 @@ public static class Initializer
         }
 
         views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
+    }
+
+    public static void ClearViewsInstance()
+    {
+        foreach (var group in views)
+        {
+            foreach (var panel in group.Panels)
+            {
+                panel.PanelInstance = null;
+            }
+        }
     }
 }

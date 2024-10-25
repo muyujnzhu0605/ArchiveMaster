@@ -79,8 +79,13 @@
                 <TextBlock
                     Margin="0,8,0,0"
                     FontWeight="Bold"
-                    Text="备份方式" />
-                <ctrl:FormItem Label="定时备份：">
+                    Text="自动备份" />
+                <CheckBox
+                    Content="启用自动备份"
+                    IsChecked="{Binding SelectedTask.EnableAutoBackup}" />
+                <ctrl:FormItem
+                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}"
+                    Label="定时备份：">
                     <Grid ColumnDefinitions="Auto,8,*">
                         <CheckBox IsChecked="{Binding SelectedTask.ByTimeInterval}" />
                         <TextBox
@@ -89,14 +94,17 @@
                             Text="{Binding SelectedTask.TimeInterval}" />
                     </Grid>
                 </ctrl:FormItem>
-                <ctrl:FormItem Label="实时备份：">
+                <ctrl:FormItem
+                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}"
+                    Label="实时备份：">
                     <CheckBox
                         Content="监测文件和目录的改动"
                         IsChecked="{Binding SelectedTask.ByWatching}" />
                 </ctrl:FormItem>
                 <CheckBox
                     Content="默认进行虚拟备份"
-                    IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}" />
+                    IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}"
+                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}" />
             </ctrl:StackFormItemGroup>
 
             <Button

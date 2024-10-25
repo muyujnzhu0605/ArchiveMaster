@@ -27,6 +27,9 @@ public partial class BackupTask : ConfigBase, ICloneable
     private bool byWatching = true;
 
     [ObservableProperty]
+    private bool enableAutoBackup = true;
+
+    [ObservableProperty]
     private bool isDefaultVirtualBackup;
 
     [ObservableProperty] [property: JsonIgnore]

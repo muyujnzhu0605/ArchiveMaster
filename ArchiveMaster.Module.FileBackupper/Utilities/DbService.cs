@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
@@ -13,11 +14,13 @@ public class DbService : IDisposable, IAsyncDisposable
     private static readonly HashSet<BackupTask> initializedTasks = new HashSet<BackupTask>();
 
     private readonly BackupperDbContext db;
+    private readonly BackupperDbContext logDb;
 
     public DbService(BackupTask backupTask)
     {
         BackupTask = backupTask;
         db = new BackupperDbContext(backupTask);
+        logDb = new BackupperDbContext(backupTask);
         Initialize();
     }
 
@@ -47,14 +50,36 @@ public class DbService : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
+        if (!logs.IsEmpty)
+        {
+            Debug.WriteLine("保存日志");
+            logDb.Logs.AddRange(logs);
+            logs.Clear();
+            logDb.SaveChanges();
+        }
+
         db?.Dispose();
+        logDb?.Dispose();
     }
 
     public async ValueTask DisposeAsync()
     {
+        if (!logs.IsEmpty)
+        {
+            Debug.WriteLine("保存日志");
+            logDb.Logs.AddRange(logs);
+            logs.Clear();
+            await logDb.SaveChangesAsync();
+        }
+
         if (db != null)
         {
             await db.DisposeAsync();
+        }
+
+        if (logDb != null)
+        {
+            await logDb.DisposeAsync();
         }
     }
 
@@ -194,11 +219,12 @@ public class DbService : IDisposable, IAsyncDisposable
         return await GetSnapshotsQuery(type).ToListAsync(token).ConfigureAwait(false);
     }
 
-    public async Task LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
-        string detail = null)
+    private readonly ConcurrentBag<BackupLogEntity> logs = new ConcurrentBag<BackupLogEntity>();
+
+    public async ValueTask LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
+        string detail = null, bool forceSave = false)
     {
-        await using var tempDb = new BackupperDbContext(BackupTask);
-        await InitializeAsync(default, tempDb);
+        await InitializeAsync(default, logDb);
         BackupLogEntity log = new BackupLogEntity()
         {
             Message = message,
@@ -206,9 +232,15 @@ public class DbService : IDisposable, IAsyncDisposable
             SnapshotId = snapshot?.Id,
             Detail = detail
         };
-        Debug.WriteLine($"{DateTime.Now}\t\t{message}");
-        tempDb.Logs.Add(log);
-        await tempDb.SaveChangesAsync();
+        //Debug.WriteLine($"{DateTime.Now}\t\t{message}");
+        logs.Add(log);
+        if (forceSave || logs.Count > 100)
+        {
+            Debug.WriteLine("保存日志");
+            logDb.Logs.AddRange(logs);
+            logs.Clear();
+            await logDb.SaveChangesAsync();
+        }
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken)

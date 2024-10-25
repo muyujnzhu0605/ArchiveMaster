@@ -70,14 +70,15 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn
+                                Binding="{Binding Snapshot.Type, Converter={StaticResource DescriptionConverter}}"
+                                Header="类型" />  
+                            <DataGridTextColumn
                                 Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
                                 Header="开始时间" />
                             <DataGridTextColumn
                                 Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
                                 Header="完成时间" />
-                            <DataGridTextColumn
-                                Binding="{Binding Snapshot.Type, Converter={StaticResource DescriptionConverter}}"
-                                Header="完成时间" />
+
                             <DataGridTextColumn
                                 Binding="{Binding CreatedFileCount}"
                                 Header="新增文件数" />

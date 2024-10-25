@@ -9,6 +9,7 @@ using ArchiveMaster.Views;
 using System;
 using System.Text;
 using Avalonia.Controls;
+using FzLib;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster;
@@ -54,12 +55,14 @@ public partial class App : Application
     }
     private async void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
+        TrayIcon.GetIcons(this)?[0]?.Dispose();
         Exit?.Invoke(sender, e);
-        await Initializer.AppHost.StopAsync();
+        await Initializer.StopAsync();
     }
 
-    private void ExitMenuItem_Click(object sender, EventArgs e)
+    private async void ExitMenuItem_Click(object sender, EventArgs e)
     {
+        await Initializer.StopAsync();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.Shutdown();
@@ -80,6 +83,7 @@ public partial class App : Application
         {
             desktop.MainWindow = null;
             isMainWindowOpened = false;
+            Initializer.ClearViewsInstance();
         };
         return desktop.MainWindow as MainWindow;
     }
