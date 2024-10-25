@@ -12,6 +12,8 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class BackupTasksViewModel : ViewModelBase
     {
+        private readonly BackupService backupService;
+
         [ObservableProperty]
         private bool canSaveConfig = false;
 
@@ -20,8 +22,10 @@ namespace ArchiveMaster.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<BackupTask> tasks;
-        public BackupTasksViewModel(FileBackupperConfig config, AppConfig appConfig)
+
+        public BackupTasksViewModel(FileBackupperConfig config, AppConfig appConfig, BackupService backupService)
         {
+            this.backupService = backupService;
             Config = config;
             AppConfig = appConfig;
 #if DEBUG
@@ -48,6 +52,22 @@ namespace ArchiveMaster.ViewModels
         public override async void OnEnter()
         {
             base.OnEnter();
+
+            while (backupService.IsBackingUp)
+            {
+                var result = await this.SendMessage(new CommonDialogMessage()
+                {
+                    Type = CommonDialogMessage.CommonDialogType.ErrorRetry,
+                    Title = "正在备份",
+                    Message = "有任务正在备份，无法进行任务配置，请前往管理中心停止备份或重试"
+                }).Task;
+                if (false.Equals(result))
+                {
+                    Exit();
+                    return;
+                }
+            }
+
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
             NotifyCanSaveConfig(false);
@@ -61,11 +81,11 @@ namespace ArchiveMaster.ViewModels
             }
 
             if ((await this.SendMessage(new CommonDialogMessage()
-            {
-                Type = CommonDialogMessage.CommonDialogType.YesNo,
-                Title = "保存配置",
-                Message = "有未保存的配置，是否保存？"
-            }).Task).Equals(true))
+                {
+                    Type = CommonDialogMessage.CommonDialogType.YesNo,
+                    Title = "保存配置",
+                    Message = "有未保存的配置，是否保存？"
+                }).Task).Equals(true))
             {
                 Save();
             }

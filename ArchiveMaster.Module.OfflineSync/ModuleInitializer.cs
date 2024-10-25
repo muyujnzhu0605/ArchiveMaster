@@ -99,32 +99,7 @@ namespace ArchiveMaster
 
         public void RegisterMessages(Visual visual)
         {
-            WeakReferenceMessenger.Default.Register<InputDialogMessage>(visual, async (_, m) =>
-            {
-                try
-                {
-                    object result = m.Type switch
-                    {
-                        InputDialogMessage.InputDialogType.Text => await visual.ShowInputTextDialogAsync(m.Title,
-                            m.Message, m.DefaultValue as string, m.Watermark, m.Validation),
-                        InputDialogMessage.InputDialogType.Integer => await visual.ShowInputNumberDialogAsync(m.Title,
-                            m.Message, (int)m.DefaultValue, m.Watermark),
-                        InputDialogMessage.InputDialogType.Float => await visual.ShowInputNumberDialogAsync(m.Title,
-                            m.Message, (double)m.DefaultValue, m.Watermark),
-                        InputDialogMessage.InputDialogType.Password => await visual.ShowInputPasswordDialogAsync(
-                            m.Title, m.Message, m.Watermark, m.Validation),
-                        InputDialogMessage.InputDialogType.MultipleLinesText => await
-                            visual.ShowInputMultiLinesTextDialogAsync(m.Title, m.Message, 3, 10,
-                                m.DefaultValue as string, m.Watermark, m.Validation),
-                        _ => throw new InvalidEnumArgumentException()
-                    };
-                    m.SetResult(result);
-                }
-                catch (Exception ex)
-                {
-                    m.SetException(ex);
-                }
-            });
+         
         }
     }
 }

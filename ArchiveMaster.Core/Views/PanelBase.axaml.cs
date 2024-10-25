@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using System;
+using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
@@ -22,9 +23,7 @@ namespace ArchiveMaster.Views
         {
             InitializeComponent();
         }
-
-        public event EventHandler RequestClosing;
-
+        
         public string Description
         {
             get => GetValue(DescriptionProperty);
@@ -50,7 +49,10 @@ namespace ArchiveMaster.Views
 
         private void ReturnButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            RequestClosing?.Invoke(this, EventArgs.Empty);
+            if (DataContext is ViewModelBase vm)
+            {
+                vm.Exit();
+            }
         }
     }
 }

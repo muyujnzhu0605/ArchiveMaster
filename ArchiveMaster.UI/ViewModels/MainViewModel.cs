@@ -36,6 +36,7 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
+
     public MainViewModel(AppConfig appConfig, IStartupManager startupManager,
         IBackCommandService backCommandService = null)
     {
@@ -56,7 +57,7 @@ public partial class MainViewModel : ObservableObject
             return false;
         });
         BackCommandService = backCommandService;
-        
+
         IsAutoStart = startupManager.IsStartupEnabled();
     }
 
@@ -69,19 +70,23 @@ public partial class MainViewModel : ObservableObject
         {
             panelInfo.PanelInstance = Services.Provider.GetService(panelInfo.PanelType) as PanelBase ??
                                       throw new Exception($"无法找到{panelInfo.PanelType}服务");
-            panelInfo.PanelInstance.RequestClosing += async (s, e) =>
+            if (panelInfo.PanelInstance.DataContext is ViewModelBase vm)
             {
-                CancelEventArgs args = new CancelEventArgs();
-                if ((s as StyledElement)?.DataContext is ViewModelBase vm)
+                vm.RequestClosing += async (s, e) =>
                 {
-                    await vm.OnExitAsync(args);
-                }
+                    CancelEventArgs args = new CancelEventArgs();
+                    if ((s as StyledElement)?.DataContext is ViewModelBase vm)
+                    {
+                        await vm.OnExitAsync(args);
+                    }
 
-                if (!args.Cancel)
-                {
-                    IsToolOpened = false;
-                }
-            };
+                    if (!args.Cancel)
+                    {
+                        IsToolOpened = false;
+                    }
+                };
+            }
+
             panelInfo.PanelInstance.Title = panelInfo.Title;
             panelInfo.PanelInstance.Description = panelInfo.Description;
         }

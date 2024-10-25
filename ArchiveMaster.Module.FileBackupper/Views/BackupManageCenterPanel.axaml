@@ -27,7 +27,6 @@
                 Grid.Row="2"
                 Header="任务状态">
                 <v:BackupTaskDataGrid
-                    IsEnabled="{Binding CanSelectTasks}"
                     ItemsSource="{Binding Tasks}"
                     SelectedItem="{Binding SelectedTask}" />
             </g:GroupBox>

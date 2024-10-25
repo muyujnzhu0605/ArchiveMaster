@@ -8,14 +8,10 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class BackupManageCenterViewModel
 {
-
-    [ObservableProperty]
-    private bool canSelectTasks = true;
-
     [ObservableProperty]
     private BackupTask selectedTask;
-    
-    
+
+
     [ObservableProperty]
     private ObservableCollection<BackupTask> tasks;
 
@@ -32,29 +28,20 @@ public partial class BackupManageCenterViewModel
 
         if (newValue != null)
         {
-            try
-            {
-                CanSelectTasks = false;
-                await UpdateSnapshots(newValue);
-                newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
-            }
-            catch (Exception ex)
-            {
-                await this.ShowErrorAsync("加载快照失败", ex);
-            }
-            finally
-            {
-                CanSelectTasks = true;
-            }
+            await RefreshSnapshots();
+            newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
         }
     }
 
     private async void SelectedBackupTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(BackupTask.Status) 
-            && (sender as BackupTask)?.Status == BackupTaskStatus.Ready)
+        if (sender == SelectedTask)
         {
-            await UpdateSnapshots((BackupTask)sender);
+            if (e.PropertyName == nameof(BackupTask.Status)
+                && (sender as BackupTask)?.Status == BackupTaskStatus.Ready)
+            {
+                await RefreshSnapshots();
+            }
         }
     }
 }

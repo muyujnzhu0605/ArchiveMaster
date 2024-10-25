@@ -13,6 +13,13 @@ public abstract partial class ViewModelBase : ObservableObject
     
     [ObservableProperty]
     private bool isWorking = false;
+    
+    public event EventHandler RequestClosing;
+
+    public void Exit()
+    {
+        RequestClosing?.Invoke(this, EventArgs.Empty);
+    }
 
     public virtual void OnEnter()
     {

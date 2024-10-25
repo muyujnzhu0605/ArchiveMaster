@@ -10,7 +10,7 @@
     <PackageVersion Include="Avalonia.Xaml.Behaviors" Version="11.1.0" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13" />
-    <PackageVersion Include="FzLib.Avalonia" Version="2.2.2" Condition="'$(Configuration)' == 'Release'" />
+    <PackageVersion Include="FzLib.Avalonia" Version="2.2.3" Condition="'$(Configuration)' == 'Release'" />
     <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="13.10.0" />
     <PackageVersion Include="MetadataExtractor" Version="2.8.1" />
     <PackageVersion Include="BinToss.GroupBox.Avalonia" Version="1.0.0" />

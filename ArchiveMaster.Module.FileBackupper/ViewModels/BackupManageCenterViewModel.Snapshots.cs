@@ -10,38 +10,44 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class BackupManageCenterViewModel
 {
-    
     [ObservableProperty]
     private BackupSnapshotWithFileCount selectedSnapshot;
-    
+
     [ObservableProperty]
     private ObservableCollection<BackupSnapshotWithFileCount> snapshots;
-    
-    [RelayCommand]
-    private async Task JumpToLogsBySnapshotAsync(BackupSnapshotWithFileCount snapshot)
+
+    async partial void OnSelectedSnapshotChanged(BackupSnapshotWithFileCount value)
     {
-        SelectedTabIndex = 2;
-        await using var db = new DbService(SelectedTask);
-        Logs = new ObservableCollection<BackupLogEntity>(await db.GetLogsAsync(snapshot.Snapshot.Id));
+        if (value == null)
+        {
+            Logs = null;
+            TreeFiles = null;
+            return;
+        }
+        await TryDoAsync("加载快照文件和日志", async () =>
+        {
+            await using var db = new DbService(SelectedTask);
+            Logs = new ObservableCollection<BackupLogEntity>(await db.GetLogsAsync(value.Snapshot.Id));
+
+            var utility = new RestoreUtility(SelectedTask);
+            var tree = await utility.GetSnapshotFileTreeAsync(value.Snapshot.Id);
+            tree.Reorder();
+            tree.Name = $"快照{value.Snapshot.BeginTime}";
+
+            TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
+            TreeFiles.Add(tree);
+        });
     }
 
-    [RelayCommand]
-    private async Task JumpToRestoreBySnapshotAsync(BackupSnapshotWithFileCount snapshot)
-    {
-        SelectedTabIndex = 1;
-        var utility = new RestoreUtility(SelectedTask);
-        var tree = await utility.GetSnapshotFileTreeAsync(snapshot.Snapshot.Id);
-        tree.Reorder();
-        tree.Name = $"快照{snapshot.Snapshot.BeginTime}";
 
-        TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
-        TreeFiles.Add(tree);
-    }
-    
-    private async Task UpdateSnapshots(BackupTask newValue)
+    [RelayCommand]
+    private Task RefreshSnapshots()
     {
-        DbService db = new DbService(newValue);
-        Snapshots = new ObservableCollection<BackupSnapshotWithFileCount>(
-            await db.GetSnapshotsWithFilesAsync());
+        return TryDoAsync("加载快照", async () =>
+        {
+            DbService db = new DbService(SelectedTask);
+            Snapshots = new ObservableCollection<BackupSnapshotWithFileCount>(
+                await db.GetSnapshotsWithFilesAsync());
+        });
     }
 }

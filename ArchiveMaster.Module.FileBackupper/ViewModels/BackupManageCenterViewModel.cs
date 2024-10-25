@@ -8,6 +8,7 @@ using System.Diagnostics;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Messages;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
@@ -17,7 +18,6 @@ using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.ViewModels
 {
-   
     public partial class BackupManageCenterViewModel : ViewModelBase
     {
         private readonly BackupService backupService;
@@ -41,6 +41,22 @@ namespace ArchiveMaster.ViewModels
             base.OnEnter();
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
+        }
+
+        private async Task TryDoAsync(string workName, Func<Task> task)
+        {
+            this.SendMessage(new LoadingMessage(true));
+            await Task.Delay(100);
+            try
+            {
+                await task();
+                this.SendMessage(new LoadingMessage(false));
+            }
+            catch (Exception ex)
+            {
+                this.SendMessage(new LoadingMessage(false));
+                await this.ShowErrorAsync($"{workName}失败", ex);
+            }
         }
     }
 }

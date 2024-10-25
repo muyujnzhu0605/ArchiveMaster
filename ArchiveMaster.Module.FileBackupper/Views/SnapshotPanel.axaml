@@ -7,11 +7,11 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
+    <Grid RowDefinitions="*,8,Auto">
         <DataGrid
             IsReadOnly="True"
             ItemsSource="{Binding Snapshots}"
-            SelectedItem="{Binding SelectedSnapShot}">
+            SelectedItem="{Binding SelectedSnapshot}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn
                     CanUserResize="False"
@@ -26,14 +26,14 @@
                                     Content="操作">
                                     <DropDownButton.Flyout>
                                         <MenuFlyout>
-                                            <MenuItem
-                                                Command="{Binding $parent[DataGrid].DataContext.JumpToLogsBySnapshotCommand}"
-                                                CommandParameter="{Binding .}"
-                                                Header="日志" />
-                                            <MenuItem
-                                                Command="{Binding $parent[DataGrid].DataContext.JumpToRestoreBySnapshotCommand}"
-                                                CommandParameter="{Binding .}"
-                                                Header="查看文件" />
+                                            <!--  <MenuItem  -->
+                                            <!--  Command="{Binding $parent[DataGrid].DataContext.JumpToLogsBySnapshotCommand}"  -->
+                                            <!--  CommandParameter="{Binding .}"  -->
+                                            <!--  Header="日志" />  -->
+                                            <!--  <MenuItem  -->
+                                            <!--  Command="{Binding $parent[DataGrid].DataContext.JumpToRestoreBySnapshotCommand}"  -->
+                                            <!--  CommandParameter="{Binding .}"  -->
+                                            <!--  Header="查看文件" />  -->
                                         </MenuFlyout>
                                     </DropDownButton.Flyout>
                                 </DropDownButton>
@@ -62,5 +62,14 @@
                     Header="修改文件数" />
             </DataGrid.Columns>
         </DataGrid>
+        <StackPanel
+            Grid.Row="2"
+            Orientation="Horizontal">
+            <Button
+                Classes="Icon"
+                Command="{Binding RefreshSnapshotsCommand}"
+                Content="{StaticResource Refresh}"
+                ToolTip.Tip="刷新" />
+        </StackPanel>
     </Grid>
 </UserControl>
