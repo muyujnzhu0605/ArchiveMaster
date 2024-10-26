@@ -23,6 +23,8 @@ public partial class BackupManageCenterViewModel
         {
             Logs = null;
             TreeFiles = null;
+            FileHistory = null;
+            SelectedFile = null;
             return;
         }
 

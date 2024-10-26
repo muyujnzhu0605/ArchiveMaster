@@ -32,36 +32,6 @@
                 <DataGridTextColumn
                     Binding="{Binding ModifiedFileCount}"
                     Header="修改文件数" />
-
-
-                <DataGridTemplateColumn
-                    CanUserResize="False"
-                    Header="操作">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel
-                                Orientation="Horizontal"
-                                Spacing="8">
-                                <DropDownButton
-                                    Classes="Link"
-                                    Content="操作">
-                                    <DropDownButton.Flyout>
-                                        <MenuFlyout>
-                                            <!--  <MenuItem  -->
-                                            <!--  Command="{Binding $parent[DataGrid].DataContext.JumpToLogsBySnapshotCommand}"  -->
-                                            <!--  CommandParameter="{Binding .}"  -->
-                                            <!--  Header="日志" />  -->
-                                            <!--  <MenuItem  -->
-                                            <!--  Command="{Binding $parent[DataGrid].DataContext.JumpToRestoreBySnapshotCommand}"  -->
-                                            <!--  CommandParameter="{Binding .}"  -->
-                                            <!--  Header="查看文件" />  -->
-                                        </MenuFlyout>
-                                    </DropDownButton.Flyout>
-                                </DropDownButton>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel

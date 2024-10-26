@@ -76,7 +76,7 @@
                         <TextBlock
                             IsVisible="{Binding SelectedFile, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
                             Text="请先选择一个文件" />
-                        <!--  新面板  -->
+                        <v:SnapshotFileHistoryPanel />
                     </Panel>
                 </TabItem>
                 <TabItem Header="修改列表">

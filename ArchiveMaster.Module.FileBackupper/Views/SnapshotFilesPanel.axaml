@@ -44,7 +44,11 @@
                                                 Command="{Binding $parent[TabItem].DataContext.SaveAsCommand}"
                                                 CommandParameter="{Binding .}"
                                                 Header="另存为" />
-                                            <MenuItem Header="历史记录" />
+                                            <!--  <MenuItem  -->
+                                            <!--  Command="{Binding $parent[TabItem].DataContext.LoadFileHistoryCommand}"  -->
+                                            <!--  CommandParameter="{Binding .}"  -->
+                                            <!--  Header="查看历史记录"  -->
+                                            <!--  IsVisible="{Binding !IsDir}" />  -->
                                         </MenuFlyout>
                                     </DropDownButton.Flyout>
                                 </DropDownButton>

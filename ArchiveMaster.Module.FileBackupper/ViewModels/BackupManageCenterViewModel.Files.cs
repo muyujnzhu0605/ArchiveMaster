@@ -22,6 +22,9 @@ public partial class BackupManageCenterViewModel
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
 
+    [ObservableProperty]
+    private ObservableCollection<BackupFile> fileHistory;
+
     private async Task LoadFilesAsync()
     {
         var utility = new RestoreUtility(SelectedTask);
@@ -33,10 +36,28 @@ public partial class BackupManageCenterViewModel
         TreeFiles.Add(tree);
     }
 
-    [RelayCommand]
-    private async Task SaveAsAsync()
+    // [RelayCommand]
+
+    async partial void OnSelectedFileChanged(SimpleFileInfo value)
     {
-        switch (SelectedFile)
+        if (value is BackupFile)
+        {
+            await TryDoAsync("加载文件历史记录", async () => await LoadFileHistoryAsync(value));
+        }
+    }
+
+    private async Task LoadFileHistoryAsync(SimpleFileInfo file)
+    {
+        Debug.Assert(file is BackupFile);
+        await using var db = new DbService(SelectedTask);
+        var history = await db.GetFileHistory(file.RelativePath);
+        FileHistory = new ObservableCollection<BackupFile>(history.Select(p => new BackupFile(p)));
+    }
+
+    [RelayCommand]
+    private async Task SaveAsAsync(SimpleFileInfo fileOrDir)
+    {
+        switch (fileOrDir)
         {
             case BackupFile file:
                 await SaveFile(file);
@@ -46,6 +67,7 @@ public partial class BackupManageCenterViewModel
                 break;
         }
     }
+
     private async Task SaveFile(BackupFile file)
     {
         if (file.Entity.BackupFileName == null)

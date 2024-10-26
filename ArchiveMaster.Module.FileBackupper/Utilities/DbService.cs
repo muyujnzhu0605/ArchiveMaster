@@ -103,7 +103,7 @@ public class DbService : IDisposable, IAsyncDisposable
         }
         else
         {
-            fullSnapshot =await GetValidSnapshots()
+            fullSnapshot = await GetValidSnapshots()
                                .Where(p => p.Type == SnapshotType.Full || p.Type == SnapshotType.VirtualFull)
                                .Where(p => p.BeginTime < snapshot.BeginTime)
                                .OrderByDescending(p => p.BeginTime)
@@ -120,9 +120,9 @@ public class DbService : IDisposable, IAsyncDisposable
             incrementalSnapshots.Add(snapshot);
         }
 
-        var fileRecords =(await db.Files
-            .Where(p => p.SnapshotId == fullSnapshot.Id)
-            .ToListAsync())
+        var fileRecords = (await db.Files
+                .Where(p => p.SnapshotId == fullSnapshot.Id)
+                .ToListAsync())
             .ToDictionary(p => p.RawFileRelativePath);
 
 
@@ -292,5 +292,30 @@ public class DbService : IDisposable, IAsyncDisposable
         db ??= this.db;
         initializedTasks.Add(BackupTask);
         return new ValueTask(db.Database.EnsureCreatedAsync(cancellationToken));
+    }
+
+    public Task<List<BackupFileEntity>> GetFileHistory(string relativePath)
+    {
+        var query = from snapshot in db.Snapshots
+            join file in db.Files on snapshot.Id equals file.SnapshotId
+            where file.RawFileRelativePath == relativePath
+            where !snapshot.IsDeleted
+            where snapshot.EndTime > default(DateTime)
+            where !file.IsDeleted
+            where file.Type == FileRecordType.Created || file.Type == FileRecordType.Modified
+            orderby snapshot.BeginTime // 根据 BeginTime 排序
+            select file;
+
+        // var query = db.Files
+        //     .Where(p => p.RawFileRelativePath == relativePath)
+        //     .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
+        //     .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
+        //     .Where(p => !p.IsDeleted)
+        //     .Include(p => p.Snapshot)
+        //     .Where(p => p.Snapshot.EndTime > default(DateTime))
+        //     .Where(p => !p.Snapshot.IsDeleted)
+        //     .OrderBy(p => p.Snapshot.BeginTime);
+
+        return query.ToListAsync();
     }
 }

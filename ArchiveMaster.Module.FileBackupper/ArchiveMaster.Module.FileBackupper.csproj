@@ -20,6 +20,10 @@
       <DependentUpon>BackupTaskDataGrid.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\SnapshotFileHistoryPanel.axaml.cs">
+      <DependentUpon>SnapshotFileHistoryPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 <!--  <ItemGroup>-->

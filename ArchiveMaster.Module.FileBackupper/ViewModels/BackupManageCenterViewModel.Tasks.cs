@@ -31,7 +31,7 @@ public partial class BackupManageCenterViewModel
     {
         await backupService.CancelCurrentAsync();
     }
-    
+
     [RelayCommand]
     private async Task LoadTasksAsync()
     {
@@ -57,8 +57,6 @@ public partial class BackupManageCenterViewModel
     async partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
     {
         Snapshots = null;
-        Logs = null;
-        TreeFiles = null;
 
         if (oldValue != null)
         {
