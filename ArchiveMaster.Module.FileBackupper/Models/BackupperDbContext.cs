@@ -18,14 +18,9 @@ public class BackupperDbContext : DbContext
         connectionString = $"Data Source={dbPath}";
     }
 
-    public DbSet<BackupSnapshotEntity> Snapshots { get; set; }
-
-    public DbSet<FileRecordEntity> Records { get; set; }
-
-    public DbSet<PhysicalFileEntity> Files { get; set; }
-
+    public DbSet<BackupFileEntity> Files { get; set; }
     public DbSet<BackupLogEntity> Logs { get; set; }
-
+    public DbSet<BackupSnapshotEntity> Snapshots { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite(connectionString);
@@ -33,13 +28,9 @@ public class BackupperDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<FileRecordEntity>()
+        modelBuilder.Entity<BackupFileEntity>()
             .HasOne(b => b.Snapshot)
             .WithMany()
             .HasForeignKey(b => b.SnapshotId);
-        modelBuilder.Entity<FileRecordEntity>()
-            .HasOne(b => b.PhysicalFile)
-            .WithMany()
-            .HasForeignKey(b => b.PhysicalFileId);
     }
 }

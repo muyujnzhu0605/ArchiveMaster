@@ -14,54 +14,6 @@ public partial class BackupService
     {
         public BackupTask BackupTask { get; } = backupTask;
 
-
-        private async Task CreateNewBackupFileAsync(DbService db, BackupSnapshotEntity snapshot,
-            FileInfo file, FileRecordType recordType, CancellationToken cancellationToken)
-        {
-            string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
-
-            var backupFileName = Guid.NewGuid().ToString("N");
-            string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
-            var sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath, cancellationToken);
-            var physicalFile = db.GetSameFile(file.LastWriteTime, file.Length, sha1);
-            if (physicalFile != null) //已经存在一样的物理文件了，那就把刚刚备份的文件给删掉
-            {
-                File.Delete(backupFilePath);
-            }
-            else //没有相同的物理备份文件
-            {
-                physicalFile = new PhysicalFileEntity
-                {
-                    FileName = backupFileName,
-                    Hash = sha1,
-                    Length = file.Length,
-                    Time = file.LastWriteTime,
-                };
-                db.Add(physicalFile);
-            }
-
-            FileRecordEntity record = new FileRecordEntity()
-            {
-                PhysicalFile = physicalFile,
-                Snapshot = snapshot,
-                RawFileRelativePath = rawRelativeFilePath,
-                Type = recordType
-            };
-            db.Add(record);
-        }
-
-        private List<FileInfo> GetSourceFiles(CancellationToken cancellationToken)
-        {
-            BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
-            var files = new DirectoryInfo(BackupTask.SourceDir)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                .WithCancellationToken(cancellationToken)
-                .Where(p => blacks.IsNotInBlackList(p))
-                .ToList();
-            return files;
-        }
-
-
         public async Task BackupAsync(SnapshotType type, CancellationToken cancellationToken = default)
         {
             if (BackupTask.Status is BackupTaskStatus.FullBackingUp or BackupTaskStatus.IncrementBackingUp)
@@ -121,6 +73,56 @@ public partial class BackupService
             }, cancellationToken);
         }
 
+        private async Task CreateNewBackupFileAsync(DbService db, BackupSnapshotEntity snapshot,
+                    FileInfo file, FileRecordType recordType, bool isVirtual, CancellationToken cancellationToken)
+        {
+            if (recordType == FileRecordType.Deleted)
+            {
+                throw new ArgumentException("不支持删除类型", nameof(recordType));
+            }
+
+            string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
+
+
+            BackupFileEntity dbFile = new BackupFileEntity()
+            {
+                Snapshot = snapshot,
+                RawFileRelativePath = rawRelativeFilePath,
+                Type = recordType,
+                Length = file.Length,
+                Time = file.LastWriteTime,
+            };
+
+            if (!isVirtual)
+            {
+                dbFile.BackupFileName = Guid.NewGuid().ToString("N");
+                string backupFilePath = Path.Combine(BackupTask.BackupDir, dbFile.BackupFileName);
+                dbFile.Hash =
+                    await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath, cancellationToken);
+
+                var existedFile = db.GetSameFile(file.LastWriteTime, file.Length, dbFile.Hash);
+                if (existedFile != null) //已经存在一样的物理文件了，那就把刚刚备份的文件给删掉
+                {
+                    await db.LogAsync(LogLevel.Information,
+                        $"文件{rawRelativeFilePath}找到了已经存在的相同物理文件{dbFile.BackupFileName}", snapshot);
+                    File.Delete(backupFilePath);
+                    dbFile.BackupFileName = existedFile.BackupFileName;
+                }
+            }
+
+            db.Add(dbFile);
+        }
+
+        private List<FileInfo> GetSourceFiles(CancellationToken cancellationToken)
+        {
+            BlackListHelper blacks = new BlackListHelper(BackupTask.BlackList, BackupTask.BlackListUseRegex);
+            var files = new DirectoryInfo(BackupTask.SourceDir)
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                .WithCancellationToken(cancellationToken)
+                .Where(p => blacks.IsNotInBlackList(p))
+                .ToList();
+            return files;
+        }
         private async Task HandleFullBackupAsync(DbService db, BackupSnapshotEntity snapshot, List<FileInfo> files,
             bool isVirtualFull, CancellationToken cancellationToken)
         {
@@ -130,35 +132,9 @@ public partial class BackupService
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
                 {
-                    await db.LogAsync(LogLevel.Information, $"开始备份{rawRelativeFilePath}", snapshot);
-
-                    string backupFileName = isVirtualFull ? null : Guid.NewGuid().ToString("N");
-                    string sha1 = null;
-
-                    if (!isVirtualFull)
-                    {
-                        string backupFilePath = Path.Combine(BackupTask.BackupDir, backupFileName);
-                        sha1 = await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath,
-                            cancellationToken);
-                    }
-
-                    PhysicalFileEntity physicalFile = new PhysicalFileEntity
-                    {
-                        FileName = backupFileName,
-                        Hash = sha1,
-                        Length = file.Length,
-                        Time = file.LastWriteTime,
-                    };
-                    db.Add(physicalFile);
-
-                    FileRecordEntity record = new FileRecordEntity()
-                    {
-                        PhysicalFile = physicalFile,
-                        Snapshot = snapshot,
-                        RawFileRelativePath = rawRelativeFilePath,
-                        Type = FileRecordType.Created
-                    };
-                    db.Add(record);
+                    snapshot.CreatedFileCount++;
+                    await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, isVirtualFull,
+                        cancellationToken);
 
                     await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已备份", snapshot);
                 }
@@ -175,7 +151,6 @@ public partial class BackupService
             var latestFiles = db.GetLatestFiles(snapshot).ToDictionary(p => p.RawFileRelativePath);
             await db.LogAsync(LogLevel.Information, $"已获取数据库中当前镜像的最新文件集合，共{latestFiles.Count}个", snapshot);
 
-            bool hasChanged = false;
             foreach (var file in files)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -184,12 +159,11 @@ public partial class BackupService
                 {
                     if (latestFiles.TryGetValue(rawRelativeFilePath, out var latestFile))
                     {
-                        if (latestFile.PhysicalFile.Time != file.LastWriteTime ||
-                            latestFile.PhysicalFile.Length != file.Length)
+                        if (latestFile.Time != file.LastWriteTime || latestFile.Length != file.Length)
                         {
-                            hasChanged = true;
+                            snapshot.ModifiedFileCount++;
                             await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已修改", snapshot);
-                            await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Modified,
+                            await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Modified, false,
                                 cancellationToken);
                         }
 
@@ -197,9 +171,10 @@ public partial class BackupService
                     }
                     else
                     {
-                        hasChanged = true;
+                        snapshot.CreatedFileCount++;
                         await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已新增", snapshot);
-                        await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, cancellationToken);
+                        await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, false,
+                            cancellationToken);
                     }
                 }
                 catch (IOException ex)
@@ -210,9 +185,9 @@ public partial class BackupService
 
             foreach (var deletingFilePath in latestFiles.Keys)
             {
-                hasChanged = true;
+                snapshot.DeletedFileCount++;
                 await db.LogAsync(LogLevel.Information, $"文件{deletingFilePath}已删除", snapshot);
-                FileRecordEntity record = new FileRecordEntity()
+                BackupFileEntity record = new BackupFileEntity()
                 {
                     Snapshot = snapshot,
                     RawFileRelativePath = deletingFilePath,
@@ -221,7 +196,7 @@ public partial class BackupService
                 db.Add(record);
             }
 
-            if (!hasChanged)
+            if (snapshot.IsEmpty())
             {
                 await db.LogAsync(LogLevel.Information, "没有文件改变");
             }

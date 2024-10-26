@@ -21,6 +21,17 @@ public partial class BackupManageCenterViewModel
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
 
+    private async Task LoadFilesAsync()
+    {
+        var utility = new RestoreUtility(SelectedTask);
+        var tree = await utility.GetSnapshotFileTreeAsync(SelectedSnapshot.Id);
+        tree.Reorder();
+        tree.Name = $"快照{SelectedSnapshot.BeginTime}";
+
+        TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
+        TreeFiles.Add(tree);
+    }
+
     [RelayCommand]
     private async Task SaveAsAsync()
     {
@@ -34,21 +45,9 @@ public partial class BackupManageCenterViewModel
                 break;
         }
     }
-
-    private async Task LoadFilesAsync()
-    {
-        var utility = new RestoreUtility(SelectedTask);
-        var tree = await utility.GetSnapshotFileTreeAsync(SelectedSnapshot.Snapshot.Id);
-        tree.Reorder();
-        tree.Name = $"快照{SelectedSnapshot.Snapshot.BeginTime}";
-
-        TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
-        TreeFiles.Add(tree);
-    }
-
     private async Task SaveFile(BackupFile file)
     {
-        if (file.RecordEntity.PhysicalFile == null)
+        if (file.Entity.BackupFileName == null)
         {
             await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
             return;
@@ -63,7 +62,7 @@ public partial class BackupManageCenterViewModel
                 FileTypeChoices =
                 [
                     new FilePickerFileType($"{extension}文件")
-                            { Patterns = [$"*.{(extension.Length == 0 ? "*" : extension)}"] }
+                        { Patterns = [$"*.{(extension.Length == 0 ? "*" : extension)}"] }
                 ]
             });
         var path = saveFile?.TryGetLocalPath();
@@ -71,7 +70,7 @@ public partial class BackupManageCenterViewModel
         {
             var dialog = new FileProgressDialog();
             this.SendMessage(new DialogHostMessage(dialog));
-            string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
+            string backupFile = Path.Combine(SelectedTask.BackupDir, file.Entity.BackupFileName);
             if (!File.Exists(backupFile))
             {
                 await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
@@ -97,7 +96,13 @@ public partial class BackupManageCenterViewModel
             List<DateTime> times = new List<DateTime>();
             foreach (var file in files.Cast<BackupFile>())
             {
-                string backupFile = Path.Combine(SelectedTask.BackupDir, file.RecordEntity.PhysicalFile.FileName);
+                if (file.Entity.BackupFileName == null)
+                {
+                    await this.ShowErrorAsync($"备份文件{file.Entity.RawFileRelativePath}不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
+                    return;
+                }
+
+                string backupFile = Path.Combine(SelectedTask.BackupDir, file.Entity.BackupFileName);
                 string fileRelativePath = dir.RelativePath == null
                     ? file.RelativePath
                     : Path.GetRelativePath(dir.RelativePath, file.RelativePath);
@@ -108,7 +113,7 @@ public partial class BackupManageCenterViewModel
 
                 if (!File.Exists(backupFile))
                 {
-                    await this.ShowErrorAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
+                    await this.ShowErrorAsync($"备份文件{file.Entity.RawFileRelativePath}不存在", "该文件不存在实际备份文件，可能是文件丢失");
                     return;
                 }
             }

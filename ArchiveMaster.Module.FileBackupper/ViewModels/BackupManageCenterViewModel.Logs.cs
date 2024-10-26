@@ -15,23 +15,28 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class BackupManageCenterViewModel
 {
+    int countPerPage = 50;
+
+    private List<BackupLogEntity> logList;
+
+    [ObservableProperty]
+    private int logPage = -1;
+
+    [ObservableProperty]
+    private ObservableCollection<int> logPages;
+
     [ObservableProperty]
     private ObservableCollection<BackupLogEntity> logs;
 
     [ObservableProperty]
-    private LogLevel logType = LogLevel.None;
-
-    [ObservableProperty]
     private string logSearchText;
 
-    private List<BackupLogEntity> logList;
-
-    int countPerPage = 50;
-
+    [ObservableProperty]
+    private LogLevel logType = LogLevel.None;
     private async Task LoadLogsAsync()
     {
         await using var db = new DbService(SelectedTask);
-        logList = await db.GetLogsAsync(SelectedSnapshot.Snapshot.Id, LogType, LogSearchText);
+        logList = await db.GetLogsAsync(SelectedSnapshot.Id, LogType, LogSearchText);
         int pages = Math.Max((int)Math.Ceiling(1.0 * logList.Count / countPerPage), 1);
 
         LogPages = new ObservableCollection<int>(Enumerable.Range(1, pages));
@@ -46,13 +51,6 @@ public partial class BackupManageCenterViewModel
         // OnLogPageChanged(1);
     }
 
-
-    partial void OnLogPagesChanged(ObservableCollection<int> value)
-    {
-        LogPage = -1;
-        LogPage = 0;
-        Logs = new ObservableCollection<BackupLogEntity>(logList.Take(countPerPage));
-    }
 
     partial void OnLogPageChanged(int value)
     {
@@ -69,6 +67,17 @@ public partial class BackupManageCenterViewModel
         }
     }
 
+    partial void OnLogPagesChanged(ObservableCollection<int> value)
+    {
+        LogPage = -1;
+        LogPage = 0;
+        Logs = new ObservableCollection<BackupLogEntity>(logList.Take(countPerPage));
+    }
+    [RelayCommand]
+    private async Task SearchLogsAsync()
+    {
+        await TryDoAsync("加载日志", LoadLogsAsync);
+    }
 
     [RelayCommand]
     private Task ShowDetailAsync(BackupLogEntity log)
@@ -81,17 +90,4 @@ public partial class BackupManageCenterViewModel
             Detail = log.Detail
         }).Task;
     }
-
-    [RelayCommand]
-    private async Task SearchLogsAsync()
-    {
-        await TryDoAsync("加载日志", LoadLogsAsync);
-    }
-
-
-    [ObservableProperty]
-    private ObservableCollection<int> logPages;
-
-    [ObservableProperty]
-    private int logPage = -1;
 }

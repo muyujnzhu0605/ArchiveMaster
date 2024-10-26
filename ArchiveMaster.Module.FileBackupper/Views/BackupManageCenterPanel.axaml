@@ -51,7 +51,7 @@
                 Grid.Row="6"
                 HorizontalAlignment="Right"
                 IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}}"
-                Text="{Binding SelectedSnapshot.Snapshot.BeginTime, StringFormat='当前选择的快照：{0}', TargetNullValue='（无）'}" />
+                Text="{Binding SelectedSnapshot.BeginTime, StringFormat='当前选择的快照：{0}', TargetNullValue='（无）'}" />
         </Grid>
     </v:PanelBase.PanelContent>
 </v:PanelBase>

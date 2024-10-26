@@ -1,4 +1,5 @@
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.Utilities;
 
 namespace ArchiveMaster.Configs;
@@ -22,13 +23,18 @@ public static class BackupTaskExtension
         task.Status = BackupTaskStatus.Ready;
     }
 
+    public static bool IsEmpty(this BackupSnapshotEntity snapshot)
+    {
+        return snapshot.CreatedFileCount + snapshot.ModifiedFileCount + snapshot.DeletedFileCount == 0;
+    }
+
     public static async Task UpdateStatusAsync(this BackupTask task)
     {
         try
         {
             task.Check();
             await using DbService db = new DbService(task);
-            var snapshots = await db.GetSnapshotsAsync();
+            var snapshots = await db.GetSnapshotsAsync(includeEmptySnapshot: true);
             task.SnapshotCount = snapshots.Count;
             if (snapshots.Count > 0)
             {
@@ -53,6 +59,7 @@ public static class BackupTaskExtension
             task.Message = ex.Message;
         }
     }
+
     public static async Task UpdateStatusAsync(this IEnumerable<BackupTask> tasks)
     {
         foreach (var task in tasks)

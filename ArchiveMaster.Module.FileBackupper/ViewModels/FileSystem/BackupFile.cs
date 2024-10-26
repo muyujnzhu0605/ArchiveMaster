@@ -4,17 +4,15 @@ namespace ArchiveMaster.ViewModels.FileSystem;
 
 public class BackupFile : TreeFileInfo
 {
-    public BackupFile(FileRecordEntity record)
+    public BackupFile(BackupFileEntity record)
     {
-        RecordEntity = record;
+        Entity = record;
         Path = record.RawFileRelativePath;
         Name = System.IO.Path.GetFileName(record.RawFileRelativePath);
-        if (record.PhysicalFile != null)
-        {
-            Time = record.PhysicalFile.Time;
-            Length = record.PhysicalFile.Length;
-        }
+
+        Time = record.Time;
+        Length = record.Length;
     }
 
-    public FileRecordEntity RecordEntity { get; set; }
+    public BackupFileEntity Entity { get; set; }
 }

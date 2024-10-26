@@ -12,12 +12,12 @@ namespace ArchiveMaster.ViewModels;
 public partial class BackupManageCenterViewModel
 {
     [ObservableProperty]
-    private BackupSnapshotWithFileCount selectedSnapshot;
+    private BackupSnapshotEntity selectedSnapshot;
 
     [ObservableProperty]
-    private ObservableCollection<BackupSnapshotWithFileCount> snapshots;
+    private ObservableCollection<BackupSnapshotEntity> snapshots;
 
-    async partial void OnSelectedSnapshotChanged(BackupSnapshotWithFileCount value)
+    async partial void OnSelectedSnapshotChanged(BackupSnapshotEntity value)
     {
         if (value == null)
         {
@@ -42,8 +42,8 @@ public partial class BackupManageCenterViewModel
         return TryDoAsync("加载快照", async () =>
         {
             DbService db = new DbService(SelectedTask);
-            Snapshots = new ObservableCollection<BackupSnapshotWithFileCount>(
-                await db.GetSnapshotsWithFilesAsync());
+            Snapshots = new ObservableCollection<BackupSnapshotEntity>(
+                await db.GetSnapshotsAsync());
         });
     }
 }

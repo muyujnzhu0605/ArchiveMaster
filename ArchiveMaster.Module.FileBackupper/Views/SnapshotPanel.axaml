@@ -13,6 +13,27 @@
             ItemsSource="{Binding Snapshots}"
             SelectedItem="{Binding SelectedSnapshot}">
             <DataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding Type, Converter={StaticResource DescriptionConverter}}"
+                    Header="类型" />
+                <DataGridTextColumn
+                    Binding="{Binding BeginTime, Converter={StaticResource DateTimeConverter}}"
+                    Header="开始时间" />
+                <DataGridTextColumn
+                    Binding="{Binding EndTime, Converter={StaticResource DateTimeConverter}}"
+                    Header="完成时间" />
+
+                <DataGridTextColumn
+                    Binding="{Binding CreatedFileCount}"
+                    Header="新增文件数" />
+                <DataGridTextColumn
+                    Binding="{Binding DeletedFileCount}"
+                    Header="删除文件数" />
+                <DataGridTextColumn
+                    Binding="{Binding ModifiedFileCount}"
+                    Header="修改文件数" />
+
+
                 <DataGridTemplateColumn
                     CanUserResize="False"
                     Header="操作">
@@ -41,25 +62,6 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn
-                    Binding="{Binding Snapshot.Type, Converter={StaticResource DescriptionConverter}}"
-                    Header="类型" />
-                <DataGridTextColumn
-                    Binding="{Binding Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
-                    Header="开始时间" />
-                <DataGridTextColumn
-                    Binding="{Binding Snapshot.EndTime, Converter={StaticResource DateTimeConverter}}"
-                    Header="完成时间" />
-
-                <DataGridTextColumn
-                    Binding="{Binding CreatedFileCount}"
-                    Header="新增文件数" />
-                <DataGridTextColumn
-                    Binding="{Binding DeletedFileCount}"
-                    Header="删除文件数" />
-                <DataGridTextColumn
-                    Binding="{Binding ModifiedFileCount}"
-                    Header="修改文件数" />
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel
