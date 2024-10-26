@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Enums;
@@ -31,24 +32,39 @@ public partial class BackupManageCenterViewModel
     {
         await using var db = new DbService(SelectedTask);
         logList = await db.GetLogsAsync(SelectedSnapshot.Snapshot.Id, LogType, LogSearchText);
-        int pages = (int)Math.Ceiling(1.0 * logList.Count / countPerPage);
+        int pages = Math.Max((int)Math.Ceiling(1.0 * logList.Count / countPerPage), 1);
 
         LogPages = new ObservableCollection<int>(Enumerable.Range(1, pages));
-        if (LogPage != 1)
-        {
-            LogPage = 1;
-        }
-        else
-        {
-            OnLogPageChanged(1);
-        }
+        // if (LogPage != 1)
+        // {
+        //     LogPage = 1;
+        // }
+        // else
+        // {
+        //     OnLogPageChanged(1);
+        // }
+        // OnLogPageChanged(1);
+    }
+
+
+    partial void OnLogPagesChanged(ObservableCollection<int> value)
+    {
+        LogPage = -1;
+        LogPage = 0;
+        Logs = new ObservableCollection<BackupLogEntity>(logList.Take(countPerPage));
     }
 
     partial void OnLogPageChanged(int value)
     {
+        Debug.WriteLine($"LogPage改变：{value}");
+        if (value == -1)
+        {
+            Logs = null;
+            return;
+        }
         if (logList != null)
         {
-            Logs = new ObservableCollection<BackupLogEntity>(logList.Skip((LogPage - 1) * countPerPage)
+            Logs = new ObservableCollection<BackupLogEntity>(logList.Skip(LogPage * countPerPage)
                 .Take(countPerPage));
         }
     }
@@ -77,5 +93,5 @@ public partial class BackupManageCenterViewModel
     private ObservableCollection<int> logPages;
 
     [ObservableProperty]
-    private int logPage = 0;
+    private int logPage = -1;
 }

@@ -11,7 +11,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid RowDefinitions="Auto,8,*">
-        <Grid ColumnDefinitions="Auto,8,Auto,32,*,8,Auto,32,Auto,8,Auto,8,Auto">
+        <Grid ColumnDefinitions="Auto,8,Auto,32,*,8,Auto,0,Auto">
             <TextBlock Text="类型：" />
             <ComboBox
                 Grid.Column="2"
@@ -26,16 +26,13 @@
                 Classes="Icon"
                 Command="{Binding SearchLogsCommand}"
                 Content="{StaticResource Search}" />
-            <TextBlock
-                Grid.Column="8"
-                Text="第" />
             <ComboBox
-                Grid.Column="10"
+                Grid.Column="8"
+                Margin="32,0,0,0"
+                DisplayMemberBinding="{Binding ., StringFormat='第{0}页'}"
+                IsVisible="{Binding LogPages, Converter={StaticResource NotNullConverter}}"
                 ItemsSource="{Binding LogPages}"
-                SelectedItem="{Binding LogPage}" />
-            <TextBlock
-                Grid.Column="12"
-                Text="页" />
+                SelectedIndex="{Binding LogPage, Mode=TwoWay}" />
         </Grid>
         <DataGrid
             Grid.Row="2"

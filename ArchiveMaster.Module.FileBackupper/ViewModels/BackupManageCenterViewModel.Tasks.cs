@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -42,26 +43,29 @@ public partial class BackupManageCenterViewModel
             return;
         }
 
-        if (e.PropertyName == nameof(BackupTask.Status))
+        await Dispatcher.UIThread.Invoke(async () =>
         {
-            switch ((sender as BackupTask)?.Status)
+            if (e.PropertyName == nameof(BackupTask.Status))
             {
-                case BackupTaskStatus.Ready:
-                    CanMakeBackup = true;
-                    IsTaskOperationEnable = true;
-                    await SelectedTask.UpdateStatusAsync();
-                    await RefreshSnapshots();
-                    break;
-                case BackupTaskStatus.FullBackingUp:
-                case BackupTaskStatus.IncrementBackingUp:
-                    CanMakeBackup = false;
-                    IsTaskOperationEnable = true;
-                    break;
-                default:
-                    IsTaskOperationEnable = true;
-                    return;
+                switch ((sender as BackupTask)?.Status)
+                {
+                    case BackupTaskStatus.Ready:
+                        CanMakeBackup = true;
+                        IsTaskOperationEnable = true;
+                        await SelectedTask.UpdateStatusAsync();
+                        await RefreshSnapshots();
+                        break;
+                    case BackupTaskStatus.FullBackingUp:
+                    case BackupTaskStatus.IncrementBackingUp:
+                        CanMakeBackup = false;
+                        IsTaskOperationEnable = true;
+                        break;
+                    default:
+                        IsTaskOperationEnable = true;
+                        return;
+                }
             }
-        }
+        });
     }
 
     [RelayCommand]
