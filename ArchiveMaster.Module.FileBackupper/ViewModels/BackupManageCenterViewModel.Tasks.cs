@@ -31,6 +31,15 @@ public partial class BackupManageCenterViewModel
     {
         await backupService.CancelCurrentAsync();
     }
+    
+    [RelayCommand]
+    private async Task LoadTasksAsync()
+    {
+        Snapshots = null;
+        SelectedTask = null;
+        Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
+        await Tasks.UpdateStatusAsync();
+    }
 
     [RelayCommand(CanExecute = nameof(CanMakeBackup))]
     private async Task MakeBackupAsync(SnapshotType type)

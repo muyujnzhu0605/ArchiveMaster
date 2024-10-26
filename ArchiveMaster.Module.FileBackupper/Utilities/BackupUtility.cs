@@ -130,9 +130,9 @@ public partial class BackupService
         {
             foreach (var file in files)
             {
-#if DEBUG
-                await Task.Delay(1000, cancellationToken);
-#endif
+// #if DEBUG
+//                 await Task.Delay(1000, cancellationToken);
+// #endif
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
@@ -158,9 +158,9 @@ public partial class BackupService
 
             foreach (var file in files)
             {
-#if DEBUG
-                await Task.Delay(1000, cancellationToken);
-#endif
+// #if DEBUG
+//                 await Task.Delay(1000, cancellationToken);
+// #endif
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try

@@ -18,6 +18,7 @@ public partial class TreeFileDirInfo : SimpleFileInfo
 
     internal TreeFileDirInfo()
     {
+        IsChecked = false;
     }
 
     internal TreeFileDirInfo(FileSystemInfo file, string topDir, TreeDirInfo parent, int depth, int index)
@@ -26,6 +27,7 @@ public partial class TreeFileDirInfo : SimpleFileInfo
         Depth = depth;
         Index = index;
         Parent = parent;
+        IsChecked = false;
     }
 
     internal TreeFileDirInfo(SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
@@ -34,6 +36,7 @@ public partial class TreeFileDirInfo : SimpleFileInfo
         Depth = depth;
         Index = index;
         Parent = parent;
+        IsChecked = false;
     }
     public bool IsLast()
     {

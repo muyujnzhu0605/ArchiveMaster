@@ -18,40 +18,84 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid RowDefinitions="Auto,8,*,8,2*,8,Auto">
+        <Grid
+            ColumnDefinitions="*,8,*"
+            RowDefinitions="Auto,8,*,8,2*">
             <ToggleSwitch
                 IsChecked="{Binding Config.EnableBackgroundBackup}"
                 OffContent="自动备份总开关"
                 OnContent="自动备份总开关" />
-            <g:GroupBox
-                Grid.Row="2"
-                Header="任务状态">
-                <v:BackupTaskDataGrid
-                    ItemsSource="{Binding Tasks}"
-                    SelectedItem="{Binding SelectedTask}" />
-            </g:GroupBox>
+            <TabControl Grid.Row="2">
+                <TabItem Header="任务状态">
+                    <Grid RowDefinitions="*,8,Auto">
+                        <v:BackupTaskDataGrid
+                            ItemsSource="{Binding Tasks}"
+                            SelectedItem="{Binding SelectedTask}" />
+                        <StackPanel
+                            Grid.Row="2"
+                            Orientation="Horizontal">
+                            <Button
+                                Classes="Icon"
+                                Command="{Binding LoadTasksCommand}"
+                                Content="{StaticResource Refresh}"
+                                ToolTip.Tip="刷新" />
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
             <TabControl
-                Grid.Row="4"
-                IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
-                SelectedIndex="{Binding SelectedTabIndex}">
+                Grid.Row="2"
+                Grid.Column="2">
                 <TabItem Header="快照">
                     <v:SnapshotPanel />
                 </TabItem>
-                <TabItem Header="文件列表">
-                    <v:SnapshotFilesPanel />
-                </TabItem>
-                <TabItem Header="日志">
-                    <v:BackupLogsPanel />
-                </TabItem>
-                <TabItem Header="操作">
+            </TabControl>
+            <TabControl
+                Grid.Row="4"
+                Grid.ColumnSpan="99"
+                IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
+                SelectedIndex="{Binding SelectedTabIndex}">
+                <TabControl.Styles>
+                    <Style Selector="Panel &gt; TextBlock">
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                    </Style>
+                </TabControl.Styles>
+                <TabItem Header="任务控制">
                     <v:BackupTaskOperationPanel />
                 </TabItem>
+                <TabItem Header="快照文件">
+                    <Panel>
+                        <TextBlock
+                            IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
+                            Text="请先选择一个快照" />
+                        <v:SnapshotFilesPanel IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}}" />
+                    </Panel>
+                </TabItem>
+                <TabItem Header="文件历史记录">
+                    <Panel>
+                        <TextBlock
+                            IsVisible="{Binding SelectedFile, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
+                            Text="请先选择一个文件" />
+                        <!--  新面板  -->
+                    </Panel>
+                </TabItem>
+                <TabItem Header="修改列表">
+                    <Panel>
+                        <TextBlock
+                            IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
+                            Text="请先选择一个快照" />
+                        <!--  新面板  -->
+                    </Panel>
+                </TabItem>
+                <TabItem Header="日志">
+                    <Panel>
+                        <TextBlock
+                            IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
+                            Text="请先选择一个快照" />
+                        <v:BackupLogsPanel />
+                    </Panel>
+                </TabItem>
             </TabControl>
-            <TextBlock
-                Grid.Row="6"
-                HorizontalAlignment="Right"
-                IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}}"
-                Text="{Binding SelectedSnapshot.BeginTime, StringFormat='当前选择的快照：{0}', TargetNullValue='（无）'}" />
         </Grid>
     </v:PanelBase.PanelContent>
 </v:PanelBase>

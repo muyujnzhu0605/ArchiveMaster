@@ -98,6 +98,7 @@ namespace ArchiveMaster.ViewModels
                         parent.SubFileCount++;
                         parent = parent.Parent;
                     }
+
                     break;
 
                 case TreeDirInfo dir:
@@ -109,6 +110,7 @@ namespace ArchiveMaster.ViewModels
                         parent.SubFolderCount++;
                         parent = parent.Parent;
                     }
+
                     break;
 
                 default:
@@ -119,6 +121,7 @@ namespace ArchiveMaster.ViewModels
         }
 
         #region 枚举已有文件创建
+
         public static TreeDirInfo BuildTree(string rootDir)
         {
             TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
@@ -180,9 +183,9 @@ namespace ArchiveMaster.ViewModels
                 parentDir.AddSub(childFile);
                 count++;
             }
+
             return index;
         }
-
 
         #endregion
 
@@ -228,6 +231,7 @@ namespace ArchiveMaster.ViewModels
                 {
                     treeFile = new TreeFileInfo(file, this, Depth + 1, subs.Count);
                 }
+
                 AddSub(treeFile);
                 return;
             }
@@ -292,7 +296,7 @@ namespace ArchiveMaster.ViewModels
         {
             if (subDirs.Count > 0)
             {
-                subDirs.Sort((a,b)=>string.CompareOrdinal(a.Name,b.Name));
+                subDirs.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
                 foreach (var dir in subDirs)
                 {
                     dir.Reorder();
@@ -301,7 +305,7 @@ namespace ArchiveMaster.ViewModels
 
             if (subFiles.Count > 0)
             {
-                subFiles.Sort((a,b)=>string.CompareOrdinal(a.Name,b.Name));
+                subFiles.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
             }
 
             if (subs.Count > 0)
@@ -315,6 +319,21 @@ namespace ArchiveMaster.ViewModels
             {
                 subs[i].Index = i;
             }
+        }
+
+
+        public List<TreeFileDirInfo> Search(string fileName)
+        {
+            List<TreeFileDirInfo> list = new List<TreeFileDirInfo>();
+            SearchInternal(fileName, list);
+            return list;
+        }
+
+        private void SearchInternal(string fileName, List<TreeFileDirInfo> list)
+        {
+            list.AddRange(subDirs.Where(dir => dir.Name.Contains(fileName)));
+            subDirs.ForEach(p => p.SearchInternal(fileName, list));
+            list.AddRange(subFiles.Where(file => file.Name.Contains(fileName)));
         }
 
         #endregion

@@ -114,7 +114,7 @@ public class DbService : IDisposable, IAsyncDisposable
                 .Where(p => p.Type == SnapshotType.Increment)
                 .Where(p => p.BeginTime > fullSnapshot.EndTime)
                 .Where(p => p.EndTime < snapshot.BeginTime)
-                .OrderByDescending(p => p.BeginTime)
+                .OrderBy(p => p.BeginTime)
                 .ToListAsync());
 
             incrementalSnapshots.Add(snapshot);

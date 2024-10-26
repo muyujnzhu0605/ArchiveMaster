@@ -8,11 +8,23 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
+    <Grid RowDefinitions="Auto,8,*">
+        <Grid ColumnDefinitions="*,8,Auto">
+            <TextBox x:Name="txtFileSearch" />
+            <Button
+                Grid.Column="2"
+                Classes="Icon"
+                Command="{Binding #dg.Search}"
+                Content="{StaticResource Search}" />
+        </Grid>
         <v:TreeFileDataGrid
+            x:Name="dg"
+            Grid.Row="2"
             ColumnIsCheckedIndex="-1"
+            ColumnStatusIndex="-1"
             ItemsSource="{Binding TreeFiles}"
             RootDepth="0"
+            SearchText="{Binding #txtFileSearch.Text}"
             SelectedItem="{Binding SelectedFile}">
             <v:TreeFileDataGrid.Columns>
                 <DataGridTemplateColumn
