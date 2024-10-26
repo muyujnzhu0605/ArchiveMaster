@@ -17,13 +17,38 @@ namespace ArchiveMaster.ViewModels;
 public partial class BackupManageCenterViewModel
 {
     [ObservableProperty]
+    private ObservableCollection<BackupFile> createdFiles;
+
+    [ObservableProperty]
+    private ObservableCollection<BackupFile> deletedFiles;
+
+    [ObservableProperty]
+    private ObservableCollection<BackupFile> fileHistory;
+
+    [ObservableProperty]
+    private ObservableCollection<BackupFile> modifiedFiles;
+
+    [ObservableProperty]
     private SimpleFileInfo selectedFile;
 
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
+    private async Task LoadFileChangesAsync()
+    {
+        await using var db = new DbService(SelectedTask);
+        var (created, modified, deleted) = await db.GetSnapshotChanges(SelectedSnapshot.Id);
+        CreatedFiles = new ObservableCollection<BackupFile>(created.Select(p=>new BackupFile(p)));
+        ModifiedFiles = new ObservableCollection<BackupFile>(modified.Select(p=>new BackupFile(p)));
+        DeletedFiles = new ObservableCollection<BackupFile>(deleted.Select(p=>new BackupFile(p)));
+    }
 
-    [ObservableProperty]
-    private ObservableCollection<BackupFile> fileHistory;
+    private async Task LoadFileHistoryAsync(SimpleFileInfo file)
+    {
+        Debug.Assert(file is BackupFile);
+        await using var db = new DbService(SelectedTask);
+        var history = await db.GetFileHistory(file.RelativePath);
+        FileHistory = new ObservableCollection<BackupFile>(history.Select(p => new BackupFile(p)));
+    }
 
     private async Task LoadFilesAsync()
     {
@@ -45,15 +70,6 @@ public partial class BackupManageCenterViewModel
             await TryDoAsync("加载文件历史记录", async () => await LoadFileHistoryAsync(value));
         }
     }
-
-    private async Task LoadFileHistoryAsync(SimpleFileInfo file)
-    {
-        Debug.Assert(file is BackupFile);
-        await using var db = new DbService(SelectedTask);
-        var history = await db.GetFileHistory(file.RelativePath);
-        FileHistory = new ObservableCollection<BackupFile>(history.Select(p => new BackupFile(p)));
-    }
-
     [RelayCommand]
     private async Task SaveAsAsync(SimpleFileInfo fileOrDir)
     {

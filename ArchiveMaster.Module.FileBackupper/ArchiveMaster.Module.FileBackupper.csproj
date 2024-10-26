@@ -24,6 +24,10 @@
       <DependentUpon>SnapshotFileHistoryPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\SnapshotChangesPanel.axaml.cs">
+      <DependentUpon>SnapshotChangesPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 <!--  <ItemGroup>-->

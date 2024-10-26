@@ -82,6 +82,21 @@ public class DbService : IDisposable, IAsyncDisposable
         }
     }
 
+    public Task<List<BackupFileEntity>> GetFileHistory(string relativePath)
+    {
+        var query = db.Files
+            .Where(p => p.RawFileRelativePath == relativePath)
+            .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
+            .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
+            .Where(p => !p.IsDeleted)
+            .Include(p => p.Snapshot)
+            .Where(p => p.Snapshot.EndTime > default(DateTime))
+            .Where(p => !p.Snapshot.IsDeleted)
+            .OrderBy(p => p.Snapshot.BeginTime);
+
+        return query.ToListAsync();
+    }
+
     public async Task<IEnumerable<BackupFileEntity>> GetLatestFilesAsync(int snapshotId)
     {
         Initialize();
@@ -217,8 +232,21 @@ public class DbService : IDisposable, IAsyncDisposable
         return query.FirstOrDefault();
     }
 
+    public async Task<(List<BackupFileEntity> Created, List<BackupFileEntity> Modified, List<BackupFileEntity> Deleted)>
+        GetSnapshotChanges(int snapshotId)
+    {
+        var allFiles = await db.Files
+            .Include(p => p.Snapshot)
+            .Where(p => p.Snapshot.Id == snapshotId)
+            .ToListAsync();
+
+        return (allFiles.Where(p => p.Type == FileRecordType.Created).ToList(),
+            allFiles.Where(p => p.Type == FileRecordType.Modified).ToList(),
+            allFiles.Where(p => p.Type == FileRecordType.Deleted).ToList());
+    }
+
     public async Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(SnapshotType? type = null,
-        bool includeEmptySnapshot = false, CancellationToken token = default)
+            bool includeEmptySnapshot = false, CancellationToken token = default)
     {
         await InitializeAsync(token);
         IQueryable<BackupSnapshotEntity> query = GetValidSnapshots();
@@ -292,30 +320,5 @@ public class DbService : IDisposable, IAsyncDisposable
         db ??= this.db;
         initializedTasks.Add(BackupTask);
         return new ValueTask(db.Database.EnsureCreatedAsync(cancellationToken));
-    }
-
-    public Task<List<BackupFileEntity>> GetFileHistory(string relativePath)
-    {
-        var query = from snapshot in db.Snapshots
-            join file in db.Files on snapshot.Id equals file.SnapshotId
-            where file.RawFileRelativePath == relativePath
-            where !snapshot.IsDeleted
-            where snapshot.EndTime > default(DateTime)
-            where !file.IsDeleted
-            where file.Type == FileRecordType.Created || file.Type == FileRecordType.Modified
-            orderby snapshot.BeginTime // 根据 BeginTime 排序
-            select file;
-
-        // var query = db.Files
-        //     .Where(p => p.RawFileRelativePath == relativePath)
-        //     .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
-        //     .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
-        //     .Where(p => !p.IsDeleted)
-        //     .Include(p => p.Snapshot)
-        //     .Where(p => p.Snapshot.EndTime > default(DateTime))
-        //     .Where(p => !p.Snapshot.IsDeleted)
-        //     .OrderBy(p => p.Snapshot.BeginTime);
-
-        return query.ToListAsync();
     }
 }

@@ -20,7 +20,7 @@
     <v:PanelBase.PanelContent>
         <Grid
             ColumnDefinitions="*,8,*"
-            RowDefinitions="Auto,8,*,8,2*">
+            RowDefinitions="Auto,8,*,8,*">
             <ToggleSwitch
                 IsChecked="{Binding Config.EnableBackgroundBackup}"
                 OffContent="自动备份总开关"
@@ -76,15 +76,16 @@
                         <TextBlock
                             IsVisible="{Binding SelectedFile, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
                             Text="请先选择一个文件" />
-                        <v:SnapshotFileHistoryPanel />
+                        <v:SnapshotFileHistoryPanel IsVisible="{Binding SelectedFile, Converter={StaticResource NotNullConverter}}" />
                     </Panel>
                 </TabItem>
-                <TabItem Header="修改列表">
+                <TabItem Header="修改内容">
                     <Panel>
                         <TextBlock
                             IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
                             Text="请先选择一个快照" />
-                        <!--  新面板  -->
+                        <v:SnapshotChangesPanel IsVisible="{Binding SelectedSnapshot, Converter={StaticResource NotNullConverter}}" />
+
                     </Panel>
                 </TabItem>
                 <TabItem Header="日志">

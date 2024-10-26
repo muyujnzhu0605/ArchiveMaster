@@ -25,15 +25,19 @@ public partial class BackupManageCenterViewModel
             TreeFiles = null;
             FileHistory = null;
             SelectedFile = null;
+            CreatedFiles = null;
+            ModifiedFiles = null;
+            DeletedFiles = null;
             return;
         }
 
-        await TryDoAsync("加载快照文件和日志", async () =>
+        await TryDoAsync("加载快照详情", async () =>
         {
             LogSearchText = null;
             LogType = LogLevel.None;
             await LoadLogsAsync();
             await LoadFilesAsync();
+            await LoadFileChangesAsync();
         });
     }
 
