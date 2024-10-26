@@ -11,11 +11,39 @@ namespace ArchiveMaster.ViewModels;
 public partial class BackupManageCenterViewModel
 {
     [ObservableProperty]
+    private bool canCancelBackingUp = true;
+
+    [ObservableProperty]
+    private bool canMakeBackup = true;
+
+    [ObservableProperty]
+    private bool isTaskOperationEnable;
+
+    [ObservableProperty]
     private BackupTask selectedTask;
 
 
     [ObservableProperty]
     private ObservableCollection<BackupTask> tasks;
+
+    [RelayCommand(CanExecute = nameof(CanCancelBackingUp))]
+    private async Task CancelMakingBackup()
+    {
+        await backupService.CancelCurrentAsync();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMakeBackup))]
+    private async Task MakeBackupAsync(SnapshotType type)
+    {
+        try
+        {
+            await backupService.MakeABackupAsync(SelectedTask, type);
+        }
+        catch (Exception ex)
+        {
+            await this.ShowErrorAsync("备份失败", ex);
+        }
+    }
 
     async partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
     {
@@ -31,7 +59,7 @@ public partial class BackupManageCenterViewModel
         if (newValue != null)
         {
             await RefreshSnapshots();
-            SelectedBackupTaskPropertyChanged(SelectedTask, new PropertyChangedEventArgs(nameof(BackupTask.Status)));
+            await UpdateOperationsEnableAsync();
             newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
         }
     }
@@ -43,53 +71,38 @@ public partial class BackupManageCenterViewModel
             return;
         }
 
-        await Dispatcher.UIThread.Invoke(async () =>
+        if (e.PropertyName == nameof(BackupTask.Status))
         {
-            if (e.PropertyName == nameof(BackupTask.Status))
+            await UpdateOperationsEnableAsync();
+        }
+    }
+
+    private Task UpdateOperationsEnableAsync()
+    {
+        return Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            switch (SelectedTask?.Status)
             {
-                switch ((sender as BackupTask)?.Status)
-                {
-                    case BackupTaskStatus.Ready:
-                        CanMakeBackup = true;
-                        IsTaskOperationEnable = true;
-                        await SelectedTask.UpdateStatusAsync();
-                        await RefreshSnapshots();
-                        break;
-                    case BackupTaskStatus.FullBackingUp:
-                    case BackupTaskStatus.IncrementBackingUp:
-                        CanMakeBackup = false;
-                        IsTaskOperationEnable = true;
-                        break;
-                    default:
-                        IsTaskOperationEnable = true;
-                        return;
-                }
+                case BackupTaskStatus.Ready:
+                    CanMakeBackup = true;
+                    CanCancelBackingUp = false;
+                    IsTaskOperationEnable = true;
+                    await SelectedTask.UpdateStatusAsync();
+                    await RefreshSnapshots();
+                    break;
+                case BackupTaskStatus.FullBackingUp:
+                case BackupTaskStatus.IncrementBackingUp:
+                    CanMakeBackup = false;
+                    CanCancelBackingUp = true;
+                    IsTaskOperationEnable = true;
+                    break;
+                default:
+                    IsTaskOperationEnable = true;
+                    return;
             }
+
+            MakeBackupCommand.NotifyCanExecuteChanged();
+            CancelMakingBackupCommand.NotifyCanExecuteChanged();
         });
-    }
-
-    [RelayCommand]
-    private void CancelMakingBackup()
-    {
-        MakeBackupCommand.Cancel();
-    }
-
-    [ObservableProperty]
-    private bool canMakeBackup = true;
-
-    [ObservableProperty]
-    private bool isTaskOperationEnable;
-
-    [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanMakeBackup))]
-    private async Task MakeBackupAsync(SnapshotType type, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await backupService.MakeABackupAsync(SelectedTask, type, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            await this.ShowErrorAsync("备份失败", ex);
-        }
     }
 }

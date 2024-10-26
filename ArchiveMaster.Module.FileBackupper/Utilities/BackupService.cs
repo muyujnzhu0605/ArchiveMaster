@@ -23,6 +23,11 @@ public partial class BackupService
 
     public bool IsBackingUp { get; private set; }
 
+    public Task CancelCurrentAsync()
+    {
+        return cts?.CancelAsync() ?? Task.CompletedTask;
+    }
+
     public async Task CheckAndBackupAllAsync()
     {
         if (!Config.EnableBackgroundBackup)
@@ -37,6 +42,7 @@ public partial class BackupService
         }
 
         IsBackingUp = true;
+
         try
         {
             foreach (var task in Config.Tasks
@@ -90,7 +96,7 @@ public partial class BackupService
         }
     }
 
-    public async Task MakeABackupAsync(BackupTask task, SnapshotType type, CancellationToken cancellationToken)
+    public async Task MakeABackupAsync(BackupTask task, SnapshotType type)
     {
         if (IsBackingUp)
         {
@@ -98,6 +104,8 @@ public partial class BackupService
         }
 
         IsBackingUp = true;
+        CreateCancellationToken();
+
         try
         {
             await using var db = new DbService(task);
@@ -112,7 +120,7 @@ public partial class BackupService
             }
 
             BackupUtility utility = new BackupUtility(task);
-            await utility.BackupAsync(type, cancellationToken);
+            await utility.BackupAsync(type, ct);
         }
         finally
         {
@@ -122,8 +130,6 @@ public partial class BackupService
 
     public async void StartAutoBackup()
     {
-        cts = new CancellationTokenSource();
-        ct = cts.Token;
         Task.Factory.StartNew(async () =>
         {
             try
@@ -134,19 +140,28 @@ public partial class BackupService
                 }
 
                 IsAutoBackingUp = true;
-                while (!ct.IsCancellationRequested)
+                while (IsAutoBackingUp)
                 {
-                    await CheckAndBackupAllAsync();
-                    await Task.Delay(60 * 1000, ct);
+                    try
+                    {
+
+                        CreateCancellationToken();
+#if DEBUG
+                        await Task.Delay(1000, ct);
+#else
+                        await Task.Delay(60 * 1000, ct);
+#endif
+                        await CheckAndBackupAllAsync();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Log.Information("循环备份任务被单次取消，等待下次一次循环");
+                    }
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                Log.Information("循环备份任务被取消");
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "循环备份任务执行出错");
+                Log.Error(ex, "循环备份任务执行出错，已退出自动备份");
             }
             finally
             {
@@ -155,13 +170,15 @@ public partial class BackupService
         }, TaskCreationOptions.LongRunning);
     }
 
-    public void Stop()
+    public Task StopAutoBackupAsync()
     {
-        cts?.Cancel();
+        IsAutoBackingUp = false;
+        return CancelCurrentAsync();
     }
 
-    public Task StopAsync()
+    private void CreateCancellationToken()
     {
-        return cts?.CancelAsync() ?? Task.CompletedTask;
+        cts = new CancellationTokenSource();
+        ct = cts.Token;
     }
 }

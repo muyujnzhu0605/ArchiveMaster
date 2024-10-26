@@ -6,19 +6,28 @@ namespace ArchiveMaster.Configs;
 
 public static class BackupTaskExtension
 {
-    public static void BeginBackup(this BackupTask task, bool isFullBackup)
+    public static void BeginBackup(this BackupTask task, SnapshotType type)
     {
-        task.Status = isFullBackup ? BackupTaskStatus.FullBackingUp : BackupTaskStatus.IncrementBackingUp;
+        task.Status = type switch
+        {
+            SnapshotType.Full => BackupTaskStatus.FullBackingUp,
+            SnapshotType.VirtualFull => BackupTaskStatus.FullBackingUp,
+            SnapshotType.Increment => BackupTaskStatus.IncrementBackingUp,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
     }
 
-    public static void EndBackup(this BackupTask task, bool isFullBackup)
+    public static void EndBackup(this BackupTask task, bool isFullBackup,bool succeed)
     {
-        if (isFullBackup)
+        if (succeed)
         {
-            task.LastFullBackupTime = DateTime.Now;
-        }
+            if (isFullBackup)
+            {
+                task.LastFullBackupTime = DateTime.Now;
+            }
 
-        task.LastBackupTime = DateTime.Now;
+            task.LastBackupTime = DateTime.Now;
+        }
 
         task.Status = BackupTaskStatus.Ready;
     }

@@ -82,17 +82,17 @@ public class DbService : IDisposable, IAsyncDisposable
         }
     }
 
-    public IEnumerable<BackupFileEntity> GetLatestFiles(int snapshotId)
+    public async Task<IEnumerable<BackupFileEntity>> GetLatestFilesAsync(int snapshotId)
     {
         Initialize();
-        BackupSnapshotEntity snapshot = GetValidSnapshots()
-                                            .FirstOrDefault(p => p.Id == snapshotId)
+        BackupSnapshotEntity snapshot = await GetValidSnapshots()
+                                            .FirstOrDefaultAsync(p => p.Id == snapshotId)
                                         ?? throw new KeyNotFoundException(
                                             $"找不到ID为{snapshotId}的{nameof(BackupSnapshotEntity)}");
-        return GetLatestFiles(snapshot);
+        return await GetLatestFilesAsync(snapshot);
     }
 
-    public IEnumerable<BackupFileEntity> GetLatestFiles(BackupSnapshotEntity snapshot)
+    public async Task<IEnumerable<BackupFileEntity>> GetLatestFilesAsync(BackupSnapshotEntity snapshot)
     {
         Initialize();
         BackupSnapshotEntity fullSnapshot;
@@ -103,34 +103,34 @@ public class DbService : IDisposable, IAsyncDisposable
         }
         else
         {
-            fullSnapshot = GetValidSnapshots()
+            fullSnapshot =await GetValidSnapshots()
                                .Where(p => p.Type == SnapshotType.Full || p.Type == SnapshotType.VirtualFull)
                                .Where(p => p.BeginTime < snapshot.BeginTime)
                                .OrderByDescending(p => p.BeginTime)
-                               .FirstOrDefault()
+                               .FirstOrDefaultAsync()
                            ?? throw new KeyNotFoundException(
                                $"找不到该{nameof(BackupSnapshotEntity)}对应的全量备份{nameof(BackupSnapshotEntity)}");
-            incrementalSnapshots.AddRange(GetValidSnapshots()
+            incrementalSnapshots.AddRange(await GetValidSnapshots()
                 .Where(p => p.Type == SnapshotType.Increment)
                 .Where(p => p.BeginTime > fullSnapshot.EndTime)
                 .Where(p => p.EndTime < snapshot.BeginTime)
                 .OrderByDescending(p => p.BeginTime)
-                .AsEnumerable());
+                .ToListAsync());
 
             incrementalSnapshots.Add(snapshot);
         }
 
-        var fileRecords = db.Files
+        var fileRecords =(await db.Files
             .Where(p => p.SnapshotId == fullSnapshot.Id)
-            .AsEnumerable()
+            .ToListAsync())
             .ToDictionary(p => p.RawFileRelativePath);
 
 
         foreach (var incrementalSnapshot in incrementalSnapshots)
         {
-            var incrementalFiles = db.Files
+            var incrementalFiles = await db.Files
                 .Where(p => p.SnapshotId == incrementalSnapshot.Id)
-                .AsEnumerable();
+                .ToListAsync();
             foreach (var incrementalFile in incrementalFiles)
             {
                 switch (incrementalFile.Type)
@@ -138,7 +138,11 @@ public class DbService : IDisposable, IAsyncDisposable
                     case FileRecordType.Created:
                         if (fileRecords.ContainsKey(incrementalFile.RawFileRelativePath))
                         {
-                            throw new Exception("增量备份中，文件被新增，但先前版本的文件中已存在该文件");
+                            await LogAsync(LogLevel.Warning,
+                                $"获取最新文件列表时，增量备份中，文件{incrementalFile.RawFileRelativePath}被新增，但先前版本的文件中已存在该文件",
+                                snapshot);
+                            fileRecords.Remove(incrementalFile.RawFileRelativePath);
+                            Debug.Assert(false);
                         }
 
                         fileRecords.Add(incrementalFile.RawFileRelativePath, incrementalFile);
@@ -147,7 +151,10 @@ public class DbService : IDisposable, IAsyncDisposable
                     case FileRecordType.Modified:
                         if (!fileRecords.ContainsKey(incrementalFile.RawFileRelativePath))
                         {
-                            throw new Exception("增量备份中，文件被修改，但不能在先前版本的文件中找到这一个文件");
+                            await LogAsync(LogLevel.Warning,
+                                $"获取最新文件列表时，增量备份中，文件{incrementalFile.RawFileRelativePath}被修改，但不能在先前版本的文件中找到这一个文件",
+                                snapshot);
+                            Debug.Assert(false);
                         }
 
                         fileRecords[incrementalFile.RawFileRelativePath] = incrementalFile;
@@ -156,7 +163,10 @@ public class DbService : IDisposable, IAsyncDisposable
                     case FileRecordType.Deleted:
                         if (!fileRecords.ContainsKey(incrementalFile.RawFileRelativePath))
                         {
-                            throw new Exception("增量备份中，文件被删除，但不能在先前版本的文件中找到这一个文件");
+                            await LogAsync(LogLevel.Warning,
+                                $"获取最新文件列表时，增量备份中，文件{incrementalFile.RawFileRelativePath}被删除，但不能在先前版本的文件中找到这一个文件",
+                                snapshot);
+                            Debug.Assert(false);
                         }
 
                         fileRecords.Remove(incrementalFile.RawFileRelativePath);
@@ -225,6 +235,7 @@ public class DbService : IDisposable, IAsyncDisposable
         query = query.OrderBy(p => p.BeginTime);
         return await query.ToListAsync(token).ConfigureAwait(false);
     }
+
     public async ValueTask LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
         string detail = null, bool forceSave = false)
     {
@@ -251,6 +262,7 @@ public class DbService : IDisposable, IAsyncDisposable
     {
         return db.SaveChangesAsync(cancellationToken);
     }
+
     private IQueryable<BackupSnapshotEntity> GetValidSnapshots()
     {
         return db.Snapshots

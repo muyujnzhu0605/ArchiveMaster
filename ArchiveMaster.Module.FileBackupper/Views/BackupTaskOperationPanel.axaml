@@ -36,8 +36,7 @@
                     </Button>
                     <Button
                         Command="{Binding CancelMakingBackupCommand}"
-                        Content="取消备份"
-                        IsEnabled="{Binding MakeBackupCommand.IsRunning}" />
+                        Content="取消备份" />
                 </StackPanel>
                 <TextBlock>
                     <Run FontWeight="Bold">全量备份：</Run>

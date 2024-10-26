@@ -13,9 +13,9 @@ public class RestoreUtility(BackupTask task)
     {
         await using var db = new DbService(task);
         TreeDirInfo tree = null;
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
-            var fileRecords = db.GetLatestFiles(snapshotId);
+            var fileRecords =await db.GetLatestFilesAsync(snapshotId);
 
             tree = TreeDirInfo.CreateEmptyTree();
 

@@ -23,6 +23,6 @@ public class BackupBackgroundService(BackupService backupService) : IHostedServi
 
     public async Task StopAsync(CancellationToken _)
     {
-        await backupService.StopAsync();
+        await backupService.StopAutoBackupAsync();
     }
 }

@@ -21,8 +21,7 @@ public partial class BackupService
                 throw new InvalidOperationException("任务正在备份中，无法进行备份");
             }
 
-            bool isIncremental = type == SnapshotType.Increment;
-            bool isVirtualFull = type == SnapshotType.VirtualFull;
+            bool succeed = false;
 
             await Task.Run(async () =>
             {
@@ -35,27 +34,29 @@ public partial class BackupService
 
                 try
                 {
-                    BackupTask.BeginBackup(isIncremental);
+                    BackupTask.BeginBackup(type);
 
                     db.Add(snapshot);
                     await db.SaveChangesAsync(cancellationToken);
-                    await db.LogAsync(LogLevel.Information, $"开始{(isIncremental ? "增量" : "全量")}备份", snapshot);
+                    await db.LogAsync(LogLevel.Information, $"开始备份，模式：{type}", snapshot);
 
                     var files = GetSourceFiles(cancellationToken);
                     await db.LogAsync(LogLevel.Information, $"完成枚举磁盘文件，共{files.Count}个", snapshot);
 
-                    if (isIncremental)
+                    if (type is SnapshotType.Increment)
                     {
                         await HandleIncrementalBackupAsync(db, snapshot, files, cancellationToken);
                     }
                     else
                     {
-                        await HandleFullBackupAsync(db, snapshot, files, isVirtualFull, cancellationToken);
+                        await HandleFullBackupAsync(db, snapshot, files, type is SnapshotType.VirtualFull,
+                            cancellationToken);
                     }
 
                     snapshot.EndTime = DateTime.Now;
                     await db.SaveChangesAsync(cancellationToken);
                     await db.LogAsync(LogLevel.Information, "备份完成", snapshot);
+                    succeed = true;
                 }
                 catch (OperationCanceledException)
                 {
@@ -68,13 +69,13 @@ public partial class BackupService
                 }
                 finally
                 {
-                    BackupTask.EndBackup(false);
+                    BackupTask.EndBackup(type is SnapshotType.Full or SnapshotType.VirtualFull, succeed);
                 }
             }, cancellationToken);
         }
 
         private async Task CreateNewBackupFileAsync(DbService db, BackupSnapshotEntity snapshot,
-                    FileInfo file, FileRecordType recordType, bool isVirtual, CancellationToken cancellationToken)
+            FileInfo file, FileRecordType recordType, bool isVirtual, CancellationToken cancellationToken)
         {
             if (recordType == FileRecordType.Deleted)
             {
@@ -123,11 +124,15 @@ public partial class BackupService
                 .ToList();
             return files;
         }
+
         private async Task HandleFullBackupAsync(DbService db, BackupSnapshotEntity snapshot, List<FileInfo> files,
             bool isVirtualFull, CancellationToken cancellationToken)
         {
             foreach (var file in files)
             {
+#if DEBUG
+                await Task.Delay(1000, cancellationToken);
+#endif
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
@@ -148,11 +153,14 @@ public partial class BackupService
         private async Task HandleIncrementalBackupAsync(DbService db, BackupSnapshotEntity snapshot,
             List<FileInfo> files, CancellationToken cancellationToken)
         {
-            var latestFiles = db.GetLatestFiles(snapshot).ToDictionary(p => p.RawFileRelativePath);
+            var latestFiles = (await db.GetLatestFilesAsync(snapshot)).ToDictionary(p => p.RawFileRelativePath);
             await db.LogAsync(LogLevel.Information, $"已获取数据库中当前镜像的最新文件集合，共{latestFiles.Count}个", snapshot);
 
             foreach (var file in files)
             {
+#if DEBUG
+                await Task.Delay(1000, cancellationToken);
+#endif
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
