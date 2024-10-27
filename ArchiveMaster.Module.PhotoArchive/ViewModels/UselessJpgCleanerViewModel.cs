@@ -2,23 +2,24 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
 public partial class UselessJpgCleanerViewModel(UselessJpgCleanerConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<UselessJpgCleanerUtility, UselessJpgCleanerConfig>(config, appConfig)
+    : TwoStepViewModelBase<UselessJpgCleanerService, UselessJpgCleanerConfig>(config, appConfig)
 {
     [ObservableProperty]
     private List<SimpleFileInfo> deletingJpgFiles;
 
     protected override Task OnInitializedAsync()
     {
-        DeletingJpgFiles = Utility.DeletingJpgFiles;
+        DeletingJpgFiles = Service.DeletingJpgFiles;
         return base.OnInitializedAsync();
     }
 

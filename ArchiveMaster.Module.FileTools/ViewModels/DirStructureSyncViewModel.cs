@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib;
@@ -9,7 +9,7 @@ using FzLib;
 namespace ArchiveMaster.ViewModels;
 
 public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<DirStructureSyncUtility, DirStructureSyncConfig>(config, appConfig)
+    : TwoStepViewModelBase<DirStructureSyncService, DirStructureSyncConfig>(config, appConfig)
 {
     [ObservableProperty]
     private bool displayMultipleMatches = true;
@@ -18,7 +18,7 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
     private bool displayRightPosition = false;
 
     [ObservableProperty]
-    private ObservableCollection<MatchingFileInfo> files;
+    private ObservableCollection<FileSystem.MatchingFileInfo> files;
 
     [ObservableProperty]
     private int filesCount = 0;
@@ -57,21 +57,21 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
 
     private void UpdateList()
     {
-        if (Utility == null)
+        if (Service == null)
         {
             return;
         }
 
-        if (Utility.WrongPositionFiles == null || Utility.RightPositionFiles == null)
+        if (Service.WrongPositionFiles == null || Service.RightPositionFiles == null)
         {
-            Files = new ObservableCollection<MatchingFileInfo>();
+            Files = new ObservableCollection<FileSystem.MatchingFileInfo>();
             return;
         }
 
-        IEnumerable<MatchingFileInfo> files = Utility.WrongPositionFiles;
+        IEnumerable<FileSystem.MatchingFileInfo> files = Service.WrongPositionFiles;
         if (DisplayRightPosition)
         {
-            files = files.Concat(Utility.RightPositionFiles);
+            files = files.Concat(Service.RightPositionFiles);
         }
 
         if (!DisplayMultipleMatches)
@@ -80,8 +80,8 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
         }
 
         files = files.OrderBy(p => p.Path);
-        Files = new ObservableCollection<MatchingFileInfo>(files);
-        Utility.ExecutingFiles = Files;
+        Files = new ObservableCollection<FileSystem.MatchingFileInfo>(files);
+        Service.ExecutingFiles = Files;
         FilesCount = Files.Count;
         CheckedFilesCount = Files.Count(p => p.IsChecked);
     }

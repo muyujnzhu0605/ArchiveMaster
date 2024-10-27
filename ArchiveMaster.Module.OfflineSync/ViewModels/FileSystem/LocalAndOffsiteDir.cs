@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using FzLib;
-using System.ComponentModel;
 
-namespace ArchiveMaster.Model
+namespace ArchiveMaster.ViewModels.FileSystem
 {
     public partial class LocalAndOffsiteDir : ObservableObject
     {

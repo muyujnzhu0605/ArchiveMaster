@@ -1,7 +1,6 @@
-using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.ViewModels.FileSystem;
 
 public partial class RenameFileInfo : SimpleFileInfo
 {

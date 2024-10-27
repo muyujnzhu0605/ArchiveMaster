@@ -1,7 +1,7 @@
 using System.Collections;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
@@ -9,16 +9,16 @@ using FzLib.Avalonia.Messages;
 namespace ArchiveMaster.ViewModels;
 
 public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<PackingUtility, PackingConfig>(config, appConfig)
+    : TwoStepViewModelBase<PackingService, PackingConfig>(config, appConfig)
 {
     [ObservableProperty]
-    private List<DiscFilePackage> discFilePackages;
+    private List<FileSystem.DiscFilePackage> discFilePackages;
 
     [ObservableProperty]
     private DateTime earliestDateTime = new DateTime(1, 1, 1);
 
     [ObservableProperty]
-    private DiscFilePackage selectedPackage;
+    private FileSystem.DiscFilePackage selectedPackage;
 
     public int[] DiscSizes { get; } = [700, 4480, 8500, 23500];
 
@@ -30,14 +30,14 @@ public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
 
     protected override Task OnInitializedAsync()
     {
-        var pkgs = Utility.Packages.DiscFilePackages;
-        if (Utility.Packages.SizeOutOfRangeFiles.Count > 0)
+        var pkgs = Service.Packages.DiscFilePackages;
+        if (Service.Packages.SizeOutOfRangeFiles.Count > 0)
         {
-            pkgs.Add(new DiscFilePackage()
+            pkgs.Add(new FileSystem.DiscFilePackage()
             {
                 Index = -1
             });
-            pkgs[^1].Files.AddRange(Utility.Packages.SizeOutOfRangeFiles);
+            pkgs[^1].Files.AddRange(Service.Packages.SizeOutOfRangeFiles);
         }
 
         DiscFilePackages = pkgs;
@@ -46,7 +46,7 @@ public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
 
     protected override async Task OnExecutingAsync(CancellationToken token)
     {
-        if (!Enumerable.Any<DiscFilePackage>(DiscFilePackages, p => p.IsChecked))
+        if (!Enumerable.Any<FileSystem.DiscFilePackage>(DiscFilePackages, p => p.IsChecked))
         {
             throw new Exception("没有任何被选中的文件包");
         }
@@ -63,7 +63,7 @@ public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
             {
                 try
                 {
-                    foreach (var index in Utility.Packages.DiscFilePackages.Where(p => p.IsChecked)
+                    foreach (var index in Service.Packages.DiscFilePackages.Where(p => p.IsChecked)
                                  .Select(p => p.Index))
                     {
                         var dir = Path.Combine(Config.TargetDir, index.ToString());
@@ -87,7 +87,7 @@ public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
 
     protected override async Task OnExecutedAsync(CancellationToken token)
     {
-        if (Enumerable.Where<DiscFilePackage>(DiscFilePackages, p => p.IsChecked)
+        if (Enumerable.Where<FileSystem.DiscFilePackage>(DiscFilePackages, p => p.IsChecked)
             .Any(p => p.Files.Any(q => q.Status == ProcessStatus.Error)))
         {
             await this.ShowErrorAsync("导出可能失败", "部分文件导出失败，请检查");

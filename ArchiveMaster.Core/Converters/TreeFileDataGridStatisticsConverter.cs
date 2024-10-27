@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Globalization;
 using ArchiveMaster.ViewModels;
+using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia.Data.Converters;
 
 namespace ArchiveMaster.Converters;

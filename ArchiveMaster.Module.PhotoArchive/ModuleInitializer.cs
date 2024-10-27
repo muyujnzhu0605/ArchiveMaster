@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
@@ -42,10 +42,10 @@ namespace ArchiveMaster
             services.AddTransient<UselessJpgCleanerPanel>();
             services.AddTransient<TimeClassifyPanel>();
 
-            services.AddTransient<PhotoSlimmingUtility>();
-            services.AddTransient<RepairModifiedTimeUtility>();
-            services.AddTransient<UselessJpgCleanerUtility>();
-            services.AddTransient<TimeClassifyUtility>();
+            services.AddTransient<PhotoSlimmingService>();
+            services.AddTransient<RepairModifiedTimeService>();
+            services.AddTransient<UselessJpgCleanerService>();
+            services.AddTransient<TimeClassifyService>();
         }
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {

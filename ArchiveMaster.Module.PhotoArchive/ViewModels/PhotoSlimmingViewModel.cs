@@ -5,18 +5,19 @@ using FzLib.Avalonia.Messages;
 using FzLib.Cryptography;
 using Mapster;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using ArchiveMaster.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimmingUtility, PhotoSlimmingConfig>
+public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>
 {
     [ObservableProperty]
     private bool canCancel;
@@ -39,15 +40,15 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     public override PhotoSlimmingConfig Config => SelectedConfig;
 
-    protected override PhotoSlimmingUtility CreateUtilityImplement()
+    protected override PhotoSlimmingService CreateServiceImplement()
     {
-        return new PhotoSlimmingUtility(Config, appConfig);
+        return new PhotoSlimmingService(Config, appConfig);
     }
 
     public PhotoSlimmingViewModel(AppConfig appConfig, PhotoSlimmingConfig config = null)
         : base(config, appConfig)
     {
-        Configs = Services.Provider.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
+        Configs = HostServices.Provider.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
         if (Configs.Count == 0)
         {
             Configs.Add(new PhotoSlimmingConfig());
@@ -61,7 +62,7 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     protected override Task OnExecutedAsync(CancellationToken token)
     {
-        ErrorMessages = new ObservableCollection<string>(Utility.ErrorMessages);
+        ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
         return base.OnExecutedAsync(token);
     }
 
@@ -80,13 +81,13 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
         Progress = -1;
         Message = "正在生成统计信息";
         Progress = Double.NaN;
-        await Utility.CopyFiles.CreateRelativePathsAsync();
-        await Utility.CompressFiles.CreateRelativePathsAsync();
-        await Utility.DeleteFiles.CreateRelativePathsAsync();
-        CopyFiles = Utility.CopyFiles;
-        CompressFiles = Utility.CompressFiles;
-        DeleteFiles = Utility.DeleteFiles;
-        ErrorMessages = new ObservableCollection<string>(Utility.ErrorMessages);
+        await Service.CopyFiles.CreateRelativePathsAsync();
+        await Service.CompressFiles.CreateRelativePathsAsync();
+        await Service.DeleteFiles.CreateRelativePathsAsync();
+        CopyFiles = Service.CopyFiles;
+        CompressFiles = Service.CompressFiles;
+        DeleteFiles = Service.DeleteFiles;
+        ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
     }
 
     protected override void OnReset()

@@ -88,17 +88,17 @@
 
 ### 项目内部结构
 
-除了`ArchiveMaster.UI.*`外，其余项目结构基本一致。本解决方案分项目并不是从数据-逻辑-界面的角度来分的，更多的是从调用关系链角度。
+除了`ArchiveMaster.UI.*`外，其余项目结构基本一致。本解决方案的主要结构是总（公共方法、接口、定以）-分（功能模块）-总（UI启动器）
 
-| 项目名称     | 描述                                                         |
-| ------------ | ------------------------------------------------------------ |
+| 项目名称         | 描述                                                 |
+|--------------|----------------------------------------------------|
 | `Assets`     | 图标等素材文件，作为`AvaloniaResource`                       |
-| `Configs`    | 工具的配置文件                                               |
-| `Converters` | 用于XAML的值转换器                                           |
-| `Enums`      | 枚举类型                                                     |
+| `Configs`    | 工具的配置文件                                            |
+| `Converters` | 用于XAML的值转换器                                        |
+| `Enums`      | 枚举类型                                               |
 | `Messages`   | 用于ViewModel和View之间通过`WeakReferenceMessenger`的通信    |
-| `Utilities`  | 各工具的执行逻辑代码，每个`Utility`拥有一个`ConfigBase`的属性。 |
-| `ViewModels` | 视图模型，连接`Views`、`Configs`和`Utilities`。              |
+| `Services`   | 各工具的执行逻辑代码，每个`Service`拥有一个`ConfigBase`的属性。         |
+| `ViewModels` | 视图模型，连接`Views`、`Configs`和`Services`。               |
 | `Views`      | UI视图界面。本软件实现了完全的MVVM。除`UI`项目外，`Views`中仅包含界面，不包含逻辑。 |
 
 

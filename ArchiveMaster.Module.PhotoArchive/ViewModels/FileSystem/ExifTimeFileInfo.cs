@@ -1,4 +1,4 @@
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.ViewModels.FileSystem;
 
 public class ExifTimeFileInfo : SimpleFileInfo
 {

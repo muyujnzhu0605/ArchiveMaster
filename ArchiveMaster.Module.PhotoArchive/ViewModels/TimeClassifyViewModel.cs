@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 public partial class TimeClassifyViewModel(TimeClassifyConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<TimeClassifyUtility, TimeClassifyConfig>(config, appConfig)
+    : TwoStepViewModelBase<TimeClassifyService, TimeClassifyConfig>(config, appConfig)
 {
     [ObservableProperty]
-    private List<FilesTimeDirInfo> sameTimePhotosDirs;
+    private List<FileSystem.FilesTimeDirInfo> sameTimePhotosDirs;
 
     protected override Task OnInitializedAsync()
     {
-        SameTimePhotosDirs = Utility.TargetDirs;
+        SameTimePhotosDirs = Service.TargetDirs;
         return base.OnInitializedAsync();
     }
 

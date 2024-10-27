@@ -1,7 +1,7 @@
 using System.Collections;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
@@ -15,6 +15,7 @@ using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using FzLib.Avalonia.Converters;
+using SimpleFileInfo = ArchiveMaster.ViewModels.FileSystem.SimpleFileInfo;
 
 namespace ArchiveMaster.Views;
 
@@ -32,7 +33,7 @@ public class SimpleFileDataGrid : DataGrid
         CanUserReorderColumns = true;
         CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] =
-            new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking));
+            new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking));
     }
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
@@ -90,7 +91,7 @@ public class SimpleFileDataGrid : DataGrid
                 foreach (var btn in buttons)
                 {
                     btn[!IsEnabledProperty] =
-                        new Binding(nameof(TwoStepViewModelBase<TwoStepUtilityBase<ConfigBase>, ConfigBase>.IsWorking))
+                        new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking))
                         {
                             Converter = new InverseBoolConverter()
                         };

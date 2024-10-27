@@ -3,23 +3,24 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Cryptography;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
 public partial class RepairModifiedTimeViewModel(RepairModifiedTimeConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<RepairModifiedTimeUtility, RepairModifiedTimeConfig>(config, appConfig)
+    : TwoStepViewModelBase<RepairModifiedTimeService, RepairModifiedTimeConfig>(config, appConfig)
 {
     [ObservableProperty]
     private List<ExifTimeFileInfo> files = new List<ExifTimeFileInfo>();
 
     protected override Task OnInitializedAsync()
     {
-        Files = Utility.Files.ToList();
+        Files = Service.Files.ToList();
         return base.OnInitializedAsync();
     }
 

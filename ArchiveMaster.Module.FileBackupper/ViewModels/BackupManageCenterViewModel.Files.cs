@@ -4,7 +4,7 @@ using System.Diagnostics;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
 using Avalonia.Platform.Storage;
@@ -52,8 +52,8 @@ public partial class BackupManageCenterViewModel
 
     private async Task LoadFilesAsync()
     {
-        var utility = new RestoreUtility(SelectedTask);
-        var tree = await utility.GetSnapshotFileTreeAsync(SelectedSnapshot.Id);
+        var Service = new RestoreService(SelectedTask);
+        var tree = await Service.GetSnapshotFileTreeAsync(SelectedSnapshot.Id);
         tree.Reorder();
         tree.Name = $"快照{SelectedSnapshot.BeginTime}";
 

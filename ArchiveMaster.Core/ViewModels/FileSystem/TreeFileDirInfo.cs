@@ -1,9 +1,9 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.ViewModels.FileSystem;
 
-public partial class TreeFileDirInfo : SimpleFileInfo
+public partial class TreeFileDirInfo : FileSystem.SimpleFileInfo
 {
     [ObservableProperty]
     private int depth;
@@ -30,7 +30,7 @@ public partial class TreeFileDirInfo : SimpleFileInfo
         IsChecked = false;
     }
 
-    internal TreeFileDirInfo(SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
+    internal TreeFileDirInfo(FileSystem.SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
         : base(file)
     {
         Depth = depth;

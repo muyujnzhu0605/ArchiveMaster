@@ -50,7 +50,7 @@ public partial class App : Application
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            singleViewPlatform.MainView = Services.Provider.GetRequiredService<MainView>();
+            singleViewPlatform.MainView = HostServices.Provider.GetRequiredService<MainView>();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -81,7 +81,7 @@ public partial class App : Application
         }
 
         isMainWindowOpened = true;
-        desktop.MainWindow = Services.Provider.GetRequiredService<MainWindow>();
+        desktop.MainWindow = HostServices.Provider.GetRequiredService<MainWindow>();
         desktop.MainWindow.Closed += (s, e) =>
         {
             desktop.MainWindow = null;

@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Messages;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,10 +15,10 @@ using System.Threading.Tasks;
 namespace ArchiveMaster.ViewModels;
 
 public partial class RenameViewModel(RenameConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<RenameUtility, RenameConfig>(config, appConfig)
+    : TwoStepViewModelBase<RenameService, RenameConfig>(config, appConfig)
 {
     [ObservableProperty]
-    private ObservableCollection<RenameFileInfo> files;
+    private ObservableCollection<FileSystem.RenameFileInfo> files;
 
     [ObservableProperty]
     private bool showMatchedOnly = true;
@@ -31,21 +31,21 @@ public partial class RenameViewModel(RenameConfig config, AppConfig appConfig)
 
     protected override Task OnInitializedAsync()
     {
-        var matched = Utility.Files.Where(p => p.IsMatched);
-        Files = new ObservableCollection<RenameFileInfo>(ShowMatchedOnly ? matched : Utility.Files);
-        TotalCount = Utility.Files.Count;
+        var matched = Service.Files.Where(p => p.IsMatched);
+        Files = new ObservableCollection<FileSystem.RenameFileInfo>(ShowMatchedOnly ? matched : Service.Files);
+        TotalCount = Service.Files.Count;
         MatchedCount = matched.Count();
         return base.OnInitializedAsync();
     }
 
     partial void OnShowMatchedOnlyChanged(bool value)
     {
-        if (Utility?.Files == null)
+        if (Service?.Files == null)
         {
             return;
         }
 
-        Files = new ObservableCollection<RenameFileInfo>(value ? Utility.Files.Where(p => p.IsMatched) : Utility.Files);
+        Files = new ObservableCollection<FileSystem.RenameFileInfo>(value ? Service.Files.Where(p => p.IsMatched) : Service.Files);
     }
 
     protected override void OnReset()

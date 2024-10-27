@@ -53,7 +53,7 @@ namespace ArchiveMaster.Configs
             try
             {
                 var json = JsonSerializer.Serialize(
-                    configs.Values.ToDictionary(p => p.Key, p => Services.Provider.GetRequiredService(p.Type)),
+                    configs.Values.ToDictionary(p => p.Key, p => HostServices.Provider.GetRequiredService(p.Type)),
                     jsonOptions);
                 File.WriteAllText(configFile, json);
             }

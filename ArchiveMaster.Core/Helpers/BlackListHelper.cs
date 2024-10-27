@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using ArchiveMaster.ViewModels;
+using SimpleFileInfo = ArchiveMaster.ViewModels.FileSystem.SimpleFileInfo;
 
 namespace ArchiveMaster.Helpers;
 
