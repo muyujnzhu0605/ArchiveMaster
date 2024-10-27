@@ -65,7 +65,7 @@ public partial class BackupManageCenterViewModel
 
         if (newValue != null)
         {
-            await RefreshSnapshots();
+            await LoadSnapshots();
             await UpdateOperationsEnableAsync();
             newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
         }
@@ -95,7 +95,7 @@ public partial class BackupManageCenterViewModel
                     CanCancelBackingUp = false;
                     IsTaskOperationEnable = true;
                     await SelectedTask.UpdateStatusAsync();
-                    await RefreshSnapshots();
+                    await LoadSnapshots();
                     break;
                 case BackupTaskStatus.FullBackingUp:
                 case BackupTaskStatus.IncrementBackingUp:

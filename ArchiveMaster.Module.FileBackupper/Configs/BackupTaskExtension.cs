@@ -43,19 +43,12 @@ public static class BackupTaskExtension
         {
             task.Check();
             await using DbService db = new DbService(task);
-            var snapshots = await db.GetSnapshotsAsync(includeEmptySnapshot: true);
-            task.SnapshotCount = snapshots.Count;
-            if (snapshots.Count > 0)
-            {
-                task.LastBackupTime = snapshots[^1].EndTime;
-                for (int i = snapshots.Count - 1; i >= 0; i--)
-                {
-                    if (snapshots[i].Type is SnapshotType.Full or SnapshotType.VirtualFull)
-                    {
-                        task.LastFullBackupTime = snapshots[i].EndTime;
-                    }
-                }
-            }
+            task.SnapshotCount = await db.GetSnapshotCountAsync(includeEmptySnapshot: true);
+            task.ValidSnapshotCount = await db.GetSnapshotCountAsync();
+            task.LastBackupTime = (await db.GetLastSnapshotAsync())?.BeginTime ?? default;
+            var dt1 = (await db.GetLastSnapshotAsync(SnapshotType.Full))?.BeginTime ?? default;
+            var dt2 = (await db.GetLastSnapshotAsync(SnapshotType.VirtualFull))?.BeginTime ?? default;
+            task.LastFullBackupTime = dt1 > dt2 ? dt1 : dt2;
 
             if (task.Status == BackupTaskStatus.Error)
             {

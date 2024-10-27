@@ -102,7 +102,7 @@
                         IsChecked="{Binding SelectedTask.ByWatching}" />
                 </ctrl:FormItem>
                 <CheckBox
-                    Content="默认进行虚拟备份"
+                    Content="自动进行全量备份时，默认进行虚拟全量备份"
                     IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}"
                     IsEnabled="{Binding SelectedTask.EnableAutoBackup}" />
             </ctrl:StackFormItemGroup>

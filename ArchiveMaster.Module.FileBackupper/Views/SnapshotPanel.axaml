@@ -16,22 +16,23 @@
                 <DataGridTextColumn
                     Binding="{Binding Type, Converter={StaticResource DescriptionConverter}}"
                     Header="类型" />
+
+                <DataGridTextColumn
+                    Binding="{Binding CreatedFileCount}"
+                    Header="新增" />
+                <DataGridTextColumn
+                    Binding="{Binding DeletedFileCount}"
+                    Header="删除" />
+                <DataGridTextColumn
+                    Binding="{Binding ModifiedFileCount}"
+                    Header="修改" />
+
                 <DataGridTextColumn
                     Binding="{Binding BeginTime, Converter={StaticResource DateTimeConverter}}"
                     Header="开始时间" />
                 <DataGridTextColumn
                     Binding="{Binding EndTime, Converter={StaticResource DateTimeConverter}}"
                     Header="完成时间" />
-
-                <DataGridTextColumn
-                    Binding="{Binding CreatedFileCount}"
-                    Header="新增文件数" />
-                <DataGridTextColumn
-                    Binding="{Binding DeletedFileCount}"
-                    Header="删除文件数" />
-                <DataGridTextColumn
-                    Binding="{Binding ModifiedFileCount}"
-                    Header="修改文件数" />
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel
@@ -39,7 +40,7 @@
             Orientation="Horizontal">
             <Button
                 Classes="Icon"
-                Command="{Binding RefreshSnapshotsCommand}"
+                Command="{Binding LoadSnapshotsCommand}"
                 Content="{StaticResource Refresh}"
                 ToolTip.Tip="刷新" />
         </StackPanel>

@@ -42,7 +42,7 @@ namespace ArchiveMaster.ViewModels
             await LoadTasksAsync();
         }
 
-        private async Task TryDoAsync(string workName, Func<Task> task)
+        private async Task<bool> TryDoAsync(string workName, Func<Task> task)
         {
             this.SendMessage(new LoadingMessage(true));
             await Task.Delay(100);
@@ -50,11 +50,13 @@ namespace ArchiveMaster.ViewModels
             {
                 await task();
                 this.SendMessage(new LoadingMessage(false));
+                return true;
             }
             catch (Exception ex)
             {
                 this.SendMessage(new LoadingMessage(false));
                 await this.ShowErrorAsync($"{workName}失败", ex);
+                return false;
             }
         }
     }

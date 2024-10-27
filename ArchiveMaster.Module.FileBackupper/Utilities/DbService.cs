@@ -246,9 +246,17 @@ public class DbService : IDisposable, IAsyncDisposable
     }
 
     public async Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(SnapshotType? type = null,
-            bool includeEmptySnapshot = false, CancellationToken token = default)
+        bool includeEmptySnapshot = false, CancellationToken token = default)
     {
         await InitializeAsync(token);
+        var query = GetSnapshotQuery(type, includeEmptySnapshot);
+
+        query = query.OrderBy(p => p.BeginTime);
+        return await query.ToListAsync(token);
+    }
+
+    private IQueryable<BackupSnapshotEntity> GetSnapshotQuery(SnapshotType? type, bool includeEmptySnapshot)
+    {
         IQueryable<BackupSnapshotEntity> query = GetValidSnapshots();
         if (type.HasValue)
         {
@@ -260,8 +268,24 @@ public class DbService : IDisposable, IAsyncDisposable
             query = query.Where(p => p.CreatedFileCount + p.DeletedFileCount + p.ModifiedFileCount > 0);
         }
 
+        return query;
+    }
+
+    public async Task<int> GetSnapshotCountAsync(SnapshotType? type = null,
+        bool includeEmptySnapshot = false, CancellationToken token = default)
+    {
+        await InitializeAsync(token);
+        var query = GetSnapshotQuery(type, includeEmptySnapshot);
         query = query.OrderBy(p => p.BeginTime);
-        return await query.ToListAsync(token).ConfigureAwait(false);
+        return await query.CountAsync(cancellationToken: token);
+    }
+
+    public async Task<BackupSnapshotEntity> GetLastSnapshotAsync(SnapshotType? type = null, CancellationToken token = default)
+    {
+        await InitializeAsync(token);
+        var query = GetSnapshotQuery(type, true);
+        query = query.OrderByDescending(p => p.BeginTime);
+        return await query.FirstOrDefaultAsync(token);
     }
 
     public async ValueTask LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,

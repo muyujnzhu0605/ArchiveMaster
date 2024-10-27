@@ -32,29 +32,41 @@ public partial class BackupTask : ConfigBase, ICloneable
     [ObservableProperty]
     private bool isDefaultVirtualBackup;
 
-    [ObservableProperty] [property: JsonIgnore]
-    private DateTime lastBackupTime;
-
-    [ObservableProperty] [property: JsonIgnore]
-    private DateTime lastFullBackupTime;
-
-    [ObservableProperty] [property: JsonIgnore]
-    private string message;
-
     [ObservableProperty]
     private string name = "新备份任务";
-
-    [ObservableProperty] [property: JsonIgnore]
-    private int snapshotCount;
 
     [ObservableProperty]
     private string sourceDir;
 
-    [ObservableProperty] [property: JsonIgnore]
-    private BackupTaskStatus status = BackupTaskStatus.Ready;
-
     [ObservableProperty]
     private TimeSpan timeInterval = TimeSpan.FromHours(1);
+    
+    #region 临时变量
+    
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private DateTime lastBackupTime;
+
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private DateTime lastFullBackupTime;
+    
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private int snapshotCount;
+    
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private int validSnapshotCount;
+    
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private BackupTaskStatus status = BackupTaskStatus.Ready;
+    
+    [ObservableProperty]
+    [property: JsonIgnore]
+    private string message;
+    #endregion
 
     public override void Check()
     {

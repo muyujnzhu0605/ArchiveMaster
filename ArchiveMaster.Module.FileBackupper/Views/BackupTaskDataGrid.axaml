@@ -11,12 +11,6 @@
         <DataGridTextColumn
             Binding="{Binding Name}"
             Header="任务名" />
-        <DataGridTextColumn
-            Binding="{Binding SourceDir}"
-            Header="需要备份的目录" />
-        <DataGridTextColumn
-            Binding="{Binding BackupDir}"
-            Header="备份文件存放目录" />
         <DataGridTemplateColumn Header="状态">
             <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
@@ -28,7 +22,10 @@
         </DataGridTemplateColumn>
         <DataGridTextColumn
             Binding="{Binding SnapshotCount}"
-            Header="快照数量" />
+            Header="快照" />
+        <DataGridTextColumn
+            Binding="{Binding ValidSnapshotCount}"
+            Header="有效快照" />
         <DataGridTextColumn
             Binding="{Binding LastBackupTime, Converter={StaticResource DateTimeConverter}, Mode=OneWay}"
             Header="上一次备份时间" />
@@ -38,5 +35,11 @@
         <DataGridTextColumn
             Binding="{Binding Message}"
             Header="信息" />
+        <DataGridTextColumn
+            Binding="{Binding SourceDir}"
+            Header="需要备份的目录" />
+        <DataGridTextColumn
+            Binding="{Binding BackupDir}"
+            Header="备份文件存放目录" />
     </DataGrid.Columns>
 </DataGrid>

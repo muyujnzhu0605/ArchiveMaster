@@ -17,6 +17,9 @@ public partial class BackupManageCenterViewModel
     [ObservableProperty]
     private ObservableCollection<BackupSnapshotEntity> snapshots;
 
+    [ObservableProperty]
+    private int totalSnapshotCount;
+
     async partial void OnSelectedSnapshotChanged(BackupSnapshotEntity value)
     {
         if (value == null)
@@ -43,13 +46,15 @@ public partial class BackupManageCenterViewModel
 
 
     [RelayCommand]
-    private Task RefreshSnapshots()
+    private async Task LoadSnapshots()
     {
-        return TryDoAsync("加载快照", async () =>
+        if (await TryDoAsync("加载快照", async () =>
+            {
+                DbService db = new DbService(SelectedTask);
+                Snapshots = new ObservableCollection<BackupSnapshotEntity>(await db.GetSnapshotsAsync());
+            }) == false)
         {
-            DbService db = new DbService(SelectedTask);
-            Snapshots = new ObservableCollection<BackupSnapshotEntity>(
-                await db.GetSnapshotsAsync());
-        });
+            SelectedTask = null;
+        }
     }
 }
