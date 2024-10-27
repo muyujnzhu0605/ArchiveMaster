@@ -6,7 +6,7 @@
 
 在开始这个项目之前的许多年，我已经陆续写了很多的用于备份、同步、管理文件或照片的软件，包括：
 
-- [文件备份工具](https://github.com/autodotua/FileBackuper_New)
+- [文件自动备份系统](https://github.com/autodotua/FileBackuper_New)
 - 文件批量操作
 - [异地备份离线同步](https://github.com/autodotua/OffsiteBackupOfflineSync)
 - [照片瘦身工具](https://github.com/autodotua/PhotoSlimming)
@@ -20,7 +20,7 @@
 
 ## 工具
 
-### 照片工具
+### 照片工具（`PhotoArchive`）
 
 一套用来解决照片（以及其他类型文件）在预处理、整理、存档、浏览等环节存在问题的自动化工具
 
@@ -31,7 +31,7 @@
 | 修复文件修改时间 | 寻找EXIF信息中的拍摄时间与照片修改时间不同的文件，将修改时间更新闻EXIF时间 | 对照片进行处理后，文件修改时间会更新，不利于部分软件的照片排序，需要从EXIF中读取实际拍摄时间，对文件修改时间进行更新。 | `RepairModifiedTime` | [照片归档工具](https://github.com/autodotua/PhotoArchivingTools)<br />控制台小程序集 | 已完成   |
 | 创建照片集合副本 | 复制或压缩照片，用于生成更小的照片集副本                     | 需要将硬盘中整理后的部分照片复制到手机中以便随时查看，但可能存在文件过大放不进手机、只需要部分目录中的文件、只需要部分类型文件等需求。 | `PhotoSlimming`      | [照片归档工具](https://github.com/autodotua/PhotoArchivingTools)<br />[照片瘦身工具](https://github.com/autodotua/PhotoSlimming) | 已完成   |
 
-### 文件目录工具
+### 文件目录工具（`FileTools`）
 
 一套以文件和目录结构为着手点的工具
 
@@ -41,8 +41,9 @@
 | 目录结构同步 | 以一个目录为模板，将另一个目录中的文件同步到与模板内相同文件一直的位置 | 有两份初始状态一样的目录，其中一份中的某些文件进行了移动等操作，希望能够让另一份也同步应用更改，避免不必要的复制操作。 | `DirStructureSync`  | [异地备份离线同步](https://github.com/autodotua/OffsiteBackupOfflineSync)<br />控制台小程序集 | 已完成   |
 | 目录结构克隆 | 以一个目录为模板，生成一个新的目录，目录中文件与模板一致，但大小为0 | 需要保存一个目录的结构，但是不需要了解文件的内容，只是想用尽可能小的容量存储文件树状结构。 | `DirStructureClone` | [异地备份离线同步](https://github.com/autodotua/OffsiteBackupOfflineSync)<br />文件归位器 | 已完成   |
 | 批量重命名   | 批量对一个目录中的文件或文件夹按规则进行重命名操作           | 需要对一个目录中的文件按一定规则进行重命名。                 | `Rebuild`           | 文件批量操作                                                 | 已完成   |
+| 文件系统监控 | 监控程序对文件系统的独写                                     |                                                              |                     |                                                              | 未开始   |
 
-### 异地备份离线同步
+### 异地备份离线同步（`OfflineSync`）
 
 在无法通过网络或实地同步的情况下，使用增量同步的方式，利用小容量设备完成异地和本地磁盘的数据同步
 
@@ -52,16 +53,25 @@
 | 本地生成补丁 | 在本地计算机生成与异地的差异文件的补丁包 | `Step2`  | [异地备份离线同步](https://github.com/autodotua/OffsiteBackupOfflineSync) | 已完成   |
 | 异地同步     | 在异地应用补丁包，实现数据同步           | `Step3`  | [异地备份离线同步](https://github.com/autodotua/OffsiteBackupOfflineSync) | 已完成   |
 
-### 光盘归档工具
+### 光盘归档工具（`DiscArchive`）
 
 将一个持续更新目录中的文件，按从旧到新的时间顺序，分装到多个光盘中，实现备份功能。
 
-| 工具名     | 用途       | 类名前缀  | 原项目                                                       | 开发进度 |
-| ---------- | ---------- | --------- | ------------------------------------------------------------ | -------- |
-| 打包到光盘 | 打包到光盘 | `Packing` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) | 已完成   |
-| 从光盘重建 | 从光盘重建 | `Rebuild` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) | 已完成   |
+| 工具名     | 用途                                     | 类名前缀  | 原项目                                                       | 开发进度 |
+| ---------- | ---------------------------------------- | --------- | ------------------------------------------------------------ | -------- |
+| 打包到光盘 | 将待备份文件，根据光盘的大小，分成多个包 | `Packing` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) | 已完成   |
+| 从光盘重建 | 从多张光盘重建磁盘文件                   | `Rebuild` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) | 已完成   |
 
-### 
+### 文件备份服务（`FileBackupper`）
+
+将目录中的文件定时或实时备份到另一个位置，支持全量备份或增量备份
+
+| 工具名       | 用途                                                         | 类名前缀 | 原项目                                                       | 开发进度     |
+| ------------ | ------------------------------------------------------------ | -------- | ------------------------------------------------------------ | ------------ |
+| 备份任务配置 | 对备份任务进行新增、删除、修改配置                           | /        | [文件自动备份系统](https://github.com/autodotua/FileBackuper_New) | 主体功能完成 |
+| 备份管理中心 | 查看备份任务的信息、进行手动备份，查看快照、快照文件、日志等 | /        | [文件自动备份系统](https://github.com/autodotua/FileBackuper_New) | 主体功能完成 |
+
+下一步计划：增加FileWatcher备份、定时全量备份、删除日志、删除快照、清理物理备份文件
 
 ## 架构
 
