@@ -46,7 +46,7 @@
                     Binding="{Binding Type, Converter={StaticResource LogLevelConverter}, Mode=OneWay}"
                     Header="类型" />
                 <DataGridTextColumn
-                    Binding="{Binding Time, Converter={StaticResource DateTimeConverter}}"
+                    Binding="{Binding Time, Converter={StaticResource DateTimeConverter}, Mode=OneWay}"
                     Header="时间" />
                 <DataGridTextColumn
                     Binding="{Binding Message}"

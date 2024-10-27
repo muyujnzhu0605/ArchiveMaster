@@ -28,11 +28,23 @@
                     Header="修改" />
 
                 <DataGridTextColumn
-                    Binding="{Binding BeginTime, Converter={StaticResource DateTimeConverter}}"
+                    Binding="{Binding BeginTime, Converter={StaticResource DateTimeConverter}, Mode=OneWay}"
                     Header="开始时间" />
                 <DataGridTextColumn
-                    Binding="{Binding EndTime, Converter={StaticResource DateTimeConverter}}"
+                    Binding="{Binding EndTime, Converter={StaticResource DateTimeConverter}, Mode=OneWay}"
                     Header="完成时间" />
+
+                <DataGridTemplateColumn Header="操作">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button
+                                Classes="Link"
+                                Command="{Binding $parent[TabItem].DataContext.DeleteSnapshotCommand}"
+                                CommandParameter="{Binding .}"
+                                Content="删除" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel

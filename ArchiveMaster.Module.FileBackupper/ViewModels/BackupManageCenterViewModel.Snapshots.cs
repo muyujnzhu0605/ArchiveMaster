@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FzLib.Avalonia.Messages;
 using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.ViewModels;
@@ -55,6 +57,46 @@ public partial class BackupManageCenterViewModel
             }) == false)
         {
             SelectedTask = null;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteSnapshotAsync(BackupSnapshotEntity snapshot)
+    {
+        string message = null;
+        int index = Snapshots.IndexOf(snapshot);
+        if (index == Snapshots.Count - 1) //最后一个，可以直接删
+        {
+            message = "是否删除此快照？";
+        }
+        else
+        {
+            if (Snapshots[index + 1].Type is SnapshotType.Increment) //后面跟着增量备份，会把后面的也一起删了
+            {
+                message = "删除此快照，将同步删除后续的增量快照，是否删除此快照？";
+            }
+            else //后面跟着全量备份，无影响
+            {
+                message = "是否删除此快照？";
+            }
+        }
+
+        bool confirm = true.Equals(await this.SendMessage(new CommonDialogMessage()
+        {
+            Type = CommonDialogMessage.CommonDialogType.YesNo,
+            Title = "删除快照",
+            Message = message
+        }).Task);
+
+        if (confirm)
+        {
+            await TryDoAsync("删除快照", async () =>
+            {
+                ThrowIfIsBackingUp();
+                await using var db = new DbService(SelectedTask);
+                await db.DeleteSnapshotAsync(snapshot);
+                await LoadSnapshots();
+            });
         }
     }
 }
