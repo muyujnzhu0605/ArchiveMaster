@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class TimeClassifyUtility(TimeClassifyConfig config) : TwoStepUtilityBase<TimeClassifyConfig>(config)
+    public class TimeClassifyUtility(TimeClassifyConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<TimeClassifyConfig>(config, appConfig)
     {
         public List<FilesTimeDirInfo> TargetDirs { get; set; }
 

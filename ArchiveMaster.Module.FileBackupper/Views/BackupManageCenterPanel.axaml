@@ -1,0 +1,110 @@
+﻿<v:PanelBase
+    x:Class="ArchiveMaster.Views.BackupManageCenterPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:ArchiveMaster.Converters"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
+    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:BackupTasksViewModel"
+    mc:Ignorable="d">
+    <v:PanelBase.Resources>
+        <c:NotNullGridLengthConverter x:Key="NotNullGridLengthConverter" />
+        <c:NullGridLengthConverter x:Key="NullGridLengthConverter" />
+    </v:PanelBase.Resources>
+    <v:PanelBase.RightTopContent>
+        <ToggleSwitch
+            IsChecked="{Binding Config.EnableBackgroundBackup}"
+            OffContent="自动备份总开关"
+            OnContent="自动备份总开关" />
+    </v:PanelBase.RightTopContent>
+    <v:PanelBase.PanelContent>
+        <Grid RowDefinitions="*,8,*">
+            <Grid
+                Grid.RowSpan="3"
+                IsVisible="{Binding SelectedTask, Converter={StaticResource NotNullConverter}, ConverterParameter=i}"
+                RowDefinitions="*,8,Auto">
+                <v:BackupTaskDataGrid
+                    ItemsSource="{Binding Tasks}"
+                    SelectedItem="{Binding SelectedTask}" />
+                <StackPanel
+                    Grid.Row="2"
+                    Orientation="Horizontal">
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding LoadTasksCommand}"
+                        Content="{StaticResource Refresh}"
+                        ToolTip.Tip="刷新" />
+                </StackPanel>
+            </Grid>
+
+            <StackPanel
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                IsVisible="{Binding !!SelectedTask}"
+                Orientation="Horizontal"
+                ZIndex="99">
+                <TextBlock>
+                    <Run
+                        FontWeight="Bold"
+                        Text="当前选择的任务：" />
+                    <Run Text="{Binding SelectedTask.Name, Mode=OneWay}" />
+                </TextBlock>
+                <Button
+                    Classes="Icon"
+                    Command="{Binding LoadTasksCommand}"
+                    Content="{StaticResource Refresh}"
+                    ToolTip.Tip="刷新" />
+            </StackPanel>
+
+            <TabControl IsVisible="{Binding !!SelectedTask}">
+                <TabItem Header="快照">
+                    <v:SnapshotPanel />
+                </TabItem>
+                <TabItem Header="任务控制">
+                    <v:BackupTaskOperationPanel />
+                </TabItem>
+            </TabControl>
+
+            <TabControl
+                Grid.Row="2"
+                IsVisible="{Binding !!SelectedTask}"
+                SelectedIndex="{Binding SelectedTabIndex}">
+                <TabControl.Styles>
+                    <Style Selector="Panel &gt; TextBlock">
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                    </Style>
+                </TabControl.Styles>
+                <TabItem
+                    Header="快照文件"
+                    IsVisible="{Binding !!SelectedSnapshot}">
+                    <v:SnapshotFilesPanel />
+                </TabItem>
+                <TabItem
+                    Header="文件历史记录"
+                    IsVisible="{Binding !!SelectedFile}">
+                    <v:SnapshotFileHistoryPanel />
+                </TabItem>
+                <TabItem
+                    Header="修改内容"
+                    IsVisible="{Binding !!SelectedSnapshot}">
+                    <v:SnapshotChangesPanel />
+                </TabItem>
+                <TabItem
+                    Header="日志"
+                    IsVisible="{Binding !!SelectedSnapshot}">
+                    <v:BackupLogsPanel />
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

@@ -57,21 +57,9 @@
                         Type="OpenFolder" />
                 </ctrl:FormItem>
                 <ctrl:FormItem Label="黑名单：">
-                    <Grid ColumnDefinitions="*,8,Auto">
-
-                        <TextBox
-                            AcceptsReturn="True"
-                            MaxLines="5"
-                            Text="{Binding Config.BlackList}"
-                            Watermark="可以是文件名，也可以是完整路径；一行一项" />
-                        <CheckBox
-                            Grid.Column="2"
-                            Height="{Binding #btnBrowse.Bounds.Height}"
-                            VerticalAlignment="Center"
-                            Classes="Middle"
-                            Content="正则"
-                            IsChecked="{Binding Config.BlackListUseRegex}" />
-                    </Grid>
+                    <v:BlackListTextBox
+                        Text="{Binding Config.BlackList}"
+                        UseRegex="{Binding Config.BlackListUseRegex}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem Label="导出方式：">
                     <ComboBox

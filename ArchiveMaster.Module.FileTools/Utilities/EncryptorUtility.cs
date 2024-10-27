@@ -10,10 +10,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Helpers;
 
 namespace ArchiveMaster.Utilities
 {
-    public class EncryptorUtility(EncryptorConfig config) : TwoStepUtilityBase<EncryptorConfig>(config)
+    public class EncryptorUtility(EncryptorConfig config, AppConfig appConfig) : TwoStepUtilityBase<EncryptorConfig>(config, appConfig)
     {
         public const string EncryptedFileExtension = ".ept";
         public const string DirectoryStructureFile = "$files$.txt";
@@ -196,11 +197,7 @@ namespace ArchiveMaster.Utilities
             NotifyMessage("正在枚举文件");
 
             await TryForFilesAsync(new DirectoryInfo(sourceDir)
-                .EnumerateFiles("*", new EnumerationOptions()
-                {
-                    IgnoreInaccessible = true,
-                    RecurseSubdirectories = true,
-                })
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
                 .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 var isEncrypted = IsEncryptedFile(file.Path);

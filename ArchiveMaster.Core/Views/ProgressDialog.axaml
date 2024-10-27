@@ -1,0 +1,22 @@
+<dialog:DialogHost
+    x:Class="ArchiveMaster.Views.ProgressDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialog="using:FzLib.Avalonia.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="Auto,8,Auto">
+        <TextBlock
+            Text="{Binding #root.Message}"
+            TextTrimming="CharacterEllipsis" />
+        <ProgressBar
+            Grid.Row="2"
+            Maximum="{Binding #root.Maximum}"
+            Minimum="{Binding #root.Minimum}"
+            Value="{Binding #root.Value}" />
+    </Grid>
+</dialog:DialogHost>

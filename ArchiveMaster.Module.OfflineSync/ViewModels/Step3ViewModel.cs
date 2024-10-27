@@ -14,15 +14,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel : OfflineSyncViewModelBase<Step3Utility, Step3Config, SyncFileInfo>
+    public partial class Step3ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step3Utility, Step3Config, SyncFileInfo>(appConfig)
     {
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
         public override Step3Config Config =>
-            Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step3;
+            Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step3;
         protected override Step3Utility CreateUtilityImplement()
         {
-            return new Step3Utility(Config);
+            return new Step3Utility(Config, appConfig);
         }
 
         protected override Task OnInitializedAsync()

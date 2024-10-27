@@ -26,9 +26,9 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility,
 
     public PaddingMode[] PaddingModes => Enum.GetValues<PaddingMode>();
 
-    public EncryptorViewModel(EncryptorConfig config) : base(config)
+    public EncryptorViewModel(EncryptorConfig config, AppConfig appConfig) : base(config, appConfig)
     {
-        AppConfig.Instance.BeforeSaving += (s, e) =>
+        appConfig.BeforeSaving += (s, e) =>
         {
             if (!Config.RememberPassword)
             {

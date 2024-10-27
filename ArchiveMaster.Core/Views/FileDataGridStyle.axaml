@@ -142,9 +142,11 @@
                                 IsHitTestVisible="False"
                                 IsVisible="{Binding !$parent[DataGrid].IsEnabled}" />
                         </Grid>
+
                     </Border>
                     <Grid
                         Grid.Row="2"
+                        Margin="4"
                         ColumnDefinitions="Auto,0,Auto,16,*">
                         <StackPanel
                             x:Name="stkSelectionButtons"
@@ -153,22 +155,22 @@
                             Spacing="8">
                             <Button
                                 Classes="Icon"
-                                Content="&#xE8B3;"
+                                Content="{StaticResource SelectAll}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="全选" />
                             <Button
                                 Classes="Icon"
-                                Content="&#xE8AB;"
+                                Content="{StaticResource Switch}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="反选" />
                             <Button
                                 Classes="Icon"
-                                Content="&#xE8E6;"
+                                Content="{StaticResource ClearSelection}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="清除" />
                             <ToggleButton
                                 Classes="Icon"
-                                Content="&#xE762;"
+                                Content="{StaticResource MultiSelect}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="仅处理选中的行" />
                         </StackPanel>
@@ -193,7 +195,6 @@
         </Setter>
     </ControlTheme>
 
-
     <ControlTheme
         x:Key="{x:Type v:TreeFileDataGrid}"
         BasedOn="{StaticResource {x:Type v:SimpleFileDataGrid}}"
@@ -201,6 +202,7 @@
         <Setter Property="RowDetailsTemplate" Value="{x:Null}" />
         <Setter Property="Template">
             <ControlTemplate>
+
                 <Grid RowDefinitions="*,8,Auto">
                     <Border
                         x:Name="DataGridBorder"
@@ -277,9 +279,11 @@
                                 IsHitTestVisible="False"
                                 IsVisible="{Binding !$parent[DataGrid].IsEnabled}" />
                         </Grid>
+
                     </Border>
                     <Grid
                         Grid.Row="2"
+                        Margin="4"
                         ColumnDefinitions="Auto,16,*">
 
                         <ContentControl

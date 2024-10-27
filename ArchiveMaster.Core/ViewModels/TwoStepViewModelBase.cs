@@ -11,19 +11,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using Avalonia.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewModelBase<TUtility, TConfig>
+public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewModelBase
     where TUtility : TwoStepUtilityBase<TConfig>
     where TConfig : ConfigBase
 {
-    public TwoStepViewModelBase(TConfig config, bool enableInitialize = true) : base(config)
+    public TwoStepViewModelBase(TConfig config, AppConfig appConfig, bool enableInitialize = true)
     {
+        Config = config;
+        this.appConfig = appConfig;
         EnableInitialize = enableInitialize;
         CanInitialize = enableInitialize;
         CanExecute = !enableInitialize;
+    }
+
+    protected virtual TUtility Utility { get; private set; }
+
+    public virtual TConfig Config { get; }
+
+    protected virtual TUtility CreateUtilityImplement()
+    {
+        return Services.Provider.GetRequiredService<TUtility>();
     }
 
     [ObservableProperty]
@@ -44,19 +56,21 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
+    protected readonly AppConfig appConfig;
+
     public bool EnableInitialize { get; }
 
     public bool ProgressIndeterminate => double.IsNaN(Progress);
 
-    protected override TUtility CreateUtility()
+    protected void CreateUtility()
     {
-        var utility = base.CreateUtility();
+        Utility = CreateUtilityImplement();
+        Debug.Assert(Utility != null);
         Utility.ProgressUpdate += Utility_ProgressUpdate;
         Utility.MessageUpdate += Utility_MessageUpdate;
-        return utility;
     }
 
-    protected override void DisposeUtility()
+    protected void DisposeUtility()
     {
         if (Utility == null)
         {
@@ -65,7 +79,7 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
 
         Utility.ProgressUpdate -= Utility_ProgressUpdate;
         Utility.MessageUpdate -= Utility_MessageUpdate;
-        base.DisposeUtility();
+        Utility = null;
     }
 
     protected virtual Task OnExecutedAsync(CancellationToken token)
@@ -146,8 +160,8 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken token)
     {
-        Stopwatch sw=Stopwatch.StartNew();
-        AppConfig.Instance.Save(false);
+        Stopwatch sw = Stopwatch.StartNew();
+        appConfig.Save(false);
         var a = sw.ElapsedMilliseconds;
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();
@@ -161,11 +175,11 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
         if (await TryRunAsync(async () =>
             {
                 var d = sw.ElapsedMilliseconds;
-                var u = CreateUtility();
+                CreateUtility();
                 var e = sw.ElapsedMilliseconds;
                 await OnInitializingAsync();
                 Config.Check();
-                await u.InitializeAsync(token);
+                await Utility.InitializeAsync(token);
                 await OnInitializedAsync();
             }, "初始化失败"))
         {

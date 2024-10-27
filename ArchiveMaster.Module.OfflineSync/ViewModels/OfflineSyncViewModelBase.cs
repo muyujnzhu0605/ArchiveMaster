@@ -22,16 +22,17 @@ namespace ArchiveMaster.ViewModels
         where TConfig : ConfigBase
         where TFile : SimpleFileInfo
     {
-        public OfflineSyncViewModelBase(TConfig config = null) : base(config)
+        public OfflineSyncViewModelBase(AppConfig appConfig, TConfig config = null) : base(config, appConfig)
         {
         }
 
-        public OfflineSyncViewModelBase(bool enableInitialize, TConfig config = null) : base(config,
-            enableInitialize)
+        public OfflineSyncViewModelBase(AppConfig appConfig, bool enableInitialize, TConfig config = null)
+            : base(config, appConfig, enableInitialize)
         {
         }
 
-        [ObservableProperty] [NotifyPropertyChangedFor(nameof(Config))]
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Config))]
         private string configName;
 
         [ObservableProperty]
@@ -39,6 +40,7 @@ namespace ArchiveMaster.ViewModels
 
         public override void OnEnter()
         {
+            base.OnEnter();
             string currentName = Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
 
             ConfigNames = Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
@@ -81,23 +83,23 @@ namespace ArchiveMaster.ViewModels
         private async Task AddConfigAsync()
         {
             if (await this.SendMessage(new InputDialogMessage()
+            {
+                Type = InputDialogMessage.InputDialogType.Text,
+                Title = "新增配置",
+                DefaultValue = "新配置",
+                Validation = t =>
                 {
-                    Type = InputDialogMessage.InputDialogType.Text,
-                    Title = "新增配置",
-                    DefaultValue = "新配置",
-                    Validation = t =>
+                    if (string.IsNullOrWhiteSpace(t))
                     {
-                        if (string.IsNullOrWhiteSpace(t))
-                        {
-                            throw new Exception("配置名为空");
-                        }
-
-                        if (ConfigNames.Contains(t))
-                        {
-                            throw new Exception("配置名已存在");
-                        }
+                        throw new Exception("配置名为空");
                     }
-                }).Task is string result)
+
+                    if (ConfigNames.Contains(t))
+                    {
+                        throw new Exception("配置名已存在");
+                    }
+                }
+            }).Task is string result)
             {
                 ConfigNames.Add(result);
                 Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection

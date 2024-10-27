@@ -4,7 +4,8 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public abstract class DiscUtilityBase<TConfig>(TConfig config) : TwoStepUtilityBase<TConfig>(config)
+    public abstract class DiscUtilityBase<TConfig>(TConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<TConfig>(config, appConfig)
         where TConfig : ConfigBase
     {
         public const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss.fff";

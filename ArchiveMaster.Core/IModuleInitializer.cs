@@ -1,7 +1,9 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster
 {

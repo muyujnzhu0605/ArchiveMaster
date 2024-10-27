@@ -8,13 +8,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureSyncUtility(DirStructureSyncConfig config)
-        : TwoStepUtilityBase<DirStructureSyncConfig>(config)
+    public class DirStructureSyncUtility(DirStructureSyncConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<DirStructureSyncConfig>(config, appConfig)
     {
         public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();
@@ -28,7 +29,7 @@ namespace ArchiveMaster.Utilities
             List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
             List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
 
-            var blacks = new BlackListUtility(Config.BlackList, Config.BlackListUseRegex);
+            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
             List<SimpleFileInfo> notMatchedFiles = new List<SimpleFileInfo>();
             List<SimpleFileInfo> matchedFiles = new List<SimpleFileInfo>();
 
@@ -42,12 +43,7 @@ namespace ArchiveMaster.Utilities
 
                 //枚举源目录
                 var sourceFiles = new DirectoryInfo(Config.SourceDir)
-                    .EnumerateFiles("*", new EnumerationOptions()
-                    {
-                        IgnoreInaccessible = true,
-                        AttributesToSkip = 0,
-                        RecurseSubdirectories = true,
-                    })
+                    .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
                     .Select(p => new SimpleFileInfo(p, Config.SourceDir))
                     .WithCancellationToken(token)
                     .ToList();
@@ -202,12 +198,7 @@ namespace ArchiveMaster.Utilities
             length2Template.Clear();
             modifiedTime2Template.Clear();
             var fileInfos = new DirectoryInfo(dir)
-                .EnumerateFiles("*", new EnumerationOptions()
-                {
-                    IgnoreInaccessible = true,
-                    AttributesToSkip = 0,
-                    RecurseSubdirectories = true,
-                })
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
                 .WithCancellationToken(token)
                 .Select(p => new SimpleFileInfo(p, dir))
                 .ToList();
@@ -268,7 +259,7 @@ namespace ArchiveMaster.Utilities
             }
 
             files = files.ToList();
-            
+
             return TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在{copyMoveText}{s.GetFileNumberMessage()}：{file.RelativePath}");

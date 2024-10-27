@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.Utilities
 {
-    public class UselessJpgCleanerUtility(UselessJpgCleanerConfig config)
-        : TwoStepUtilityBase<UselessJpgCleanerConfig>(config)
+    public class UselessJpgCleanerUtility(UselessJpgCleanerConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<UselessJpgCleanerConfig>(config, appConfig)
     {
         public List<SimpleFileInfo> DeletingJpgFiles { get; set; }
 

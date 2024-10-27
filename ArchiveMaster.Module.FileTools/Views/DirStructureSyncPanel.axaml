@@ -130,18 +130,9 @@
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="黑名单：">
-                <Grid ColumnDefinitions="*,8,Auto">
-                    <TextBox
-                        AcceptsReturn="True"
-                        MaxLines="5"
-                        Text="{Binding Config.BlackList}"
-                        Watermark="可以是文件名，也可以是完整路径；一行一项" />
-                    <CheckBox
-                        Grid.Column="2"
-                        VerticalAlignment="Center"
-                        Content="使用正则表达式"
-                        IsChecked="{Binding Config.BlackListUseRegex}" />
-                </Grid>
+                <v:BlackListTextBox
+                    Text="{Binding Config.BlackList}"
+                    UseRegex="{Binding Config.BlackListUseRegex}" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="文件匹配选项：">
@@ -151,10 +142,10 @@
                         IsChecked="{Binding Config.CompareName}" />
                     <CheckBox
                         Content="匹配文件大小"
-                        IsChecked="{Binding CompareLength}" />
+                        IsChecked="{Binding Config.CompareLength}" />
                     <CheckBox
                         Content="匹配修改时间"
-                        IsChecked="{Binding CompareModifiedTime}" />
+                        IsChecked="{Binding Config.CompareModifiedTime}" />
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
 

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using Avalonia.Media;
 using FzLib.Avalonia.Converters;
@@ -9,7 +10,8 @@ using FzLib.Program;
 
 namespace ArchiveMaster.Utilities;
 
-public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfig>(config)
+public class RenameUtility(RenameConfig config, AppConfig appConfig)
+    : TwoStepUtilityBase<RenameConfig>(config, appConfig)
 {
     public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
         new Dictionary<string, Func<SimpleFileInfo, string, string>>()
@@ -204,20 +206,12 @@ public class RenameUtility(RenameConfig config) : TwoStepUtilityBase<RenameConfi
             if (Config.RenameTarget == RenameTargetType.File)
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateFiles("*", new EnumerationOptions()
-                    {
-                        IgnoreInaccessible = true,
-                        RecurseSubdirectories = true,
-                    });
+                    .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions());
             }
             else
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateDirectories("*", new EnumerationOptions()
-                    {
-                        IgnoreInaccessible = true,
-                        RecurseSubdirectories = true,
-                    });
+                    .EnumerateDirectories("*", OptionsHelper.GetEnumerationOptions());
             }
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();

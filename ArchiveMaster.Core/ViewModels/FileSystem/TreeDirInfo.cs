@@ -1,80 +1,155 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text.Json.Serialization;
-using ArchiveMaster.Basic;
 
 namespace ArchiveMaster.ViewModels
 {
+    [DebuggerDisplay("Name = {Name}, Subs Count = {Subs.Count}")]
     public partial class TreeDirInfo : TreeFileDirInfo
     {
+        /// <summary>
+        /// 路径分隔符
+        /// </summary>
+        private char[] pathSeparator = ['/', '\\'];
+
+        /// <summary>
+        /// 子目录
+        /// </summary>
+        private List<TreeDirInfo> subDirs = new List<TreeDirInfo>();
+
+        /// <summary>
+        /// 子目录名到子目录的字典
+        /// </summary>
+        private Dictionary<string, TreeDirInfo> subDirsDic = new Dictionary<string, TreeDirInfo>();
+
+        /// <summary>
+        /// 子文件
+        /// </summary>
+        private List<TreeFileInfo> subFiles = new List<TreeFileInfo>();
+
+        /// <summary>
+        /// 子目录和子文件
+        /// </summary>
+        private List<TreeFileDirInfo> subs = new List<TreeFileDirInfo>();
+
+        private TreeDirInfo()
+        {
+            IsDir = true;
+        }
+
+        private TreeDirInfo(SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
+            : base(dir, parent, depth, index)
+        {
+            IsDir = true;
+        }
+
         private TreeDirInfo(DirectoryInfo dir, string topDir, TreeDirInfo parent, int depth, int index)
             : base(dir, topDir, parent, depth, index)
         {
+            IsDir = true;
         }
 
-
-        [JsonIgnore]
-        public IList<TreeFileDirInfo> Subs { get; } = new List<TreeFileDirInfo>();
-
-        public IList<TreeFileInfo> SubFiles { get; } = new List<TreeFileInfo>();
-        public IList<TreeDirInfo> SubDirs { get; } = new List<TreeDirInfo>();
-
-        public int SubFileCount { get; set; }
-        public int SubFolderCount { get; set; }
-
+        /// <summary>
+        /// 是否已展开（UI）
+        /// </summary>
         [JsonIgnore]
         public bool IsExpanded { get; set; }
+
+        /// <summary>
+        /// 子目录
+        /// </summary>
+        public IReadOnlyList<TreeDirInfo> SubDirs => subDirs.AsReadOnly();
+
+        /// <summary>
+        /// 子目录的数量，需手动更新
+        /// </summary>
+        public int SubFileCount { get; set; }
+
+        /// <summary>
+        /// 子文件
+        /// </summary>
+        public IReadOnlyList<TreeFileInfo> SubFiles => subFiles.AsReadOnly();
+
+        /// <summary>
+        /// 子文件的数量，需手动更新
+        /// </summary>
+        public int SubFolderCount { get; set; }
+
+        /// <summary>
+        /// 子文件和子目录
+        /// </summary>
+        [JsonIgnore]
+        public IReadOnlyList<TreeFileDirInfo> Subs => subs.AsReadOnly();
+
+        /// <summary>
+        /// 增加子目录或子文件
+        /// </summary>
+        /// <param name="item"></param>
+        /// <exception cref="ArgumentException"></exception>
+        private void AddSub(TreeFileDirInfo item)
+        {
+            TreeDirInfo parent = this;
+            switch (item)
+            {
+                case TreeFileInfo file:
+                    subFiles.Add(file);
+                    subs.Add(file);
+                    while (parent != null)
+                    {
+                        parent.SubFileCount++;
+                        parent = parent.Parent;
+                    }
+
+                    break;
+
+                case TreeDirInfo dir:
+                    subDirs.Add(dir);
+                    subs.Add(dir);
+                    subDirsDic.Add(dir.Name, dir);
+                    while (parent != null)
+                    {
+                        parent.SubFolderCount++;
+                        parent = parent.Parent;
+                    }
+
+                    break;
+
+                default:
+                    throw new ArgumentException("未知的类");
+            }
+
+            item.Parent = this;
+        }
+
+        #region 枚举已有文件创建
 
         public static TreeDirInfo BuildTree(string rootDir)
         {
             TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
-            EnumerateDirsAndFiles(root);
+            EnumerateDirsAndFiles(root, CancellationToken.None);
             return root;
         }
 
-        private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex)
+        public static async Task<TreeDirInfo> BuildTreeAsync(string rootDir,
+            CancellationToken cancellationToken = default)
         {
-            int index = initialIndex;
-            int count = 0;
-            foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateFiles())
-            {
-                var childDir = new TreeFileInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
-                parentDir.SubFiles.Add(childDir);
-                parentDir.Subs.Add(childDir);
-                count++;
-            }
-
-            while (parentDir != null)
-            {
-                parentDir.SubFileCount += count;
-                parentDir = parentDir.Parent;
-            }
-
-            return index;
+            TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
+            await Task.Run(() => EnumerateDirsAndFiles(root, cancellationToken), cancellationToken);
+            return root;
         }
 
-        private static void EnumerateDirsAndFiles(TreeDirInfo dir)
-        {
-            int tempIndex = EnumerateDirs(dir, 0);
-            EnumerateFiles(dir, tempIndex);
-        }
-
-        private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex)
+        private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex, CancellationToken cancellationToken)
         {
             int index = initialIndex;
             int count = 0;
             foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateDirectories())
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var childDir = new TreeDirInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
-                parentDir.SubDirs.Add(childDir);
-                parentDir.Subs.Add(childDir);
+                parentDir.AddSub(childDir);
 
                 try
                 {
-                    EnumerateDirsAndFiles(childDir);
+                    EnumerateDirsAndFiles(childDir, cancellationToken);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -88,15 +163,106 @@ namespace ArchiveMaster.ViewModels
                 count++;
             }
 
-            while (parentDir != null)
+            return index;
+        }
+
+        private static void EnumerateDirsAndFiles(TreeDirInfo dir, CancellationToken cancellationToken)
+        {
+            int tempIndex = EnumerateDirs(dir, 0, cancellationToken);
+            EnumerateFiles(dir, tempIndex, cancellationToken);
+        }
+
+        private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex, CancellationToken cancellationToken)
+        {
+            int index = initialIndex;
+            int count = 0;
+            foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateFiles())
             {
-                parentDir.SubFolderCount += count;
-                parentDir = parentDir.Parent;
+                cancellationToken.ThrowIfCancellationRequested();
+                var childFile = new TreeFileInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
+                parentDir.AddSub(childFile);
+                count++;
             }
 
             return index;
         }
 
+        #endregion
+
+        #region 手动添加
+
+        /// <summary>
+        /// 创建一个空实例
+        /// </summary>
+        /// <returns></returns>
+        public static TreeDirInfo CreateEmptyTree()
+        {
+            return new TreeDirInfo();
+        }
+
+        /// <summary>
+        /// 增加一个文件，将根据相对文件路径自动创建不存在的子目录并将文件放置到合适的子目录下
+        /// </summary>
+        /// <param name="file"></param>
+        public void AddFile(SimpleFileInfo file)
+        {
+            var relativePath = file.RelativePath;
+            var parts = relativePath.Split(pathSeparator, StringSplitOptions.RemoveEmptyEntries);
+            Add(parts, file, 0);
+        }
+
+        /// <summary>
+        /// 增加节点
+        /// </summary>
+        /// <param name="pathParts"></param>
+        /// <param name="file"></param>
+        /// <param name="depth"></param>
+        private void Add(string[] pathParts, SimpleFileInfo file, int depth)
+        {
+            //这里的depth和this.Depth可能不同，比如在非顶级目录调用Add方法
+            if (depth == pathParts.Length - 1)
+            {
+                if (file is TreeFileInfo treeFile)
+                {
+                    treeFile.Depth = Depth + 1;
+                    treeFile.Index = subs.Count;
+                }
+                else
+                {
+                    treeFile = new TreeFileInfo(file, this, Depth + 1, subs.Count);
+                }
+
+                AddSub(treeFile);
+                return;
+            }
+
+            string name = pathParts[depth];
+            if (!subDirsDic.TryGetValue(name, out TreeDirInfo subDir))
+            {
+                subDir = new TreeDirInfo()
+                {
+                    Name = name,
+                    TopDirectory = TopDirectory,
+                    Path = Path == null ? name : System.IO.Path.Combine(Path, name),
+                    Depth = Depth + 1,
+                    Index = subs.Count,
+                    IsDir = true,
+                };
+                AddSub(subDir);
+            }
+
+            subDir.Add(pathParts, file, depth + 1);
+        }
+
+        #endregion
+
+        #region 操作
+
+        /// <summary>
+        /// 展开为平铺的文件列表
+        /// </summary>
+        /// <param name="includingDir"></param>
+        /// <returns></returns>
         public IEnumerable<SimpleFileInfo> Flatten(bool includingDir = false)
         {
             Stack<TreeDirInfo> stack = new Stack<TreeDirInfo>();
@@ -117,7 +283,6 @@ namespace ArchiveMaster.ViewModels
                     // files.Add(subFile);
                 }
 
-
                 foreach (var subDir in current.SubDirs.Reverse())
                 {
                     stack.Push(subDir);
@@ -126,5 +291,51 @@ namespace ArchiveMaster.ViewModels
 
             // return files;
         }
+
+        public void Reorder()
+        {
+            if (subDirs.Count > 0)
+            {
+                subDirs.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+                foreach (var dir in subDirs)
+                {
+                    dir.Reorder();
+                }
+            }
+
+            if (subFiles.Count > 0)
+            {
+                subFiles.Sort((a, b) => string.CompareOrdinal(a.Name, b.Name));
+            }
+
+            if (subs.Count > 0)
+            {
+                subs.Clear();
+                subs.AddRange(subDirs);
+                subs.AddRange(subFiles);
+            }
+
+            for (int i = 0; i < subs.Count; i++)
+            {
+                subs[i].Index = i;
+            }
+        }
+
+
+        public List<TreeFileDirInfo> Search(string fileName)
+        {
+            List<TreeFileDirInfo> list = new List<TreeFileDirInfo>();
+            SearchInternal(fileName, list);
+            return list;
+        }
+
+        private void SearchInternal(string fileName, List<TreeFileDirInfo> list)
+        {
+            list.AddRange(subDirs.Where(dir => dir.Name.Contains(fileName)));
+            subDirs.ForEach(p => p.SearchInternal(fileName, list));
+            list.AddRange(subFiles.Where(file => file.Name.Contains(fileName)));
+        }
+
+        #endregion
     }
 }

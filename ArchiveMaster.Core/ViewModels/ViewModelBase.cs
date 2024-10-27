@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Utilities;
 using Avalonia.Controls;
@@ -8,48 +9,26 @@ namespace ArchiveMaster.ViewModels;
 
 public abstract partial class ViewModelBase : ObservableObject
 {
+    public static ViewModelBase Current { get; private set; }
+    
     [ObservableProperty]
     private bool isWorking = false;
+    
+    public event EventHandler RequestClosing;
+
+    public void Exit()
+    {
+        RequestClosing?.Invoke(this, EventArgs.Empty);
+    }
 
     public virtual void OnEnter()
     {
-        
-    }
-}
-public abstract partial class ViewModelBase<TUtility, TConfig> :ViewModelBase
-    where TUtility : UtilityBase<TConfig>
-    where TConfig : ConfigBase
-{
-    public ViewModelBase(TConfig config)
-    {
-        Config = config;
+        Current = this;
     }
 
-
-    protected virtual TUtility Utility { get; private set; }
-
-    public virtual TConfig Config { get; }
-
-
-    protected virtual TUtility CreateUtility()
+    public virtual Task OnExitAsync(CancelEventArgs args)
     {
-        Utility = CreateUtilityImplement();
-
-        if (Utility == null)
-        {
-            Utility = Services.Provider.GetService<TUtility>();
-        }
-
-        return Utility;
-    }
-
-    protected virtual TUtility CreateUtilityImplement()
-    {
-        return null;
-    }
-
-    protected virtual void DisposeUtility()
-    {
-        Utility = null;
+        Current = null;
+        return Task.CompletedTask;
     }
 }

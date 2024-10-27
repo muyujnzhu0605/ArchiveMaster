@@ -15,13 +15,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step2ViewModel : OfflineSyncViewModelBase<Step2Utility, Step2Config, SyncFileInfo>
+    public partial class Step2ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step2Utility, Step2Config, SyncFileInfo>(appConfig)
     {
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        public override Step2Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig.Step2;
+        public override Step2Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
         protected override Step2Utility CreateUtilityImplement()
         {
-            return new Step2Utility(Config);
+            return new Step2Utility(Config, appConfig);
         }
 
         [RelayCommand]
@@ -135,5 +135,5 @@ namespace ArchiveMaster.ViewModels
             Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
             return base.OnInitializedAsync();
         }
-        }
+    }
 }

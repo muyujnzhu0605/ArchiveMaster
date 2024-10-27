@@ -1,0 +1,118 @@
+﻿<v:PanelBase
+    x:Class="ArchiveMaster.Views.BackupTasksPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:ArchiveMaster.Configs"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:BackupTasksViewModel"
+    mc:Ignorable="d">
+    <v:PanelBase.PanelContent>
+        <Grid
+            ColumnDefinitions="*,16,*"
+            RowDefinitions="*,8,Auto">
+
+            <Grid RowDefinitions="*,8,Auto">
+                <v:BackupTaskDataGrid
+                    ItemsSource="{Binding Tasks}"
+                    SelectedItem="{Binding SelectedTask}" />
+
+                <StackPanel
+                    Grid.Row="2"
+                    Margin="0,0,8,0"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding AddTaskCommand}"
+                        Content="{StaticResource Add}"
+                        FontFamily="{StaticResource IconFont}"
+                        ToolTip.Tip="新增" />
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding DeleteSelectedTaskCommand}"
+                        Content="{StaticResource Delete}"
+                        FontFamily="{StaticResource IconFont}"
+                        IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}"
+                        ToolTip.Tip="删除" />
+                </StackPanel>
+
+            </Grid>
+
+
+            <ctrl:StackFormItemGroup
+                Grid.Column="2"
+                IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}">
+                <TextBlock
+                    FontWeight="Bold"
+                    Text="基本信息" />
+                <ctrl:FormItem Label="任务名：">
+                    <TextBox Text="{Binding SelectedTask.Name}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem Label="需要备份的目录：">
+                    <ctrl:FilePickerTextBox
+                        FileNames="{Binding SelectedTask.SourceDir}"
+                        Type="OpenFolder" />
+                </ctrl:FormItem>
+
+                <ctrl:FormItem Label="备份文件存放目录：">
+                    <ctrl:FilePickerTextBox
+                        FileNames="{Binding SelectedTask.BackupDir}"
+                        Type="OpenFolder" />
+                </ctrl:FormItem>
+
+                <ctrl:FormItem Label="黑名单：">
+                    <v:BlackListTextBox
+                        Text="{Binding SelectedTask.BlackList}"
+                        UseRegex="{Binding SelectedTask.BlackListUseRegex}" />
+                </ctrl:FormItem>
+
+
+                <TextBlock
+                    Margin="0,8,0,0"
+                    FontWeight="Bold"
+                    Text="自动备份" />
+                <CheckBox
+                    Content="启用自动备份"
+                    IsChecked="{Binding SelectedTask.EnableAutoBackup}" />
+                <ctrl:FormItem
+                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}"
+                    Label="定时备份：">
+                    <Grid ColumnDefinitions="Auto,8,*">
+                        <CheckBox IsChecked="{Binding SelectedTask.ByTimeInterval}" />
+                        <TextBox
+                            Grid.Column="2"
+                            IsEnabled="{Binding SelectedTask.ByTimeInterval}"
+                            Text="{Binding SelectedTask.TimeInterval}" />
+                    </Grid>
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}"
+                    Label="实时备份：">
+                    <CheckBox
+                        Content="监测文件和目录的改动"
+                        IsChecked="{Binding SelectedTask.ByWatching}" />
+                </ctrl:FormItem>
+                <CheckBox
+                    Content="自动进行全量备份时，默认进行虚拟全量备份"
+                    IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}"
+                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}" />
+            </ctrl:StackFormItemGroup>
+
+            <Button
+                Grid.Row="2"
+                Grid.ColumnSpan="99"
+                HorizontalAlignment="Center"
+                Command="{Binding SaveCommand}"
+                Content="保存" />
+        </Grid>
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

@@ -9,7 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
-public partial class TimeClassifyViewModel(TimeClassifyConfig config) : TwoStepViewModelBase<TimeClassifyUtility,TimeClassifyConfig>(config)
+public partial class TimeClassifyViewModel(TimeClassifyConfig config, AppConfig appConfig)
+    : TwoStepViewModelBase<TimeClassifyUtility, TimeClassifyConfig>(config, appConfig)
 {
     [ObservableProperty]
     private List<FilesTimeDirInfo> sameTimePhotosDirs;

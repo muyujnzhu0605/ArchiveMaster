@@ -36,24 +36,26 @@
                 Grid.Row="4"
                 Orientation="Horizontal">
                 <Button
-                    Grid.Column="4"
-                    Classes="Long"
+                    Classes="Icon"
                     Command="{Binding InputDirCommand}"
-                    Content="输入并添加.." />
+                    Content="{StaticResource KeyboardStandard}"
+                    ToolTip.Tip="输入以新增备份目录" />
                 <Button
-                    Grid.Column="4"
-                    Classes="Long"
+                    Classes="Icon"
                     Command="{Binding BrowseDirCommand}"
-                    Content="浏览并添加.." />
+                    Content="{StaticResource OpenFile}"
+                    ToolTip.Tip="浏览并新增备份目录" />
                 <Button
-                    Classes="Long"
+                    Classes="Icon"
                     Command="{Binding RemoveSelectedCommand}"
-                    Content="移除选中项"
-                    IsEnabled="{Binding SelectedSyncDir, Converter={StaticResource NotNullConverter}}" />
+                    Content="{StaticResource Remove}"
+                    IsEnabled="{Binding SelectedSyncDir, Converter={StaticResource NotNullConverter}}"
+                    ToolTip.Tip="移除选中项" />
                 <Button
-                    Classes="Long"
+                    Classes="Icon"
                     Command="{Binding RemoveAllCommand}"
-                    Content="移除全部" />
+                    Content="{StaticResource Clear}"
+                    ToolTip.Tip="移除全部" />
             </StackPanel>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>

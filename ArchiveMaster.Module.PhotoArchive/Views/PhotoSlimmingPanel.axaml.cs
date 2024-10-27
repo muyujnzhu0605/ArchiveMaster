@@ -6,9 +6,9 @@ namespace ArchiveMaster.Views
 {
     public partial class PhotoSlimmingPanel : TwoStepPanelBase
     {
-        public PhotoSlimmingPanel()
+        public PhotoSlimmingPanel(PhotoSlimmingViewModel viewModel)
         {
-            DataContext = new PhotoSlimmingViewModel();
+            DataContext = viewModel;
             InitializeComponent();
         }
     }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows.Input;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
@@ -19,6 +20,7 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using FzLib;
 using FzLib.Avalonia.Converters;
 using Serilog;
 
@@ -26,16 +28,24 @@ namespace ArchiveMaster.Views;
 
 public class TreeFileDataGrid : SimpleFileDataGrid
 {
-    protected override Type StyleKeyOverride => typeof(TreeFileDataGrid);
+    public static readonly StyledProperty<bool> DoubleTappedToOpenFileProperty =
+        AvaloniaProperty.Register<TreeFileDataGrid, bool>(
+            nameof(DoubleTappedToOpenFile), true);
 
     public static readonly StyledProperty<int> RootDepthProperty
         = AvaloniaProperty.Register<TreeFileDataGrid, int>(nameof(RootDepth), 1);
 
-    public int RootDepth
-    {
-        get => GetValue(RootDepthProperty);
-        set => SetValue(RootDepthProperty, value);
-    }
+    // protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    // {
+    //     base.OnPropertyChanged(change);
+    //     if (change.Property == ExpandRequestFilesProperty)
+    //     {
+    //         ExpandToFiles(ExpandRequestFiles);
+    //     }
+    // }
+    public static readonly StyledProperty<string> SearchTextProperty =
+        AvaloniaProperty.Register<TreeFileDataGrid, string>(
+            nameof(SearchText));
 
     public TreeFileDataGrid()
     {
@@ -43,45 +53,99 @@ public class TreeFileDataGrid : SimpleFileDataGrid
     }
 
     public override double ColumnPathIndex => -1;
-
-    private void DataGridDoubleTapped(object sender, TappedEventArgs e)
+    public bool DoubleTappedToOpenFile
     {
-        if (e.Source is Visual { DataContext: TreeDirInfo dir })
-        {
-            if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
-            {
-                return;
-            }
+        get => GetValue(DoubleTappedToOpenFileProperty);
+        set => SetValue(DoubleTappedToOpenFileProperty, value);
+    }
 
-            if (!dir.IsExpanded)
+    public int RootDepth
+    {
+        get => GetValue(RootDepthProperty);
+        set => SetValue(RootDepthProperty, value);
+    }
+
+    //  private IEnumerable<TreeFileDirInfo> expandRequestFiles;
+    //
+    //  public static readonly DirectProperty<TreeFileDataGrid, IEnumerable<TreeFileDirInfo>> ExpandRequestFilesProperty = AvaloniaProperty.RegisterDirect<TreeFileDataGrid, IEnumerable<TreeFileDirInfo>>(
+    // nameof(ExpandRequestFiles), o => o.ExpandRequestFiles, (o, v) => o.ExpandRequestFiles = v);
+    //
+    //  public IEnumerable<TreeFileDirInfo> ExpandRequestFiles
+    //  {
+    //      get => expandRequestFiles;
+    //      set => SetAndRaise(ExpandRequestFilesProperty, ref expandRequestFiles, value);
+    //  }
+    public string SearchText
+    {
+        get => GetValue(SearchTextProperty);
+        set => SetValue(SearchTextProperty, value);
+    }
+
+    protected override Type StyleKeyOverride => typeof(TreeFileDataGrid);
+    public void ExpandTo(TreeFileDirInfo file)
+    {
+        Stack<TreeDirInfo> stack = new Stack<TreeDirInfo>();
+        if (file.Parent == null || file.Parent.IsExpanded)
+        {
+            return;
+        }
+
+        stack.Push(file.Parent);
+        while (stack.Peek().Parent != null && stack.Peek().Parent.IsExpanded == false)
+        {
+            stack.Push(stack.Peek().Parent);
+        }
+
+        while (stack.Count > 0)
+        {
+            Expand(stack.Pop());
+        }
+    }
+
+    public void Search()
+    {
+        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        {
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+        }
+
+        if (items.Count == 0 || items[0] is not TreeDirInfo root)
+        {
+            throw new ArgumentException($"{nameof(ItemsSource)}的根节点必须为单个{nameof(TreeDirInfo)}");
+        }
+
+        Collapse(root);
+        if (items.Count > 1)
+        {
+            throw new ArgumentException($"{nameof(ItemsSource)}的根节点必须为单个{nameof(TreeDirInfo)}");
+        }
+
+        try
+        {
+            var files = root.Search(SearchText);
+
+            SelectedItems.Clear();
+            foreach (var file in files)
             {
-                items.InsertRange(items.IndexOf(dir) + 1, dir.Subs);
-                dir.IsExpanded = true;
-            }
-            else
-            {
-                items.RemoveRange(items.IndexOf(dir) + 1, dir.Subs.Count);
-                dir.IsExpanded = false;
+                ExpandTo(file);
+                // file.IsChecked = true;
+                SelectedItems.Add(file);
             }
         }
-        else
+        catch (Exception ex)
         {
-            if (e.Source is Visual { DataContext: TreeFileInfo file })
-            {
-                try
-                {
-                    Process.Start(new ProcessStartInfo(file.Path)
-                    {
-                        UseShellExecute = true
-                    });
-                }
-                catch(Exception ex)
-                {
-                    Log.Error(ex,"打开文件失败");
-                }
-            }
-
+            Debug.Assert(false);
         }
+    }
+    protected override DataGridColumn GetLengthColumn()
+    {
+        return new DataGridTextColumn()
+        {
+            Header = ColumnLengthHeader,
+            Binding = new Binding()
+            { Converter = new TreeFileDirLengthConverter(), Mode = BindingMode.OneWay },
+            IsReadOnly = true,
+        };
     }
 
     protected override DataGridColumn GetNameColumn()
@@ -139,7 +203,8 @@ public class TreeFileDataGrid : SimpleFileDataGrid
                 {
                     lines.Children.Add(new Line()
                     {
-                        StartPoint = new Point(point.x1, point.y1), EndPoint = new Point(point.x2, point.y2),
+                        StartPoint = new Point(point.x1, point.y1),
+                        EndPoint = new Point(point.x2, point.y2),
                         [!Shape.StrokeProperty] = new DynamicResourceExtension("Foreground0"),
                     });
                 }
@@ -172,14 +237,82 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         return column;
     }
 
-    protected override DataGridColumn GetLengthColumn()
+    private void Collapse(TreeDirInfo dir)
     {
-        return new DataGridTextColumn()
+        if (dir.IsExpanded == false)
         {
-            Header = ColumnLengthHeader,
-            Binding = new Binding()
-                { Converter = new TreeFileDirLengthConverter(), Mode = BindingMode.OneWay },
-            IsReadOnly = true,
-        };
+            return;
+        }
+
+        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        {
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+        }
+
+        foreach (var subDir in dir.SubDirs.Where(p => p.IsExpanded))
+        {
+            Collapse(subDir);
+        }
+
+        items.RemoveRange(items.IndexOf(dir) + 1, dir.Subs.Count);
+        dir.IsExpanded = false;
+    }
+
+    private void DataGridDoubleTapped(object sender, TappedEventArgs e)
+    {
+        if (e.Source is Visual { DataContext: TreeDirInfo dir })
+        {
+            if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+            {
+                return;
+            }
+
+            if (!dir.IsExpanded)
+            {
+                Expand(dir);
+            }
+            else
+            {
+                Collapse(dir);
+            }
+        }
+        else
+        {
+            if (!DoubleTappedToOpenFile)
+            {
+                return;
+            }
+
+            if (e.Source is Visual { DataContext: TreeFileInfo file })
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(file.Path)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "打开文件失败");
+                }
+            }
+        }
+    }
+    private void Expand(TreeDirInfo dir)
+    {
+        if (dir.IsExpanded == true)
+        {
+            return;
+        }
+
+        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        {
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+        }
+
+        // dir.Subs.ForEach(p => p.IsChecked = false);
+        items.InsertRange(items.IndexOf(dir) + 1, dir.Subs);
+        dir.IsExpanded = true;
     }
 }

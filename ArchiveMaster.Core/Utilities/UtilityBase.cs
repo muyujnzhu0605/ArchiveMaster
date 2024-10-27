@@ -8,9 +8,12 @@ namespace ArchiveMaster.Utilities
 {
     public abstract class UtilityBase<TConfig> where TConfig : ConfigBase
     {
-        public UtilityBase(TConfig config)
+        private readonly AppConfig appConfig;
+
+        public UtilityBase(TConfig config, AppConfig appConfig)
         {
             Config = config;
+            this.appConfig = appConfig;
         }
 
         public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
@@ -170,9 +173,9 @@ namespace ArchiveMaster.Utilities
             }
 
 
-            if (AppConfig.Instance.DebugMode && AppConfig.Instance.DebugModeLoopDelay > 0)
+            if (appConfig.DebugMode && appConfig.DebugModeLoopDelay > 0)
             {
-                Thread.Sleep(AppConfig.Instance.DebugModeLoopDelay);
+                Thread.Sleep(appConfig.DebugModeLoopDelay);
             }
         }
     }

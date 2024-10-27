@@ -14,7 +14,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:MainViewModel"
-    Background="{DynamicResource Background2}"
+    Background="{DynamicResource Background1}"
     IsEnabled="{Binding IsEnable}"
     mc:Ignorable="d">
     <Design.DataContext>
@@ -78,7 +78,7 @@
                                         <TextBlock
                                             FontFamily="{StaticResource IconFont}"
                                             FontSize="16"
-                                            Text="&#xE10C;" />
+                                            Text="{StaticResource More}" />
                                         <Button.Flyout>
                                             <MenuFlyout ItemsSource="{Binding MenuItems}">
                                                 <MenuFlyout.ItemContainerTheme>
@@ -139,7 +139,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Background="Transparent"
-                    Content="&#xE115;"
+                    Content="{StaticResource Settings}"
                     FontFamily="{StaticResource IconFont}"
                     FontSize="18"
                     IsVisible="{Binding !IsToolOpened}">
@@ -148,10 +148,15 @@
                             <StackPanel Orientation="Vertical">
                                 <CheckBox
                                     Content="调试模式"
-                                    IsChecked="{Binding Source={x:Static cfg:AppConfig.Instance}, Path=DebugMode}" />
+                                    IsChecked="{Binding Path=AppConfig.DebugMode}" />
                                 <ctrl:FormItem Label="调试模式循环延迟（毫秒）：">
-                                    <TextBox Text="{Binding Source={x:Static cfg:AppConfig.Instance}, Path=DebugModeLoopDelay}" />
+                                    <TextBox Text="{Binding Path=AppConfig.DebugModeLoopDelay}" />
                                 </ctrl:FormItem>
+                                <CheckBox
+                                    Command="{Binding SetAutoStartCommand}"
+                                    CommandParameter="{Binding $self.IsChecked, Mode=OneWay}"
+                                    Content="开机自启"
+                                    IsChecked="{Binding IsAutoStart}" />
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>

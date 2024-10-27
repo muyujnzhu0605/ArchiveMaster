@@ -90,9 +90,10 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IStor
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
-        Services.Builder.AddSingleton<IPermissionService>(this);
-        Services.Builder.AddSingleton<IBackCommandService>(this);
-        Services.Builder.AddSingleton<IViewPadding>(this);
+        throw new NotImplementedException();
+        //Services.Builder.AddSingleton<IPermissionService>(this);
+        //Services.Builder.AddSingleton<IBackCommandService>(this);
+        //Services.Builder.AddSingleton<IViewPadding>(this);
         PlatformServices.StorageService = this;
 
         return base.CustomizeAppBuilder(builder);

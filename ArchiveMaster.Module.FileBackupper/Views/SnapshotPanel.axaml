@@ -1,0 +1,48 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.SnapshotPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="*,8,Auto">
+        <DataGrid
+            IsReadOnly="True"
+            ItemsSource="{Binding Snapshots}"
+            SelectedItem="{Binding SelectedSnapshot}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding Type, Converter={StaticResource DescriptionConverter}}"
+                    Header="类型" />
+
+                <DataGridTextColumn
+                    Binding="{Binding CreatedFileCount}"
+                    Header="新增" />
+                <DataGridTextColumn
+                    Binding="{Binding DeletedFileCount}"
+                    Header="删除" />
+                <DataGridTextColumn
+                    Binding="{Binding ModifiedFileCount}"
+                    Header="修改" />
+
+                <DataGridTextColumn
+                    Binding="{Binding BeginTime, Converter={StaticResource DateTimeConverter}}"
+                    Header="开始时间" />
+                <DataGridTextColumn
+                    Binding="{Binding EndTime, Converter={StaticResource DateTimeConverter}}"
+                    Header="完成时间" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel
+            Grid.Row="2"
+            Orientation="Horizontal">
+            <Button
+                Classes="Icon"
+                Command="{Binding LoadSnapshotsCommand}"
+                Content="{StaticResource Refresh}"
+                ToolTip.Tip="刷新" />
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -13,8 +13,8 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Utilities
 {
-    public class RepairModifiedTimeUtility(RepairModifiedTimeConfig config)
-        : TwoStepUtilityBase<RepairModifiedTimeConfig>(config)
+    public class RepairModifiedTimeUtility(RepairModifiedTimeConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<RepairModifiedTimeConfig>(config, appConfig)
     {
         public string[] Extensions = { "jpg", "jpeg", "heif", "heic" };
 

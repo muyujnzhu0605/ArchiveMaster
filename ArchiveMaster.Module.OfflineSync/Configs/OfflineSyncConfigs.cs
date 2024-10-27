@@ -16,14 +16,19 @@ namespace ArchiveMaster.Configs
 
         public Dictionary<string, SingleConfig> ConfigCollection { get; set; } = new Dictionary<string, SingleConfig>()
         {
-            ["默认"]=new SingleConfig()
+            ["默认"] = new SingleConfig()
         };
-        
+
         [JsonIgnore]
         public SingleConfig CurrentConfig
         {
             get
             {
+                if (CurrentConfigName == null)
+                {
+                    return null;
+                }
+
                 if (ConfigCollection.TryGetValue(CurrentConfigName, out SingleConfig value))
                 {
                     return value;

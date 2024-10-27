@@ -13,8 +13,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace ArchiveMaster.Utilities
 {
-    public class DirStructureCloneUtility(DirStructureCloneConfig config)
-        : TwoStepUtilityBase<DirStructureCloneConfig>(config)
+    public class DirStructureCloneUtility(DirStructureCloneConfig config, AppConfig appConfig)
+        : TwoStepUtilityBase<DirStructureCloneConfig>(config, appConfig)
     {
         public TreeDirInfo RootDir { get; private set; }
 
@@ -66,14 +66,13 @@ namespace ArchiveMaster.Utilities
             File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));
         }
 
-        public override Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken token)
         {
             List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
             NotifyMessage("正在枚举文件");
             NotifyProgressIndeterminate();
-
-            return Task.Run(() => { RootDir = TreeDirInfo.BuildTree(config.SourceDir); }, token);
+            RootDir = await TreeDirInfo.BuildTreeAsync(config.SourceDir, token);
         }
 
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]

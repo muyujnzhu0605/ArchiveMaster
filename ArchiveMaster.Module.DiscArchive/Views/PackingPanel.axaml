@@ -31,19 +31,9 @@
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="黑名单：">
-                <Grid ColumnDefinitions="*,8,Auto">
-                    <TextBox
-                        AcceptsReturn="True"
-                        MaxLines="5"
-                        MinLines="3"
-                        Text="{Binding Config.BlackList}"
-                        Watermark="可以是文件名，也可以是完整路径；一行一项" />
-                    <CheckBox
-                        Grid.Column="2"
-                        VerticalAlignment="Center"
-                        Content="使用正则表达式"
-                        IsChecked="{Binding Config.BlackListUseRegex}" />
-                </Grid>
+                <v:BlackListTextBox
+                    Text="{Binding Config.BlackList}"
+                    UseRegex="{Binding Config.BlackListUseRegex}" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
@@ -199,14 +189,14 @@
                 <Button
                     Classes="Icon"
                     Command="{Binding SelectAllCommand}"
-                    Content="&#xE8B3;"
+                    Content="{StaticResource SelectAll}"
                     FontFamily="{StaticResource IconFont}"
                     ToolTip.Tip="全选" />
                 <Button
                     Grid.Column="2"
                     Classes="Icon"
                     Command="{Binding SelectNoneCommand}"
-                    Content="&#xE8E6;"
+                    Content="{StaticResource ClearSelection}"
                     FontFamily="{StaticResource IconFont}"
                     ToolTip.Tip="清除" />
             </Grid>

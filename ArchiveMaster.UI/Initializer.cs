@@ -2,51 +2,89 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
+using ArchiveMaster.Utilities;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster;
 
-public class Initializer
+public static class Initializer
 {
-    public void Initialize()
-    {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        InitializeModules();
-        AppConfig.Instance.Load();
+    private static bool stopped = false;
+    private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
+    public static IHost AppHost { get; private set; }
 
-        Services.Builder.AddSingleton(this);
-        Services.Builder.AddTransient<MainWindow>();
-        Services.Builder.AddTransient<MainView>();
-        Services.Builder.AddTransient<MainViewModel>();
-
-        Services.BuildServiceProvider();
-    }
-
-    public IModuleInitializer[] ModuleInitializers { get; } =
+    public static IModuleInitializer[] ModuleInitializers { get; } =
     [
         new FileToolsModuleInitializer(),
         new PhotoArchiveModuleInitializer(),
         new OfflineSyncModuleInitializer(),
         new DiscArchiveModuleInitializer(),
+        new FileBackupperModuleInitializer(),
     ];
 
-    private void InitializeModules()
+    public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
+
+    public static void ClearViewsInstance()
+    {
+        foreach (var group in views)
+        {
+            foreach (var panel in group.Panels)
+            {
+                panel.PanelInstance = null;
+            }
+        }
+    }
+
+    public static void Initialize()
+    {
+        if (AppHost != null)
+        {
+            throw new InvalidOperationException("已经初始化");
+        }
+
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+        var builder = Host.CreateApplicationBuilder();
+        var config = new AppConfig();
+        InitializeModules(builder.Services, config);
+        config.Load(builder.Services);
+        builder.Services.AddSingleton(config);
+        builder.Services.AddTransient<MainWindow>();
+        builder.Services.AddTransient<MainView>();
+        builder.Services.AddTransient<MainViewModel>();
+        builder.Services.AddHostedService<AppLifetime>();
+        builder.Services.TryAddStartupManager();
+        AppHost = builder.Build();
+        Services.Initialize(AppHost.Services);
+        AppHost.Start();
+    }
+
+    public static Task StopAsync()
+    {
+        if (!stopped)
+        {
+            stopped = true;
+            return AppHost.StopAsync();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
     {
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
+
         foreach (var moduleInitializer in ModuleInitializers)
         {
-            if (moduleInitializer == null)
-            {
-                throw new Exception($"模块不存在实现了{nameof(IModuleInitializer)}的类");
-            }
-
-            moduleInitializer.RegisterServices(Services.Builder);
+            moduleInitializer.RegisterServices(services);
 
             try
             {
@@ -54,7 +92,7 @@ public class Initializer
                 {
                     foreach (var config in moduleInitializer.Configs)
                     {
-                        AppConfig.RegisterConfig(config);
+                        appConfig.RegisterConfig(config);
                     }
                 }
 
@@ -71,7 +109,4 @@ public class Initializer
 
         views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
     }
-
-    private List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
-    public IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
 }
