@@ -1,5 +1,6 @@
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
@@ -46,7 +47,6 @@ public partial class BackupService
         {
             foreach (var task in Config.Tasks
                          .Where(p => p.Status == BackupTaskStatus.Ready)
-                         .Where(p => p.EnableAutoBackup)
                          .Where(p => p.ByTimeInterval)
                          .ToList())
             {
@@ -73,19 +73,35 @@ public partial class BackupService
                 //开始备份
                 await using var db = new DbService(task);
                 await db.LogAsync(LogLevel.Information, $"根据间隔时间备份规则，已到应备份时间");
-                BackupService.BackupEngine engine = new BackupService.BackupEngine(task);
-                var hasFullSnapshot = (await db.GetSnapshotsAsync(SnapshotType.Full, token: ct)).Count != 0
-                                      || (await db.GetSnapshotsAsync(SnapshotType.VirtualFull, token: ct)).Count != 0;
+                BackupEngine engine = new BackupEngine(task);
 
-                if (!hasFullSnapshot)
+                var fullSnapshot =
+                    await db.GetLastSnapshotAsync(new[] { SnapshotType.VirtualFull, SnapshotType.Full }, ct);
+
+
+                if (fullSnapshot == null)
                 {
-                    await db.LogAsync(LogLevel.Information, $"未找到全量备份快照，即将开始全量备份，虚拟备份：{task.IsDefaultVirtualBackup}");
+                    await db.LogAsync(LogLevel.Information,
+                        $"未找到全量备份快照，即将开始{(task.IsDefaultVirtualBackup ? "虚拟" : "")}全量备份");
                     await engine.BackupAsync(
                         task.IsDefaultVirtualBackup ? SnapshotType.VirtualFull : SnapshotType.Full, ct);
                 }
                 else
                 {
-                    await engine.BackupAsync(SnapshotType.Increment, ct);
+                    var snapshotCountAfterLastFullSnapshot = await db.GetSnapshotCountAsync(
+                        otherQueryAction: q => { return q.Where(p => p.BeginTime > fullSnapshot.BeginTime); },
+                        token: ct);
+                    if (snapshotCountAfterLastFullSnapshot > task.MaxAutoIncrementBackupCount)
+                    {
+                        await db.LogAsync(LogLevel.Information,
+                            $"最后一次全量备份后的增量备份数量已超过允许值，即将开始{(task.IsDefaultVirtualBackup ? "虚拟" : "")}全量备份");
+                        await engine.BackupAsync(
+                            task.IsDefaultVirtualBackup ? SnapshotType.VirtualFull : SnapshotType.Full, ct);
+                    }
+                    else
+                    {
+                        await engine.BackupAsync(SnapshotType.Increment, ct);
+                    }
                 }
             }
         }
@@ -118,7 +134,7 @@ public partial class BackupService
                 }
             }
 
-            BackupService.BackupEngine engine = new BackupService.BackupEngine(task);
+            BackupEngine engine = new BackupEngine(task);
             await engine.BackupAsync(type, ct);
         }
         finally
@@ -143,7 +159,6 @@ public partial class BackupService
                 {
                     try
                     {
-
                         CreateCancellationToken();
 #if DEBUG
                         await Task.Delay(1000, ct);

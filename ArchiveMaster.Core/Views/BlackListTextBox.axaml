@@ -11,6 +11,7 @@
         <TextBox
             AcceptsReturn="True"
             MaxLines="5"
+            ScrollViewer.HorizontalScrollBarVisibility="Hidden"
             Text="{Binding $parent[UserControl].Text}"
             ToolTip.Tip="可以识别以下格式：&#x0a;文件名：如file.txt“：&#x0a;目录名：以/或\结尾，如cache/&#x0a;路径：如C:\Windows\或/usr/bin/file"
             Watermark="一行一项，支持文件名、目录名、路径" />

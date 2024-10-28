@@ -11,7 +11,7 @@
     xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
-    d:DesignHeight="450"
+    d:DesignHeight="600"
     d:DesignWidth="800"
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
@@ -47,65 +47,84 @@
 
             </Grid>
 
-
-            <ctrl:StackFormItemGroup
+            <ScrollViewer
                 Grid.Column="2"
-                IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}">
-                <TextBlock
-                    FontWeight="Bold"
-                    Text="基本信息" />
-                <ctrl:FormItem Label="任务名：">
-                    <TextBox Text="{Binding SelectedTask.Name}" />
-                </ctrl:FormItem>
-                <ctrl:FormItem Label="需要备份的目录：">
-                    <ctrl:FilePickerTextBox
-                        FileNames="{Binding SelectedTask.SourceDir}"
-                        Type="OpenFolder" />
-                </ctrl:FormItem>
+                HorizontalScrollBarVisibility="Disabled">
+                <ctrl:StackFormItemGroup IsEnabled="{Binding SelectedTask, Converter={StaticResource NotNullConverter}}">
+                    <ctrl:StackFormItemGroup.Styles>
+                        <Style Selector="TextBlock.Title">
+                            <Setter Property="Margin" Value="0,16,0,0" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Style>
+                    </ctrl:StackFormItemGroup.Styles>
+                    <TextBlock
+                        Margin="0"
+                        Classes="Title"
+                        Text="基本信息" />
+                    <ctrl:FormItem Label="任务名：">
+                        <TextBox Text="{Binding SelectedTask.Name}" />
+                    </ctrl:FormItem>
+                    <ctrl:FormItem Label="需要备份的目录：">
+                        <ctrl:FilePickerTextBox
+                            FileNames="{Binding SelectedTask.SourceDir}"
+                            Type="OpenFolder" />
+                    </ctrl:FormItem>
 
-                <ctrl:FormItem Label="备份文件存放目录：">
-                    <ctrl:FilePickerTextBox
-                        FileNames="{Binding SelectedTask.BackupDir}"
-                        Type="OpenFolder" />
-                </ctrl:FormItem>
+                    <ctrl:FormItem Label="备份文件存放目录：">
+                        <ctrl:FilePickerTextBox
+                            FileNames="{Binding SelectedTask.BackupDir}"
+                            Type="OpenFolder" />
+                    </ctrl:FormItem>
 
-                <ctrl:FormItem Label="黑名单：">
-                    <v:BlackListTextBox
-                        Text="{Binding SelectedTask.BlackList}"
-                        UseRegex="{Binding SelectedTask.BlackListUseRegex}" />
-                </ctrl:FormItem>
+                    <ctrl:FormItem Label="黑名单：">
+                        <v:BlackListTextBox
+                            Text="{Binding SelectedTask.BlackList}"
+                            UseRegex="{Binding SelectedTask.BlackListUseRegex}" />
+                    </ctrl:FormItem>
 
 
-                <TextBlock
-                    Margin="0,8,0,0"
-                    FontWeight="Bold"
-                    Text="自动备份" />
-                <CheckBox
-                    Content="启用自动备份"
-                    IsChecked="{Binding SelectedTask.EnableAutoBackup}" />
-                <ctrl:FormItem
-                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}"
-                    Label="定时备份：">
-                    <Grid ColumnDefinitions="Auto,8,*">
-                        <CheckBox IsChecked="{Binding SelectedTask.ByTimeInterval}" />
-                        <TextBox
-                            Grid.Column="2"
-                            IsEnabled="{Binding SelectedTask.ByTimeInterval}"
-                            Text="{Binding SelectedTask.TimeInterval}" />
-                    </Grid>
-                </ctrl:FormItem>
-                <ctrl:FormItem
-                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}"
-                    Label="实时备份：">
+                    <TextBlock
+                        Classes="Title"
+                        Text="定时备份" />
                     <CheckBox
-                        Content="监测文件和目录的改动"
+                        Content="定时查看文件和目录的变化并备份"
+                        IsChecked="{Binding SelectedTask.ByTimeInterval}" />
+
+                    <ctrl:FormItem
+                        IsEnabled="{Binding SelectedTask.ByTimeInterval}"
+                        Label="备份时间间隔：">
+                        <TimePicker SelectedTime="{Binding SelectedTask.TimeInterval}" />
+                    </ctrl:FormItem>
+                    <TextBlock
+                        Classes="Description"
+                        IsEnabled="{Binding SelectedTask.ByTimeInterval}"
+                        Text="优先进行增量备份，若不存在全量备份则进行全量备份" />
+                    <ctrl:FormItem
+                        IsEnabled="{Binding SelectedTask.ByTimeInterval}"
+                        Label="增量备份最大数量：">
+                        <NumericUpDown
+                            FormatString="0"
+                            Increment="10"
+                            Minimum="0"
+                            Value="{Binding SelectedTask.MaxAutoIncrementBackupCount}" />
+                    </ctrl:FormItem>
+                    <TextBlock
+                        Classes="Description"
+                        IsEnabled="{Binding SelectedTask.ByTimeInterval}"
+                        Text="当一个连续的增量备份超过该数量后，将进行一次全量备份" />
+                    <CheckBox
+                        Content="自动进行全量备份时，默认进行虚拟全量备份"
+                        IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}"
+                        IsEnabled="{Binding SelectedTask.ByTimeInterval}" />
+
+                    <TextBlock
+                        Classes="Title"
+                        Text="监控备份" />
+                    <CheckBox
+                        Content="监测发现文件和目录的改动时进行备份"
                         IsChecked="{Binding SelectedTask.ByWatching}" />
-                </ctrl:FormItem>
-                <CheckBox
-                    Content="自动进行全量备份时，默认进行虚拟全量备份"
-                    IsChecked="{Binding SelectedTask.IsDefaultVirtualBackup}"
-                    IsEnabled="{Binding SelectedTask.EnableAutoBackup}" />
-            </ctrl:StackFormItemGroup>
+                </ctrl:StackFormItemGroup>
+            </ScrollViewer>
 
             <Button
                 Grid.Row="2"

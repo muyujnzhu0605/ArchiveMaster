@@ -30,7 +30,7 @@ public partial class DbService
         var query = GetSnapshotQuery(type, includeEmptySnapshot);
 
         query = query.OrderBy(p => p.BeginTime);
-        var snapshots= await query.ToListAsync(token);
+        var snapshots = await query.ToListAsync(token);
         return snapshots;
     }
 
@@ -50,12 +50,35 @@ public partial class DbService
         return query;
     }
 
+    private IQueryable<BackupSnapshotEntity> GetSnapshotQuery(SnapshotType[] types, bool includeEmptySnapshot)
+    {
+        IQueryable<BackupSnapshotEntity> query = GetValidSnapshots();
+        if (types.Length > 0)
+        {
+            query = query.Where(p => types.Contains(p.Type));
+        }
+
+        if (!includeEmptySnapshot)
+        {
+            query = query.Where(p => p.CreatedFileCount + p.DeletedFileCount + p.ModifiedFileCount > 0);
+        }
+
+        return query;
+    }
+
     public async Task<int> GetSnapshotCountAsync(SnapshotType? type = null,
-        bool includeEmptySnapshot = false, CancellationToken token = default)
+        bool includeEmptySnapshot = false,
+        Func<IQueryable<BackupSnapshotEntity>, IQueryable<BackupSnapshotEntity>> otherQueryAction = null,
+        CancellationToken token = default)
     {
         await InitializeAsync(token);
         var query = GetSnapshotQuery(type, includeEmptySnapshot);
         query = query.OrderBy(p => p.BeginTime);
+        if (otherQueryAction != null)
+        {
+            query = otherQueryAction.Invoke(query);
+        }
+
         return await query.CountAsync(cancellationToken: token);
     }
 
@@ -64,6 +87,15 @@ public partial class DbService
     {
         await InitializeAsync(token);
         var query = GetSnapshotQuery(type, true);
+        query = query.OrderByDescending(p => p.BeginTime);
+        return await query.FirstOrDefaultAsync(token);
+    }
+
+    public async Task<BackupSnapshotEntity> GetLastSnapshotAsync(SnapshotType[] types,
+        CancellationToken token = default)
+    {
+        await InitializeAsync(token);
+        var query = GetSnapshotQuery(types, true);
         query = query.OrderByDescending(p => p.BeginTime);
         return await query.FirstOrDefaultAsync(token);
     }
@@ -77,6 +109,7 @@ public partial class DbService
 
     public async Task DeleteSnapshotAsync(BackupSnapshotEntity snapshot)
     {
+        await InitializeAsync();
         //下一个全量备份
         var nextFullSnapshot = await GetValidSnapshots()
             .Where(p => p.BeginTime > snapshot.BeginTime)
