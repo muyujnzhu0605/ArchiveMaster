@@ -1,9 +1,6 @@
-﻿using FzLib;
-using System.ComponentModel;
-using ArchiveMaster.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ArchiveMaster.ViewModels
+namespace ArchiveMaster.ViewModels.FileSystem
 {
     public partial class DiscFilePackage : ObservableObject
     {
@@ -11,7 +8,7 @@ namespace ArchiveMaster.ViewModels
         private int index;
 
         [ObservableProperty]
-        private List<DiscFile> files = new List<DiscFile>();
+        private List<FileSystem.DiscFile> files = new List<FileSystem.DiscFile>();
 
         [ObservableProperty]
         private long totalLength;

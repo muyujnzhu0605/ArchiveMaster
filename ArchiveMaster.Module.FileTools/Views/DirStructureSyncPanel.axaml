@@ -5,6 +5,7 @@
     xmlns:c="using:ArchiveMaster.Converters"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fileSystem="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:ui="http://schemas.modernwpf.com/2019"
@@ -18,7 +19,7 @@
     <UserControl.Resources>
         <DataTemplate
             x:Key="DataGridDetailTemplate"
-            x:DataType="vm:MatchingFileInfo">
+            x:DataType="fileSystem:MatchingFileInfo">
             <Grid
                 Margin="8"
                 ColumnDefinitions="*,16,*">

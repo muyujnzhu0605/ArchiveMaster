@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
@@ -14,40 +14,40 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step3Utility, Step3Config, SyncFileInfo>(appConfig)
+    public partial class Step3ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step3Service, Step3Config, FileSystem.SyncFileInfo>(appConfig)
     {
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
         public override Step3Config Config =>
-            Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step3;
-        protected override Step3Utility CreateUtilityImplement()
+            HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step3;
+        protected override Step3Service CreateServiceImplement()
         {
-            return new Step3Utility(Config, appConfig);
+            return new Step3Service(Config, appConfig);
         }
 
         protected override Task OnInitializedAsync()
         {
-            Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
+            Files = new ObservableCollection<FileSystem.SyncFileInfo>(Service.UpdateFiles);
             return base.OnInitializedAsync();
         }
 
         protected override async Task OnExecutedAsync(CancellationToken token)
         {
-            Utility.AnalyzeEmptyDirectories(token);
-            if (Utility.DeletingDirectories.Count != 0)
+            Service.AnalyzeEmptyDirectories(token);
+            if (Service.DeletingDirectories.Count != 0)
             {
                 var result = await this.SendMessage(new CommonDialogMessage()
                 {
                     Title = "删除空目录",
-                    Message = $"有{Utility.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
+                    Message = $"有{Service.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
                     Detail = string.Join(Environment.NewLine,
-                        Utility.DeletingDirectories.Select(p => p.Path)),
+                        Service.DeletingDirectories.Select(p => p.Path)),
                     Type = CommonDialogMessage.CommonDialogType.YesNo
                 }).Task;
                 if (result.Equals(true))
                 {
-                    Utility.DeleteEmptyDirectories(Config.DeleteMode,
-                        Services.Provider.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
+                    Service.DeleteEmptyDirectories(Config.DeleteMode,
+                        HostServices.Provider.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
                 }
             }
         }

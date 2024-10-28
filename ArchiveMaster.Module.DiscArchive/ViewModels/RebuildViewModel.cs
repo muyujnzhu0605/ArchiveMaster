@@ -1,14 +1,15 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
+using ArchiveMaster.ViewModels.FileSystem;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
 public partial class RebuildViewModel(RebuildConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<RebuildUtility, RebuildConfig>(config, appConfig)
+    : TwoStepViewModelBase<RebuildService, RebuildConfig>(config, appConfig)
 {
     [ObservableProperty]
     private FileSystemTree fileTree;
@@ -18,7 +19,7 @@ public partial class RebuildViewModel(RebuildConfig config, AppConfig appConfig)
 
     protected override Task OnInitializedAsync()
     {
-        FileTree = Utility.FileTree;
+        FileTree = Service.FileTree;
         return base.OnInitializedAsync();
     }
 
@@ -34,7 +35,7 @@ public partial class RebuildViewModel(RebuildConfig config, AppConfig appConfig)
 
     protected override Task OnExecutedAsync(CancellationToken token)
     {
-        RebuildErrors = Utility.RebuildErrors;
+        RebuildErrors = Service.RebuildErrors;
         return base.OnExecutedAsync(token);
     }
 

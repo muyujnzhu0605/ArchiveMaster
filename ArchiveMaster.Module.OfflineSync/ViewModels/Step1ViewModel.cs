@@ -1,6 +1,6 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Messages;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,19 +9,20 @@ using CommunityToolkit.Mvvm.Messaging;
 using FzLib;
 using FzLib.Avalonia.Messages;
 using System.Collections.ObjectModel;
+using ArchiveMaster.ViewModels.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step1ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step1Utility, Step1Config, SimpleFileInfo>(appConfig, false)
+    public partial class Step1ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step1Service, Step1Config, SimpleFileInfo>(appConfig, false)
     {
         [ObservableProperty]
         private string selectedSyncDir;
 
-        public override Step1Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step1;
-        protected override Step1Utility CreateUtilityImplement()
+        public override Step1Config Config => HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step1;
+        protected override Step1Service CreateServiceImplement()
         {
-            return new Step1Utility(Config, appConfig);
+            return new Step1Service(Config, appConfig);
         }
 
         public string SnapshotSuggestedFileName => $"异地备份（{DateTime.Now:yyyyMMdd-HHmmss}）";

@@ -1,7 +1,7 @@
 namespace ArchiveMaster.ViewModels;
 
-public class RebuildError(DiscFile file, string error)
+public class RebuildError(FileSystem.DiscFile file, string error)
 {
     public string Error { get; set; } = error;
-    public DiscFile File { get; set; } = file;
+    public FileSystem.DiscFile File { get; set; } = file;
 }

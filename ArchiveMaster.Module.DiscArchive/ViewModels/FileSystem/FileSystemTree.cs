@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 
-namespace ArchiveMaster.ViewModels
+namespace ArchiveMaster.ViewModels.FileSystem
 {
     [DebuggerDisplay("{Name}   {Count}个子目录，{Files.Count}个文件")]
     public class FileSystemTree : IReadOnlyList<FileSystemTree>
@@ -31,7 +31,7 @@ namespace ArchiveMaster.ViewModels
         }
 
 
-        public DiscFile File { get; set; }
+        public FileSystem.DiscFile File { get; set; }
         public bool IsFile { get; private set; } = false;
 
         public List<FileSystemTree> Files { get; private set; } = new List<FileSystemTree>();

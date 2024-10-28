@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Messages;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +14,13 @@ using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility, EncryptorConfig>
+public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService, EncryptorConfig>
 {
     [ObservableProperty]
     private bool isEncrypting = true;
 
     [ObservableProperty]
-    private List<EncryptorFileInfo> processingFiles;
+    private List<FileSystem.EncryptorFileInfo> processingFiles;
 
     public CipherMode[] CipherModes => Enum.GetValues<CipherMode>();
 
@@ -72,7 +72,7 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorUtility,
 
     protected override Task OnInitializedAsync()
     {
-        ProcessingFiles = Utility.ProcessingFiles;
+        ProcessingFiles = Service.ProcessingFiles;
         return base.OnInitializedAsync();
     }
 

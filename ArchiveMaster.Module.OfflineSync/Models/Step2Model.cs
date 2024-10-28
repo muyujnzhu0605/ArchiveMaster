@@ -1,4 +1,5 @@
 ﻿using ArchiveMaster.ViewModels;
+using SyncFileInfo = ArchiveMaster.ViewModels.FileSystem.SyncFileInfo;
 
 namespace ArchiveMaster.Models
 {

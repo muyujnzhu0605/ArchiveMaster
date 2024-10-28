@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
@@ -60,10 +60,10 @@ namespace ArchiveMaster
             services.AddTransient<DirStructureSyncPanel>();
             services.AddTransient<RenamePanel>();
             
-            services.AddTransient<EncryptorUtility>();
-            services.AddTransient<DirStructureCloneUtility>();
-            services.AddTransient<DirStructureSyncUtility>();
-            services.AddTransient<RenameUtility>();  
+            services.AddTransient<EncryptorService>();
+            services.AddTransient<DirStructureCloneService>();
+            services.AddTransient<DirStructureSyncService>();
+            services.AddTransient<RenameService>();  
             
         }
     }

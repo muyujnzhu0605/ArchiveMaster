@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SyncFileInfo = ArchiveMaster.ViewModels.FileSystem.SyncFileInfo;
 
 namespace ArchiveMaster.Converters
 {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
@@ -32,8 +32,8 @@ namespace ArchiveMaster
             services.AddTransient<PackingPanel>();
             services.AddTransient<RebuildPanel>();
 
-            services.AddTransient<PackingUtility>();
-            services.AddTransient<RebuildUtility>();
+            services.AddTransient<PackingService>();
+            services.AddTransient<RebuildService>();
         }
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {

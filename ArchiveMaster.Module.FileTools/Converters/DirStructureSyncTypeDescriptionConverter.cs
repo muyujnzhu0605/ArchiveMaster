@@ -4,6 +4,7 @@ using ArchiveMaster.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using MatchingFileInfo = ArchiveMaster.ViewModels.FileSystem.MatchingFileInfo;
 
 namespace ArchiveMaster.Converters;
 

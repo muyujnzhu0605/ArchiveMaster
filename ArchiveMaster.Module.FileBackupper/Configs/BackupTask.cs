@@ -27,9 +27,6 @@ public partial class BackupTask : ConfigBase, ICloneable
     private bool byWatching = true;
 
     [ObservableProperty]
-    private bool enableAutoBackup = true;
-
-    [ObservableProperty]
     private bool isDefaultVirtualBackup;
 
     [ObservableProperty]
@@ -38,11 +35,28 @@ public partial class BackupTask : ConfigBase, ICloneable
     [ObservableProperty]
     private string sourceDir;
 
+    /// <summary>
+    /// 定时备份时间间隔
+    /// </summary>
     [ObservableProperty]
     private TimeSpan timeInterval = TimeSpan.FromHours(1);
-    
+
+    /// <summary>
+    /// 当自动备份的增量备份超过这个值后，将进行一次全量备份
+    /// </summary>
+    [ObservableProperty]
+    private int maxAutoIncrementBackupCount = 100;
+
+    partial void OnMaxAutoIncrementBackupCountChanged(int value)
+    {
+        if (value < 0)
+        {
+            MaxAutoIncrementBackupCount = 0;
+        }
+    }
+
     #region 临时变量
-    
+
     [ObservableProperty]
     [property: JsonIgnore]
     private DateTime lastBackupTime;
@@ -50,22 +64,23 @@ public partial class BackupTask : ConfigBase, ICloneable
     [ObservableProperty]
     [property: JsonIgnore]
     private DateTime lastFullBackupTime;
-    
+
     [ObservableProperty]
     [property: JsonIgnore]
     private int snapshotCount;
-    
+
     [ObservableProperty]
     [property: JsonIgnore]
     private int validSnapshotCount;
-    
+
     [ObservableProperty]
     [property: JsonIgnore]
     private BackupTaskStatus status = BackupTaskStatus.Ready;
-    
+
     [ObservableProperty]
     [property: JsonIgnore]
     private string message;
+
     #endregion
 
     public override void Check()

@@ -15,8 +15,9 @@ using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Avalonia;
+using FzLib.Program.Startup;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
@@ -68,7 +69,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (panelInfo.PanelInstance == null)
         {
-            panelInfo.PanelInstance = Services.Provider.GetService(panelInfo.PanelType) as PanelBase ??
+            panelInfo.PanelInstance = HostServices.Provider.GetService(panelInfo.PanelType) as PanelBase ??
                                       throw new Exception($"无法找到{panelInfo.PanelType}服务");
             if (panelInfo.PanelInstance.DataContext is ViewModelBase vm)
             {

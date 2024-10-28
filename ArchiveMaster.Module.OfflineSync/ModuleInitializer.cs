@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
@@ -39,9 +39,9 @@ namespace ArchiveMaster
             services.AddTransient<Step2Panel>();
             services.AddTransient<Step3Panel>();
 
-            services.AddTransient<Step1Utility>();
-            services.AddTransient<Step2Utility>();
-            services.AddTransient<Step3Utility>();
+            services.AddTransient<Step1Service>();
+            services.AddTransient<Step2Service>();
+            services.AddTransient<Step3Service>();
         }
 
         public IList<ConfigInfo> Configs =>
@@ -68,14 +68,14 @@ namespace ArchiveMaster
                     if (folders.Count > 0)
                     {
                         var folder = folders[0].TryGetLocalPath();
-                        await TestUtility.CreateSyncTestFilesAsync(folder);
+                        await TestService.CreateSyncTestFilesAsync(folder);
                     }
                 })),
                 new ModuleMenuItemInfo("自动化测试", new AsyncRelayCommand(async () =>
                 {
                     try
                     {
-                        await TestUtility.TestAllAsync();
+                        await TestService.TestAllAsync();
 
                         await WeakReferenceMessenger.Default.Send(new CommonDialogMessage()
                         {

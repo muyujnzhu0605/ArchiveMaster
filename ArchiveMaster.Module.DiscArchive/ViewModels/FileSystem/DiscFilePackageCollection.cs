@@ -1,11 +1,8 @@
-﻿using System.IO;
-using ArchiveMaster.ViewModels;
-
-namespace ArchiveMaster.ViewModels
+﻿namespace ArchiveMaster.ViewModels.FileSystem
 {
     public class DiscFilePackageCollection
     {
-        public List<DiscFilePackage> DiscFilePackages { get; } = new List<DiscFilePackage>();
-        public List<DiscFile> SizeOutOfRangeFiles { get; } = new List<DiscFile>();
+        public List<FileSystem.DiscFilePackage> DiscFilePackages { get; } = new List<FileSystem.DiscFilePackage>();
+        public List<FileSystem.DiscFile> SizeOutOfRangeFiles { get; } = new List<FileSystem.DiscFile>();
     }
 }

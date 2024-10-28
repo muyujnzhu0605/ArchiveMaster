@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text.Json.Serialization;
 
-namespace ArchiveMaster.ViewModels
+namespace ArchiveMaster.ViewModels.FileSystem
 {
     [DebuggerDisplay("Name = {Name}, Subs Count = {Subs.Count}")]
     public partial class TreeDirInfo : TreeFileDirInfo
@@ -36,7 +36,7 @@ namespace ArchiveMaster.ViewModels
             IsDir = true;
         }
 
-        private TreeDirInfo(SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
+        private TreeDirInfo(FileSystem.SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
             : base(dir, parent, depth, index)
         {
             IsDir = true;
@@ -204,7 +204,7 @@ namespace ArchiveMaster.ViewModels
         /// 增加一个文件，将根据相对文件路径自动创建不存在的子目录并将文件放置到合适的子目录下
         /// </summary>
         /// <param name="file"></param>
-        public void AddFile(SimpleFileInfo file)
+        public void AddFile(FileSystem.SimpleFileInfo file)
         {
             var relativePath = file.RelativePath;
             var parts = relativePath.Split(pathSeparator, StringSplitOptions.RemoveEmptyEntries);
@@ -217,7 +217,7 @@ namespace ArchiveMaster.ViewModels
         /// <param name="pathParts"></param>
         /// <param name="file"></param>
         /// <param name="depth"></param>
-        private void Add(string[] pathParts, SimpleFileInfo file, int depth)
+        private void Add(string[] pathParts, FileSystem.SimpleFileInfo file, int depth)
         {
             //这里的depth和this.Depth可能不同，比如在非顶级目录调用Add方法
             if (depth == pathParts.Length - 1)
@@ -263,7 +263,7 @@ namespace ArchiveMaster.ViewModels
         /// </summary>
         /// <param name="includingDir"></param>
         /// <returns></returns>
-        public IEnumerable<SimpleFileInfo> Flatten(bool includingDir = false)
+        public IEnumerable<FileSystem.SimpleFileInfo> Flatten(bool includingDir = false)
         {
             Stack<TreeDirInfo> stack = new Stack<TreeDirInfo>();
             stack.Push(this);

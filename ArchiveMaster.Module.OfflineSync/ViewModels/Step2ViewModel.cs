@@ -1,27 +1,27 @@
 ﻿using ArchiveMaster.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib;
-using ArchiveMaster.Model;
 using ArchiveMaster.Views;
 using System.Collections;
 using System.Collections.ObjectModel;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
 using Microsoft.Extensions.DependencyInjection;
+using LocalAndOffsiteDir = ArchiveMaster.ViewModels.FileSystem.LocalAndOffsiteDir;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step2ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step2Utility, Step2Config, SyncFileInfo>(appConfig)
+    public partial class Step2ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step2Service, Step2Config, FileSystem.SyncFileInfo>(appConfig)
     {
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        public override Step2Config Config => Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
-        protected override Step2Utility CreateUtilityImplement()
+        public override Step2Config Config => HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
+        protected override Step2Service CreateServiceImplement()
         {
-            return new Step2Utility(Config, appConfig);
+            return new Step2Service(Config, appConfig);
         }
 
         [RelayCommand]
@@ -108,7 +108,7 @@ namespace ArchiveMaster.ViewModels
                 string[] localSearchingDirs = Config.LocalDir.Split(new[] { '|', '\r', '\n' },
                     StringSplitOptions.RemoveEmptyEntries);
                 Config.MatchingDirs =
-                    new ObservableCollection<LocalAndOffsiteDir>(await Step2Utility
+                    new ObservableCollection<LocalAndOffsiteDir>(await Step2Service
                         .MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot, localSearchingDirs));
             }
             catch (OperationCanceledException)
@@ -132,7 +132,7 @@ namespace ArchiveMaster.ViewModels
 
         protected override Task OnInitializedAsync()
         {
-            Files = new ObservableCollection<SyncFileInfo>(Utility.UpdateFiles);
+            Files = new ObservableCollection<FileSystem.SyncFileInfo>(Service.UpdateFiles);
             return base.OnInitializedAsync();
         }
     }

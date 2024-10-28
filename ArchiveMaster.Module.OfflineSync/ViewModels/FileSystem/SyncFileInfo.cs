@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using ArchiveMaster.Enums;
+﻿using ArchiveMaster.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
-using FzLib;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.ViewModels.FileSystem;
 
 public partial class SyncFileInfo : SimpleFileInfo
 {
@@ -34,7 +26,7 @@ public partial class SyncFileInfo : SimpleFileInfo
     private FileUpdateType updateType;
 
     /// <summary>
-    /// 对于 <see cref="UpdateType"/>为<see cref="FileUpdateType.Move"/> 类型的对象，表示异地的相对路径
+    /// 对于 <see cref="ViewModels.SyncFileInfo.UpdateType"/>为<see cref="FileUpdateType.Move"/> 类型的对象，表示异地的相对路径
     /// </summary>
     [ObservableProperty]
     private string oldRelativePath;

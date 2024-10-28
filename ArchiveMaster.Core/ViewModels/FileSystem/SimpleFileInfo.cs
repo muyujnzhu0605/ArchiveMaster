@@ -1,8 +1,8 @@
-﻿using ArchiveMaster.Enums;
+﻿using System.Text.Json.Serialization;
+using ArchiveMaster.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Text.Json.Serialization;
 
-namespace ArchiveMaster.ViewModels
+namespace ArchiveMaster.ViewModels.FileSystem
 {
     public partial class SimpleFileInfo : ObservableObject
     {

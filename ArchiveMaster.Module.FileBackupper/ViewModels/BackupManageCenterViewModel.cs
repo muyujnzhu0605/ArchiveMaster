@@ -1,5 +1,5 @@
 ﻿using ArchiveMaster.Configs;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -40,6 +40,14 @@ namespace ArchiveMaster.ViewModels
         {
             base.OnEnter();
             await LoadTasksAsync();
+        }
+
+        private void ThrowIfIsBackingUp()
+        {
+            if (backupService.IsBackingUp)
+            {
+                throw new InvalidOperationException("有任务正在备份，无法进行操作");
+            }
         }
 
         private async Task<bool> TryDoAsync(string workName, Func<Task> task)

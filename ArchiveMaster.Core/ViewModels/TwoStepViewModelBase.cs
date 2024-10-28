@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Messages;
 using ArchiveMaster.Messages;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -16,8 +16,8 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewModelBase
-    where TUtility : TwoStepUtilityBase<TConfig>
+public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewModelBase
+    where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase
 {
     public TwoStepViewModelBase(TConfig config, AppConfig appConfig, bool enableInitialize = true)
@@ -29,13 +29,13 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
         CanExecute = !enableInitialize;
     }
 
-    protected virtual TUtility Utility { get; private set; }
+    protected virtual TService Service { get; private set; }
 
     public virtual TConfig Config { get; }
 
-    protected virtual TUtility CreateUtilityImplement()
+    protected virtual TService CreateServiceImplement()
     {
-        return Services.Provider.GetRequiredService<TUtility>();
+        return HostServices.Provider.GetRequiredService<TService>();
     }
 
     [ObservableProperty]
@@ -62,24 +62,24 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
 
     public bool ProgressIndeterminate => double.IsNaN(Progress);
 
-    protected void CreateUtility()
+    protected void CreateService()
     {
-        Utility = CreateUtilityImplement();
-        Debug.Assert(Utility != null);
-        Utility.ProgressUpdate += Utility_ProgressUpdate;
-        Utility.MessageUpdate += Utility_MessageUpdate;
+        Service = CreateServiceImplement();
+        Debug.Assert(Service != null);
+        Service.ProgressUpdate += Service_ProgressUpdate;
+        Service.MessageUpdate += Service_MessageUpdate;
     }
 
-    protected void DisposeUtility()
+    protected void DisposeService()
     {
-        if (Utility == null)
+        if (Service == null)
         {
             return;
         }
 
-        Utility.ProgressUpdate -= Utility_ProgressUpdate;
-        Utility.MessageUpdate -= Utility_MessageUpdate;
-        Utility = null;
+        Service.ProgressUpdate -= Service_ProgressUpdate;
+        Service.MessageUpdate -= Service_MessageUpdate;
+        Service = null;
     }
 
     protected virtual Task OnExecutedAsync(CancellationToken token)
@@ -129,12 +129,12 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
     {
         if (!EnableInitialize)
         {
-            CreateUtility();
+            CreateService();
         }
 
-        if (Utility == null)
+        if (Service == null)
         {
-            throw new NullReferenceException($"{nameof(Utility)}为空");
+            throw new NullReferenceException($"{nameof(Service)}为空");
         }
 
         CanExecute = false;
@@ -147,7 +147,7 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
         {
             await OnExecutingAsync(token);
             Config.Check();
-            await Utility.ExecuteAsync(token);
+            await Service.ExecuteAsync(token);
             await OnExecutedAsync(token);
         }, "执行失败");
 
@@ -175,11 +175,11 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
         if (await TryRunAsync(async () =>
             {
                 var d = sw.ElapsedMilliseconds;
-                CreateUtility();
+                CreateService();
                 var e = sw.ElapsedMilliseconds;
                 await OnInitializingAsync();
                 Config.Check();
-                await Utility.InitializeAsync(token);
+                await Service.InitializeAsync(token);
                 await OnInitializedAsync();
             }, "初始化失败"))
         {
@@ -213,7 +213,7 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
 
         Message = "就绪";
         OnReset();
-        DisposeUtility();
+        DisposeService();
     }
 
     private async Task<bool> TryRunAsync(Func<Task> action, string errorTitle)
@@ -257,12 +257,12 @@ public abstract partial class TwoStepViewModelBase<TUtility, TConfig> : ViewMode
         }
     }
 
-    private void Utility_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
+    private void Service_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
     {
         Progress = e.Progress;
     }
 
-    private void Utility_MessageUpdate(object sender, MessageUpdateEventArgs e)
+    private void Service_MessageUpdate(object sender, MessageUpdateEventArgs e)
     {
         Message = e.Message;
     }

@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
 
-namespace ArchiveMaster.ViewModels
+namespace ArchiveMaster.ViewModels.FileSystem
 {
     public partial class EncryptorFileInfo : SimpleFileInfo
     {

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Platforms;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using FzLib.Avalonia.Dialogs;
+using FzLib.Program.Startup;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -63,7 +64,7 @@ public static class Initializer
         builder.Services.AddHostedService<AppLifetime>();
         builder.Services.TryAddStartupManager();
         AppHost = builder.Build();
-        Services.Initialize(AppHost.Services);
+        HostServices.Initialize(AppHost.Services);
         AppHost.Start();
     }
 

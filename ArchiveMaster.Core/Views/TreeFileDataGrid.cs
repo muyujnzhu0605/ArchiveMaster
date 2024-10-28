@@ -5,8 +5,9 @@ using System.Windows.Input;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
+using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -23,6 +24,8 @@ using Avalonia.VisualTree;
 using FzLib;
 using FzLib.Avalonia.Converters;
 using Serilog;
+using SimpleFileInfo = ArchiveMaster.ViewModels.FileSystem.SimpleFileInfo;
+using TreeFileDirInfo = ArchiveMaster.ViewModels.FileSystem.TreeFileDirInfo;
 
 namespace ArchiveMaster.Views;
 

@@ -1,7 +1,7 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Messages;
-using ArchiveMaster.Utilities;
+using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,13 +12,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using ArchiveMaster.ViewModels.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
     public abstract partial class
-        OfflineSyncViewModelBase<TUtility, TConfig, TFile> : TwoStepViewModelBase<TUtility, TConfig>
-        where TUtility : TwoStepUtilityBase<TConfig>
+        OfflineSyncViewModelBase<TService, TConfig, TFile> : TwoStepViewModelBase<TService, TConfig>
+        where TService : TwoStepServiceBase<TConfig>
         where TConfig : ConfigBase
         where TFile : SimpleFileInfo
     {
@@ -41,9 +42,9 @@ namespace ArchiveMaster.ViewModels
         public override void OnEnter()
         {
             base.OnEnter();
-            string currentName = Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
+            string currentName = HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
 
-            ConfigNames = Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
+            ConfigNames = HostServices.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
             ConfigName = currentName;
         }
 
@@ -57,26 +58,26 @@ namespace ArchiveMaster.ViewModels
             nameof(CheckedFileCount))]
         private ObservableCollection<TFile> files = new ObservableCollection<TFile>();
 
-        public long AddedFileCount => Files?.Cast<SyncFileInfo>()
+        public long AddedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Count() ?? 0;
 
-        public long AddedFileLength => Files?.Cast<SyncFileInfo>()
+        public long AddedFileLength => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Sum(p => p.Length) ?? 0;
 
         public int CheckedFileCount => Files?.Where(p => p.IsChecked)?.Count() ?? 0;
 
-        public int DeletedFileCount => Files?.Cast<SyncFileInfo>()
+        public int DeletedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Delete && p.IsChecked)?.Count() ?? 0;
 
         public char DirectorySeparatorChar => Path.DirectorySeparatorChar;
 
-        public long ModifiedFileCount => Files?.Cast<SyncFileInfo>()
+        public long ModifiedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Count() ?? 0;
 
-        public long ModifiedFileLength => Files?.Cast<SyncFileInfo>()
+        public long ModifiedFileLength => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Sum(p => p.Length) ?? 0;
 
-        public int MovedFileCount => Files?.Cast<SyncFileInfo>()
+        public int MovedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Move && p.IsChecked)?.Count() ?? 0;
 
         [RelayCommand]
@@ -102,7 +103,7 @@ namespace ArchiveMaster.ViewModels
             }).Task is string result)
             {
                 ConfigNames.Add(result);
-                Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection
+                HostServices.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection
                     .Add(result, new SingleConfig());
                 ConfigName = result;
             }
@@ -118,7 +119,7 @@ namespace ArchiveMaster.ViewModels
                 }
 
                 this.Notify(nameof(CheckedFileCount));
-                if (s is not SyncFileInfo syncFile)
+                if (s is not FileSystem.SyncFileInfo syncFile)
                 {
                     return;
                 }
@@ -150,9 +151,9 @@ namespace ArchiveMaster.ViewModels
 
         partial void OnConfigNameChanged(string oldValue, string newValue)
         {
-            if (Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName != newValue)
+            if (HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName != newValue)
             {
-                Services.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName = newValue;
+                HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName = newValue;
             }
 
             ResetCommand.Execute(null);
@@ -182,7 +183,7 @@ namespace ArchiveMaster.ViewModels
             if (result.Equals(true))
             {
                 ConfigNames.Remove(name);
-                Services.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Remove(name);
+                HostServices.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Remove(name);
                 if (ConfigNames.Count == 0)
                 {
                     ConfigNames.Add("默认");

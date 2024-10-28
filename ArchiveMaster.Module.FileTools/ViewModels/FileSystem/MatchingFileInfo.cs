@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.ViewModels.FileSystem;
 
 public partial class MatchingFileInfo : SimpleFileInfo
 {
