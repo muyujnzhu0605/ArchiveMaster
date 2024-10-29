@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -120,7 +121,7 @@ public partial class DbService
 
         return fileRecords.Values;
     }
-    
+
     public BackupFileEntity GetSameFile(DateTime time, long length, string sha1)
     {
         Initialize();
@@ -136,4 +137,46 @@ public partial class DbService
         return query.FirstOrDefault();
     }
 
+    public async Task<(IList<FileInfo> RedundantFiles, IList<BackupFileEntity> LostFiles)> CheckFilesAsync(
+        CancellationToken cancellationToken)
+    {
+        var lostFiles = new List<BackupFileEntity>();
+        List<FileInfo> redundantFiles = null;
+        var diskFileLength = Guid.NewGuid().ToString("N").Length;
+        await Task.Run(() =>
+        {
+            var diskFiles = new DirectoryInfo(BackupTask.BackupDir)
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                .WithCancellationToken(cancellationToken)
+                .Where(p => p.Name.Length == diskFileLength)
+                .ToList();
+
+            var query = db.Files
+                .Include(p => p.Snapshot)
+                .Where(p => p.IsDeleted == false)
+                .Where(p => p.Snapshot.IsDeleted == false)
+                .Where(p => p.Snapshot.EndTime > default(DateTime))
+                .Where(p => p.BackupFileName != null)
+                .Where(p => p.Type != FileRecordType.Deleted);
+            var dbFiles = query.ToList();
+
+            var diskFileName2FileInfo = diskFiles.ToDictionary(p => p.Name);
+            var dbFileName2Entity = dbFiles.ToDictionary(p => p.BackupFileName);
+
+            foreach (var key in dbFileName2Entity.Keys)
+            {
+                if (diskFileName2FileInfo.ContainsKey(key))
+                {
+                    diskFileName2FileInfo.Remove(key);
+                }
+                else
+                {
+                    lostFiles.Add(dbFileName2Entity[key]);
+                }
+            }
+
+            redundantFiles = diskFileName2FileInfo.Values.ToList();
+        }, cancellationToken);
+        return (redundantFiles, lostFiles);
+    }
 }

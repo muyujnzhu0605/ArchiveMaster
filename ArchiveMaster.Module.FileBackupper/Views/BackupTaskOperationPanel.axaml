@@ -52,5 +52,13 @@
                 </TextBlock>
             </StackPanel>
         </g:GroupBox>
+
+        <g:GroupBox Header="清理">
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Command="{Binding OrganizeFilesCommand}"
+                    Content="整理文件" />
+            </StackPanel>
+        </g:GroupBox>
     </StackPanel>
 </UserControl>
