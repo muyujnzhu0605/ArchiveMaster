@@ -128,18 +128,14 @@ public partial class BackupService
         {
             foreach (var file in files)
             {
-// #if DEBUG
-//                 await Task.Delay(1000, cancellationToken);
-// #endif
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
                 {
-                    snapshot.CreatedFileCount++;
                     await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, isVirtualFull,
                         cancellationToken);
-
                     await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已备份", snapshot);
+                    snapshot.CreatedFileCount++;
                 }
                 catch (IOException ex)
                 {
@@ -156,9 +152,6 @@ public partial class BackupService
 
             foreach (var file in files)
             {
-// #if DEBUG
-//                 await Task.Delay(1000, cancellationToken);
-// #endif
                 cancellationToken.ThrowIfCancellationRequested();
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
@@ -167,20 +160,20 @@ public partial class BackupService
                     {
                         if (latestFile.Time != file.LastWriteTime || latestFile.Length != file.Length)
                         {
-                            snapshot.ModifiedFileCount++;
                             await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已修改", snapshot);
                             await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Modified, false,
                                 cancellationToken);
+                            snapshot.ModifiedFileCount++;
                         }
 
                         latestFiles.Remove(rawRelativeFilePath);
                     }
                     else
                     {
-                        snapshot.CreatedFileCount++;
                         await db.LogAsync(LogLevel.Information, $"文件{rawRelativeFilePath}已新增", snapshot);
                         await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, false,
                             cancellationToken);
+                        snapshot.CreatedFileCount++;
                     }
                 }
                 catch (IOException ex)
@@ -191,7 +184,6 @@ public partial class BackupService
 
             foreach (var deletingFilePath in latestFiles.Keys)
             {
-                snapshot.DeletedFileCount++;
                 await db.LogAsync(LogLevel.Information, $"文件{deletingFilePath}已删除", snapshot);
                 BackupFileEntity record = new BackupFileEntity()
                 {
@@ -200,6 +192,7 @@ public partial class BackupService
                     Type = FileRecordType.Deleted
                 };
                 db.Add(record);
+                snapshot.DeletedFileCount++;
             }
 
             if (snapshot.IsEmpty())

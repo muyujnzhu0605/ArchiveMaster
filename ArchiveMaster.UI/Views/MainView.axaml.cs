@@ -44,7 +44,6 @@ public partial class MainView : UserControl
         DataContext = viewModel;
 
         InitializeComponent();
-        RegisterMessages();
         if (viewPadding != null)
         {
             Padding = new Thickness(0, viewPadding.GetTop(), 0, viewPadding.GetBottom());
@@ -86,9 +85,17 @@ public partial class MainView : UserControl
         });
     }
 
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+        WeakReferenceMessenger.Default.Cleanup();
+    }
+
     protected override async void OnLoaded(RoutedEventArgs e)
     {
         base.OnLoaded(e);
+        RegisterMessages();
         permissionService?.CheckPermissions();
         if (appConfig.LoadError != null)
         {
