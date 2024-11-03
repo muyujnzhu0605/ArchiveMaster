@@ -37,20 +37,21 @@ public class FileProgressDialog : ProgressDialog
     }
 
     public async Task CopyFilesAsync(IList<string> sourcePaths, IList<string> destinationPaths, IList<DateTime> times,
-            int bufferSize = 128 * 1024)
+        int bufferSize = 128 * 1024)
     {
         if (sourcePaths.Count != destinationPaths.Count || sourcePaths.Count != times.Count)
         {
             throw new ArgumentException("源、目标或时间的数量不同");
         }
 
-        cts = new CancellationTokenSource();
-        var buffer = new byte[bufferSize];
-
-        Maximum = sourcePaths.Select(p => new FileInfo(p).Length).Sum();
         int i = 0;
         try
         {
+            cts = new CancellationTokenSource();
+            var buffer = new byte[bufferSize];
+
+            Maximum = sourcePaths.Select(p => new FileInfo(p).Length).Sum();
+
             for (; i < sourcePaths.Count; i++)
             {
                 Message = "正在复制" + Path.GetFileName(destinationPaths[i]);

@@ -15,7 +15,7 @@
         RowDetailsTemplate="{x:Null}">
         <v:SimpleFileDataGrid.Columns>
             <DataGridTextColumn
-                Binding="{Binding Entity.Snapshot.BeginTime, Converter={StaticResource DateTimeConverter}}"
+                Binding="{Binding Entity.Snapshot.BeginTime, Mode=OneWay, Converter={StaticResource DateTimeConverter}}"
                 Header="快照时间" />
             <DataGridTemplateColumn
                 CanUserResize="False"

@@ -27,6 +27,12 @@
             SearchText="{Binding #txtFileSearch.Text}"
             SelectedItem="{Binding SelectedFile}">
             <v:TreeFileDataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding Entity.BackupFileName}"
+                    Header="备份文件名" />
+                <DataGridTextColumn
+                    Binding="{Binding Entity.Hash}"
+                    Header="文件哈希（SHA1）" />
                 <DataGridTemplateColumn
                     CanUserResize="False"
                     Header="操作">
@@ -40,7 +46,34 @@
                                     Command="{Binding $parent[TabItem].DataContext.SaveAsCommand}"
                                     CommandParameter="{Binding .}"
                                     Content="另存为" />
+                                <DropDownButton
+                                    Classes="Link"
+                                    Content="复制信息">
+                                    <DropDownButton.Flyout>
+                                        <MenuFlyout>
+                                            <MenuItem
+                                                Command="{Binding $parent[TabItem].DataContext.CopyCommand}"
+                                                CommandParameter="{Binding Name}"
+                                                Header="文件名" />
+                                            <MenuItem
+                                                Command="{Binding $parent[TabItem].DataContext.CopyCommand}"
+                                                CommandParameter="{Binding Path}"
+                                                Header="相对路径" />
+                                            <MenuItem
+                                                Command="{Binding $parent[TabItem].DataContext.CopyCommand}"
+                                                CommandParameter="{Binding Entity.BackupFileName}"
+                                                Header="备份文件名"
+                                                IsVisible="{Binding !!!IsDir}" />
+                                            <MenuItem
+                                                Command="{Binding $parent[TabItem].DataContext.CopyCommand}"
+                                                CommandParameter="{Binding Entity.Hash}"
+                                                Header="文件哈希"
+                                                IsVisible="{Binding !!!IsDir}" />
+                                        </MenuFlyout>
+                                    </DropDownButton.Flyout>
+                                </DropDownButton>
                             </StackPanel>
+
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

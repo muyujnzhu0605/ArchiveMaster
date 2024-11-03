@@ -161,7 +161,7 @@ public partial class DbService
             var dbFiles = query.ToList();
 
             var diskFileName2FileInfo = diskFiles.ToDictionary(p => p.Name);
-            var dbFileName2Entity = dbFiles.ToDictionary(p => p.BackupFileName);
+            var dbFileName2Entity = dbFiles.GroupBy(p => p.BackupFileName).ToDictionary(p=>p.Key,p=>p.FirstOrDefault());
 
             foreach (var key in dbFileName2Entity.Keys)
             {

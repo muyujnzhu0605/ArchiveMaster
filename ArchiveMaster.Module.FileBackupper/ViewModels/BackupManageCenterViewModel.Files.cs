@@ -136,15 +136,22 @@ public partial class BackupManageCenterViewModel
             List<string> sourcePaths = new List<string>();
             List<string> destinationPaths = new List<string>();
             List<DateTime> times = new List<DateTime>();
+            List<string> notExistedFiles = new List<string>();
             foreach (var file in files.Cast<BackupFile>())
             {
                 if (file.Entity.BackupFileName == null)
                 {
-                    await this.ShowErrorAsync($"备份文件{file.Entity.RawFileRelativePath}不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
-                    return;
+                    notExistedFiles.Add(file.Entity.RawFileRelativePath);
+                    continue;
                 }
 
                 string backupFile = Path.Combine(SelectedTask.BackupDir, file.Entity.BackupFileName);
+                if (!File.Exists(backupFile))
+                {
+                    notExistedFiles.Add(file.Entity.RawFileRelativePath);
+                    continue;
+                }
+
                 string fileRelativePath = dir.RelativePath == null
                     ? file.RelativePath
                     : Path.GetRelativePath(dir.RelativePath, file.RelativePath);
@@ -152,15 +159,28 @@ public partial class BackupManageCenterViewModel
                 sourcePaths.Add(backupFile);
                 destinationPaths.Add(destinationPath);
                 times.Add(file.Time);
-
-                if (!File.Exists(backupFile))
-                {
-                    await this.ShowErrorAsync($"备份文件{file.Entity.RawFileRelativePath}不存在", "该文件不存在实际备份文件，可能是文件丢失");
-                    return;
-                }
             }
 
-            await dialog.CopyFilesAsync(sourcePaths, destinationPaths, times);
+            bool copy = true;
+            if (notExistedFiles.Count > 0)
+            {
+                copy = (bool)await this.SendMessage(new CommonDialogMessage()
+                {
+                    Title = "部分文件不存在",
+                    Message = "部分文件不存在实际备份文件，可能是虚拟备份或文件丢失。是否另存为其余文件？",
+                    Detail = string.Join(Environment.NewLine, notExistedFiles),
+                    Type = CommonDialogMessage.CommonDialogType.YesNo
+                }).Task;
+            }
+
+            if (copy)
+            {
+                await dialog.CopyFilesAsync(sourcePaths, destinationPaths, times);
+            }
+            else
+            {
+                dialog.Close();
+            }
         }
     }
 
@@ -196,9 +216,9 @@ public partial class BackupManageCenterViewModel
                 Title = "检查文件"
             }).Task))
         {
-            await TryDoAsync("删除多余文件",  () =>
+            await TryDoAsync("删除多余文件", () =>
             {
-               return Task.Run(() =>
+                return Task.Run(() =>
                 {
                     foreach (var file in issuedFiles.RedundantFiles)
                     {
@@ -207,5 +227,12 @@ public partial class BackupManageCenterViewModel
                 });
             });
         }
+    }
+
+    [RelayCommand]
+    private async Task CopyAsync(object obj)
+    {
+        await this.SendMessage(new GetClipboardMessage()).Clipboard
+            .SetTextAsync(obj is string str ? str : obj?.ToString() ?? "");
     }
 }
