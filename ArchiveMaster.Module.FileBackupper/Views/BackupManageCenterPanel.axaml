@@ -62,8 +62,8 @@
                 <Button
                     Classes="Icon"
                     Command="{Binding LoadTasksCommand}"
-                    Content="{StaticResource Refresh}"
-                    ToolTip.Tip="刷新" />
+                    Content="{StaticResource ReturnToCall}"
+                    ToolTip.Tip="返回" />
             </StackPanel>
 
             <TabControl IsVisible="{Binding !!SelectedTask}">
@@ -84,24 +84,24 @@
                         <Setter Property="HorizontalAlignment" Value="Center" />
                     </Style>
                 </TabControl.Styles>
-                <TabItem
-                    Header="快照文件"
-                    IsVisible="{Binding !!SelectedSnapshot}">
-                    <v:SnapshotFilesPanel />
-                </TabItem>
-                <TabItem
-                    Header="文件历史记录"
-                    IsVisible="{Binding !!SelectedFile}">
-                    <v:SnapshotFileHistoryPanel />
-                </TabItem>
-                <TabItem
-                    Header="修改内容"
-                    IsVisible="{Binding !!SelectedSnapshot}">
-                    <v:SnapshotChangesPanel />
-                </TabItem>
+              <TabItem
+                  Header="变更内容"
+                  IsVisible="{Binding !!SelectedSnapshot}">
+                <v:SnapshotChangesPanel />
+              </TabItem>
+              <TabItem
+                  Header="快照文件"
+                  IsVisible="{Binding !!SelectedSnapshot}">
+                <v:SnapshotFilesPanel />
+              </TabItem>
+              <TabItem
+                  Header="文件历史记录"
+                  IsVisible="{Binding !!SelectedFile}">
+                <v:SnapshotFileHistoryPanel />
+              </TabItem>
                 <TabItem
                     Header="日志"
-                    IsVisible="{Binding !!SelectedSnapshot}">
+                    IsVisible="{Binding SelectedSnapshot}">
                     <v:BackupLogsPanel />
                 </TabItem>
             </TabControl>

@@ -36,19 +36,12 @@ public partial class BackupManageCenterViewModel
     private async Task LoadLogsAsync()
     {
         await using var db = new DbService(SelectedTask);
-        logList = await db.GetLogsAsync(SelectedSnapshot.Id, LogType, LogSearchText);
+        logList = await db.GetLogsAsync(SelectedSnapshot?.Id??null, LogType, LogSearchText);
         int pages = Math.Max((int)Math.Ceiling(1.0 * logList.Count / countPerPage), 1);
 
         LogPages = new ObservableCollection<int>(Enumerable.Range(1, pages));
-        // if (LogPage != 1)
-        // {
-        //     LogPage = 1;
-        // }
-        // else
-        // {
-        //     OnLogPageChanged(1);
-        // }
-        // OnLogPageChanged(1);
+        LogPage = -1;
+        LogPage = 0;
     }
 
 
@@ -69,8 +62,6 @@ public partial class BackupManageCenterViewModel
 
     partial void OnLogPagesChanged(ObservableCollection<int> value)
     {
-        LogPage = -1;
-        LogPage = 0;
         Logs = new ObservableCollection<BackupLogEntity>(logList.Take(countPerPage));
     }
     [RelayCommand]

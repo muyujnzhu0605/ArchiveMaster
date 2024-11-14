@@ -66,6 +66,8 @@ public partial class BackupManageCenterViewModel
         if (newValue != null)
         {
             await LoadSnapshots();
+            await LoadLogsAsync();
+            SelectedTabIndex = 3;
             await UpdateOperationsEnableAsync();
             newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
         }
