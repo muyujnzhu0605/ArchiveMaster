@@ -3,75 +3,84 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid ColumnDefinitions="*,8,Auto">
         <Button
+            x:Name="btn"
             Grid.Column="2"
             VerticalAlignment="Center"
             Content="设置..">
             <Button.Flyout>
-                <Flyout OverlayDismissEventPassThrough="True">
+                <v:PopupFlyout OverlayDismissEventPassThrough="True">
                     <Grid
                         Width="400"
-                        Height="400"
+                        Height="600"
                         ColumnDefinitions="*,8,*"
-                        RowDefinitions="Auto,8,*,16,Auto,8,*,16,Auto,8,*,8,Auto">
-                        <TextBlock Text="包含的文件：" />
-                        <TextBox
-                            Grid.Row="2"
-                            AcceptsReturn="True"
-                            Text="{Binding $parent[UserControl].Filter.IncludeFiles}" />
+                        RowDefinitions="*,8,Auto,8,Auto">
+                        <Grid.Styles>
+                            <Style Selector="TextBox">
+                                <Setter Property="TextWrapping" Value="Wrap" />
+                            </Style>
+                        </Grid.Styles>
+                        <gb:GroupBox Header="白名单">
+                            <Grid RowDefinitions="Auto,8,*,16,Auto,8,*,16,Auto,8,*">
+                                <TextBlock Text="包含的文件：" />
+                                <TextBox
+                                    Grid.Row="2"
+                                    AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
+                                    Text="{Binding $parent[UserControl].Filter.IncludeFiles}" />
 
-                        <TextBlock
-                            Grid.Row="4"
-                            Text="包含的文件夹：" />
-                        <TextBox
-                            Grid.Row="6"
-                            AcceptsReturn="True"
-                            Text="{Binding $parent[UserControl].Filter.IncludeFolders}" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Text="包含的文件夹：" />
+                                <TextBox
+                                    Grid.Row="6"
+                                    AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
+                                    Text="{Binding $parent[UserControl].Filter.IncludeFolders}" />
 
-                        <TextBlock
-                            Grid.Row="8"
-                            Text="包含的路径：" />
-                        <TextBox
-                            Grid.Row="10"
-                            AcceptsReturn="True"
-                            Text="{Binding $parent[UserControl].Filter.IncludePaths}" />
+                                <TextBlock
+                                    Grid.Row="8"
+                                    Text="包含的路径：" />
+                                <TextBox
+                                    Grid.Row="10"
+                                    AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
+                                    Text="{Binding $parent[UserControl].Filter.IncludePaths}" />
+                            </Grid>
+                        </gb:GroupBox>
+                        <gb:GroupBox
+                            Grid.Column="2"
+                            Header="黑名单">
+                            <Grid RowDefinitions="Auto,8,*,16,Auto,8,*,16,Auto,8,*">
+                                <TextBlock Text="排除的文件：" />
+                                <TextBox
+                                    Grid.Row="2"
+                                    AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
+                                    Text="{Binding $parent[UserControl].Filter.ExcludeFiles}" />
+                                <TextBlock
+                                    Grid.Row="4"
+                                    Text="排除的文件夹：" />
+                                <TextBox
+                                    Grid.Row="6"
+                                    AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
+                                    Text="{Binding $parent[UserControl].Filter.ExcludeFolders}" />
 
-                        <TextBlock
-                            Grid.Column="2"
-                            Text="排除的文件：" />
-                        <TextBox
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            AcceptsReturn="True"
-                            Text="{Binding $parent[UserControl].Filter.ExcludeFiles}" />
-
-                        <TextBlock
-                            Grid.Row="4"
-                            Grid.Column="2"
-                            Text="排除的文件夹：" />
-                        <TextBox
-                            Grid.Row="6"
-                            Grid.Column="2"
-                            AcceptsReturn="True"
-                            Text="{Binding $parent[UserControl].Filter.ExcludeFolders}" />
-
-                        <TextBlock
-                            Grid.Row="8"
-                            Grid.Column="2"
-                            Text="排除的路径：" />
-                        <TextBox
-                            Grid.Row="10"
-                            Grid.Column="2"
-                            AcceptsReturn="True"
-                            Text="{Binding $parent[UserControl].Filter.ExcludePaths}" />
-
+                                <TextBlock
+                                    Grid.Row="8"
+                                    Text="排除的路径：" />
+                                <TextBox
+                                    Grid.Row="10"
+                                    AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
+                                    Text="{Binding $parent[UserControl].Filter.ExcludePaths}" />
+                            </Grid>
+                        </gb:GroupBox>
                         <Grid
-                            Grid.Row="12"
+                            Grid.Row="2"
+                            Grid.ColumnSpan="3"
                             ColumnDefinitions="Auto,*,Auto">
                             <Button
                                 Classes="Icon"
@@ -82,8 +91,29 @@
                                 Content="使用正则表达式"
                                 IsChecked="{Binding $parent[UserControl].Filter.UseRegex}" />
                         </Grid>
+
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.ColumnSpan="3"
+                            IsVisible="{Binding !$parent[UserControl].Filter.UseRegex}">
+                            <Run>筛选规则说明：</Run>
+                            <LineBreak />
+                            <Run>1. 对于白名单，文本必须完全匹配模式中的内容；</Run>
+                            <LineBreak />
+                            <Run xml:space="preserve">    每一组中，只要一条规则匹配，筛选即通过。</Run>
+                            <LineBreak />
+                            <Run>2. 对于黑名单，只要文本中包含模式中的关键词，就会被排除；</Run>
+                            <LineBreak />
+                            <Run xml:space="preserve">    每一组中，只要一条规则匹配，文件即被排除。</Run>
+                            <LineBreak />
+                            <Run>3. 通配符说明：</Run>
+                            <LineBreak />
+                            <Run xml:space="preserve">    “*”：匹配零个或多个任意字符；</Run>
+                            <LineBreak />
+                            <Run xml:space="preserve">    “?”：匹配单个任意字符。</Run>
+                        </TextBlock>
                     </Grid>
-                </Flyout>
+                </v:PopupFlyout>
             </Button.Flyout>
         </Button>
     </Grid>

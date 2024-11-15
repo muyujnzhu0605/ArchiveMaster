@@ -12,6 +12,26 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <v:FileFilterControl Filter="{Binding Filter}" />
+        <Grid RowDefinitions="Auto,8,*">
+            <ct:StackFormItemGroup>
+                <ct:FormItem Label="目录：">
+                    <ct:FilePickerTextBox
+                        FileNames="{Binding Dir}"
+                        Type="OpenFolder" />
+                </ct:FormItem>
+                <ct:FormItem Label="筛选：">
+                    <v:FileFilterControl Filter="{Binding Filter}">
+                        <Interaction.Behaviors>
+                            <EventTriggerBehavior EventName="Closed">
+                                <InvokeCommandAction Command="{Binding UpdateStatusCommand}" />
+                            </EventTriggerBehavior>
+                        </Interaction.Behaviors>
+                    </v:FileFilterControl>
+                </ct:FormItem>
+            </ct:StackFormItemGroup>
+            <v:SimpleFileDataGrid
+                Grid.Row="2"
+                ItemsSource="{Binding Files}" />
+        </Grid>
     </v:PanelBase.PanelContent>
 </v:PanelBase>

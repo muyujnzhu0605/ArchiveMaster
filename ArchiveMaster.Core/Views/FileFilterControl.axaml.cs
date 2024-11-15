@@ -18,6 +18,19 @@ public partial class FileFilterControl : UserControl
     {
         InitializeComponent();
     }
+
+    public event EventHandler Closed
+    {
+        add => (btn.Flyout as PopupFlyout).Closed += value;
+        remove => (btn.Flyout as PopupFlyout).Closed -= value;
+    }
+
+    public event EventHandler Opened
+    {
+        add => (btn.Flyout as PopupFlyout).Opened += value;
+        remove => (btn.Flyout as PopupFlyout).Opened -= value;
+    }
+
     public FileFilterConfig Filter
     {
         get => GetValue(FilterProperty);
@@ -26,6 +39,8 @@ public partial class FileFilterControl : UserControl
 
     private void ResetButton_OnClick(object sender, RoutedEventArgs e)
     {
-        new FileFilterConfig().Adapt(Filter);
+        var newObj = new FileFilterConfig();
+        newObj.UseRegex = Filter.UseRegex;
+        newObj.Adapt(Filter);
     }
 }
