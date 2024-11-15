@@ -1,0 +1,90 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.FileFilterControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid ColumnDefinitions="*,8,Auto">
+        <Button
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Content="设置..">
+            <Button.Flyout>
+                <Flyout OverlayDismissEventPassThrough="True">
+                    <Grid
+                        Width="400"
+                        Height="400"
+                        ColumnDefinitions="*,8,*"
+                        RowDefinitions="Auto,8,*,16,Auto,8,*,16,Auto,8,*,8,Auto">
+                        <TextBlock Text="包含的文件：" />
+                        <TextBox
+                            Grid.Row="2"
+                            AcceptsReturn="True"
+                            Text="{Binding $parent[UserControl].Filter.IncludeFiles}" />
+
+                        <TextBlock
+                            Grid.Row="4"
+                            Text="包含的文件夹：" />
+                        <TextBox
+                            Grid.Row="6"
+                            AcceptsReturn="True"
+                            Text="{Binding $parent[UserControl].Filter.IncludeFolders}" />
+
+                        <TextBlock
+                            Grid.Row="8"
+                            Text="包含的路径：" />
+                        <TextBox
+                            Grid.Row="10"
+                            AcceptsReturn="True"
+                            Text="{Binding $parent[UserControl].Filter.IncludePaths}" />
+
+                        <TextBlock
+                            Grid.Column="2"
+                            Text="排除的文件：" />
+                        <TextBox
+                            Grid.Row="2"
+                            Grid.Column="2"
+                            AcceptsReturn="True"
+                            Text="{Binding $parent[UserControl].Filter.ExcludeFiles}" />
+
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="2"
+                            Text="排除的文件夹：" />
+                        <TextBox
+                            Grid.Row="6"
+                            Grid.Column="2"
+                            AcceptsReturn="True"
+                            Text="{Binding $parent[UserControl].Filter.ExcludeFolders}" />
+
+                        <TextBlock
+                            Grid.Row="8"
+                            Grid.Column="2"
+                            Text="排除的路径：" />
+                        <TextBox
+                            Grid.Row="10"
+                            Grid.Column="2"
+                            AcceptsReturn="True"
+                            Text="{Binding $parent[UserControl].Filter.ExcludePaths}" />
+
+                        <Grid
+                            Grid.Row="12"
+                            ColumnDefinitions="Auto,*,Auto">
+                            <Button
+                                Classes="Icon"
+                                Click="ResetButton_OnClick"
+                                Content="{StaticResource Refresh}" />
+                            <CheckBox
+                                Grid.Column="2"
+                                Content="使用正则表达式"
+                                IsChecked="{Binding $parent[UserControl].Filter.UseRegex}" />
+                        </Grid>
+                    </Grid>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
+    </Grid>
+</UserControl>

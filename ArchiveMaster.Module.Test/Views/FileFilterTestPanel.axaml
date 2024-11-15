@@ -1,0 +1,17 @@
+﻿<v:PanelBase
+    x:Class="ArchiveMaster.Views.FileFilterTestPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <v:PanelBase.PanelContent>
+        <v:FileFilterControl Filter="{Binding Filter}" />
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

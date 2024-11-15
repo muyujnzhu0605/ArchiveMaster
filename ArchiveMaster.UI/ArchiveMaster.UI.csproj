@@ -35,5 +35,6 @@
     <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Module.DiscArchive\ArchiveMaster.Module.DiscArchive.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.Test\ArchiveMaster.Module.Test.csproj" />
   </ItemGroup>
 </Project>
