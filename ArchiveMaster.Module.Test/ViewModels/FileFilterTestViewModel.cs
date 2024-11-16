@@ -10,7 +10,7 @@ namespace ArchiveMaster.ViewModels;
 public partial class FileFilterTestViewModel : ViewModelBase
 {
     [ObservableProperty]
-    private FileFilterConfig filter = new();
+    private FileFilterConfig filter = new FileFilterConfig();
 
     [ObservableProperty]
     private string dir;
@@ -23,7 +23,7 @@ public partial class FileFilterTestViewModel : ViewModelBase
         if (Directory.Exists(value))
         {
             Files = new ObservableCollection<SimpleFileInfo>(new DirectoryInfo(value)
-                .EnumerateFiles("*", SearchOption.AllDirectories)
+                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
                 .Select(p => new SimpleFileInfo(p, value)));
             UpdateStatus();
         }

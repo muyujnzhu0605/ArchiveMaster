@@ -4,11 +4,19 @@ namespace ArchiveMaster.Configs
 {
     public partial class FileFilterConfig : ObservableObject
     {
+        private static readonly string DefaultExcludeFiles = $"Thumbs.db{Environment.NewLine}desktop.ini";
+        
+        private static readonly string DefaultExcludeFilesR = @"^(Thumbs\.db)|(desktop.ini)$";
+        
+        private static readonly string DefaultExcludeFolders = "$*";
+        
+        private static readonly string DefaultExcludeFoldersR = @"\$.*";
+        
         [ObservableProperty]
-        private string excludeFiles = "";
+        private string excludeFiles = DefaultExcludeFiles;
 
         [ObservableProperty]
-        private string excludeFolders = "";
+        private string excludeFolders = DefaultExcludeFolders;
 
         [ObservableProperty]
         private string excludePaths = "";
@@ -32,6 +40,9 @@ namespace ArchiveMaster.Configs
                 IncludeFiles = IncludeFiles == "*" ? ".*" : IncludeFiles;
                 IncludeFolders = IncludeFolders == "*" ? ".*" : IncludeFolders;
                 IncludePaths = IncludePaths == "*" ? ".*" : IncludePaths;
+                ExcludeFiles = ExcludeFiles == DefaultExcludeFiles ? DefaultExcludeFilesR : ExcludeFiles;
+                ExcludeFolders = ExcludeFolders == DefaultExcludeFolders ? DefaultExcludeFoldersR : ExcludeFolders;
+                
 
                 IncludeFiles = IncludeFiles.Replace(Environment.NewLine, "");
                 IncludeFolders = IncludeFolders.Replace(Environment.NewLine, "");
@@ -45,6 +56,8 @@ namespace ArchiveMaster.Configs
                 IncludeFiles = IncludeFiles == ".*" ? "*" : IncludeFiles;
                 IncludeFolders = IncludeFolders == ".*" ? "*" : IncludeFolders;
                 IncludePaths = IncludePaths == ".*" ? "*" : IncludePaths;
+                ExcludeFiles = ExcludeFiles == DefaultExcludeFilesR ? DefaultExcludeFiles : ExcludeFiles;
+                ExcludeFolders = ExcludeFolders == DefaultExcludeFoldersR ? DefaultExcludeFolders : ExcludeFolders;
             }
         }
     }

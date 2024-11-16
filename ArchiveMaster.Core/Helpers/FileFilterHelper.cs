@@ -6,8 +6,10 @@ using SimpleFileInfo = ArchiveMaster.ViewModels.FileSystem.SimpleFileInfo;
 
 namespace ArchiveMaster.Helpers;
 
-public class FileFilterHelper
+public partial class FileFilterHelper
 {
+    private static readonly char[] PathSplitter = ['/', '\\'];
+    
     private readonly string[] excludeFiles;
 
     private readonly string[] excludeFolders;
@@ -41,13 +43,13 @@ public class FileFilterHelper
         {
             RegexOptions regexOptions = OperatingSystem.IsWindows() ? RegexOptions.IgnoreCase : RegexOptions.None;
             rIncludeFiles = string.IsNullOrWhiteSpace(filter.IncludeFiles)
-                ? null
+                ? AllowAllRegex()
                 : new Regex(filter.IncludeFiles, regexOptions);
             rIncludeFolders = string.IsNullOrWhiteSpace(filter.IncludeFolders)
-                ? null
+                ? AllowAllRegex()
                 : new Regex(filter.IncludeFolders, regexOptions);
             rIncludePaths = string.IsNullOrWhiteSpace(filter.IncludePaths)
-                ? null
+                ? AllowAllRegex()
                 : new Regex(filter.IncludePaths, regexOptions);
             rExcludeFiles = string.IsNullOrWhiteSpace(filter.ExcludeFiles)
                 ? null
@@ -62,15 +64,15 @@ public class FileFilterHelper
         else
         {
             includeFiles = string.IsNullOrWhiteSpace(filter.IncludeFiles)
-                ? []
+                ? ["*"]
                 : filter.IncludeFiles.Split(Environment.NewLine);
 
             includeFolders = string.IsNullOrWhiteSpace(filter.IncludeFolders)
-                ? []
+                ? ["*"]
                 : filter.IncludeFolders.Split(Environment.NewLine);
 
             includePaths = string.IsNullOrWhiteSpace(filter.IncludePaths)
-                ? []
+                ? ["*"]
                 : filter.IncludePaths.Split(Environment.NewLine);
 
             excludeFiles = string.IsNullOrWhiteSpace(filter.ExcludeFiles)
@@ -86,17 +88,22 @@ public class FileFilterHelper
                 : filter.ExcludePaths.Split(Environment.NewLine);
         }
     }
-
     public bool IsMatched(string path)
     {
-#if DEBUG
-        bool result = IsMatched(path.Replace('\\', '/'), Path.GetFileName(Path.GetDirectoryName(path)),
-            Path.GetFileName(path));
-        Console.WriteLine($"文件{path}筛选结果：{(result ? "通过" : "拦下")}");
-        return result;
-#else
-        return IsMatched(path.Replace('\\','/'), Path.GetFileName(Path.GetDirectoryName(path)), Path.GetFileName(path));
-#endif
+        string name = Path.GetFileName(path);
+        if (!IsMatchedName(name))
+        {
+            return false;
+        }
+
+        path = path.Replace('\\', '/');
+        if (!IsMatchedPath(path))
+        {
+            return false;
+        }
+
+        string[] folders = Path.GetDirectoryName(path)?.Split(PathSplitter, StringSplitOptions.RemoveEmptyEntries);
+        return IsMatchedFolder(folders);
     }
 
     public bool IsMatched(SimpleFileInfo file)
@@ -109,6 +116,9 @@ public class FileFilterHelper
         return IsMatched(file.FullName);
     }
 
+    [GeneratedRegex(".*")]
+    private static partial Regex AllowAllRegex();
+
     /// <summary>
     /// 支持通配符（*表示0个或多个任意字符，?表示1个任意字符）的字符串匹配
     /// </summary>
@@ -116,13 +126,8 @@ public class FileFilterHelper
     /// <param name="pattern">匹配模式</param>
     /// <param name="contains">是否为包含模式。包含模式时，字符串包含pattern则为真，否则需要完全匹配</param>
     /// <returns></returns>
-    public static bool IsMatchedByPattern(string text, string pattern, bool contains)
+    private static bool IsMatchedByPattern(string text, string pattern)
     {
-        if (contains)
-        {
-            pattern = $"*{pattern.Trim('*')}*";
-        }
-
         // 判断是否在 Windows 系统上运行
         if (OperatingSystem.IsWindows())
         {
@@ -175,54 +180,49 @@ public class FileFilterHelper
         return dp[patternLen]; // 返回最终结果，表示文本是否与模式完全匹配
     }
 
-    private bool IsMatched(string path, string folder, string name)
+    private bool IsMatchedFolder(params string[] folders)
     {
-        bool MatchesRegex(Regex regex, string input)
+        if (useRegex)
         {
-            return regex != null && regex.IsMatch(input);
+            return folders.All(folder => !IsMatchesRegex(rExcludeFolders, folder))
+                   && folders.Any(folder => IsMatchesRegex(rIncludeFolders, folder));
         }
+
+        //每个目录的一部分都与每个黑名单不匹配，且任意目录的一部分与任意白名单匹配
+        return folders.All(folder => excludeFolders.All(p => !IsMatchedByPattern(folder, p)))
+               && folders.Any(folder => includeFolders.Any(p => IsMatchedByPattern(folder, p)));
+    }
+
+    private bool IsMatchedName(string fileName)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(fileName);
 
         if (useRegex)
         {
-            if (path != null)
-            {
-                if (MatchesRegex(rExcludePaths, path)) return false;
-                if (MatchesRegex(rIncludePaths, path)) return false;
-            }
-
-            if (folder != null)
-            {
-                if (MatchesRegex(rExcludeFolders, folder)) return false;
-                if (MatchesRegex(rIncludeFolders, folder)) return false;
-            }
-
-            if (name != null)
-            {
-                if (MatchesRegex(rExcludeFiles, name)) return false;
-                if (MatchesRegex(rIncludeFiles, name)) return false;
-            }
+            return !IsMatchesRegex(rExcludeFiles, fileName)
+                   && IsMatchesRegex(rIncludeFiles, fileName);
         }
-        else
+
+        return excludeFiles.All(p => !IsMatchedByPattern(fileName, p))
+               && includeFiles.Any(p => IsMatchedByPattern(fileName, p));
+    }
+
+    private bool IsMatchedPath(string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
+        if (useRegex)
         {
-            if (path != null)
-            {
-                if (excludePaths.Any(p => IsMatchedByPattern(path, p, true))) return false;
-                if (includePaths.All(p => !IsMatchedByPattern(path, p, false))) return false;
-            }
-
-            if (folder != null)
-            {
-                if (excludeFolders.Any(f => IsMatchedByPattern(folder, f, true))) return false;
-                if (includeFolders.All(f => !IsMatchedByPattern(folder, f, false))) return false;
-            }
-
-            if (name != null)
-            {
-                if (excludeFiles.Any(f => IsMatchedByPattern(name, f, true))) return false;
-                if (includeFiles.All(f => !IsMatchedByPattern(name, f, false))) return false;
-            }
+            return !IsMatchesRegex(rExcludePaths, path)
+                   && IsMatchesRegex(rIncludePaths, path);
         }
 
-        return true;
+        return excludePaths.All(p => !IsMatchedByPattern(path, p))
+               && includePaths.Any(p => IsMatchedByPattern(path, p));
+    }
+
+    private bool IsMatchesRegex(Regex regex, string input)
+    {
+        return regex != null && regex.IsMatch(input);
     }
 }

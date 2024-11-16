@@ -15,7 +15,7 @@ public partial class BackupTask : ConfigBase, ICloneable
     private string backupDir;
 
     [ObservableProperty]
-    private FileFilterConfig filter;
+    private FileFilterConfig filter = new FileFilterConfig();
 
     [ObservableProperty]
     private bool byTimeInterval = true;

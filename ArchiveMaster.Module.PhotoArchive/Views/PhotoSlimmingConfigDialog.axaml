@@ -7,6 +7,7 @@
     xmlns:dialog="using:FzLib.Avalonia.Dialogs"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     Title="编辑配置"
     d:DesignHeight="450"
@@ -75,11 +76,8 @@
 
             <gb:GroupBox Header="文件筛选">
                 <ct:StackFormItemGroup>
-                    <ct:FormItem Label="匹配条件（正则）：">
-                        <TextBox Text="{Binding Config.WhiteList}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="黑名单（正则）：">
-                        <TextBox Text="{Binding Config.BlackList}" />
+                    <ct:FormItem Label="匹配条件：">
+                        <v:FileFilterControl Filter="{Binding Config.Filter}" />
                     </ct:FormItem>
                     <ct:FormItem Label="复制后缀名：">
                         <TextBox Text="{Binding Config.CopyDirectlyExtensions, Converter={StaticResource StringListConverter}}" />
