@@ -20,7 +20,7 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
+            var filter = new FileFilterHelper(Config.Filter);
             DiscFilePackageCollection packages = new DiscFilePackageCollection();
             NotifyMessage("正在搜索文件");
 
@@ -29,7 +29,7 @@ namespace ArchiveMaster.Services
                 var filesOrderedByTime = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", SearchOption.AllDirectories)
                     .Where(p => p.LastWriteTime > Config.EarliestTime)
-                    .Where(p => !blacks.IsInBlackList(p))
+                    .Where(filter.IsMatched)
                     .OrderBy(p => p.LastWriteTime)
                     .Select(p => new DiscFile(p, Config.SourceDir));
 

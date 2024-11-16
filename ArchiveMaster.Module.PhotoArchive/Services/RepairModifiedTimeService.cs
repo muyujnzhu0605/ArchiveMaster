@@ -17,7 +17,7 @@ namespace ArchiveMaster.Services
     public class RepairModifiedTimeService(RepairModifiedTimeConfig config, AppConfig appConfig)
         : TwoStepServiceBase<RepairModifiedTimeConfig>(config, appConfig)
     {
-        public string[] Extensions = { "jpg", "jpeg", "heif", "heic" };
+        public string[] Extensions = { "jpg", "jpeg", "heif", "heic","dng" };
 
         public ConcurrentBag<ExifTimeFileInfo> Files { get; } = new ConcurrentBag<ExifTimeFileInfo>();
 
@@ -77,8 +77,8 @@ namespace ArchiveMaster.Services
         private DateTime? FindExifTime(string file)
         {
             IReadOnlyList<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(file);
-            MetadataExtractor.Directory dir = null;
-            if ((dir = directories.FirstOrDefault(p => p.Name == "Exif SubIFD")) != null)
+         
+            foreach (var dir in directories.Where(p=>p.Name=="Exif SubIFD"))
             {
                 if (dir.TryGetDateTime(36867, out DateTime time1))
                 {
@@ -91,9 +91,10 @@ namespace ArchiveMaster.Services
                 }
             }
 
-            if ((dir = directories.FirstOrDefault(p => p.Name == "Exif IFD0")) != null)
+            MetadataExtractor.Directory dir2 = null;
+            if ((dir2 = directories.FirstOrDefault(p => p.Name == "Exif IFD0")) != null)
             {
-                if (dir.TryGetDateTime(306, out DateTime time))
+                if (dir2.TryGetDateTime(306, out DateTime time))
                 {
                     return time;
                 }

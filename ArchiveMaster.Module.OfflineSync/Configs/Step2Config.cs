@@ -9,10 +9,7 @@ namespace ArchiveMaster.Configs
     public partial class Step2Config : ConfigBase
     {
         [ObservableProperty]
-        private string blackList;
-
-        [ObservableProperty]
-        private bool blackListUseRegex;
+        private FileFilterConfig filter;
 
         [ObservableProperty]
         private ExportMode exportMode = ExportMode.Copy;

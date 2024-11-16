@@ -122,7 +122,7 @@ namespace ArchiveMaster.Services
 
                             break;
                         case ExportMode.Copy:
-                        copy:
+                            copy:
                             int tryCount = 10;
 
                             while (--tryCount > 0)
@@ -218,7 +218,7 @@ namespace ArchiveMaster.Services
             int index = 0;
             NotifyProgressIndeterminate();
             NotifyMessage($"正在初始化");
-            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
+            var filter = new FileFilterHelper(Config.Filter);
             await Task.Run(() =>
             {
                 var step1Model = ZipService.ReadFromZip<Step1Model>(Config.OffsiteSnapshot);
@@ -278,7 +278,7 @@ namespace ArchiveMaster.Services
                         NotifyMessage($"正在比对第（{++index} 个）：{relativePath}");
                         localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
 
-                        if (blacks.IsInBlackList(file))
+                        if (!filter.IsMatched(file))
                         {
                             continue;
                         }
@@ -387,7 +387,8 @@ namespace ArchiveMaster.Services
                     {
                         var offsitePathWithTopDir =
                             Path.Combine(Path.GetFileName(file.TopDirectory), file.RelativePath);
-                        if (blacks.IsInBlackList(file))
+
+                        if (!filter.IsMatched(file))
                         {
                             continue;
                         }

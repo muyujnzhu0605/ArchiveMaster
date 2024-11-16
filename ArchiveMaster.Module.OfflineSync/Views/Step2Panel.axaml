@@ -56,10 +56,8 @@
                         FileNames="{Binding Config.PatchDir}"
                         Type="OpenFolder" />
                 </ctrl:FormItem>
-                <ctrl:FormItem Label="黑名单：">
-                    <v:BlackListTextBox
-                        Text="{Binding Config.BlackList}"
-                        UseRegex="{Binding Config.BlackListUseRegex}" />
+                <ctrl:FormItem Label="筛选：">
+                    <v:FileFilterControl Filter="{Binding Config.Filter}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem Label="导出方式：">
                     <ComboBox

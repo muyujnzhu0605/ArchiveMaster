@@ -76,12 +76,9 @@
                             Type="OpenFolder" />
                     </ctrl:FormItem>
 
-                    <ctrl:FormItem Label="黑名单：">
-                        <v:BlackListTextBox
-                            Text="{Binding SelectedTask.BlackList}"
-                            UseRegex="{Binding SelectedTask.BlackListUseRegex}" />
+                    <ctrl:FormItem Label="筛选：">
+                        <v:FileFilterControl Filter="{Binding SelectedTask.Filter}" />
                     </ctrl:FormItem>
-
 
                     <TextBlock
                         Classes="Title"

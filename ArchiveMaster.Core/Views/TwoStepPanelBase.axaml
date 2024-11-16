@@ -56,7 +56,7 @@
                     IsVisible="{Binding IsWorking}"
                     Maximum="1"
                     Minimum="0"
-                    ProgressTextFormat="{}{1:0}%"
+                    ProgressTextFormat="{}{1:0.0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
                     Value="{Binding Progress}">
                     <ProgressBar.Styles>
@@ -108,7 +108,7 @@
                     IsVisible="{Binding IsWorking}"
                     Maximum="1"
                     Minimum="0"
-                    ProgressTextFormat="{}{1:0}%"
+                    ProgressTextFormat="{}{1:0.0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
                     Value="{Binding Progress}">
                     <ProgressBar.Styles>

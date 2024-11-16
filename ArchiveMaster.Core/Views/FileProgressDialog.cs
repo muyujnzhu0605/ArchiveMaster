@@ -100,7 +100,7 @@ public class FileProgressDialog : ProgressDialog
                 await destinationStream.WriteAsync(buffer.AsMemory(0, bytesRead), cts.Token);
                 Value += bytesRead;
 #if DEBUG
-                await Task.Delay(100);
+                // await Task.Delay(100);
 #endif
             }
         }
