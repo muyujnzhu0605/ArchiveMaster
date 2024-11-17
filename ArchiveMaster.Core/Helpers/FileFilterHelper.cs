@@ -124,7 +124,6 @@ public partial class FileFilterHelper
     /// </summary>
     /// <param name="text">字符串</param>
     /// <param name="pattern">匹配模式</param>
-    /// <param name="contains">是否为包含模式。包含模式时，字符串包含pattern则为真，否则需要完全匹配</param>
     /// <returns></returns>
     private static bool IsMatchedByPattern(string text, string pattern)
     {

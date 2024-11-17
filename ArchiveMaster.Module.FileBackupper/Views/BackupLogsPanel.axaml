@@ -7,32 +7,53 @@
     xmlns:l="using:Microsoft.Extensions.Logging"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:semi="https://irihi.tech/semi"
+    xmlns:u="https://irihi.tech/ursa"
+    xmlns:u-semi="https://irihi.tech/ursa/themes/semi"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid RowDefinitions="Auto,8,*">
-        <Grid ColumnDefinitions="Auto,8,Auto,32,*,8,Auto,0,Auto">
+        <Grid ColumnDefinitions="Auto,8,Auto,32,Auto,8,Auto,8,Auto,8,Auto,32,*,8,Auto,0,Auto">
             <TextBlock Text="类型：" />
             <ComboBox
                 Grid.Column="2"
                 DisplayMemberBinding="{Binding ., Converter={StaticResource StringReplaceConverter}, ConverterParameter='Trace:细节;Debug:调试;Information:信息;Warning:警告;Error:错误;Critical:关键;None:全部'}"
                 ItemsSource="{me:EnumValues l:LogLevel}"
                 SelectedItem="{Binding LogType}" />
-            <TextBox
+
+            <TextBlock
                 Grid.Column="4"
-                Text="{Binding LogSearchText}" />
-            <Button
+                Text="时间范围：" />
+            <TextBox
                 Grid.Column="6"
+                Text="{Binding LogTimeFrom}" />
+            <TextBlock
+                Grid.Column="8"
+                Text="至" />
+            <TextBox
+                Grid.Column="10"
+                Text="{Binding LogTimeTo}" />
+            <TextBox
+                Grid.Column="12"
+                Text="{Binding LogSearchText}"
+                Watermark="关键词搜索" />
+            <Button
+                Grid.Column="14"
                 Classes="Icon"
                 Command="{Binding SearchLogsCommand}"
                 Content="{StaticResource Search}" />
             <ComboBox
-                Grid.Column="8"
+                Grid.Column="16"
                 Margin="32,0,0,0"
                 DisplayMemberBinding="{Binding ., StringFormat='第{0}页'}"
                 IsVisible="{Binding LogPages, Converter={StaticResource NotNullConverter}}"
                 ItemsSource="{Binding LogPages}"
-                SelectedIndex="{Binding LogPage, Mode=TwoWay}" />
+                SelectedIndex="{Binding LogPage, Mode=TwoWay}">
+                <Interaction.Behaviors>
+                    <EventTriggerBehavior EventName="" />
+                </Interaction.Behaviors>
+            </ComboBox>
         </Grid>
         <DataGrid
             Grid.Row="2"

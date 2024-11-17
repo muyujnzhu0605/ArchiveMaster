@@ -105,7 +105,7 @@ namespace ArchiveMaster.ViewModels
             {
                 Config.Check();
 
-                string[] localSearchingDirs = Config.LocalDir.Split(new[] { '|', '\r', '\n' },
+                string[] localSearchingDirs = Config.LocalDir.Split(['|', '\r', '\n'],
                     StringSplitOptions.RemoveEmptyEntries);
                 Config.MatchingDirs =
                     new ObservableCollection<LocalAndOffsiteDir>(await Step2Service
@@ -120,14 +120,12 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        protected override Task OnInitializingAsync()
+        protected override async Task OnInitializingAsync()
         {
             if (Config.MatchingDirs is null or { Count: 0 })
             {
-                throw new Exception("没有匹配的目录");
+                await MatchDirsAsync();
             }
-
-            return base.OnInitializingAsync();
         }
 
         protected override Task OnInitializedAsync()

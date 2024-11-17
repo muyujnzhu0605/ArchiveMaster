@@ -41,6 +41,8 @@ public partial class BackupManageCenterViewModel
             SelectedTabIndex = 0;
             LogSearchText = null;
             LogType = LogLevel.None;
+            LogTimeFrom = value.BeginTime.AddHours(-1);
+            LogTimeTo = value.EndTime.AddHours(1);
             await LoadLogsAsync();
             await LoadFilesAsync();
             await LoadFileChangesAsync();

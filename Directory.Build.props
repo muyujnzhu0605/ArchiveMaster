@@ -2,6 +2,7 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
     <AppVersion>2.1.0</AppVersion>
+    <AvaloniaVersion>11.2.1</AvaloniaVersion>
   </PropertyGroup>
 
   <ItemGroup>

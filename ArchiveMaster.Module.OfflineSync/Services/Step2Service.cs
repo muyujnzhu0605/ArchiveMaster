@@ -30,15 +30,16 @@ namespace ArchiveMaster.Services
         public static async Task<IList<LocalAndOffsiteDir>> MatchLocalAndOffsiteDirsAsync(string snapshotPath,
             string[] localSearchingDirs)
         {
-            Step1Model step1 = ZipService.ReadFromZip<Step1Model>(snapshotPath);
-            var matchingDirs =
-                step1.Files
-                    .Select(p => p.TopDirectory)
-                    .Distinct()
-                    .Select(p => new LocalAndOffsiteDir() { OffsiteDir = p, })
-                    .ToList();
+            List<LocalAndOffsiteDir> matchingDirs = null;
             await Task.Run(() =>
             {
+                Step1Model step1 = ZipService.ReadFromZip<Step1Model>(snapshotPath);
+                matchingDirs =
+                    step1.Files
+                        .Select(p => p.TopDirectory)
+                        .Distinct()
+                        .Select(p => new LocalAndOffsiteDir() { OffsiteDir = p, })
+                        .ToList();
                 var matchingDirsDic = matchingDirs.ToDictionary(p => Path.GetFileName(p.OffsiteDir), p => p);
                 foreach (var localSearchingDir in localSearchingDirs)
                 {

@@ -54,6 +54,7 @@ public partial class BackupManageCenterViewModel
         }
     }
 
+
     async partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
     {
         Snapshots = null;
@@ -66,6 +67,8 @@ public partial class BackupManageCenterViewModel
         if (newValue != null)
         {
             await LoadSnapshots();
+            LogTimeFrom = DateTime.Today;
+            LogTimeTo = DateTime.Today.AddDays(1);
             await LoadLogsAsync();
             SelectedTabIndex = 3;
             await UpdateOperationsEnableAsync();

@@ -86,40 +86,42 @@ public class SimpleFileDataGrid : DataGrid
             var buttons = this.GetVisualDescendants()
                 .OfType<Button>()
                 .ToList();
-            if (buttons.Count == 4)
+            if (buttons.Count != 4)
             {
-                foreach (var btn in buttons)
-                {
-                    btn[!IsEnabledProperty] =
-                        new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking))
-                        {
-                            Converter = new InverseBoolConverter()
-                        };
-                }
-
-                var tbtn = (ToggleButton)buttons[3];
-                buttons[0].Click += (_, _) =>
-                {
-                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
-                    {
-                        file.IsChecked = true;
-                    }
-                };
-                buttons[1].Click += (_, _) =>
-                {
-                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
-                    {
-                        file.IsChecked = !file.IsChecked;
-                    }
-                };
-                buttons[2].Click += (_, _) =>
-                {
-                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
-                    {
-                        file.IsChecked = false;
-                    }
-                };
+                return;
             }
+
+            foreach (var btn in buttons)
+            {
+                btn[!IsEnabledProperty] =
+                    new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking))
+                    {
+                        Converter = new InverseBoolConverter()
+                    };
+            }
+
+            var tbtn = (ToggleButton)buttons[3];
+            buttons[0].Click += (_, _) =>
+            {
+                foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                {
+                    file.IsChecked = true;
+                }
+            };
+            buttons[1].Click += (_, _) =>
+            {
+                foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                {
+                    file.IsChecked = !file.IsChecked;
+                }
+            };
+            buttons[2].Click += (_, _) =>
+            {
+                foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                {
+                    file.IsChecked = false;
+                }
+            };
         }
         else
         {
@@ -133,8 +135,8 @@ public class SimpleFileDataGrid : DataGrid
             }
         }
     }
-    
-   protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
+
+    protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
     [
         (ColumnIsCheckedIndex, GetIsCheckedColumn),
         (ColumnStatusIndex, GetProcessStatusColumn),
@@ -148,7 +150,7 @@ public class SimpleFileDataGrid : DataGrid
     protected override void OnInitialized()
     {
         base.OnInitialized();
-      
+
         //插入的，从后往前插，这样不会打乱顺序
         var ordered1 = PresetColumns
             .Where(p => p.Index >= 0)
@@ -206,6 +208,7 @@ public class SimpleFileDataGrid : DataGrid
             Binding = new Binding(nameof(SimpleFileInfo.Length))
                 { Converter = new FileLength2StringConverter(), Mode = BindingMode.OneWay },
             IsReadOnly = true,
+            MaxWidth = 120,
         };
     }
 
@@ -216,6 +219,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnMessageHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Message)),
             IsReadOnly = true,
+            Width = new DataGridLength(400),
         };
     }
 
@@ -225,7 +229,8 @@ public class SimpleFileDataGrid : DataGrid
         {
             Header = ColumnNameHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Name)),
-            IsReadOnly = true
+            IsReadOnly = true,
+            Width = new DataGridLength(400),
         };
     }
 
@@ -236,6 +241,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnPathHeader,
             Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
             IsReadOnly = true,
+            Width = new DataGridLength(400),
         };
     }
 
@@ -246,7 +252,8 @@ public class SimpleFileDataGrid : DataGrid
             CanUserResize = false,
             CanUserReorder = false,
             CanUserSort = false,
-            Header = ColumnStatusHeader
+            Header = ColumnStatusHeader,
+            MaxWidth = 200,
         };
 
         var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) => new Ellipse
@@ -272,6 +279,7 @@ public class SimpleFileDataGrid : DataGrid
                 Mode = BindingMode.OneWay
             },
             IsReadOnly = true,
+            CanUserResize = false
         };
     }
 }
