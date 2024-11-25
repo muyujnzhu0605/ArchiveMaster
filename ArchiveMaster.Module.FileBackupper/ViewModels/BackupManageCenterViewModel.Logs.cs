@@ -47,19 +47,27 @@ public partial class BackupManageCenterViewModel
 
     private async Task LoadLogsAsync()
     {
-        await using var db = new DbService(SelectedTask);
-        pagedLogs = await db.GetLogsAsync(SelectedSnapshot?.Id, LogType, LogSearchText, (LogTimeFrom, LogTimeTo), 0,
-            PageSize);
+        try
+        {
+            await using var db = new DbService(SelectedTask);
+            pagedLogs = await db.GetLogsAsync(SelectedSnapshot?.Id, LogType, LogSearchText, (LogTimeFrom, LogTimeTo), 0,
+                PageSize);
 
-        if (pagedLogs.PageCount == 0)
+            if (pagedLogs.PageCount == 0)
+            {
+                LogPages = null;
+            }
+            else
+            {
+                LogPages = new ObservableCollection<int>(Enumerable.Range(1, pagedLogs.PageCount));
+                Logs = new ObservableCollection<BackupLogEntity>(pagedLogs.Items);
+                LogPage = 0;
+            }
+        }
+        catch (Exception ex)
         {
             LogPages = null;
-        }
-        else
-        {
-            LogPages = new ObservableCollection<int>(Enumerable.Range(1, pagedLogs.PageCount));
-            Logs = new ObservableCollection<BackupLogEntity>(pagedLogs.Items);
-            LogPage = 0;
+            await this.ShowErrorAsync("加载日志失败", ex);
         }
     }
 

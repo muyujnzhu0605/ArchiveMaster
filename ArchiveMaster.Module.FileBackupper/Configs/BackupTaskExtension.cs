@@ -8,6 +8,7 @@ public static class BackupTaskExtension
 {
     public static void BeginBackup(this BackupTask task, SnapshotType type)
     {
+        task.Check();
         task.Status = type switch
         {
             SnapshotType.Full => BackupTaskStatus.FullBackingUp,
@@ -30,6 +31,7 @@ public static class BackupTaskExtension
         }
 
         task.Status = BackupTaskStatus.Ready;
+        task.Message = "";
     }
 
     public static bool IsEmpty(this BackupSnapshotEntity snapshot)
@@ -53,6 +55,7 @@ public static class BackupTaskExtension
             if (task.Status == BackupTaskStatus.Error)
             {
                 task.Status = BackupTaskStatus.Ready;
+                task.Message = "";
             }
         }
         catch (Exception ex)

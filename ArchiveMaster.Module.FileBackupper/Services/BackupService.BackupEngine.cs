@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
@@ -81,7 +82,7 @@ public partial class BackupService
             }
 
             string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
-
+            Debug.WriteLine(rawRelativeFilePath);
 
             BackupFileEntity dbFile = new BackupFileEntity()
             {

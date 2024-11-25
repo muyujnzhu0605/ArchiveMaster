@@ -66,13 +66,22 @@ public partial class BackupManageCenterViewModel
 
         if (newValue != null)
         {
-            await LoadSnapshots();
-            LogTimeFrom = DateTime.Today;
-            LogTimeTo = DateTime.Today.AddDays(1);
-            await LoadLogsAsync();
-            SelectedTabIndex = 3;
-            await UpdateOperationsEnableAsync();
-            newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
+            try
+            {
+                newValue.Check();
+                await LoadSnapshots();
+                LogTimeFrom = DateTime.Today;
+                LogTimeTo = DateTime.Today.AddDays(1);
+                await LoadLogsAsync();
+                SelectedTabIndex = 3;
+                await UpdateOperationsEnableAsync();
+                newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
+            }
+            catch (Exception ex)
+            {
+                await this.ShowErrorAsync("加载任务失败", ex);
+                SelectedTask = null;
+            }
         }
     }
 
