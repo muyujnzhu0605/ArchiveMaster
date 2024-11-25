@@ -58,7 +58,8 @@ public partial class BackupManageCenterViewModel
     async partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
     {
         Snapshots = null;
-
+        LastLog = null;
+        
         if (oldValue != null)
         {
             oldValue.PropertyChanged -= SelectedBackupTaskPropertyChanged;

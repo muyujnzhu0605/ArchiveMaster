@@ -17,6 +17,8 @@ public partial class BackupService
         Config = config;
     }
 
+    public static event EventHandler<BackupLogEventArgs> NewLog;
+    
     public FileBackupperConfig Config { get; }
 
     public bool IsAutoBackingUp { get; private set; }
@@ -107,7 +109,7 @@ public partial class BackupService
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex,"定时备份失败");
+                    Log.Error(ex, "定时备份失败");
                 }
             }
         }
@@ -149,49 +151,49 @@ public partial class BackupService
         }
     }
 
-    public async void StartAutoBackup()
+    public void StartAutoBackup()
     {
-        Task.Factory.StartNew(async () =>
-        {
-            try
-            {
-                foreach (var task in Config.Tasks)
-                {
-                    await task.UpdateStatusAsync();
-                }
+        _ = Task.Run(async () =>
+           {
+               try
+               {
+                   foreach (var task in Config.Tasks)
+                   {
+                       await task.UpdateStatusAsync();
+                   }
 
-                IsAutoBackingUp = true;
-                while (IsAutoBackingUp)
-                {
-                    try
-                    {
-                        CreateCancellationToken();
+                   IsAutoBackingUp = true;
+                   while (IsAutoBackingUp)
+                   {
+                       try
+                       {
+                           CreateCancellationToken();
 #if DEBUG
-                        await Task.Delay(10000, ct);
+                           await Task.Delay(10000, ct);
 #else
                         await Task.Delay(60 * 1000, ct);
 #endif
-                        await CheckAndBackupAllAsync();
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        Log.Information("循环备份任务被单次取消，等待下次一次循环");
-                    }
-                    catch (Exception ex)
-                    {                
-                        Log.Error(ex, "检查和备份任务出错");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "循环备份任务执行出错，已退出自动备份");
-            }
-            finally
-            {
-                IsAutoBackingUp = false;
-            }
-        }, TaskCreationOptions.LongRunning);
+                           await CheckAndBackupAllAsync();
+                       }
+                       catch (OperationCanceledException)
+                       {
+                           Log.Information("循环备份任务被单次取消，等待下次一次循环");
+                       }
+                       catch (Exception ex)
+                       {
+                           Log.Error(ex, "检查和备份任务出错");
+                       }
+                   }
+               }
+               catch (Exception ex)
+               {
+                   Log.Error(ex, "循环备份任务执行出错，已退出自动备份");
+               }
+               finally
+               {
+                   IsAutoBackingUp = false;
+               }
+           });
     }
 
     public Task StopAutoBackupAsync()

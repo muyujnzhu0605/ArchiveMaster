@@ -54,7 +54,7 @@ public partial class DbService
     }
 
 
-    public async ValueTask LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
+    public async ValueTask<BackupLogEntity> LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
         string detail = null, bool forceSave = false)
     {
         await InitializeAsync(default, logDb);
@@ -74,5 +74,6 @@ public partial class DbService
             logs.Clear();
             await logDb.SaveChangesAsync();
         }
+        return log;
     }
 }

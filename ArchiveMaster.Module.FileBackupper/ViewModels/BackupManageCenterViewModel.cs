@@ -32,6 +32,13 @@ namespace ArchiveMaster.ViewModels
             Config = config;
             this.appConfig = appConfig;
             this.backupService = backupService;
+            BackupService.NewLog += (s, e) =>
+            {
+                if (e.Task == SelectedTask)
+                {
+                    LastLog = e.Log;
+                }
+            };
         }
 
         public FileBackupperConfig Config { get; }

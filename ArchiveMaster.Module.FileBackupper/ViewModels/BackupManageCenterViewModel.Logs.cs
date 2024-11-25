@@ -45,6 +45,9 @@ public partial class BackupManageCenterViewModel
     [ObservableProperty]
     private DateTime logTimeTo;
 
+    [ObservableProperty]
+    private BackupLogEntity lastLog;
+
     private async Task LoadLogsAsync()
     {
         try
