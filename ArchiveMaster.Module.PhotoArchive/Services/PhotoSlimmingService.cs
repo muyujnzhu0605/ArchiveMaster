@@ -99,7 +99,6 @@ namespace ArchiveMaster.Services
                 return;
             }
 
-            var filter = new FileFilterHelper(Config.Filter);
             NotifyProgressIndeterminate();
             NotifyMessage("正在筛选需要删除的文件");
             ISet<string> desiredDistFiles = CopyFiles.SkippedFiles
@@ -109,8 +108,7 @@ namespace ArchiveMaster.Services
                 .ToFrozenSet();
 
             foreach (var file in Directory
-                         .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories)
-                         .Where(filter.IsMatched))
+                         .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories))
             {
                 token.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
@@ -133,8 +131,7 @@ namespace ArchiveMaster.Services
 
             desiredDistFolders = desiredDistFolders.ToFrozenSet();
             foreach (var dir in Directory
-                         .EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories)
-                         .Where(filter.IsMatched))
+                         .EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories))
             {
                 if (!desiredDistFolders.Contains(dir))
                 {

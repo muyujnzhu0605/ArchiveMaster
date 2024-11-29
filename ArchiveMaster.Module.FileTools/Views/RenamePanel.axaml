@@ -113,9 +113,6 @@
                     <DataGridTextColumn
                         Binding="{Binding NewName}"
                         Header="新文件（夹）名" />
-                    <DataGridTextColumn
-                        Binding="{Binding NewPath}"
-                        Header="新路径" />
 
                 </DataGrid.Columns>
             </v:SimpleFileDataGrid>

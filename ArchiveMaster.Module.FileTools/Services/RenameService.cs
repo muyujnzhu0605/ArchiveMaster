@@ -170,7 +170,7 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
     {
         var processingFiles = Files.Where(p => p.IsMatched && p.IsChecked).ToList();
         var duplicates = processingFiles
-            .Select(p => p.NewPath)
+            .Select(p => p.GetNewPath())
             .GroupBy(p => p)
             .Where(p => p.Count() > 1)
             .Select(p => p.Key);
@@ -184,14 +184,28 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
         {
             NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             file.TempPath = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
-            File.Move(file.Path, file.TempPath);
+            if (file.IsDir)
+            {
+                Directory.Move(file.Path, file.TempPath);
+            }
+            else
+            {
+                File.Move(file.Path, file.TempPath);
+            }
         }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
             NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
-            File.Move(file.TempPath, file.NewPath);
+            if (file.IsDir)
+            {
+                Directory.Move(file.TempPath, file.GetNewPath());
+            }
+            else
+            {
+                File.Move(file.TempPath, file.GetNewPath());
+            }
         }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
     }
 
@@ -226,7 +240,6 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
                 if (renameFile.IsMatched)
                 {
                     renameFile.NewName = Rename(renameFile);
-                    renameFile.NewPath = Path.Combine(Path.GetDirectoryName(renameFile.Path), renameFile.NewName);
                 }
             }, token, FilesLoopOptions.DoNothing());
 

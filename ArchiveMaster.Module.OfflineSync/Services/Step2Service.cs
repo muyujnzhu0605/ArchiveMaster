@@ -352,7 +352,7 @@ namespace ArchiveMaster.Services
                                     TopDirectory = offsiteTopDirectory,
                                 };
                                 UpdateFiles.Add(movedFile);
-                                localFiles.Add(Path.Combine(offsiteDir.Name, offsiteMovedFile.RelativePath),
+                                localFiles.TryAdd(Path.Combine(offsiteDir.Name, offsiteMovedFile.RelativePath),
                                     0); //如果被移动了，那么不需要进行删除判断，所以要把异地的文件地址也加入进去。
                             }
                             else //新增文件
