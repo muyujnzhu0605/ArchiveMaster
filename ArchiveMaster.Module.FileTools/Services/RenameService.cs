@@ -180,6 +180,8 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
         }
 
         //重命名为临时文件名，避免有可能新的文件名和其他文件的旧文件名一致导致错误的问题
+        //假设直接重命名文件 A -> B，但同时另一个文件正在从 B -> C，可能会导致冲突，因为文件系统在操作过程中会认为目标路径已经存在。
+        //临时名称中转确保了重命名操作在一个独立的“空间”中完成，避免了名称重叠的问题。
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
             NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
@@ -197,7 +199,7 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
+            NotifyMessage($"正在重命名（第二步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             if (file.IsDir)
             {
                 Directory.Move(file.TempPath, file.GetNewPath());
