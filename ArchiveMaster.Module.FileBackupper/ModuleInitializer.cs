@@ -18,12 +18,7 @@ namespace ArchiveMaster
     {
         public string ModuleName => "文件备份服务";
 
-        public int Order =>
-#if DEBUG
-            0;
-#else
-            5;
-#endif
+        public int Order => 5;
 
         public IList<ConfigInfo> Configs =>
         [

@@ -14,8 +14,6 @@
     <None Remove="obj\**" />
   </ItemGroup>
 
-
-
   <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
@@ -23,6 +21,9 @@
   <ItemGroup>
     <Compile Update="Views\EncryptorPanel.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DuplicateFileCleanupPanel.axaml.cs">
+      <DependentUpon>DuplicateFileCleanupPanel.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\RenamePanel.axaml.cs">
       <DependentUpon>RenamePanel.axaml</DependentUpon>
