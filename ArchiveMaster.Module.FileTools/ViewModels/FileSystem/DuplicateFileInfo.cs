@@ -5,10 +5,10 @@ namespace ArchiveMaster.ViewModels.FileSystem;
 public partial class DuplicateFileInfo : SimpleFileInfo
 {
     [ObservableProperty]
-    private string existedFilePath;
+    private SimpleFileInfo existedFile;
 
-    public DuplicateFileInfo(FileInfo file, string topDir,string existedFilePath) : base(file, topDir)
+    public DuplicateFileInfo(FileInfo file, string topDir, SimpleFileInfo existedFile) : base(file, topDir)
     {
-        ExistedFilePath = existedFilePath;
+        ExistedFile = existedFile;
     }
 }

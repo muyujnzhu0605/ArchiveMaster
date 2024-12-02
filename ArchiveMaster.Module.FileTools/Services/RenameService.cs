@@ -224,12 +224,12 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
             if (Config.RenameTarget == RenameTargetType.File)
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions());
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions());
             }
             else
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateDirectories("*", OptionsHelper.GetEnumerationOptions());
+                    .EnumerateDirectories("*", FileEnumerateExtension.GetEnumerationOptions());
             }
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();

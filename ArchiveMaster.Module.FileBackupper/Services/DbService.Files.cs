@@ -146,8 +146,8 @@ public partial class DbService
         await Task.Run(() =>
         {
             var diskFiles = new DirectoryInfo(BackupTask.BackupDir)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                .WithCancellationToken(cancellationToken)
+                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                .ApplyFilter(cancellationToken)
                 .Where(p => p.Name.Length == diskFileLength)
                 .ToList();
 

@@ -45,9 +45,9 @@ public class FileMatchHelper
     public void AddReferenceDir(string dir, CancellationToken cancellationToken = default)
     {
         foreach (var file in new DirectoryInfo(dir)
-                     .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions()))
+                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                     .ApplyFilter(cancellationToken))
         {
-            cancellationToken.ThrowIfCancellationRequested();
             AddFeatureIf(ByName, name2File, file.Name, file.FullName);
             AddFeatureIf(ByLength, length2File, file.Length, file.FullName);
             AddFeatureIf(ByTime, time2File, TruncateDateTime(file.LastWriteTime), file.FullName);

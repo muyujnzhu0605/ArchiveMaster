@@ -45,6 +45,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
                 {
                     return Path;
                 }
+
                 return System.IO.Path.GetRelativePath(TopDirectory, Path);
             }
         }
@@ -78,6 +79,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
             {
                 throw new ArgumentException($"提供的{nameof(topDir)}不是{nameof(file)}的父级");
             }
+
             Time = file.LastWriteTime;
             IsDir = file.Attributes.HasFlag(FileAttributes.Directory);
             if (!IsDir && file is FileInfo f)
@@ -129,5 +131,10 @@ namespace ArchiveMaster.ViewModels.FileSystem
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(IsCompleted));
         }
+
+        public static IEqualityComparer<SimpleFileInfo> EqualityComparer { get; }
+            = EqualityComparer<SimpleFileInfo>.Create(
+                (s1, s2) => s1.Path == s2.Path,
+                s => s.Path.GetHashCode());
     }
 }

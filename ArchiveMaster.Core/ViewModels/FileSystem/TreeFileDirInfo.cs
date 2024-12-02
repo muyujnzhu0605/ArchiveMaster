@@ -30,7 +30,7 @@ public partial class TreeFileDirInfo : FileSystem.SimpleFileInfo
         IsChecked = false;
     }
 
-    internal TreeFileDirInfo(FileSystem.SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
+    internal TreeFileDirInfo(SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
         : base(file)
     {
         Depth = depth;

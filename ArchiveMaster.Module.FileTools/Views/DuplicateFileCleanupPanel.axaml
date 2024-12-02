@@ -58,13 +58,15 @@
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
-            <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn
-                        Binding="{Binding ExistedFilePath}"
-                        Header="已存在文件的路径" />
-                </DataGrid.Columns>
-            </v:SimpleFileDataGrid>
+            <!-- <v:SimpleFileDataGrid ItemsSource="{Binding Files}"> -->
+            <!--     <DataGrid.Columns> -->
+            <!--  <DataGridTextColumn  -->
+            <!--  Binding="{Binding ExistedFile.Path}"  -->
+            <!--  Header="已存在文件的路径" />  -->
+            <!--     </DataGrid.Columns> -->
+            <!-- </v:SimpleFileDataGrid> -->
+
+            <v:TreeFileDataGrid ItemsSource="{Binding Groups}" />
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

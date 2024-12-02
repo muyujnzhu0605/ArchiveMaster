@@ -124,8 +124,8 @@ public partial class BackupService
         {
             var filter = new FileFilterHelper(BackupTask.Filter);
             var files = new DirectoryInfo(BackupTask.SourceDir)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                .WithCancellationToken(cancellationToken)
+                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                .ApplyFilter(cancellationToken)
                 .Where(filter.IsMatched)
                 .ToList();
             return files;

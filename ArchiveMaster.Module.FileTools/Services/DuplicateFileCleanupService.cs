@@ -38,30 +38,53 @@ namespace ArchiveMaster.Services
         public override Task InitializeAsync(CancellationToken token)
         {
             List<DuplicateFileInfo> files = new List<DuplicateFileInfo>();
-
+            Config.Check();
             return Task.Run(() =>
             {
                 NotifyMessage("正在枚举文件");
-                List<FileInfo> allReferenceFiles = new List<FileInfo>();
+                List<SimpleFileInfo> allReferenceFiles = new List<SimpleFileInfo>();
                 if (Config.CleanUpSelf)
                 {
-                    allReferenceFiles = new DirectoryInfo(Config.CleaningDir)
-                        .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                        .WithCancellationToken(token)
-                        .ToList();
+                    allReferenceFiles =
+                        new DirectoryInfo(Config.CleaningDir).GetSimpleFileInfos(Config.CleaningDir, token);
                 }
 
                 if (Config.CleanUpByReference)
                 {
-                    allReferenceFiles = allReferenceFiles.Union(new DirectoryInfo(Config.CleaningDir)
-                        .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                        .WithCancellationToken(token)).ToList();
+                    allReferenceFiles = allReferenceFiles
+                        .Union(new DirectoryInfo(Config.CleaningDir).GetSimpleFileInfos(Config.ReferenceDir, token))
+                        .ToList();
                 }
 
                 NotifyMessage("正在构建文件特征");
                 matcher = BuildFileFeatures(token);
                 Match(allReferenceFiles, token);
+                Group(token);
             }, token);
+        }
+
+        private void Group(CancellationToken cancellationToken)
+        {
+            var tree = TreeDirInfo.CreateEmptyTree();
+            foreach (var group in DuplicateFiles.GroupBy(p => p.ExistedFile,SimpleFileInfo.EqualityComparer))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var refFile = new TreeDirInfo()
+                {
+                    Name = group.Key.Path,
+                    Path = group.Key.Path,
+                    Depth = 1,
+                    Index = tree.Subs.Count,
+                    IsDir = true,
+                };
+                tree.AddSub(refFile);
+                foreach (var file in group)
+                {
+                    refFile.AddSubFile(file);
+                }
+            }
+
+            DuplicateGroups = tree;
         }
 
         private FileMatchHelper BuildFileFeatures(CancellationToken token)
@@ -74,8 +97,9 @@ namespace ArchiveMaster.Services
         }
 
         public IReadOnlyList<DuplicateFileInfo> DuplicateFiles { get; private set; }
+        public TreeDirInfo DuplicateGroups { get; private set; }
 
-        private void Match(IEnumerable<FileInfo> referenceFiles, CancellationToken token)
+        private void Match(IEnumerable<SimpleFileInfo> referenceFiles, CancellationToken token)
         {
             HashSet<string> checkedFiles = new HashSet<string>();
 
@@ -84,13 +108,13 @@ namespace ArchiveMaster.Services
             foreach (var file in referenceFiles)
             {
                 token.ThrowIfCancellationRequested();
-                if (!checkedFiles.Add(file.FullName))
+                if (!checkedFiles.Add(file.Path))
                 {
                     continue;
                 }
 
-                var matchedFiles = matcher.GetMatchedFiles(file);
-                if (matchedFiles.Count == 0 || matchedFiles.Count == 1 && matchedFiles.Contains(file.FullName))
+                var matchedFiles = matcher.GetMatchedFiles(file.FileSystemInfo as FileInfo);
+                if (matchedFiles.Count == 0 || matchedFiles.Count == 1 && matchedFiles.Contains(file.Path))
                 {
                     //没有匹配到，或者只匹配到了自己
                     continue;
@@ -98,14 +122,13 @@ namespace ArchiveMaster.Services
 
                 foreach (var matchedFile in matchedFiles)
                 {
-                    if (matchedFile == file.FullName)
+                    if (matchedFile == file.Path)
                     {
                         continue;
                     }
 
                     checkedFiles.Add(matchedFile);
-                    duplicateFiles.Add(new DuplicateFileInfo(new FileInfo(matchedFile), Config.CleaningDir,
-                        file.FullName));
+                    duplicateFiles.Add(new DuplicateFileInfo(new FileInfo(matchedFile), Config.CleaningDir, file));
                 }
             }
 

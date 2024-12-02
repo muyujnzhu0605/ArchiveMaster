@@ -11,6 +11,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Basic;
 using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
@@ -21,14 +22,19 @@ public partial class DuplicateFileCleanupViewModel(DuplicateFileCleanupConfig co
     [ObservableProperty]
     private ObservableCollection<DuplicateFileInfo> files;
 
+    [ObservableProperty]
+    private BulkObservableCollection<SimpleFileInfo> groups;
+
     protected override Task OnInitializedAsync()
     {
         Files = new ObservableCollection<DuplicateFileInfo>(Service.DuplicateFiles);
+        Groups = new BulkObservableCollection<SimpleFileInfo>(Service.DuplicateGroups.SubDirs);
         return base.OnInitializedAsync();
     }
 
     protected override void OnReset()
     {
         Files = null;
+        Groups = null;
     }
 }

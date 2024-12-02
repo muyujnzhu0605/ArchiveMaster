@@ -45,10 +45,10 @@ namespace ArchiveMaster.Services
 
                 //枚举源目录
                 var sourceFiles = new DirectoryInfo(Config.SourceDir)
-                    .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                     .Where(filter.IsMatched)
                     .Select(p => new SimpleFileInfo(p, Config.SourceDir))
-                    .WithCancellationToken(token)
+                    .ApplyFilter(token)
                     .ToList();
 
                 TryForFiles(sourceFiles, (sourceFile, s) =>
@@ -195,8 +195,8 @@ namespace ArchiveMaster.Services
             length2Template.Clear();
             modifiedTime2Template.Clear();
             var fileInfos = new DirectoryInfo(dir)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                .WithCancellationToken(token)
+                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                .ApplyFilter(token)
                 .Select(p => new SimpleFileInfo(p, dir))
                 .ToList();
 

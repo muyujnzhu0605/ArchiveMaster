@@ -23,7 +23,7 @@ public partial class FileFilterTestViewModel : ViewModelBase
         if (Directory.Exists(value))
         {
             Files = new ObservableCollection<SimpleFileInfo>(new DirectoryInfo(value)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                 .Select(p => new SimpleFileInfo(p, value)));
             UpdateStatus();
         }

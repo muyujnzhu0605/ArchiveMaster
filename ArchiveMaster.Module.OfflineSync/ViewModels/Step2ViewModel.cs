@@ -15,10 +15,14 @@ using LocalAndOffsiteDir = ArchiveMaster.ViewModels.FileSystem.LocalAndOffsiteDi
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step2ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step2Service, Step2Config, FileSystem.SyncFileInfo>(appConfig)
+    public partial class Step2ViewModel(AppConfig appConfig)
+        : OfflineSyncViewModelBase<Step2Service, Step2Config, FileSystem.SyncFileInfo>(appConfig)
     {
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-        public override Step2Config Config => HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
+
+        public override Step2Config Config =>
+            HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
+
         protected override Step2Service CreateServiceImplement()
         {
             return new Step2Service(Config, appConfig);
@@ -98,6 +102,8 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
+        private static readonly char[] LocalDirSplitter = ['|', '\r', '\n'];
+
         [RelayCommand]
         private async Task MatchDirsAsync()
         {
@@ -105,8 +111,8 @@ namespace ArchiveMaster.ViewModels
             {
                 Config.Check();
 
-                string[] localSearchingDirs = Config.LocalDir.Split(['|', '\r', '\n'],
-                    StringSplitOptions.RemoveEmptyEntries);
+                string[] localSearchingDirs =
+                    Config.LocalDir.Split(LocalDirSplitter, StringSplitOptions.RemoveEmptyEntries);
                 Config.MatchingDirs =
                     new ObservableCollection<LocalAndOffsiteDir>(await Step2Service
                         .MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot, localSearchingDirs));
