@@ -6,6 +6,21 @@ namespace ArchiveMaster.ViewModels.FileSystem
     [DebuggerDisplay("Name = {Name}, Subs Count = {Subs.Count}")]
     public partial class TreeDirInfo : TreeFileDirInfo
     {
+        public enum TreeBuildType
+        {
+            /// <summary>
+            /// 手动添加子级
+            /// </summary>
+            Manual,
+
+            /// <summary>
+            /// 通过自动枚举目录或提供文件信息，自动添加子集
+            /// </summary>
+            Automatic
+        }
+
+        public TreeBuildType BuildType { get; private set; }
+
         /// <summary>
         /// 路径分隔符
         /// </summary>
@@ -31,18 +46,18 @@ namespace ArchiveMaster.ViewModels.FileSystem
         /// </summary>
         private List<TreeFileDirInfo> subs = new List<TreeFileDirInfo>();
 
-        private TreeDirInfo()
+        public TreeDirInfo()
         {
             IsDir = true;
         }
 
-        private TreeDirInfo(FileSystem.SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
+        public TreeDirInfo(SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
             : base(dir, parent, depth, index)
         {
             IsDir = true;
         }
 
-        private TreeDirInfo(DirectoryInfo dir, string topDir, TreeDirInfo parent, int depth, int index)
+        public TreeDirInfo(DirectoryInfo dir, string topDir, TreeDirInfo parent, int depth, int index)
             : base(dir, topDir, parent, depth, index)
         {
             IsDir = true;
@@ -85,7 +100,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
         /// </summary>
         /// <param name="item"></param>
         /// <exception cref="ArgumentException"></exception>
-        private void AddSub(TreeFileDirInfo item)
+        public void AddSub(TreeFileDirInfo item)
         {
             TreeDirInfo parent = this;
             switch (item)
@@ -104,7 +119,11 @@ namespace ArchiveMaster.ViewModels.FileSystem
                 case TreeDirInfo dir:
                     subDirs.Add(dir);
                     subs.Add(dir);
-                    subDirsDic.Add(dir.Name, dir);
+                    if (!subDirsDic.TryAdd(dir.Name, dir))
+                    {
+                        // throw new ArgumentException($"目录名{dir.Name}已存在于当前目录{Name}下", nameof(item));
+                    }
+
                     while (parent != null)
                     {
                         parent.SubFolderCount++;
@@ -204,11 +223,57 @@ namespace ArchiveMaster.ViewModels.FileSystem
         /// 增加一个文件，将根据相对文件路径自动创建不存在的子目录并将文件放置到合适的子目录下
         /// </summary>
         /// <param name="file"></param>
-        public void AddFile(FileSystem.SimpleFileInfo file)
+        public void AddFile(SimpleFileInfo file)
         {
             var relativePath = file.RelativePath;
             var parts = relativePath.Split(pathSeparator, StringSplitOptions.RemoveEmptyEntries);
             Add(parts, file, 0);
+        }
+
+        public TreeDirInfo AddSubDir(string dirName)
+        {
+            var subDir = new TreeDirInfo()
+            {
+                Name = dirName,
+                TopDirectory = TopDirectory,
+                Path = Path == null ? dirName : System.IO.Path.Combine(Path, dirName),
+                Depth = Depth + 1,
+                Index = subs.Count,
+                IsDir = true,
+            };
+            AddSub(subDir);
+            return subDir;
+        }
+
+        public TreeDirInfo AddSubDirByPath(string dirPath)
+        {
+            var subDir = new TreeDirInfo()
+            {
+                Name = System.IO.Path.GetFileName(dirPath),
+                TopDirectory = TopDirectory,
+                Path = dirPath,
+                Depth = Depth + 1,
+                Index = subs.Count,
+                IsDir = true,
+            };
+            AddSub(subDir);
+            return subDir;
+        }
+
+        public TreeFileInfo AddSubFile(SimpleFileInfo file)
+        {
+            if (file is TreeFileInfo treeFile)
+            {
+                treeFile.Depth = Depth + 1;
+                treeFile.Index = subs.Count;
+            }
+            else
+            {
+                treeFile = new TreeFileInfo(file, this, Depth + 1, subs.Count);
+            }
+
+            AddSub(treeFile);
+            return treeFile;
         }
 
         /// <summary>
@@ -217,7 +282,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
         /// <param name="pathParts"></param>
         /// <param name="file"></param>
         /// <param name="depth"></param>
-        private void Add(string[] pathParts, FileSystem.SimpleFileInfo file, int depth)
+        private void Add(string[] pathParts, SimpleFileInfo file, int depth)
         {
             //这里的depth和this.Depth可能不同，比如在非顶级目录调用Add方法
             if (depth == pathParts.Length - 1)

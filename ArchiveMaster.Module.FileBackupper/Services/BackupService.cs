@@ -17,6 +17,8 @@ public partial class BackupService
         Config = config;
     }
 
+    public static event EventHandler<BackupLogEventArgs> NewLog;
+    
     public FileBackupperConfig Config { get; }
 
     public bool IsAutoBackingUp { get; private set; }
@@ -46,7 +48,7 @@ public partial class BackupService
         try
         {
             foreach (var task in Config.Tasks
-                         .Where(p => p.Status == BackupTaskStatus.Ready)
+                         .Where(p => p.Status is BackupTaskStatus.Ready or BackupTaskStatus.Error)
                          .Where(p => p.ByTimeInterval)
                          .ToList())
             {
@@ -78,30 +80,36 @@ public partial class BackupService
                 var fullSnapshot =
                     await db.GetLastSnapshotAsync(new[] { SnapshotType.VirtualFull, SnapshotType.Full }, ct);
 
-
-                if (fullSnapshot == null)
+                try
                 {
-                    await db.LogAsync(LogLevel.Information,
-                        $"未找到全量备份快照，即将开始{(task.IsDefaultVirtualBackup ? "虚拟" : "")}全量备份");
-                    await engine.BackupAsync(
-                        task.IsDefaultVirtualBackup ? SnapshotType.VirtualFull : SnapshotType.Full, ct);
-                }
-                else
-                {
-                    var snapshotCountAfterLastFullSnapshot = await db.GetSnapshotCountAsync(
-                        otherQueryAction: q => { return q.Where(p => p.BeginTime > fullSnapshot.BeginTime); },
-                        token: ct);
-                    if (snapshotCountAfterLastFullSnapshot > task.MaxAutoIncrementBackupCount)
+                    if (fullSnapshot == null)
                     {
                         await db.LogAsync(LogLevel.Information,
-                            $"最后一次全量备份后的增量备份数量已超过允许值，即将开始{(task.IsDefaultVirtualBackup ? "虚拟" : "")}全量备份");
+                            $"未找到全量备份快照，即将开始{(task.IsDefaultVirtualBackup ? "虚拟" : "")}全量备份");
                         await engine.BackupAsync(
                             task.IsDefaultVirtualBackup ? SnapshotType.VirtualFull : SnapshotType.Full, ct);
                     }
                     else
                     {
-                        await engine.BackupAsync(SnapshotType.Increment, ct);
+                        var snapshotCountAfterLastFullSnapshot = await db.GetSnapshotCountAsync(
+                            otherQueryAction: q => { return q.Where(p => p.BeginTime > fullSnapshot.BeginTime); },
+                            token: ct);
+                        if (snapshotCountAfterLastFullSnapshot > task.MaxAutoIncrementBackupCount)
+                        {
+                            await db.LogAsync(LogLevel.Information,
+                                $"最后一次全量备份后的增量备份数量已超过允许值，即将开始{(task.IsDefaultVirtualBackup ? "虚拟" : "")}全量备份");
+                            await engine.BackupAsync(
+                                task.IsDefaultVirtualBackup ? SnapshotType.VirtualFull : SnapshotType.Full, ct);
+                        }
+                        else
+                        {
+                            await engine.BackupAsync(SnapshotType.Increment, ct);
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "定时备份失败");
                 }
             }
         }
@@ -143,45 +151,49 @@ public partial class BackupService
         }
     }
 
-    public async void StartAutoBackup()
+    public void StartAutoBackup()
     {
-        Task.Factory.StartNew(async () =>
-        {
-            try
-            {
-                foreach (var task in Config.Tasks)
-                {
-                    await task.UpdateStatusAsync();
-                }
+        _ = Task.Run(async () =>
+           {
+               try
+               {
+                   foreach (var task in Config.Tasks)
+                   {
+                       await task.UpdateStatusAsync();
+                   }
 
-                IsAutoBackingUp = true;
-                while (IsAutoBackingUp)
-                {
-                    try
-                    {
-                        CreateCancellationToken();
+                   IsAutoBackingUp = true;
+                   while (IsAutoBackingUp)
+                   {
+                       try
+                       {
+                           CreateCancellationToken();
 #if DEBUG
-                        await Task.Delay(1000, ct);
+                           await Task.Delay(10000, ct);
 #else
                         await Task.Delay(60 * 1000, ct);
 #endif
-                        await CheckAndBackupAllAsync();
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        Log.Information("循环备份任务被单次取消，等待下次一次循环");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "循环备份任务执行出错，已退出自动备份");
-            }
-            finally
-            {
-                IsAutoBackingUp = false;
-            }
-        }, TaskCreationOptions.LongRunning);
+                           await CheckAndBackupAllAsync();
+                       }
+                       catch (OperationCanceledException)
+                       {
+                           Log.Information("循环备份任务被单次取消，等待下次一次循环");
+                       }
+                       catch (Exception ex)
+                       {
+                           Log.Error(ex, "检查和备份任务出错");
+                       }
+                   }
+               }
+               catch (Exception ex)
+               {
+                   Log.Error(ex, "循环备份任务执行出错，已退出自动备份");
+               }
+               finally
+               {
+                   IsAutoBackingUp = false;
+               }
+           });
     }
 
     public Task StopAutoBackupAsync()

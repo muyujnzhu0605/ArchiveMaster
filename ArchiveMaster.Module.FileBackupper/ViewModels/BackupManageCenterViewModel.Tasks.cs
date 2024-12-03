@@ -54,10 +54,12 @@ public partial class BackupManageCenterViewModel
         }
     }
 
+
     async partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
     {
         Snapshots = null;
-
+        LastLog = null;
+        
         if (oldValue != null)
         {
             oldValue.PropertyChanged -= SelectedBackupTaskPropertyChanged;
@@ -65,9 +67,22 @@ public partial class BackupManageCenterViewModel
 
         if (newValue != null)
         {
-            await LoadSnapshots();
-            await UpdateOperationsEnableAsync();
-            newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
+            try
+            {
+                newValue.Check();
+                await LoadSnapshots();
+                LogTimeFrom = DateTime.Today;
+                LogTimeTo = DateTime.Today.AddDays(1);
+                await LoadLogsAsync();
+                SelectedTabIndex = 3;
+                await UpdateOperationsEnableAsync();
+                newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
+            }
+            catch (Exception ex)
+            {
+                await this.ShowErrorAsync("加载任务失败", ex);
+                SelectedTask = null;
+            }
         }
     }
 

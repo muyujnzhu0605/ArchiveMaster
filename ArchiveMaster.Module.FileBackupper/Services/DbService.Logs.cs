@@ -3,20 +3,23 @@ using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
+using ArchiveMaster.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.Services;
+
 public partial class DbService
 {
     private readonly BackupperDbContext logDb;
-    
+
     private readonly ConcurrentBag<BackupLogEntity> logs = new ConcurrentBag<BackupLogEntity>();
 
-    public async Task<List<BackupLogEntity>> GetLogsAsync(int? snapshotId = null, LogLevel? type = null,
-        string searchText = null)
+    public async Task<PagedList<BackupLogEntity>> GetLogsAsync(int? snapshotId = null, LogLevel? type = null,
+        string searchText = null, (DateTime from, DateTime to)? timeRange = null, int pageIndex = 0, int pageSize = 0)
     {
         await InitializeAsync();
+
         IQueryable<BackupLogEntity> query = db.Logs;
         if (snapshotId.HasValue)
         {
@@ -33,12 +36,25 @@ public partial class DbService
             query = query.Where(p => p.Message.Contains(searchText));
         }
 
+        if (timeRange.HasValue)
+        {
+            query=query.Where(p=>p.Time>timeRange.Value.from && p.Time<timeRange.Value.to);
+        }
+
         query = query.OrderBy(p => p.Time);
-        return await query.ToListAsync();
+
+        int totalCount = await query.CountAsync();
+
+        if (pageSize > 0)
+        {
+            query = query.Skip(pageIndex * pageSize).Take(pageSize);
+        }
+
+        return new PagedList<BackupLogEntity>(await query.ToListAsync(), pageIndex, pageSize, totalCount);
     }
 
-  
-    public async ValueTask LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
+
+    public async ValueTask<BackupLogEntity> LogAsync(LogLevel logLevel, string message, BackupSnapshotEntity snapshot = null,
         string detail = null, bool forceSave = false)
     {
         await InitializeAsync(default, logDb);
@@ -58,5 +74,6 @@ public partial class DbService
             logs.Clear();
             await logDb.SaveChangesAsync();
         }
+        return log;
     }
 }

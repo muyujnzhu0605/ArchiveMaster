@@ -11,6 +11,8 @@
     Title="文件归档大师"
     Width="1200"
     Height="800"
+    MinWidth="600"
+    MinHeight="400"
     TitleBarBackground="{DynamicResource Background1}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">

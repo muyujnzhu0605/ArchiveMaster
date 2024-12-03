@@ -36,8 +36,6 @@ namespace ArchiveMaster.ViewModels
                     Name = "任务名",
                     SourceDir = @"C:\Users\autod\Desktop\备份源目录",
                     BackupDir = @"C:\Users\autod\Desktop\备份文件夹",
-                    BlackList = "黑名单",
-                    BlackListUseRegex = true
                 });
             }
 

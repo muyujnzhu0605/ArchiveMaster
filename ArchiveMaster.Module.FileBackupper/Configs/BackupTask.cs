@@ -15,10 +15,7 @@ public partial class BackupTask : ConfigBase, ICloneable
     private string backupDir;
 
     [ObservableProperty]
-    private string blackList;
-
-    [ObservableProperty]
-    private bool blackListUseRegex;
+    private FileFilterConfig filter = new FileFilterConfig();
 
     [ObservableProperty]
     private bool byTimeInterval = true;
@@ -85,6 +82,10 @@ public partial class BackupTask : ConfigBase, ICloneable
 
     public override void Check()
     {
+        if(Filter==null)
+        {
+            Filter = new FileFilterConfig();
+        }
         CheckDir(SourceDir, "需要备份的目录");
         CheckDir(BackupDir, "备份文件存放目录");
         CheckEmpty(Name, "备份任务名");

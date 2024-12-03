@@ -15,10 +15,7 @@ public partial class PackingConfig : ConfigBase
     private DateTime earliestTime = DateTime.MinValue;
 
     [ObservableProperty]
-    private string blackList;
-
-    [ObservableProperty]
-    private bool blackListUseRegex;
+    private FileFilterConfig filter=new FileFilterConfig();
 
     [ObservableProperty]
     private PackingType packingType = PackingType.Copy;

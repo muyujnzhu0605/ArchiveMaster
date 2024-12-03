@@ -7,11 +7,14 @@ using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using FzLib;
+using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster;
@@ -19,22 +22,54 @@ namespace ArchiveMaster;
 public partial class App : Application
 {
     private bool isMainWindowOpened = false;
-
+    private bool dontOpen = false;
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
 
     public override void Initialize()
     {
-        Initializer.Initialize();
-        
         AvaloniaXamlLoader.Load(this);
-        if (OperatingSystem.IsWindows())
+        var currentProcess = Process.GetCurrentProcess();
+        var processes = Process
+            .GetProcessesByName(currentProcess.ProcessName)
+            .Where(p => p.MainModule?.FileName == currentProcess.MainModule?.FileName)
+            .Where(p => p.Id != currentProcess.Id);
+
+        if (processes.Any())
         {
-            Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei"));
+            dontOpen = true;
+            ShowMultiInstanceDialog();
+        }
+        else
+        {
+            Initializer.Initialize();
+            if (OperatingSystem.IsWindows())
+            {
+                Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei"));
+            }
+        }
+    }
+
+    private async void ShowMultiInstanceDialog()
+    {
+        if (TrayIcon.GetIcons(this) is { Count: > 0 })
+        {
+            TrayIcon.GetIcons(this)[0].IsVisible = false;
+        }
+
+        await DialogExtension.ShowOkDialogAsync(null, "当前位置的程序已启动，无法重复启动多个实例");
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
         }
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
+        if (dontOpen)
+        {
+            return;
+        }
+
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);

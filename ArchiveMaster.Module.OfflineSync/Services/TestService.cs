@@ -54,8 +54,13 @@ namespace ArchiveMaster.Services
                     OffsiteSnapshot = c1.OutputFile,
                     PatchDir = Path.Combine(dir, "patch"),
                     ExportMode = ExportMode.Copy,
-                    BlackList = $"黑名单文件.+{Environment.NewLine}黑名单目录/{Environment.NewLine}Thumb\\.db",
-                    BlackListUseRegex = true,
+                    Filter = new FileFilterConfig()
+                    {
+                        ExcludeFiles = "黑名单文件.+",
+                        ExcludeFolders = "黑名单目录",
+                        ExcludePaths = "Thumb",
+                        UseRegex = true
+                    }
                 };
                 var match = await Step2Service.MatchLocalAndOffsiteDirsAsync(c2.OffsiteSnapshot, searchingDirs);
                 c2.MatchingDirs = new ObservableCollection<LocalAndOffsiteDir>(match);

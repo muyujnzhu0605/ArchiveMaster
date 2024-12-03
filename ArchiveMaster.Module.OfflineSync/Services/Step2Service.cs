@@ -30,15 +30,16 @@ namespace ArchiveMaster.Services
         public static async Task<IList<LocalAndOffsiteDir>> MatchLocalAndOffsiteDirsAsync(string snapshotPath,
             string[] localSearchingDirs)
         {
-            Step1Model step1 = ZipService.ReadFromZip<Step1Model>(snapshotPath);
-            var matchingDirs =
-                step1.Files
-                    .Select(p => p.TopDirectory)
-                    .Distinct()
-                    .Select(p => new LocalAndOffsiteDir() { OffsiteDir = p, })
-                    .ToList();
+            List<LocalAndOffsiteDir> matchingDirs = null;
             await Task.Run(() =>
             {
+                Step1Model step1 = ZipService.ReadFromZip<Step1Model>(snapshotPath);
+                matchingDirs =
+                    step1.Files
+                        .Select(p => p.TopDirectory)
+                        .Distinct()
+                        .Select(p => new LocalAndOffsiteDir() { OffsiteDir = p, })
+                        .ToList();
                 var matchingDirsDic = matchingDirs.ToDictionary(p => Path.GetFileName(p.OffsiteDir), p => p);
                 foreach (var localSearchingDir in localSearchingDirs)
                 {
@@ -122,7 +123,7 @@ namespace ArchiveMaster.Services
 
                             break;
                         case ExportMode.Copy:
-                        copy:
+                            copy:
                             int tryCount = 10;
 
                             while (--tryCount > 0)
@@ -218,7 +219,7 @@ namespace ArchiveMaster.Services
             int index = 0;
             NotifyProgressIndeterminate();
             NotifyMessage($"正在初始化");
-            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
+            var filter = new FileFilterHelper(Config.Filter);
             await Task.Run(() =>
             {
                 var step1Model = ZipService.ReadFromZip<Step1Model>(Config.OffsiteSnapshot);
@@ -278,7 +279,7 @@ namespace ArchiveMaster.Services
                         NotifyMessage($"正在比对第（{++index} 个）：{relativePath}");
                         localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
 
-                        if (blacks.IsInBlackList(file))
+                        if (!filter.IsMatched(file))
                         {
                             continue;
                         }
@@ -351,7 +352,7 @@ namespace ArchiveMaster.Services
                                     TopDirectory = offsiteTopDirectory,
                                 };
                                 UpdateFiles.Add(movedFile);
-                                localFiles.Add(Path.Combine(offsiteDir.Name, offsiteMovedFile.RelativePath),
+                                localFiles.TryAdd(Path.Combine(offsiteDir.Name, offsiteMovedFile.RelativePath),
                                     0); //如果被移动了，那么不需要进行删除判断，所以要把异地的文件地址也加入进去。
                             }
                             else //新增文件
@@ -387,7 +388,8 @@ namespace ArchiveMaster.Services
                     {
                         var offsitePathWithTopDir =
                             Path.Combine(Path.GetFileName(file.TopDirectory), file.RelativePath);
-                        if (blacks.IsInBlackList(file))
+
+                        if (!filter.IsMatched(file))
                         {
                             continue;
                         }

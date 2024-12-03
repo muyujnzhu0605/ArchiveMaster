@@ -18,9 +18,10 @@ public partial class RenameFileInfo : SimpleFileInfo
     [ObservableProperty]
     private string newName;
 
-    [ObservableProperty]
-    private string newPath;
+    public string TempPath { get; set; }
 
-    [ObservableProperty]
-    private string tempPath;
+    public string GetNewPath()
+    {
+        return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path), NewName);
+    }
 }

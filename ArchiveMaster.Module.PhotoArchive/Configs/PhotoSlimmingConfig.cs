@@ -52,16 +52,10 @@ namespace ArchiveMaster.Configs
         private string distDir = @"C:\目标\目录";
 
         /// <summary>
-        /// 黑名单（正则）（匹配路径）
+        /// 筛选
         /// </summary>
         [ObservableProperty]
-        private string blackList = "网";
-
-        /// <summary>
-        /// 白名单（正则）（匹配不带后缀名的文件名）
-        /// </summary>
-        [ObservableProperty]
-        private string whiteList = ".*";
+        private FileFilterConfig filter = new FileFilterConfig();
 
         /// <summary>
         /// 修复文件修改时间时，最大可接受的Exif和修改时间的时间差（秒）

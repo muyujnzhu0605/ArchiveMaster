@@ -12,6 +12,9 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
+    <Compile Update="Views\FileFilterControl.axaml.cs">
+      <DependentUpon>FileFilterTextBox.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\ProgressDialog.axaml.cs">
       <DependentUpon>ProgressDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
@@ -22,6 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q16-AnyCPU" />
+    <PackageReference Include="Mapster" />
     <PackageReference Include="MetadataExtractor" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
   </ItemGroup>

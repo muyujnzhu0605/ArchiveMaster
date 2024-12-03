@@ -5,10 +5,19 @@ using System.ComponentModel;
 namespace ArchiveMaster.Basic;
 
 //https://github.com/DustinCampbell/SimpleMVVM/blob/master/Source/SimpleMVVM/Collections/BulkObservableCollection.cs
-public partial class BulkObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
+public class BulkObservableCollection<T> : Collection<T>, INotifyCollectionChanged, INotifyPropertyChanged
 {
     private int bulkOperationCount;
     private bool collectionChangedDuringBulkOperation;
+
+    public BulkObservableCollection()
+    {
+        
+    }
+    public BulkObservableCollection(IEnumerable<T> collection)
+    {
+        AddRange(collection);
+    }
 
     protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
     {

@@ -15,9 +15,12 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class BackupManageCenterViewModel
 {
-    int countPerPage = 50;
-
-    private List<BackupLogEntity> logList;
+    private const int PageSize =
+#if DEBUG
+        10;
+#else
+        100;
+#endif
 
     [ObservableProperty]
     private int logPage = -1;
@@ -33,46 +36,61 @@ public partial class BackupManageCenterViewModel
 
     [ObservableProperty]
     private LogLevel logType = LogLevel.None;
+
+    private PagedList<BackupLogEntity> pagedLogs;
+
+    [ObservableProperty]
+    private DateTime logTimeFrom;
+
+    [ObservableProperty]
+    private DateTime logTimeTo;
+
+    [ObservableProperty]
+    private BackupLogEntity lastLog;
+
     private async Task LoadLogsAsync()
     {
-        await using var db = new DbService(SelectedTask);
-        logList = await db.GetLogsAsync(SelectedSnapshot.Id, LogType, LogSearchText);
-        int pages = Math.Max((int)Math.Ceiling(1.0 * logList.Count / countPerPage), 1);
+        try
+        {
+            await using var db = new DbService(SelectedTask);
+            pagedLogs = await db.GetLogsAsync(SelectedSnapshot?.Id, LogType, LogSearchText, (LogTimeFrom, LogTimeTo), 0,
+                PageSize);
 
-        LogPages = new ObservableCollection<int>(Enumerable.Range(1, pages));
-        // if (LogPage != 1)
-        // {
-        //     LogPage = 1;
-        // }
-        // else
-        // {
-        //     OnLogPageChanged(1);
-        // }
-        // OnLogPageChanged(1);
+            if (pagedLogs.PageCount == 0)
+            {
+                LogPages = null;
+            }
+            else
+            {
+                LogPages = new ObservableCollection<int>(Enumerable.Range(1, pagedLogs.PageCount));
+                Logs = new ObservableCollection<BackupLogEntity>(pagedLogs.Items);
+                LogPage = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            LogPages = null;
+            await this.ShowErrorAsync("加载日志失败", ex);
+        }
     }
 
 
-    partial void OnLogPageChanged(int value)
+    async partial void OnLogPageChanged(int value)
     {
         Debug.WriteLine($"LogPage改变：{value}");
-        if (value == -1)
+        if (value < 0)
         {
             Logs = null;
             return;
         }
-        if (logList != null)
-        {
-            Logs = new ObservableCollection<BackupLogEntity>(logList.Skip(LogPage * countPerPage)
-                .Take(countPerPage));
-        }
+
+        await using var db = new DbService(SelectedTask);
+        var logs = await db.GetLogsAsync(SelectedSnapshot?.Id, LogType, LogSearchText, (LogTimeFrom, LogTimeTo), value,
+            PageSize);
+        Logs = new ObservableCollection<BackupLogEntity>(logs.Items);
     }
 
-    partial void OnLogPagesChanged(ObservableCollection<int> value)
-    {
-        LogPage = -1;
-        LogPage = 0;
-        Logs = new ObservableCollection<BackupLogEntity>(logList.Take(countPerPage));
-    }
+
     [RelayCommand]
     private async Task SearchLogsAsync()
     {

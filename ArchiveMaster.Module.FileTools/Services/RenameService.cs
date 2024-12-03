@@ -170,7 +170,7 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
     {
         var processingFiles = Files.Where(p => p.IsMatched && p.IsChecked).ToList();
         var duplicates = processingFiles
-            .Select(p => p.NewPath)
+            .Select(p => p.GetNewPath())
             .GroupBy(p => p)
             .Where(p => p.Count() > 1)
             .Select(p => p.Key);
@@ -180,18 +180,34 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
         }
 
         //重命名为临时文件名，避免有可能新的文件名和其他文件的旧文件名一致导致错误的问题
+        //假设直接重命名文件 A -> B，但同时另一个文件正在从 B -> C，可能会导致冲突，因为文件系统在操作过程中会认为目标路径已经存在。
+        //临时名称中转确保了重命名操作在一个独立的“空间”中完成，避免了名称重叠的问题。
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
             NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
             file.TempPath = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
-            File.Move(file.Path, file.TempPath);
+            if (file.IsDir)
+            {
+                Directory.Move(file.Path, file.TempPath);
+            }
+            else
+            {
+                File.Move(file.Path, file.TempPath);
+            }
         }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
-            NotifyMessage($"正在重命名（第一步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
-            File.Move(file.TempPath, file.NewPath);
+            NotifyMessage($"正在重命名（第二步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
+            if (file.IsDir)
+            {
+                Directory.Move(file.TempPath, file.GetNewPath());
+            }
+            else
+            {
+                File.Move(file.TempPath, file.GetNewPath());
+            }
         }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
     }
 
@@ -208,12 +224,12 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
             if (Config.RenameTarget == RenameTargetType.File)
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions());
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions());
             }
             else
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateDirectories("*", OptionsHelper.GetEnumerationOptions());
+                    .EnumerateDirectories("*", FileEnumerateExtension.GetEnumerationOptions());
             }
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
@@ -226,7 +242,6 @@ public class RenameService(RenameConfig config, AppConfig appConfig)
                 if (renameFile.IsMatched)
                 {
                     renameFile.NewName = Rename(renameFile);
-                    renameFile.NewPath = Path.Combine(Path.GetDirectoryName(renameFile.Path), renameFile.NewName);
                 }
             }, token, FilesLoopOptions.DoNothing());
 

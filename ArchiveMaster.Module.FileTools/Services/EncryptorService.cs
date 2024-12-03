@@ -198,7 +198,7 @@ namespace ArchiveMaster.Services
             NotifyMessage("正在枚举文件");
 
             await TryForFilesAsync(new DirectoryInfo(sourceDir)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                 .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 var isEncrypted = IsEncryptedFile(file.Path);

@@ -50,12 +50,15 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         AvaloniaProperty.Register<TreeFileDataGrid, string>(
             nameof(SearchText));
 
+    protected static readonly TreeFileDirLengthConverter TreeFileDirLengthConverter = new TreeFileDirLengthConverter();
+
     public TreeFileDataGrid()
     {
         DoubleTapped += DataGridDoubleTapped;
     }
 
     public override double ColumnPathIndex => -1;
+
     public bool DoubleTappedToOpenFile
     {
         get => GetValue(DoubleTappedToOpenFileProperty);
@@ -68,23 +71,16 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         set => SetValue(RootDepthProperty, value);
     }
 
-    //  private IEnumerable<TreeFileDirInfo> expandRequestFiles;
-    //
-    //  public static readonly DirectProperty<TreeFileDataGrid, IEnumerable<TreeFileDirInfo>> ExpandRequestFilesProperty = AvaloniaProperty.RegisterDirect<TreeFileDataGrid, IEnumerable<TreeFileDirInfo>>(
-    // nameof(ExpandRequestFiles), o => o.ExpandRequestFiles, (o, v) => o.ExpandRequestFiles = v);
-    //
-    //  public IEnumerable<TreeFileDirInfo> ExpandRequestFiles
-    //  {
-    //      get => expandRequestFiles;
-    //      set => SetAndRaise(ExpandRequestFilesProperty, ref expandRequestFiles, value);
-    //  }
     public string SearchText
     {
         get => GetValue(SearchTextProperty);
         set => SetValue(SearchTextProperty, value);
     }
 
+    public string TreeFileDirLengthFormat { get; set; } = Converters.TreeFileDirLengthConverter.DefaultFormat;
+
     protected override Type StyleKeyOverride => typeof(TreeFileDataGrid);
+
     public void ExpandTo(TreeFileDirInfo file)
     {
         Stack<TreeDirInfo> stack = new Stack<TreeDirInfo>();
@@ -140,13 +136,45 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             Debug.Assert(false);
         }
     }
+
+    protected override DataGridColumn GetIsCheckedColumn()
+    {
+        var column = new DataGridTemplateColumn
+        {
+            CanUserResize = false,
+            CanUserReorder = false,
+            CanUserSort = false,
+            Header = ColumnIsCheckedHeader
+        };
+        var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
+        {
+            var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
+
+            return new CheckBox()
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
+                [!IsVisibleProperty] = new Binding(nameof(SimpleFileInfo.IsDir))
+                    { Converter = InverseBoolConverter },
+                [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
+                    { Source = rootPanel, Converter = InverseBoolConverter },
+            };
+        });
+
+        column.CellTemplate = cellTemplate;
+        return column;
+    }
     protected override DataGridColumn GetLengthColumn()
     {
         return new DataGridTextColumn()
         {
             Header = ColumnLengthHeader,
             Binding = new Binding()
-            { Converter = new TreeFileDirLengthConverter(), Mode = BindingMode.OneWay },
+            {
+                Converter = TreeFileDirLengthConverter, 
+                ConverterParameter = TreeFileDirLengthFormat,
+                Mode = BindingMode.OneWay
+            },
             IsReadOnly = true,
         };
     }
@@ -302,6 +330,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             }
         }
     }
+
     private void Expand(TreeDirInfo dir)
     {
         if (dir.IsExpanded == true)

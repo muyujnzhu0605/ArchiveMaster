@@ -23,7 +23,8 @@ namespace ArchiveMaster
             new ConfigInfo(typeof(EncryptorConfig)),
             new ConfigInfo(typeof(DirStructureSyncConfig)),
             new ConfigInfo(typeof(DirStructureCloneConfig)),
-            new ConfigInfo(typeof(RenameConfig))
+            new ConfigInfo(typeof(RenameConfig)),
+            new ConfigInfo(typeof(DuplicateFileCleanupConfig))
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -37,6 +38,8 @@ namespace ArchiveMaster
                     baseUrl + "directory.svg"),
                 new ToolPanelInfo(typeof(RenamePanel), "批量重命名", "批量对一个目录中的文件或文件夹按规则进行重命名操作",
                     baseUrl + "rename.svg"),
+                new ToolPanelInfo(typeof(DuplicateFileCleanupPanel), "重复文件清理", "清理一个目录内的重复文件，或已包含在另一个目录中的相同文件",
+                    baseUrl + "cleanup.svg"),
             },
             GroupName = ModuleName
         };
@@ -63,7 +66,10 @@ namespace ArchiveMaster
             services.AddTransient<EncryptorService>();
             services.AddTransient<DirStructureCloneService>();
             services.AddTransient<DirStructureSyncService>();
-            services.AddTransient<RenameService>();  
+            services.AddTransient<RenameService>();
+
+            services.AddViewAndViewModel<DuplicateFileCleanupPanel, DuplicateFileCleanupViewModel>();
+            services.AddTransient<DuplicateFileCleanupService>();
             
         }
     }

@@ -1,0 +1,70 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.DuplicateFileCleanupPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:ArchiveMaster.Converters"
+    xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
+    xmlns:ct="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    x:DataType="vm:EncryptorViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="待清理目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.CleaningDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem
+                Description="若待清理目录下的某文件，在参考目录下也找到了相同的文件，则将删除待清理目录下的该文件。"
+                Label="参考目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.ReferenceDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem
+                Description="为了防止误删，文件将被移动到指定位置，需要手动进行删除。"
+                Label="删除文件位置：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.RecycleBin}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="匹配条件：">
+                <ct:WrapFormItemGroup>
+                    <CheckBox
+                        Content="文件名"
+                        IsChecked="{Binding Config.CompareName}" />
+                    <CheckBox
+                        Content="文件大小"
+                        IsChecked="{Binding Config.CompareLength}" />
+                    <CheckBox
+                        Content="修改时间"
+                        IsChecked="{Binding Config.CompareTime}" />
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid RowDefinitions="*,8,Auto">
+            <v:TreeFileDataGrid
+                ItemsSource="{Binding Groups}"
+                TreeFileDirLengthFormat="{}{F}个匹配的文件">
+                <v:TreeFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding RelativePath}"
+                        Header="相对路径" />
+                </v:TreeFileDataGrid.Columns>
+            </v:TreeFileDataGrid>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

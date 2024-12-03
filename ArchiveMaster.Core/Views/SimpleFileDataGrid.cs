@@ -28,6 +28,14 @@ public class SimpleFileDataGrid : DataGrid
     public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
         nameof(ShowCount), true);
 
+    protected static readonly DateTimeConverter DateTimeConverter = new DateTimeConverter();
+
+    protected static readonly FileLength2StringConverter FileLength2StringConverter = new FileLength2StringConverter();
+
+    protected static readonly InverseBoolConverter InverseBoolConverter = new InverseBoolConverter();
+
+    protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter = new ProcessStatusColorConverter();
+
     public SimpleFileDataGrid()
     {
         CanUserReorderColumns = true;
@@ -63,7 +71,6 @@ public class SimpleFileDataGrid : DataGrid
     public virtual string ColumnTimeHeader { get; init; } = "修改时间";
 
     public virtual double ColumnTimeIndex { get; init; } = 0.6;
-
     public object Footer
     {
         get => GetValue(FooterProperty);
@@ -76,65 +83,7 @@ public class SimpleFileDataGrid : DataGrid
         set => SetValue(ShowCountProperty, value);
     }
 
-    protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
-
-    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-    {
-        base.OnApplyTemplate(e);
-        if (ColumnIsCheckedIndex >= 0)
-        {
-            var buttons = this.GetVisualDescendants()
-                .OfType<Button>()
-                .ToList();
-            if (buttons.Count == 4)
-            {
-                foreach (var btn in buttons)
-                {
-                    btn[!IsEnabledProperty] =
-                        new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking))
-                        {
-                            Converter = new InverseBoolConverter()
-                        };
-                }
-
-                var tbtn = (ToggleButton)buttons[3];
-                buttons[0].Click += (_, _) =>
-                {
-                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
-                    {
-                        file.IsChecked = true;
-                    }
-                };
-                buttons[1].Click += (_, _) =>
-                {
-                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
-                    {
-                        file.IsChecked = !file.IsChecked;
-                    }
-                };
-                buttons[2].Click += (_, _) =>
-                {
-                    foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
-                    {
-                        file.IsChecked = false;
-                    }
-                };
-            }
-        }
-        else
-        {
-            var stk = this
-                .GetVisualDescendants()
-                .OfType<StackPanel>()
-                .FirstOrDefault(p => p.Name == "stkSelectionButtons");
-            if (stk != null)
-            {
-                ((Grid)stk.Parent).Children.Remove(stk);
-            }
-        }
-    }
-    
-   protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
+    protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
     [
         (ColumnIsCheckedIndex, GetIsCheckedColumn),
         (ColumnStatusIndex, GetProcessStatusColumn),
@@ -145,32 +94,7 @@ public class SimpleFileDataGrid : DataGrid
         (ColumnMessageIndex, GetMessageColumn),
     ];
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-      
-        //插入的，从后往前插，这样不会打乱顺序
-        var ordered1 = PresetColumns
-            .Where(p => p.Index >= 0)
-            .Where(p => p.Index < Columns.Count)
-            .OrderByDescending(p => p.Index);
-
-        //追加的，按序号从小到大调用Add方法
-        var ordered2 = PresetColumns
-            .Where(p => p.Index >= 0)
-            .Where(p => p.Index >= Columns.Count)
-            .OrderBy(p => p.Index);
-
-        foreach (var column in ordered1)
-        {
-            Columns.Insert((int)column.Index, column.Func());
-        }
-
-        foreach (var column in ordered2)
-        {
-            Columns.Add(column.Func());
-        }
-    }
+    protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
 
     protected virtual DataGridColumn GetIsCheckedColumn()
     {
@@ -190,7 +114,7 @@ public class SimpleFileDataGrid : DataGrid
                 HorizontalAlignment = HorizontalAlignment.Center,
                 [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
                 [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                    { Source = rootPanel, Converter = new InverseBoolConverter() },
+                { Source = rootPanel, Converter = InverseBoolConverter },
             };
         });
 
@@ -204,8 +128,9 @@ public class SimpleFileDataGrid : DataGrid
         {
             Header = ColumnLengthHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Length))
-                { Converter = new FileLength2StringConverter(), Mode = BindingMode.OneWay },
+            { Converter = FileLength2StringConverter, Mode = BindingMode.OneWay },
             IsReadOnly = true,
+            MaxWidth = 120,
         };
     }
 
@@ -216,6 +141,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnMessageHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Message)),
             IsReadOnly = true,
+            Width = new DataGridLength(400),
         };
     }
 
@@ -225,7 +151,8 @@ public class SimpleFileDataGrid : DataGrid
         {
             Header = ColumnNameHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Name)),
-            IsReadOnly = true
+            IsReadOnly = true,
+            Width = new DataGridLength(400),
         };
     }
 
@@ -236,6 +163,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnPathHeader,
             Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
             IsReadOnly = true,
+            Width = new DataGridLength(400),
         };
     }
 
@@ -246,7 +174,8 @@ public class SimpleFileDataGrid : DataGrid
             CanUserResize = false,
             CanUserReorder = false,
             CanUserSort = false,
-            Header = ColumnStatusHeader
+            Header = ColumnStatusHeader,
+            MaxWidth = 200,
         };
 
         var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) => new Ellipse
@@ -254,7 +183,7 @@ public class SimpleFileDataGrid : DataGrid
             Width = 8,
             Height = 8,
             [!Shape.FillProperty] = new Binding(nameof(SimpleFileInfo.Status))
-                { Converter = new ProcessStatusColorConverter() }
+            { Converter = ProcessStatusColorConverter }
         });
 
         column.CellTemplate = cellTemplate;
@@ -268,10 +197,96 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnTimeHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Time))
             {
-                Converter = new DateTimeConverter(),
+                Converter = DateTimeConverter,
                 Mode = BindingMode.OneWay
             },
             IsReadOnly = true,
+            CanUserResize = false
         };
+    }
+
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+        if (ColumnIsCheckedIndex >= 0)
+        {
+            var buttons = this.GetVisualDescendants()
+                .OfType<Button>()
+                .ToList();
+            if (buttons.Count != 4)
+            {
+                return;
+            }
+
+            foreach (var btn in buttons)
+            {
+                btn[!IsEnabledProperty] =
+                    new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking))
+                    {
+                        Converter = InverseBoolConverter
+                    };
+            }
+
+            var tbtn = (ToggleButton)buttons[3];
+            buttons[0].Click += (_, _) =>
+            {
+                foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                {
+                    file.IsChecked = true;
+                }
+            };
+            buttons[1].Click += (_, _) =>
+            {
+                foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                {
+                    file.IsChecked = !file.IsChecked;
+                }
+            };
+            buttons[2].Click += (_, _) =>
+            {
+                foreach (SimpleFileInfo file in tbtn.IsChecked == true ? SelectedItems : ItemsSource)
+                {
+                    file.IsChecked = false;
+                }
+            };
+        }
+        else
+        {
+            var stk = this
+                .GetVisualDescendants()
+                .OfType<StackPanel>()
+                .FirstOrDefault(p => p.Name == "stkSelectionButtons");
+            if (stk != null)
+            {
+                ((Grid)stk.Parent).Children.Remove(stk);
+            }
+        }
+    }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        int columnCount = Columns.Count;
+        //插入的，从后往前插，这样不会打乱顺序
+        var ordered1 = PresetColumns
+            .Where(p => p.Index >= 0)
+            .Where(p => p.Index < columnCount)
+            .OrderByDescending(p => p.Index);
+
+        //追加的，按序号从小到大调用Add方法
+        var ordered2 = PresetColumns
+            .Where(p => p.Index >= 0)
+            .Where(p => p.Index >= columnCount)
+            .OrderBy(p => p.Index);
+
+        foreach (var column in ordered1)
+        {
+            Columns.Insert((int)column.Index, column.Func());
+        }
+
+        foreach (var column in ordered2)
+        {
+            Columns.Add(column.Func());
+        }
     }
 }

@@ -24,6 +24,9 @@ public static class Initializer
 
     public static IModuleInitializer[] ModuleInitializers { get; } =
     [
+#if DEBUG
+        new TestModuleInitializer(),
+#endif
         new FileToolsModuleInitializer(),
         new PhotoArchiveModuleInitializer(),
         new OfflineSyncModuleInitializer(),

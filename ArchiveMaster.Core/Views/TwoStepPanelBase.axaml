@@ -1,15 +1,15 @@
 <local:PanelBase
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
     x:Class="ArchiveMaster.Views.TwoStepPanelBase"
+    x:Name="root"
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ArchiveMaster.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="using:System"
-    x:Name="root"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <local:PanelBase.Resources>
         <sys:Boolean x:Key="ShowSingleLine">True</sys:Boolean>
@@ -17,33 +17,29 @@
         <sys:Double x:Key="ConfigMaxHeight">300</sys:Double>
     </local:PanelBase.Resources>
     <local:PanelBase.PanelContent>
-        <Grid
-            Margin="8"
-            RowDefinitions="Auto,8,Auto,8,*,24,Auto">
+        <Grid Margin="8" RowDefinitions="Auto,8,Auto,8,*,24,Auto">
 
             <ScrollViewer
-                MaxHeight="{DynamicResource ConfigMaxHeight}"
                 HorizontalScrollBarVisibility="Disabled"
                 IsEnabled="{Binding CanInitialize}"
+                MaxHeight="{DynamicResource ConfigMaxHeight}"
                 VerticalScrollBarVisibility="Auto">
                 <ContentControl Content="{Binding #root.ConfigsContent}" />
             </ScrollViewer>
 
             <Border
-                Grid.Row="2"
-                Margin="32,16"
                 BorderBrush="{DynamicResource Background3}"
                 BorderThickness="0,2,0,0"
-                IsVisible="{Binding EnableInitialize}" />
+                Grid.Row="2"
+                IsVisible="{Binding EnableInitialize}"
+                Margin="32,16" />
 
 
-            <ContentControl
-                Grid.Row="4"
-                Content="{Binding ElementName=root, Path=ResultsContent}" />
+            <ContentControl Content="{Binding ElementName=root, Path=ResultsContent}" Grid.Row="4" />
 
             <Grid
-                Grid.Row="6"
                 ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
+                Grid.Row="6"
                 IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}"
                 IsVisible="{DynamicResource ShowSingleLine}">
 
@@ -60,9 +56,9 @@
                     IsVisible="{Binding IsWorking}"
                     Maximum="1"
                     Minimum="0"
-                    ProgressTextFormat="{}{1:0}%"
+                    ProgressTextFormat="{}{1:0.0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
-                    Value="{Binding Value}">
+                    Value="{Binding Progress}">
                     <ProgressBar.Styles>
                         <Style Selector="ProgressBar:horizontal">
                             <Setter Property="MinWidth" Value="72" />
@@ -70,31 +66,31 @@
                     </ProgressBar.Styles>
                 </ProgressBar>
                 <Button
-                    Grid.Column="4"
                     Classes="Long Primary"
                     Command="{Binding InitializeCommand}"
                     Content="{Binding #root.InitializeButtonContent}"
+                    Grid.Column="4"
                     IsVisible="{Binding EnableInitialize}" />
                 <Button
-                    Grid.Column="6"
                     Classes="Long Primary"
                     Command="{Binding ExecuteCommand}"
-                    Content="{Binding #root.ExecuteButtonContent}" />
+                    Content="{Binding #root.ExecuteButtonContent}"
+                    Grid.Column="6" />
                 <Button
-                    Grid.Column="8"
                     Classes="Middle"
                     Command="{Binding CancelCommand}"
-                    Content="{Binding #root.StopButtonContent}" />
+                    Content="{Binding #root.StopButtonContent}"
+                    Grid.Column="8" />
                 <Button
-                    Grid.Column="10"
                     Classes="Middle"
                     Command="{Binding ResetCommand}"
-                    Content="{Binding #root.ResetButtonContent}" />
+                    Content="{Binding #root.ResetButtonContent}"
+                    Grid.Column="10" />
             </Grid>
 
             <Grid
-                Grid.Row="6"
                 ColumnDefinitions="*,16,Auto,8,Auto"
+                Grid.Row="6"
                 IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}"
                 IsVisible="{DynamicResource ShowTwoLines}"
                 RowDefinitions="Auto,8,Auto">
@@ -112,9 +108,9 @@
                     IsVisible="{Binding IsWorking}"
                     Maximum="1"
                     Minimum="0"
-                    ProgressTextFormat="{}{1:0}%"
+                    ProgressTextFormat="{}{1:0.0}%"
                     ShowProgressText="{Binding !ProgressIndeterminate}"
-                    Value="{Binding Value}">
+                    Value="{Binding Progress}">
                     <ProgressBar.Styles>
                         <Style Selector="ProgressBar:horizontal">
                             <Setter Property="MinWidth" Value="72" />
@@ -123,28 +119,28 @@
                 </ProgressBar>
 
                 <Button
-                    Grid.Column="2"
                     Classes="Long Primary"
                     Command="{Binding InitializeCommand}"
                     Content="{Binding #root.InitializeButtonContent}"
+                    Grid.Column="2"
                     IsVisible="{Binding EnableInitialize}" />
                 <Button
-                    Grid.Row="2"
-                    Grid.Column="2"
                     Classes="Long Primary"
                     Command="{Binding ExecuteCommand}"
-                    Content="{Binding #root.ExecuteButtonContent}" />
+                    Content="{Binding #root.ExecuteButtonContent}"
+                    Grid.Column="2"
+                    Grid.Row="2" />
                 <Button
-                    Grid.Column="4"
                     Classes="Middle"
                     Command="{Binding CancelCommand}"
-                    Content="{Binding #root.StopButtonContent}" />
+                    Content="{Binding #root.StopButtonContent}"
+                    Grid.Column="4" />
                 <Button
-                    Grid.Row="2"
-                    Grid.Column="4"
                     Classes="Middle"
                     Command="{Binding ResetCommand}"
-                    Content="{Binding #root.ResetButtonContent}" />
+                    Content="{Binding #root.ResetButtonContent}"
+                    Grid.Column="4"
+                    Grid.Row="2" />
             </Grid>
 
         </Grid>

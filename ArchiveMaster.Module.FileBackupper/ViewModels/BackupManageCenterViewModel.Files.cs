@@ -4,6 +4,7 @@ using System.Diagnostics;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
@@ -33,13 +34,14 @@ public partial class BackupManageCenterViewModel
 
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
+
     private async Task LoadFileChangesAsync()
     {
         await using var db = new DbService(SelectedTask);
         var (created, modified, deleted) = await db.GetSnapshotChanges(SelectedSnapshot.Id);
-        CreatedFiles = new ObservableCollection<BackupFile>(created.Select(p=>new BackupFile(p)));
-        ModifiedFiles = new ObservableCollection<BackupFile>(modified.Select(p=>new BackupFile(p)));
-        DeletedFiles = new ObservableCollection<BackupFile>(deleted.Select(p=>new BackupFile(p)));
+        CreatedFiles = new ObservableCollection<BackupFile>(created.Select(p => new BackupFile(p)));
+        ModifiedFiles = new ObservableCollection<BackupFile>(modified.Select(p => new BackupFile(p)));
+        DeletedFiles = new ObservableCollection<BackupFile>(deleted.Select(p => new BackupFile(p)));
     }
 
     private async Task LoadFileHistoryAsync(SimpleFileInfo file)
@@ -70,6 +72,7 @@ public partial class BackupManageCenterViewModel
             await TryDoAsync("加载文件历史记录", async () => await LoadFileHistoryAsync(value));
         }
     }
+
     [RelayCommand]
     private async Task SaveAsAsync(SimpleFileInfo fileOrDir)
     {
@@ -133,15 +136,22 @@ public partial class BackupManageCenterViewModel
             List<string> sourcePaths = new List<string>();
             List<string> destinationPaths = new List<string>();
             List<DateTime> times = new List<DateTime>();
+            List<string> notExistedFiles = new List<string>();
             foreach (var file in files.Cast<BackupFile>())
             {
                 if (file.Entity.BackupFileName == null)
                 {
-                    await this.ShowErrorAsync($"备份文件{file.Entity.RawFileRelativePath}不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
-                    return;
+                    notExistedFiles.Add(file.Entity.RawFileRelativePath);
+                    continue;
                 }
 
                 string backupFile = Path.Combine(SelectedTask.BackupDir, file.Entity.BackupFileName);
+                if (!File.Exists(backupFile))
+                {
+                    notExistedFiles.Add(file.Entity.RawFileRelativePath);
+                    continue;
+                }
+
                 string fileRelativePath = dir.RelativePath == null
                     ? file.RelativePath
                     : Path.GetRelativePath(dir.RelativePath, file.RelativePath);
@@ -149,15 +159,80 @@ public partial class BackupManageCenterViewModel
                 sourcePaths.Add(backupFile);
                 destinationPaths.Add(destinationPath);
                 times.Add(file.Time);
-
-                if (!File.Exists(backupFile))
-                {
-                    await this.ShowErrorAsync($"备份文件{file.Entity.RawFileRelativePath}不存在", "该文件不存在实际备份文件，可能是文件丢失");
-                    return;
-                }
             }
 
-            await dialog.CopyFilesAsync(sourcePaths, destinationPaths, times);
+            bool copy = true;
+            if (notExistedFiles.Count > 0)
+            {
+                copy = (bool)await this.SendMessage(new CommonDialogMessage()
+                {
+                    Title = "部分文件不存在",
+                    Message = "部分文件不存在实际备份文件，可能是虚拟备份或文件丢失。是否另存为其余文件？",
+                    Detail = string.Join(Environment.NewLine, notExistedFiles),
+                    Type = CommonDialogMessage.CommonDialogType.YesNo
+                }).Task;
+            }
+
+            if (copy)
+            {
+                await dialog.CopyFilesAsync(sourcePaths, destinationPaths, times);
+            }
+            else
+            {
+                dialog.Close();
+            }
         }
+    }
+
+    [RelayCommand]
+    private async Task OrganizeFilesAsync()
+    {
+        (IList<FileInfo> RedundantFiles, IList<BackupFileEntity> LostFiles) issuedFiles = ([], []);
+        await TryDoAsync("整理文件", async () =>
+        {
+            await using var db = new DbService(SelectedTask);
+            issuedFiles = await db.CheckFilesAsync(default);
+        });
+        if (issuedFiles.RedundantFiles.Count + issuedFiles.LostFiles.Count == 0)
+        {
+            await this.SendMessage(new CommonDialogMessage()
+            {
+                Type = CommonDialogMessage.CommonDialogType.Ok,
+                Message = "不存在多余或丢失的备份文件",
+                Title = "检查文件"
+            }).Task;
+            return;
+        }
+
+        if (true.Equals(await this.SendMessage(new CommonDialogMessage()
+            {
+                Type = CommonDialogMessage.CommonDialogType.YesNo,
+                Message =
+                    $"存在{issuedFiles.RedundantFiles.Count}个多余文件；{Environment.NewLine}存在{issuedFiles.LostFiles.Count}个丢失的备份文件{Environment.NewLine}是否删除多余文件？",
+                Detail = $"多余文件（在备份文件夹中存在但数据库中不存在的文件）：{Environment.NewLine}"
+                         + string.Join(Environment.NewLine, issuedFiles.RedundantFiles.Select(p => p.Name))
+                         + $"{Environment.NewLine}{Environment.NewLine}丢失文件（被数据库记录但无物理文件，会导致恢复失败）：{Environment.NewLine}"
+                         + string.Join(Environment.NewLine, issuedFiles.LostFiles.Select(p => p.RawFileRelativePath)),
+                Title = "检查文件"
+            }).Task))
+        {
+            await TryDoAsync("删除多余文件", () =>
+            {
+                return Task.Run(() =>
+                {
+                    foreach (var file in issuedFiles.RedundantFiles)
+                    {
+                        file.Delete();
+                    }
+                });
+            });
+        }
+    }
+
+    [RelayCommand]
+    private async Task CopyAsync(object obj)
+    {
+        await this.SendMessage(new GetClipboardMessage()).Clipboard
+            .SetTextAsync(obj is string str ? str : obj?.ToString() ?? "");
     }
 }

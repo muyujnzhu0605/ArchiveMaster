@@ -9,10 +9,7 @@ namespace ArchiveMaster.Configs
     public partial class Step2Config : ConfigBase
     {
         [ObservableProperty]
-        private string blackList;
-
-        [ObservableProperty]
-        private bool blackListUseRegex;
+        private FileFilterConfig filter = new FileFilterConfig();
 
         [ObservableProperty]
         private ExportMode exportMode = ExportMode.Copy;
@@ -25,9 +22,9 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string offsiteSnapshot;
-        
+
         [ObservableProperty]
-        [property:JsonIgnore]
+        [property: JsonIgnore]
         private ObservableCollection<LocalAndOffsiteDir> matchingDirs;
 
         partial void OnOffsiteSnapshotChanged(string value)
@@ -37,7 +34,7 @@ namespace ArchiveMaster.Configs
 
         public override void Check()
         {
-            CheckFile(OffsiteSnapshot,"异地快照文件");
+            CheckFile(OffsiteSnapshot, "异地快照文件");
         }
     }
 }

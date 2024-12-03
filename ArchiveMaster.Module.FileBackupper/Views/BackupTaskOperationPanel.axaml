@@ -52,5 +52,23 @@
                 </TextBlock>
             </StackPanel>
         </g:GroupBox>
+
+        <g:GroupBox Header="清理">
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Command="{Binding OrganizeFilesCommand}"
+                    Content="整理文件" />
+            </StackPanel>
+        </g:GroupBox>
+
+        <g:GroupBox Header="最后的日志">
+            <Grid ColumnDefinitions="200,8,*">
+                <TextBlock Text="{Binding LastLog.Time}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Text="{Binding LastLog.Message}"
+                    TextWrapping="Wrap" />
+            </Grid>
+        </g:GroupBox>
     </StackPanel>
 </UserControl>

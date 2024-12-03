@@ -31,7 +31,7 @@ namespace ArchiveMaster.Services
             List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
             List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
 
-            var blacks = new BlackListHelper(Config.BlackList, Config.BlackListUseRegex);
+            var filter = new FileFilterHelper(Config.Filter);
             List<SimpleFileInfo> notMatchedFiles = new List<SimpleFileInfo>();
             List<SimpleFileInfo> matchedFiles = new List<SimpleFileInfo>();
 
@@ -45,19 +45,14 @@ namespace ArchiveMaster.Services
 
                 //枚举源目录
                 var sourceFiles = new DirectoryInfo(Config.SourceDir)
-                    .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .Where(filter.IsMatched)
                     .Select(p => new SimpleFileInfo(p, Config.SourceDir))
-                    .WithCancellationToken(token)
+                    .ApplyFilter(token)
                     .ToList();
 
                 TryForFiles(sourceFiles, (sourceFile, s) =>
                 {
-                    //黑名单检测
-                    if (blacks.IsInBlackList(sourceFile))
-                    {
-                        return;
-                    }
-
                     NotifyMessage($"正在分析源文件{s.GetFileNumberMessage()}：{sourceFile.RelativePath}");
                     matchedFiles.Clear();
                     tempFiles.Clear();
@@ -200,8 +195,8 @@ namespace ArchiveMaster.Services
             length2Template.Clear();
             modifiedTime2Template.Clear();
             var fileInfos = new DirectoryInfo(dir)
-                .EnumerateFiles("*", OptionsHelper.GetEnumerationOptions())
-                .WithCancellationToken(token)
+                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                .ApplyFilter(token)
                 .Select(p => new SimpleFileInfo(p, dir))
                 .ToList();
 

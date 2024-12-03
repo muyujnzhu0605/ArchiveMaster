@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Directory = System.IO.Directory;
 using ImageMagick;
 using System.Diagnostics;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 
@@ -19,19 +20,14 @@ namespace ArchiveMaster.Services
 {
     public class PhotoSlimmingService : TwoStepServiceBase<PhotoSlimmingConfig>
     {
-        private readonly Regex rBlack;
         private readonly Regex rCompress;
         private readonly Regex rCopy;
-        private readonly Regex rWhite;
         private ConcurrentBag<string> errorMessages;
 
         public PhotoSlimmingService(PhotoSlimmingConfig config, AppConfig appConfig) : base(config, appConfig)
         {
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
             rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
-            rBlack = new Regex(Config.BlackList);
-            rWhite = new Regex(string.IsNullOrWhiteSpace(Config.WhiteList) ? ".*" : Config.WhiteList,
-                RegexOptions.IgnoreCase);
 
             if (!config.FolderNameTemplate.Contains(PhotoSlimmingConfig.FolderNamePlaceholder))
             {
@@ -112,8 +108,7 @@ namespace ArchiveMaster.Services
                 .ToFrozenSet();
 
             foreach (var file in Directory
-                         .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories)
-                         .Where(p => !rBlack.IsMatch(p)))
+                         .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories))
             {
                 token.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
@@ -136,8 +131,7 @@ namespace ArchiveMaster.Services
 
             desiredDistFolders = desiredDistFolders.ToFrozenSet();
             foreach (var dir in Directory
-                         .EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories)
-                         .Where(p => !rBlack.IsMatch(p)))
+                         .EnumerateDirectories(Config.DistDir, "*", SearchOption.AllDirectories))
             {
                 if (!desiredDistFolders.Contains(dir))
                 {
@@ -148,6 +142,8 @@ namespace ArchiveMaster.Services
 
         private void SearchCopyingAndCompressingFiles(CancellationToken token)
         {
+            var filter = new FileFilterHelper(Config.Filter);
+
             NotifyProgressIndeterminate();
             NotifyMessage("正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
@@ -158,8 +154,7 @@ namespace ArchiveMaster.Services
             {
                 NotifyMessage($"正在查找文件{s.GetFileNumberMessage()}");
 
-                if (rBlack.IsMatch(file.Path)
-                    || !rWhite.IsMatch(Path.GetFileNameWithoutExtension(file.Name)))
+                if (!filter.IsMatched(file))
                 {
                     return;
                 }
