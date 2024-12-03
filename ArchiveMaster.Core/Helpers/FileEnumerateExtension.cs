@@ -43,16 +43,16 @@ public static class FileEnumerateExtension
     }
 
     public static List<SimpleFileInfo> GetSimpleFileInfos(this DirectoryInfo directoryInfo,
-        string topDir, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
-        return directoryInfo.EnumerateSimpleFileInfos(topDir, cancellationToken).ToList();
+        return directoryInfo.EnumerateSimpleFileInfos(cancellationToken).ToList();
     }
 
     public static IEnumerable<SimpleFileInfo> EnumerateSimpleFileInfos(this DirectoryInfo directoryInfo,
-        string topDir, CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         return directoryInfo.EnumerateFiles("*", GetEnumerationOptions())
             .ApplyFilter(cancellationToken)
-            .Select(p => new SimpleFileInfo(p, topDir));
+            .Select(p => new SimpleFileInfo(p, directoryInfo.FullName));
     }
 }

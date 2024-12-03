@@ -39,6 +39,8 @@ namespace ArchiveMaster.Services
                     }
                 }
 
+                NotifyMessage("正在将文件移动到回收站");
+                int index = 0;
                 foreach (var group in DuplicateGroups.SubDirs)
                 {
                     NotifyMessage($"正在删除与“{group.Name}”相同的文件");
@@ -56,16 +58,9 @@ namespace ArchiveMaster.Services
                             file.Error(ex);
                         }
                     }
+                    
+                    NotifyProgress(1.0 * index++ / DuplicateGroups.SubFolderCount);
                 }
-
-
-                //     if (!string.IsNullOrWhiteSpace(Config.TargetDir))
-                //     {
-                //         //TryForFiles(flatten, (file, s) =>
-                //         //{
-                //         //    NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
-                //         //}, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
-                //     }
             }, token);
         }
 
@@ -79,8 +74,11 @@ namespace ArchiveMaster.Services
                 matcher = BuildFileFeatures(token);
 
                 NotifyMessage("正在枚举参考文件");
-                List<SimpleFileInfo> allReferenceFiles =
-                    new DirectoryInfo(Config.CleaningDir).GetSimpleFileInfos(Config.ReferenceDir, token);
+                List<SimpleFileInfo> allReferenceFiles = new DirectoryInfo(Config.ReferenceDir)
+                    .EnumerateSimpleFileInfos(token)
+                    .OrderBy(file => file.Path.StartsWith(Config.CleaningDir, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                //由于ReferenceDir可能包含CleaningDir，因此需要优先考虑不在CleaningDir里的文件，尽可能删除CleaningDir内的重复文件
 
                 NotifyMessage("正在匹配文件");
                 MatchAndGroup(allReferenceFiles, token);
@@ -140,8 +138,10 @@ namespace ArchiveMaster.Services
                 bool first = true;
                 foreach (var file in group.OrderBy(p => p.Path))
                 {
+                    //file肯定是在CleaningDir里的，group.Key有可能在CleaningDirect里。
+                    //如果group.Key是属于CleaningDir的，那么保留第一个
                     var treeFile = refFile.AddSubFile(file);
-                    treeFile.IsChecked = !(first && Config.CleaningDir == Config.ReferenceDir);
+                    treeFile.IsChecked = !(first && group.Key.Path.StartsWith(Config.CleaningDir));
                     first = false;
                 }
             }

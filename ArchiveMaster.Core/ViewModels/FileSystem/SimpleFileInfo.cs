@@ -1,9 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 using ArchiveMaster.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels.FileSystem
 {
+    [DebuggerDisplay("Name = {Name}, Path = {Path}")]
     public partial class SimpleFileInfo : ObservableObject
     {
         [property: JsonIgnore]
