@@ -6,6 +6,21 @@ namespace ArchiveMaster.ViewModels.FileSystem
     [DebuggerDisplay("Name = {Name}, Subs Count = {Subs.Count}")]
     public partial class TreeDirInfo : TreeFileDirInfo
     {
+        public enum TreeBuildType
+        {
+            /// <summary>
+            /// 手动添加子级
+            /// </summary>
+            Manual,
+
+            /// <summary>
+            /// 通过自动枚举目录或提供文件信息，自动添加子集
+            /// </summary>
+            Automatic
+        }
+
+        public TreeBuildType BuildType { get; private set; }
+
         /// <summary>
         /// 路径分隔符
         /// </summary>
@@ -36,7 +51,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
             IsDir = true;
         }
 
-        public TreeDirInfo(FileSystem.SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
+        public TreeDirInfo(SimpleFileInfo dir, TreeDirInfo parent, int depth, int index)
             : base(dir, parent, depth, index)
         {
             IsDir = true;
@@ -106,7 +121,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
                     subs.Add(dir);
                     if (!subDirsDic.TryAdd(dir.Name, dir))
                     {
-                        throw new ArgumentException($"目录名{dir.Name}已存在于当前目录{Name}下", nameof(item));
+                        // throw new ArgumentException($"目录名{dir.Name}已存在于当前目录{Name}下", nameof(item));
                     }
 
                     while (parent != null)

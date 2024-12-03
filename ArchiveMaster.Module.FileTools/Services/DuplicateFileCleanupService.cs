@@ -19,6 +19,10 @@ namespace ArchiveMaster.Services
     public class DuplicateFileCleanupService(DuplicateFileCleanupConfig config, AppConfig appConfig)
         : TwoStepServiceBase<DuplicateFileCleanupConfig>(config, appConfig)
     {
+        private FileMatchHelper matcher;
+
+        public TreeDirInfo DuplicateGroups { get; private set; }
+
         public override async Task ExecuteAsync(CancellationToken token)
         {
             // await Task.Run(() =>
@@ -33,58 +37,22 @@ namespace ArchiveMaster.Services
             // }, token);
         }
 
-        private FileMatchHelper matcher;
-
         public override Task InitializeAsync(CancellationToken token)
         {
             List<DuplicateFileInfo> files = new List<DuplicateFileInfo>();
             Config.Check();
             return Task.Run(() =>
             {
-                NotifyMessage("正在枚举文件");
-                List<SimpleFileInfo> allReferenceFiles = new List<SimpleFileInfo>();
-                if (Config.CleanUpSelf)
-                {
-                    allReferenceFiles =
-                        new DirectoryInfo(Config.CleaningDir).GetSimpleFileInfos(Config.CleaningDir, token);
-                }
-
-                if (Config.CleanUpByReference)
-                {
-                    allReferenceFiles = allReferenceFiles
-                        .Union(new DirectoryInfo(Config.CleaningDir).GetSimpleFileInfos(Config.ReferenceDir, token))
-                        .ToList();
-                }
-
-                NotifyMessage("正在构建文件特征");
+                NotifyMessage("正在构建待清理文件特征");
                 matcher = BuildFileFeatures(token);
-                Match(allReferenceFiles, token);
-                Group(token);
+
+                NotifyMessage("正在枚举参考文件");
+                List<SimpleFileInfo> allReferenceFiles =
+                    new DirectoryInfo(Config.CleaningDir).GetSimpleFileInfos(Config.ReferenceDir, token);
+
+                NotifyMessage("正在匹配文件");
+                MatchAndGroup(allReferenceFiles, token);
             }, token);
-        }
-
-        private void Group(CancellationToken cancellationToken)
-        {
-            var tree = TreeDirInfo.CreateEmptyTree();
-            foreach (var group in DuplicateFiles.GroupBy(p => p.ExistedFile,SimpleFileInfo.EqualityComparer))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var refFile = new TreeDirInfo()
-                {
-                    Name = group.Key.Path,
-                    Path = group.Key.Path,
-                    Depth = 1,
-                    Index = tree.Subs.Count,
-                    IsDir = true,
-                };
-                tree.AddSub(refFile);
-                foreach (var file in group)
-                {
-                    refFile.AddSubFile(file);
-                }
-            }
-
-            DuplicateGroups = tree;
         }
 
         private FileMatchHelper BuildFileFeatures(CancellationToken token)
@@ -96,14 +64,10 @@ namespace ArchiveMaster.Services
             return matcher;
         }
 
-        public IReadOnlyList<DuplicateFileInfo> DuplicateFiles { get; private set; }
-        public TreeDirInfo DuplicateGroups { get; private set; }
-
-        private void Match(IEnumerable<SimpleFileInfo> referenceFiles, CancellationToken token)
+        private void MatchAndGroup(IEnumerable<SimpleFileInfo> referenceFiles, CancellationToken token)
         {
             HashSet<string> checkedFiles = new HashSet<string>();
 
-            NotifyMessage("正在匹配文件");
             List<DuplicateFileInfo> duplicateFiles = new List<DuplicateFileInfo>();
             foreach (var file in referenceFiles)
             {
@@ -122,17 +86,35 @@ namespace ArchiveMaster.Services
 
                 foreach (var matchedFile in matchedFiles)
                 {
-                    if (matchedFile == file.Path)
-                    {
-                        continue;
-                    }
-
                     checkedFiles.Add(matchedFile);
                     duplicateFiles.Add(new DuplicateFileInfo(new FileInfo(matchedFile), Config.CleaningDir, file));
                 }
             }
 
-            DuplicateFiles = duplicateFiles.AsReadOnly();
+            var tree = TreeDirInfo.CreateEmptyTree();
+            foreach (var group in duplicateFiles.GroupBy(p => p.ExistedFile, SimpleFileInfo.EqualityComparer))
+            {
+                token.ThrowIfCancellationRequested();
+                var refFile = new TreeDirInfo()
+                {
+                    Name = group.Key.Name,
+                    Path = group.Key.Path,
+                    TopDirectory = Config.ReferenceDir,
+                    Depth = 1,
+                    Index = tree.Subs.Count,
+                    IsDir = true,
+                };
+                tree.AddSub(refFile);
+                bool first = true;
+                foreach (var file in group.OrderBy(p => p.Path))
+                {
+                    var treeFile = refFile.AddSubFile(file);
+                    treeFile.IsChecked = !(first && Config.CleaningDir == Config.ReferenceDir);
+                    first = false;
+                }
+            }
+
+            DuplicateGroups = tree;
         }
     }
 }

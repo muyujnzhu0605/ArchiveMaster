@@ -12,6 +12,9 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
     : TwoStepViewModelBase<DirStructureSyncService, DirStructureSyncConfig>(config, appConfig)
 {
     [ObservableProperty]
+    private int checkedFilesCount = 0;
+
+    [ObservableProperty]
     private bool displayMultipleMatches = true;
 
     [ObservableProperty]
@@ -22,9 +25,18 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
 
     [ObservableProperty]
     private int filesCount = 0;
+    protected override Task OnInitializedAsync()
+    {
+        UpdateList();
+        return base.OnInitializedAsync();
+    }
 
-    [ObservableProperty]
-    private int checkedFilesCount = 0;
+    protected override void OnReset()
+    {
+        Files = null;
+        FilesCount = 0;
+        CheckedFilesCount = 0;
+    }
 
     partial void OnDisplayMultipleMatchesChanged(bool value)
     {
@@ -35,14 +47,6 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
     {
         UpdateList();
     }
-
-
-    protected override Task OnInitializedAsync()
-    {
-        UpdateList();
-        return base.OnInitializedAsync();
-    }
-
     [RelayCommand]
     private void SelectAll()
     {
@@ -84,13 +88,5 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
         Service.ExecutingFiles = Files;
         FilesCount = Files.Count;
         CheckedFilesCount = Files.Count(p => p.IsChecked);
-    }
-
-
-    protected override void OnReset()
-    {
-        Files = null;
-        FilesCount = 0;
-        CheckedFilesCount = 0;
     }
 }

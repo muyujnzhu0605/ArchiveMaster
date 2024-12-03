@@ -30,17 +30,6 @@
                     Type="OpenFolder" />
             </ct:FormItem>
 
-            <ct:FormItem Label="清理内容：">
-                <ct:WrapFormItemGroup>
-                    <CheckBox
-                        Content="清理自身：在待清理目录中查找相同文件，仅保留修改时间最早的版本"
-                        IsChecked="{Binding Config.CleanUpSelf}" />
-                    <CheckBox
-                        Content="根据参考清理：若待清理目录中的某个文件与参考目录的某个文件相同，则删除待清理目录中的该文件"
-                        IsChecked="{Binding Config.CleanUpByReference}" />
-                </ct:WrapFormItemGroup>
-            </ct:FormItem>
-
             <ct:FormItem Label="匹配条件：">
                 <ct:WrapFormItemGroup>
                     <CheckBox
@@ -58,15 +47,15 @@
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
-            <!-- <v:SimpleFileDataGrid ItemsSource="{Binding Files}"> -->
-            <!--     <DataGrid.Columns> -->
-            <!--  <DataGridTextColumn  -->
-            <!--  Binding="{Binding ExistedFile.Path}"  -->
-            <!--  Header="已存在文件的路径" />  -->
-            <!--     </DataGrid.Columns> -->
-            <!-- </v:SimpleFileDataGrid> -->
-
-            <v:TreeFileDataGrid ItemsSource="{Binding Groups}" />
+            <v:TreeFileDataGrid
+                ItemsSource="{Binding Groups}"
+                TreeFileDirLengthFormat="{}{F}个匹配的文件">
+                <v:TreeFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding RelativePath}"
+                        Header="相对路径" />
+                </v:TreeFileDataGrid.Columns>
+            </v:TreeFileDataGrid>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

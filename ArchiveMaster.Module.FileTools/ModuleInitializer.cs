@@ -38,7 +38,7 @@ namespace ArchiveMaster
                     baseUrl + "directory.svg"),
                 new ToolPanelInfo(typeof(RenamePanel), "批量重命名", "批量对一个目录中的文件或文件夹按规则进行重命名操作",
                     baseUrl + "rename.svg"),
-                new ToolPanelInfo(typeof(DuplicateFileCleanupPanel), "重复文件清理", "清理一个目录内的重复文件，以及包含在另一个目录中的重复文件",
+                new ToolPanelInfo(typeof(DuplicateFileCleanupPanel), "重复文件清理", "清理一个目录内的重复文件，或已包含在另一个目录中的相同文件",
                     baseUrl + "cleanup.svg"),
             },
             GroupName = ModuleName
