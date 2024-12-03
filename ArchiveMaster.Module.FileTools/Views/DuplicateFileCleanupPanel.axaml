@@ -24,9 +24,18 @@
                     FileNames="{Binding Config.CleaningDir}"
                     Type="OpenFolder" />
             </ct:FormItem>
-            <ct:FormItem Label="参考目录：">
+            <ct:FormItem
+                Description="若待清理目录下的某文件，在参考目录下也找到了相同的文件，则将删除待清理目录下的该文件。"
+                Label="参考目录：">
                 <ct:FilePickerTextBox
                     FileNames="{Binding Config.ReferenceDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem
+                Description="为了防止误删，文件将被移动到指定位置，需要手动进行删除。"
+                Label="删除文件位置：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.RecycleBin}"
                     Type="OpenFolder" />
             </ct:FormItem>
 
