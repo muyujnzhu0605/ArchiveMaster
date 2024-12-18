@@ -72,9 +72,9 @@ namespace ArchiveMaster.Services
                     Directory.CreateDirectory(Config.DistDir);
                 }
 
+                Clear(token);
                 Compress(token);
                 Copy(token);
-                Clear(token);
             }, token);
         }
 
@@ -188,6 +188,8 @@ namespace ArchiveMaster.Services
         {
             TryForFiles(DeleteFiles.ProcessingFiles, (file, s) =>
             {
+                NotifyMessage($"（第一步，共三步）正在删除{s.GetFileNumberMessage()}：{file.Name}");
+
                 if (file.IsDir)
                 {
                     Directory.Delete(file.Path, true);
@@ -196,19 +198,14 @@ namespace ArchiveMaster.Services
                 {
                     File.Delete(file.Path);
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress()
-                .WithMultiThreads(Config.Thread).Catch(
-                    (file, ex) =>
-                    {
-                        errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
-                    }).Build());
+            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         private void Compress(CancellationToken token)
         {
             TryForFiles(CompressFiles.ProcessingFiles, (file, s) =>
             {
-                NotifyMessage($"（第一步，共三步）正在压缩{s.GetFileNumberMessage()}：{file.Name}");
+                NotifyMessage($"（第二步，共三步）正在压缩{s.GetFileNumberMessage()}：{file.Name}");
                 string distPath = GetDistPath(file.Path, Config.OutputFormat, out _);
                 if (File.Exists(distPath))
                 {
@@ -266,7 +263,7 @@ namespace ArchiveMaster.Services
         {
             TryForFiles(CopyFiles.ProcessingFiles, (file, s) =>
             {
-                NotifyMessage($"（第二步，共三步）正在复制{s.GetFileNumberMessage()}：{file.Name}");
+                NotifyMessage($"（第三步，共三步）正在复制{s.GetFileNumberMessage()}：{file.Name}");
 
                 string distPath = GetDistPath(file.Path, null, out string subPath);
                 if (File.Exists(distPath))
