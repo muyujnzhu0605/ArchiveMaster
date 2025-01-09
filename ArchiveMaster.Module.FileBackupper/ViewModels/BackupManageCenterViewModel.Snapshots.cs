@@ -51,15 +51,17 @@ public partial class BackupManageCenterViewModel
 
 
     [RelayCommand]
-    private async Task LoadSnapshots()
+    private async Task LoadSnapshotsAsync()
     {
-        if (await TryDoAsync("加载快照", async () =>
-            {
-                DbService db = new DbService(SelectedTask);
-                Snapshots = new ObservableCollection<BackupSnapshotEntity>(await db.GetSnapshotsAsync());
-            }) == false)
+        try
+        {
+            DbService db = new DbService(SelectedTask);
+            Snapshots = new ObservableCollection<BackupSnapshotEntity>(await db.GetSnapshotsAsync());
+        }
+        catch (Exception ex)
         {
             SelectedTask = null;
+            throw;
         }
     }
 
@@ -98,7 +100,7 @@ public partial class BackupManageCenterViewModel
                 ThrowIfIsBackingUp();
                 await using var db = new DbService(SelectedTask);
                 await db.DeleteSnapshotAsync(snapshot);
-                await LoadSnapshots();
+                await LoadSnapshotsAsync();
             });
         }
     }

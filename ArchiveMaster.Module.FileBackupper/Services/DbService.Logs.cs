@@ -38,19 +38,30 @@ public partial class DbService
 
         if (timeRange.HasValue)
         {
-            query=query.Where(p=>p.Time>timeRange.Value.from && p.Time<timeRange.Value.to);
+            query = query.Where(p => p.Time > timeRange.Value.from && p.Time < timeRange.Value.to);
         }
 
         query = query.OrderBy(p => p.Time);
+        int totalCount = 0;
+        IList<BackupLogEntity> result = null;
 
-        int totalCount = await query.CountAsync();
-
-        if (pageSize > 0)
+        await Task.Run(() =>
         {
-            query = query.Skip(pageIndex * pageSize).Take(pageSize);
-        }
-
-        return new PagedList<BackupLogEntity>(await query.ToListAsync(), pageIndex, pageSize, totalCount);
+            totalCount = query.Count();
+            if (totalCount == 0)
+            {
+                result = new List<BackupLogEntity>();
+            }
+            else
+            {
+                if (pageSize > 0)
+                {
+                    query = query.Skip(pageIndex * pageSize).Take(pageSize);
+                }
+                result = [.. query];
+            }
+        });
+        return new PagedList<BackupLogEntity>(result, pageIndex, pageSize, totalCount);
     }
 
 

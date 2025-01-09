@@ -59,7 +59,7 @@ public partial class BackupManageCenterViewModel
     {
         Snapshots = null;
         LastLog = null;
-        
+
         if (oldValue != null)
         {
             oldValue.PropertyChanged -= SelectedBackupTaskPropertyChanged;
@@ -67,22 +67,18 @@ public partial class BackupManageCenterViewModel
 
         if (newValue != null)
         {
-            try
+            await TryDoAsync("加载任务", async () =>
             {
                 newValue.Check();
-                await LoadSnapshots();
+                await LoadSnapshotsAsync();
                 LogTimeFrom = DateTime.Today;
                 LogTimeTo = DateTime.Today.AddDays(1);
                 await LoadLogsAsync();
                 SelectedTabIndex = 3;
                 await UpdateOperationsEnableAsync();
                 newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
-            }
-            catch (Exception ex)
-            {
-                await this.ShowErrorAsync("加载任务失败", ex);
-                SelectedTask = null;
-            }
+            });
+
         }
     }
 
@@ -110,7 +106,7 @@ public partial class BackupManageCenterViewModel
                     CanCancelBackingUp = false;
                     IsTaskOperationEnable = true;
                     await SelectedTask.UpdateStatusAsync();
-                    await LoadSnapshots();
+                    await LoadSnapshotsAsync();
                     break;
                 case BackupTaskStatus.FullBackingUp:
                 case BackupTaskStatus.IncrementBackingUp:
