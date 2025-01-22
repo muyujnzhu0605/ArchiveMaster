@@ -26,7 +26,7 @@ public partial class SyncFileInfo : SimpleFileInfo
     private FileUpdateType updateType;
 
     /// <summary>
-    /// 对于 <see cref="ViewModels.SyncFileInfo.UpdateType"/>为<see cref="FileUpdateType.Move"/> 类型的对象，表示异地的相对路径
+    /// 对于 <see cref="UpdateType"/>为<see cref="FileUpdateType.Move"/> 类型的对象，表示异地的相对路径
     /// </summary>
     [ObservableProperty]
     private string oldRelativePath;

@@ -38,10 +38,17 @@ public class SimpleFileDataGrid : DataGrid
 
     public SimpleFileDataGrid()
     {
+        AreRowDetailsFrozen = true;
         CanUserReorderColumns = true;
         CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] =
             new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking));
+    }
+
+    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+    {
+        base.OnSelectionChanged(e);
+        RowDetailsVisibilityMode = SelectedItems.Count == 1 ? DataGridRowDetailsVisibilityMode.VisibleWhenSelected : DataGridRowDetailsVisibilityMode.Collapsed;
     }
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
