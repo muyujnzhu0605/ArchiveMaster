@@ -19,7 +19,7 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private string selectedSyncDir;
 
-        public override Step1Config Config => HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step1;
+        public override Step1Config Config => HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step1;
         protected override Step1Service CreateServiceImplement()
         {
             return new Step1Service(Config, appConfig);

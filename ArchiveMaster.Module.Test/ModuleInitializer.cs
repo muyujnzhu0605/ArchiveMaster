@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
@@ -23,33 +24,28 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
-    public class TestModuleInitializer : IModuleInitializer
+    public class TestModuleInfo : IModuleInfo
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.Test/Assets/";
-        public string ModuleName => "测试";
-        public int Order => -100;
-
-        public void RegisterServices(IServiceCollection services)
-        {
-            services.AddTransient<FileFilterTestPanel>();
-        }
-
+        public IList<Type> BackgroundServices { get; }
         public IList<ConfigInfo> Configs =>
         [
         ];
+
+        public string ModuleName => "测试";
+        public int Order => -100;
+        public IList<Type> SingletonServices { get; }
+
+        public IList<Type> TransientServices { get; }
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(FileFilterTestPanel), "文件筛选测试", "测试FileFilter功能", baseUrl + "test.svg"),
+                new ToolPanelInfo(typeof(FileFilterTestPanel), typeof(FileFilterTestViewModel), "文件筛选测试",
+                    "测试FileFilter功能", baseUrl + "test.svg"),
             },
             GroupName = ModuleName,
         };
-
-        public void RegisterMessages(Visual visual)
-        {
-         
-        }
     }
 }

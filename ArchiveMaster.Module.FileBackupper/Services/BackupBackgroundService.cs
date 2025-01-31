@@ -5,10 +5,12 @@ using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster.Services;
 
-public class BackupBackgroundService(BackupService backupService) : IHostedService
+public class BackupBackgroundService(BackupService backupService, FileBackupperConfig config) : IBackgroundService
 {
-    private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-    
+    public FileBackupperConfig Config { get; } = config;
+
+    public bool IsEnabled => Config.EnableBackgroundBackup;
+
     public Task StartAsync(CancellationToken _)
     {
         if (Design.IsDesignMode)

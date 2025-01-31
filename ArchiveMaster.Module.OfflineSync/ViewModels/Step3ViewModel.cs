@@ -19,7 +19,7 @@ namespace ArchiveMaster.ViewModels
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
         public override Step3Config Config =>
-            HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step3;
+            HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step3;
         protected override Step3Service CreateServiceImplement()
         {
             return new Step3Service(Config, appConfig);
@@ -47,7 +47,7 @@ namespace ArchiveMaster.ViewModels
                 if (result.Equals(true))
                 {
                     Service.DeleteEmptyDirectories(Config.DeleteMode,
-                        HostServices.Provider.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
+                        HostServices.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
                 }
             }
         }

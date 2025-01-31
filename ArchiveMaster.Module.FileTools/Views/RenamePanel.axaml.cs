@@ -5,9 +5,8 @@ namespace ArchiveMaster.Views
 {
     public partial class RenamePanel : TwoStepPanelBase
     {
-        public RenamePanel(RenameViewModel viewModel)
+        public RenamePanel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

@@ -19,14 +19,13 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>
 {
+    private readonly AppConfig appConfig;
+
     [ObservableProperty]
     private bool canCancel;
 
     [ObservableProperty]
     private SlimmingFilesInfo compressFiles;
-
-    [ObservableProperty]
-    private PhotoSlimmingConfig selectedConfig;
 
     [ObservableProperty]
     private SlimmingFilesInfo copyFiles;
@@ -36,19 +35,13 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
 
     [ObservableProperty]
     private ObservableCollection<string> errorMessages;
-    private readonly AppConfig appConfig;
 
-    public override PhotoSlimmingConfig Config => SelectedConfig;
-
-    protected override PhotoSlimmingService CreateServiceImplement()
-    {
-        return new PhotoSlimmingService(Config, appConfig);
-    }
-
+    [ObservableProperty]
+    private PhotoSlimmingConfig selectedConfig;
     public PhotoSlimmingViewModel(AppConfig appConfig, PhotoSlimmingConfig config = null)
         : base(config, appConfig)
     {
-        Configs = HostServices.Provider.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
+        Configs = HostServices.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
         if (Configs.Count == 0)
         {
             Configs.Add(new PhotoSlimmingConfig());
@@ -58,22 +51,18 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
         this.appConfig = appConfig;
     }
 
+    public override PhotoSlimmingConfig Config => SelectedConfig;
+
     public ObservableCollection<PhotoSlimmingConfig> Configs { get; set; }
 
+    protected override PhotoSlimmingService CreateServiceImplement()
+    {
+        return new PhotoSlimmingService(Config, appConfig);
+    }
     protected override Task OnExecutedAsync(CancellationToken token)
     {
         ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
         return base.OnExecutedAsync(token);
-    }
-
-    protected override Task OnInitializingAsync()
-    {
-        if (Config == null)
-        {
-            throw new ArgumentException("请先选择配置");
-        }
-
-        return base.OnInitializingAsync();
     }
 
     protected override async Task OnInitializedAsync()
@@ -90,6 +79,15 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
         ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
     }
 
+    protected override Task OnInitializingAsync()
+    {
+        if (Config == null)
+        {
+            throw new ArgumentException("请先选择配置");
+        }
+
+        return base.OnInitializingAsync();
+    }
     protected override void OnReset()
     {
         CopyFiles = null;

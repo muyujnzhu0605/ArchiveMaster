@@ -35,7 +35,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
 
     protected virtual TService CreateServiceImplement()
     {
-        return HostServices.Provider.GetRequiredService<TService>();
+        return HostServices.GetRequiredService<TService>();
     }
 
     [ObservableProperty]

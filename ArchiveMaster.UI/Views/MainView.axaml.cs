@@ -48,8 +48,41 @@ public partial class MainView : UserControl
         {
             Padding = new Thickness(0, viewPadding.GetTop(), 0, viewPadding.GetBottom());
         }
+    }
 
-        Initializer.ModuleInitializers.ForEach(p => p.RegisterMessages(this));
+    protected override async void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        RegisterMessages();
+        permissionService?.CheckPermissions();
+        if (appConfig.LoadError != null)
+        {
+            await this.ShowErrorDialogAsync("加载配置失败", appConfig.LoadError);
+        }
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        if (Bounds.Width <= 420)
+        {
+            Resources["BoxWidth"] = 160d;
+            Resources["BoxHeight"] = 200d;
+            Resources["ShowDescription"] = false;
+        }
+        else
+        {
+            Resources["BoxWidth"] = 200d;
+            Resources["BoxHeight"] = 280d;
+            Resources["ShowDescription"] = true;
+        }
+    }
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+        WeakReferenceMessenger.Default.Cleanup();
     }
 
     private void RegisterMessages()
@@ -84,42 +117,6 @@ public partial class MainView : UserControl
             });
         });
     }
-
-    protected override void OnUnloaded(RoutedEventArgs e)
-    {
-        base.OnUnloaded(e);
-        WeakReferenceMessenger.Default.UnregisterAll(this);
-        WeakReferenceMessenger.Default.Cleanup();
-    }
-
-    protected override async void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        RegisterMessages();
-        permissionService?.CheckPermissions();
-        if (appConfig.LoadError != null)
-        {
-            await this.ShowErrorDialogAsync("加载配置失败", appConfig.LoadError);
-        }
-    }
-
-    protected override void OnSizeChanged(SizeChangedEventArgs e)
-    {
-        base.OnSizeChanged(e);
-        if (Bounds.Width <= 420)
-        {
-            Resources["BoxWidth"] = 160d;
-            Resources["BoxHeight"] = 200d;
-            Resources["ShowDescription"] = false;
-        }
-        else
-        {
-            Resources["BoxWidth"] = 200d;
-            Resources["BoxHeight"] = 280d;
-            Resources["ShowDescription"] = true;
-        }
-    }
-
     private void ToolItem_OnKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)

@@ -17,12 +17,35 @@ namespace ArchiveMaster.Services
 {
     public static class TestService
     {
-        private const int Count = 2;
         private const int CostTimeCount = 0;
+        private const int Count = 2;
+        private static Random random = new Random();
+
+        public static Task CreateSyncTestFilesAsync(string dir)
+        {
+            return Task.Run(() =>
+            {
+                DateTime time = new DateTime(2000, 1, 1, 0, 0, 0);
+                var root = new DirectoryInfo(dir);
+                if (root.Exists)
+                {
+                    root.Delete(true);
+                }
+
+                root.Create();
+
+                var local = root.CreateSubdirectory("local");
+                var remote = root.CreateSubdirectory("remote");
+
+                CreateTestFiles(local.CreateSubdirectory("syncDir1"), remote.CreateSubdirectory("syncDir1"));
+                CreateTestFiles(local.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"),
+                    remote.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"));
+            });
+        }
 
         public static async Task TestAllAsync()
         {
-            var appConfig = HostServices.Provider.GetRequiredService<AppConfig>();
+            var appConfig = HostServices.GetRequiredService<AppConfig>();
             string dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             string localDir = Path.Combine(dir, "local");
             string remoteDir = Path.Combine(dir, "remote");
@@ -146,31 +169,6 @@ namespace ArchiveMaster.Services
                 throw new Exception();
             }
         }
-
-        public static Task CreateSyncTestFilesAsync(string dir)
-        {
-            return Task.Run(() =>
-            {
-                DateTime time = new DateTime(2000, 1, 1, 0, 0, 0);
-                var root = new DirectoryInfo(dir);
-                if (root.Exists)
-                {
-                    root.Delete(true);
-                }
-
-                root.Create();
-
-                var local = root.CreateSubdirectory("local");
-                var remote = root.CreateSubdirectory("remote");
-
-                CreateTestFiles(local.CreateSubdirectory("syncDir1"), remote.CreateSubdirectory("syncDir1"));
-                CreateTestFiles(local.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"),
-                    remote.CreateSubdirectory("folder").CreateSubdirectory("syncDir2"));
-            });
-        }
-
-        private static Random random = new Random();
-
         private static void CreateRandomFile(string path)
         {
             using FileStream file = File.Create(path);

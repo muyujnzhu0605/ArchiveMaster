@@ -8,9 +8,8 @@ namespace ArchiveMaster.Views
     /// </summary>
     public partial class RebuildPanel : TwoStepPanelBase
     {
-        public RebuildPanel(RebuildViewModel viewModel)
+        public RebuildPanel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

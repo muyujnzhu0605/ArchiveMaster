@@ -21,8 +21,8 @@ namespace ArchiveMaster;
 
 public partial class App : Application
 {
-    private bool isMainWindowOpened = false;
     private bool dontOpen = false;
+    private bool isMainWindowOpened = false;
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
 
     public override void Initialize()
@@ -49,20 +49,6 @@ public partial class App : Application
         }
     }
 
-    private async void ShowMultiInstanceDialog()
-    {
-        if (TrayIcon.GetIcons(this) is { Count: > 0 })
-        {
-            TrayIcon.GetIcons(this)[0].IsVisible = false;
-        }
-
-        await DialogExtension.ShowOkDialogAsync(null, "当前位置的程序已启动，无法重复启动多个实例");
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
-        }
-    }
-
     public override void OnFrameworkInitializationCompleted()
     {
         if (dontOpen)
@@ -85,7 +71,7 @@ public partial class App : Application
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            singleViewPlatform.MainView = HostServices.Provider.GetRequiredService<MainView>();
+            singleViewPlatform.MainView = HostServices.GetRequiredService<MainView>();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -116,35 +102,42 @@ public partial class App : Application
         }
 
         isMainWindowOpened = true;
-        desktop.MainWindow = HostServices.Provider.GetRequiredService<MainWindow>();
+        desktop.MainWindow = HostServices.GetRequiredService<MainWindow>();
         desktop.MainWindow.Closed += (s, e) =>
         {
             desktop.MainWindow = null;
             isMainWindowOpened = false;
             Initializer.ClearViewsInstance();
+
+            var backgroundServices = Initializer.GetBackgroundServices();
+            if (backgroundServices.Count == 0 || backgroundServices.All(p => !p.IsEnabled))
+            {
+                desktop.Shutdown();
+            }
         };
         return desktop.MainWindow as MainWindow;
     }
 
+    private async void ShowMultiInstanceDialog()
+    {
+        if (TrayIcon.GetIcons(this) is { Count: > 0 })
+        {
+            TrayIcon.GetIcons(this)[0].IsVisible = false;
+        }
+
+        await DialogExtension.ShowOkDialogAsync(null, "当前位置的程序已启动，无法重复启动多个实例");
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
     private void TrayIcon_Clicked(object sender, EventArgs e)
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             if (desktop.MainWindow is MainWindow m)
             {
-                if (m.WindowState == WindowState.Minimized) //最小化
-                {
-                    m.BringToFront();
-                }
-                // else //正在显示，直接关窗口
-                // {
-                //     if (ViewModelBase.Current?.IsWorking ?? false)
-                //     {
-                //         return;
-                //     }
-                //
-                //     desktop.MainWindow.Close();
-                // }
+                m.BringToFront();
             }
             else //关了窗口，重新开一个新的
             {

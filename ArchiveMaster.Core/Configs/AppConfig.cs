@@ -38,30 +38,6 @@ namespace ArchiveMaster.Configs
 
         public Exception LoadError { get; private set; }
 
-        public void RegisterConfig(ConfigInfo config)
-        {
-            configs.Add(config.Key, config);
-        }
-
-        public void Save(bool raiseEvent = true)
-        {
-            if (raiseEvent)
-            {
-                BeforeSaving?.Invoke(this, EventArgs.Empty);
-            }
-
-            try
-            {
-                var json = JsonSerializer.Serialize(
-                    configs.Values.ToDictionary(p => p.Key, p => HostServices.Provider.GetRequiredService(p.Type)),
-                    jsonOptions);
-                File.WriteAllText(configFile, json);
-            }
-            catch (Exception ex)
-            {
-            }
-        }
-
         public void Load(IServiceCollection services)
         {
             try
@@ -110,6 +86,30 @@ namespace ArchiveMaster.Configs
                 {
                     services.AddSingleton(config.Type);
                 }
+            }
+        }
+
+        public void RegisterConfig(ConfigInfo config)
+        {
+            configs.Add(config.Key, config);
+        }
+
+        public void Save(bool raiseEvent = true)
+        {
+            if (raiseEvent)
+            {
+                BeforeSaving?.Invoke(this, EventArgs.Empty);
+            }
+
+            try
+            {
+                var json = JsonSerializer.Serialize(
+                    configs.Values.ToDictionary(p => p.Key, p => HostServices.GetRequiredService(p.Type)),
+                    jsonOptions);
+                File.WriteAllText(configFile, json);
+            }
+            catch (Exception ex)
+            {
             }
         }
     }

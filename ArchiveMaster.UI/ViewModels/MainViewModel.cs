@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Models;
 using ArchiveMaster.Platforms;
 using ArchiveMaster.Services;
 using Avalonia;
@@ -69,8 +70,8 @@ public partial class MainViewModel : ObservableObject
     {
         if (panelInfo.PanelInstance == null)
         {
-            panelInfo.PanelInstance = HostServices.Provider.GetService(panelInfo.PanelType) as PanelBase ??
-                                      throw new Exception($"无法找到{panelInfo.PanelType}服务");
+            panelInfo.PanelInstance = HostServices.GetService(panelInfo.ViewType) as PanelBase ??
+                                      throw new Exception($"无法找到{panelInfo.ViewType}服务");
             if (panelInfo.PanelInstance.DataContext is ViewModelBase vm)
             {
                 vm.RequestClosing += async (s, e) =>

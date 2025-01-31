@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
@@ -23,39 +24,32 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
-    public class OfflineSyncModuleInitializer : IModuleInitializer
+    public class OfflineSyncModuleInfo : IModuleInfo
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
-        public string ModuleName => "异地备份离线同步";
-        public int Order => 3;
-
-        public void RegisterServices(IServiceCollection services)
-        {
-            services.AddTransient<Step1ViewModel>();
-            services.AddTransient<Step2ViewModel>();
-            services.AddTransient<Step3ViewModel>();
-
-            services.AddTransient<Step1Panel>();
-            services.AddTransient<Step2Panel>();
-            services.AddTransient<Step3Panel>();
-
-            services.AddTransient<Step1Service>();
-            services.AddTransient<Step2Service>();
-            services.AddTransient<Step3Service>();
-        }
-
+        public IList<Type> BackgroundServices { get; }
         public IList<ConfigInfo> Configs =>
         [
             new ConfigInfo(typeof(OfflineSyncConfig))
         ];
 
+        public string ModuleName => "异地备份离线同步";
+        public int Order => 3;
+        public IList<Type> SingletonServices { get; }
+
+        public IList<Type> TransientServices { get; } =
+            [typeof(Step1Service), typeof(Step2Service), typeof(Step3Service)];
+
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(Step1Panel), "制作异地快照", "在异地计算机创建所需要的目录快照", baseUrl + "snapshot.svg"),
-                new ToolPanelInfo(typeof(Step2Panel), "本地生成补丁", "在本地计算机生成与异地的差异文件的补丁包", baseUrl + "patch.svg"),
-                new ToolPanelInfo(typeof(Step3Panel), "异地同步", "在异地应用补丁包，实现数据同步", baseUrl + "update.svg")
+                new ToolPanelInfo(typeof(Step1Panel), typeof(Step1ViewModel), "制作异地快照", "在异地计算机创建所需要的目录快照",
+                    baseUrl + "snapshot.svg"),
+                new ToolPanelInfo(typeof(Step2Panel), typeof(Step2ViewModel), "本地生成补丁", "在本地计算机生成与异地的差异文件的补丁包",
+                    baseUrl + "patch.svg"),
+                new ToolPanelInfo(typeof(Step3Panel), typeof(Step3ViewModel), "异地同步", "在异地应用补丁包，实现数据同步",
+                    baseUrl + "update.svg")
             },
             GroupName = ModuleName,
             MenuItems =
@@ -96,10 +90,5 @@ namespace ArchiveMaster
                 }))
             }
         };
-
-        public void RegisterMessages(Visual visual)
-        {
-         
-        }
     }
 }
