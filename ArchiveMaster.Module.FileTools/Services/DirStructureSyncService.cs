@@ -16,8 +16,8 @@ using MatchingFileInfo = ArchiveMaster.ViewModels.FileSystem.MatchingFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public class DirStructureSyncService(DirStructureSyncConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<DirStructureSyncConfig>(config, appConfig)
+    public class DirStructureSyncService(AppConfig appConfig)
+        : TwoStepServiceBase<DirStructureSyncConfig>(appConfig)
     {
         public IList<MatchingFileInfo> ExecutingFiles { get; set; }
         private readonly Dictionary<long, object> length2Template = new Dictionary<long, object>();

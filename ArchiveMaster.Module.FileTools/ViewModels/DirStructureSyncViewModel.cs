@@ -8,8 +8,8 @@ using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<DirStructureSyncService, DirStructureSyncConfig>(config, appConfig)
+public partial class DirStructureSyncViewModel(AppConfig appConfig)
+    : SingleVersionConfigTwoStepViewModelBase<DirStructureSyncService, DirStructureSyncConfig>(appConfig)
 {
     [ObservableProperty]
     private int checkedFilesCount = 0;
@@ -25,6 +25,7 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
 
     [ObservableProperty]
     private int filesCount = 0;
+
     protected override Task OnInitializedAsync()
     {
         UpdateList();
@@ -47,6 +48,7 @@ public partial class DirStructureSyncViewModel(DirStructureSyncConfig config, Ap
     {
         UpdateList();
     }
+
     [RelayCommand]
     private void SelectAll()
     {

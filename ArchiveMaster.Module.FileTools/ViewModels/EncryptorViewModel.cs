@@ -14,7 +14,7 @@ using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService, EncryptorConfig>
+public partial class EncryptorViewModel : SingleVersionConfigTwoStepViewModelBase<EncryptorService, EncryptorConfig>
 {
     [ObservableProperty]
     private bool isEncrypting = true;
@@ -26,7 +26,7 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService,
 
     public PaddingMode[] PaddingModes => Enum.GetValues<PaddingMode>();
 
-    public EncryptorViewModel(EncryptorConfig config, AppConfig appConfig) : base(config, appConfig)
+    public EncryptorViewModel(  AppConfig appConfig) : base( appConfig)
     {
         appConfig.BeforeSaving += (s, e) =>
         {

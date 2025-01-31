@@ -16,9 +16,16 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
+public abstract class
+    SingleVersionConfigTwoStepViewModelBase<TService, TConfig>(AppConfig appConfig, bool enableInitialize = true)
+    : TwoStepViewModelBase<TService, TConfig>(appConfig.GetConfig<TConfig>(typeof(TConfig).Name), appConfig,
+        enableInitialize)
+    where TService : TwoStepServiceBase<TConfig>
+    where TConfig : ConfigBase, new();
+
 public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewModelBase
     where TService : TwoStepServiceBase<TConfig>
-    where TConfig : ConfigBase
+    where TConfig : ConfigBase, new()
 {
     public TwoStepViewModelBase(TConfig config, AppConfig appConfig, bool enableInitialize = true)
     {
@@ -35,7 +42,9 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
 
     protected virtual TService CreateServiceImplement()
     {
-        return HostServices.GetRequiredService<TService>();
+        var service= HostServices.GetRequiredService<TService>();
+        service.Config = Config;
+        return service;
     }
 
     [ObservableProperty]
@@ -53,7 +62,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     [ObservableProperty]
     private string message = "就绪";
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
     protected readonly AppConfig appConfig;

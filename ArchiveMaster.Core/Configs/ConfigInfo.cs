@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace ArchiveMaster.Configs
 {
@@ -15,6 +16,7 @@ namespace ArchiveMaster.Configs
             Key = type.Name;
         }
 
+        [JsonIgnore]
         public Type Type { get; set; }
         public string Key { get; set; }
     }

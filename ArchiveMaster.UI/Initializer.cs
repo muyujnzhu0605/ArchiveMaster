@@ -28,13 +28,13 @@ public static class Initializer
     public static IModuleInfo[] ModuleInitializers { get; } =
     [
 #if DEBUG
-        new TestModuleInfo(),
+        // new TestModuleInfo(),
 #endif
         new FileToolsModuleInfo(),
-        new PhotoArchiveModuleInfo(),
-        new OfflineSyncModuleInfo(),
-        new DiscArchiveModuleInfo(),
-        new FileBackupperModuleInfo(),
+        // new PhotoArchiveModuleInfo(),
+        // new OfflineSyncModuleInfo(),
+        // new DiscArchiveModuleInfo(),
+        // new FileBackupperModuleInfo(),
     ];
 
     public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
@@ -70,7 +70,7 @@ public static class Initializer
         var builder = Host.CreateApplicationBuilder();
         var config = new AppConfig();
         InitializeModules(builder.Services, config);
-        config.Load(builder.Services);
+        config.Load();
         builder.Services.AddSingleton(config);
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<MainView>();
@@ -92,14 +92,17 @@ public static class Initializer
 
         return Task.CompletedTask;
     }
+
     private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
     {
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
 
         foreach (var moduleInitializer in ModuleInitializers)
         {
+#if !DEBUG
             try
             {
+#endif
                 //注册配置
                 foreach (var config in moduleInitializer.Configs ?? [])
                 {
@@ -143,13 +146,15 @@ public static class Initializer
                 }
 
                 viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
+#if !DEBUG
             }
             catch (Exception ex)
             {
                 throw new Exception($"加载模块{moduleInitializer.ModuleName}时出错: {ex.Message}");
             }
-        }
+#endif
+            }
 
-        views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
+            views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
+        }
     }
-}

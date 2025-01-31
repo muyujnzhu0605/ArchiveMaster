@@ -42,7 +42,7 @@ public class SimpleFileDataGrid : DataGrid
         CanUserReorderColumns = true;
         CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] =
-            new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking));
+            new Binding("IsWorking");
     }
 
     protected override void OnSelectionChanged(SelectionChangedEventArgs e)
@@ -228,7 +228,7 @@ public class SimpleFileDataGrid : DataGrid
             foreach (var btn in buttons)
             {
                 btn[!IsEnabledProperty] =
-                    new Binding(nameof(TwoStepViewModelBase<TwoStepServiceBase<ConfigBase>, ConfigBase>.IsWorking))
+                    new Binding("IsWorking")
                     {
                         Converter = InverseBoolConverter
                     };

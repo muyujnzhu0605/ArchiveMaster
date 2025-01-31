@@ -16,8 +16,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace ArchiveMaster.Services
 {
-    public class DuplicateFileCleanupService(DuplicateFileCleanupConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<DuplicateFileCleanupConfig>(config, appConfig)
+    public class DuplicateFileCleanupService(AppConfig appConfig)
+        : TwoStepServiceBase<DuplicateFileCleanupConfig>(appConfig)
     {
         private FileMatchHelper matcher;
 
@@ -58,7 +58,7 @@ namespace ArchiveMaster.Services
                             file.Error(ex);
                         }
                     }
-                    
+
                     NotifyProgress(1.0 * index++ / DuplicateGroups.SubFolderCount);
                 }
             }, token);

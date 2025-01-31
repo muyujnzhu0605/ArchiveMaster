@@ -14,8 +14,8 @@ using System.Threading.Tasks;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RenameViewModel(RenameConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<RenameService, RenameConfig>(config, appConfig)
+public partial class RenameViewModel(AppConfig appConfig)
+    : SingleVersionConfigTwoStepViewModelBase<RenameService, RenameConfig>(appConfig)
 {
     [ObservableProperty]
     private ObservableCollection<FileSystem.RenameFileInfo> files;
@@ -45,7 +45,9 @@ public partial class RenameViewModel(RenameConfig config, AppConfig appConfig)
             return;
         }
 
-        Files = new ObservableCollection<FileSystem.RenameFileInfo>(value ? Service.Files.Where(p => p.IsMatched) : Service.Files);
+        Files = new ObservableCollection<FileSystem.RenameFileInfo>(value
+            ? Service.Files.Where(p => p.IsMatched)
+            : Service.Files);
     }
 
     protected override void OnReset()

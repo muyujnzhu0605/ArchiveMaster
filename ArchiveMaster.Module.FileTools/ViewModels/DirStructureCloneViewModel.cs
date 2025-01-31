@@ -8,8 +8,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace ArchiveMaster.ViewModels;
 
 public partial class
-    DirStructureCloneViewModel(DirStructureCloneConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(config, appConfig)
+    DirStructureCloneViewModel(AppConfig appConfig)
+    : SingleVersionConfigTwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(appConfig)
 {
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;

@@ -24,57 +24,73 @@ namespace ArchiveMaster.Configs
             WriteIndented = true,
         };
 
-        private Dictionary<string, ConfigInfo> configs = new Dictionary<string, ConfigInfo>();
+        private List<ConfigItem> configs = new List<ConfigItem>();
+        private Dictionary<string, Type> configTypes = new Dictionary<string, Type>();
 
         public event EventHandler BeforeSaving;
 
         public bool DebugMode { get; set; }
 
-        // #if DEBUG
-        //             = true;
-        // #endif
-
         public int DebugModeLoopDelay { get; set; } = 30;
 
         public Exception LoadError { get; private set; }
 
-        public void Load(IServiceCollection services)
+        public T GetConfig<T>(string key, string group=null, string version=null) where T:new()
+        {
+            var configItem = configs.FirstOrDefault(p => p.Key == key && p.Group == group && p.Version == version);
+            if (configItem == null)
+            {
+                configItem = new ConfigItem
+                {
+                    Key = key,
+                    Group = group,
+                    Version = version,
+                    Type = typeof(T),
+                    Config = new T()
+                };
+                configs.Add(configItem);
+            }
+            else
+            {
+                if (configItem.Config is not T)
+                {
+                    throw new InvalidCastException(
+                        $"配置列表中的配置项{key}（组：{group ?? "（无）"}；版本：{version ?? "（无）"}）的配置项对象类型（{configItem.Type?.Name}）与请求的类型（{typeof(T).Name}）不一致");
+                }
+            }
+
+            return (T)configItem.Config;
+        }
+
+        public void Load()
         {
             try
             {
                 Dictionary<string, object> fileConfigs = new Dictionary<string, object>();
                 if (File.Exists(configFile))
                 {
-                    var json = File.ReadAllText(configFile);
-                    JsonObject jobj = JsonNode.Parse(json) as JsonObject;
-                    foreach (var kv in jobj)
+                    var json = JsonNode.Parse(File.ReadAllText(configFile));
+                    if (json is not JsonArray jarray)
                     {
-                        if (configs.TryGetValue(kv.Key, out ConfigInfo config))
-                        {
-                            fileConfigs.Add(kv.Key, JsonSerializer.Deserialize(kv.Value, config.Type));
-                            //
-                            // config.Config = JsonSerializer.Deserialize(kv.Value, config.Type);
-                            // Services.Builder.AddSingleton(config.Type,  config.Config);
-                        }
+                        throw new Exception("配置文件内不是Json Array");
                     }
-                }
 
-                foreach (var config in configs.Values)
-                {
-                    if (fileConfigs.TryGetValue(config.Key, out object obj) && obj != null)
+                    foreach (var key in configTypes.Keys)
                     {
-                        try
+                        var configItemJsons =
+                            jarray.Where(p => key.Equals(p[nameof(ConfigInfo.Key)]?.GetValue<string>()));
+                        foreach (var j in configItemJsons)
                         {
-                            services.AddSingleton(config.Type, obj);
+                            ConfigItem configItem = new ConfigItem
+                            {
+                                Key = key,
+                                Type = configTypes[key],
+                                Version = j[nameof(configItem.Version)]?.GetValue<string>(),
+                                Group = j[nameof(configItem.Group)]?.GetValue<string>(),
+                                Config = j[nameof(configItem.Config)]?.Deserialize(configTypes[key])
+                            };
+                            configs.Add(configItem);
                         }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex, $"加载单个配置{config.Key}失败");
-                        }
-                    }
-                    else
-                    {
-                        services.AddSingleton(config.Type);
                     }
                 }
             }
@@ -82,16 +98,12 @@ namespace ArchiveMaster.Configs
             {
                 Log.Error(ex, "加载配置失败");
                 LoadError = new Exception("加载配置文件失败，将重置配置", ex);
-                foreach (var config in configs.Values)
-                {
-                    services.AddSingleton(config.Type);
-                }
             }
         }
 
         public void RegisterConfig(ConfigInfo config)
         {
-            configs.Add(config.Key, config);
+            configTypes.Add(config.Key, config.Type);
         }
 
         public void Save(bool raiseEvent = true)
@@ -103,9 +115,7 @@ namespace ArchiveMaster.Configs
 
             try
             {
-                var json = JsonSerializer.Serialize(
-                    configs.Values.ToDictionary(p => p.Key, p => HostServices.GetRequiredService(p.Type)),
-                    jsonOptions);
+                var json = JsonSerializer.Serialize(configs, jsonOptions);
                 File.WriteAllText(configFile, json);
             }
             catch (Exception ex)

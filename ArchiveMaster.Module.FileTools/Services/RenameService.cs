@@ -12,8 +12,8 @@ using RenameFileInfo = ArchiveMaster.ViewModels.FileSystem.RenameFileInfo;
 
 namespace ArchiveMaster.Services;
 
-public class RenameService(RenameConfig config, AppConfig appConfig)
-    : TwoStepServiceBase<RenameConfig>(config, appConfig)
+public class RenameService(AppConfig appConfig)
+    : TwoStepServiceBase<RenameConfig>(appConfig)
 {
     public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
         new Dictionary<string, Func<SimpleFileInfo, string, string>>()

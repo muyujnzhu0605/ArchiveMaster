@@ -7,19 +7,12 @@ using SimpleFileInfo = ArchiveMaster.ViewModels.FileSystem.SimpleFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public abstract class ServiceBase<TConfig> where TConfig : ConfigBase
+    public abstract class ServiceBase<TConfig>(AppConfig appConfig)
+        where TConfig : ConfigBase
     {
-        private readonly AppConfig appConfig;
-
-        public ServiceBase(TConfig config, AppConfig appConfig)
-        {
-            Config = config;
-            this.appConfig = appConfig;
-        }
-
         public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
         public event EventHandler<MessageUpdateEventArgs> MessageUpdate;
-        public virtual TConfig Config { get; }
+        public virtual TConfig Config { get; internal set; }
 
         protected void NotifyProgressIndeterminate()
         {

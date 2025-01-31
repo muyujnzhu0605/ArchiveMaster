@@ -14,8 +14,8 @@ using Microsoft.Win32.SafeHandles;
 
 namespace ArchiveMaster.Services
 {
-    public class DirStructureCloneService(DirStructureCloneConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<DirStructureCloneConfig>(config, appConfig)
+    public class DirStructureCloneService(AppConfig appConfig)
+        : TwoStepServiceBase<DirStructureCloneConfig>(appConfig)
     {
         public TreeDirInfo RootDir { get; private set; }
 
@@ -73,7 +73,7 @@ namespace ArchiveMaster.Services
 
             NotifyMessage("正在枚举文件");
             NotifyProgressIndeterminate();
-            RootDir = await TreeDirInfo.BuildTreeAsync(config.SourceDir, token);
+            RootDir = await TreeDirInfo.BuildTreeAsync(Config.SourceDir, token);
         }
 
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]

@@ -30,11 +30,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj"/>
-        <ProjectReference Include="..\ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj"/>
-        <ProjectReference Include="..\ArchiveMaster.Module.PhotoArchive\ArchiveMaster.Module.PhotoArchive.csproj"/>
+<!--        <ProjectReference Include="..\ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj"/>-->
+<!--        <ProjectReference Include="..\ArchiveMaster.Module.PhotoArchive\ArchiveMaster.Module.PhotoArchive.csproj"/>-->
         <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj"/>
-        <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj"/>
-        <ProjectReference Include="..\ArchiveMaster.Module.DiscArchive\ArchiveMaster.Module.DiscArchive.csproj"/>
-        <ProjectReference Include="..\ArchiveMaster.Module.Test\ArchiveMaster.Module.Test.csproj" Condition="'$(Configuration)' == 'Debug'"/>
+<!--        <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj"/>-->
+<!--        <ProjectReference Include="..\ArchiveMaster.Module.DiscArchive\ArchiveMaster.Module.DiscArchive.csproj"/>-->
+<!--        <ProjectReference Include="..\ArchiveMaster.Module.Test\ArchiveMaster.Module.Test.csproj" Condition="'$(Configuration)' == 'Debug'"/>-->
     </ItemGroup>
 </Project>

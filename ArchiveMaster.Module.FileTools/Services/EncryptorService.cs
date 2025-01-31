@@ -15,7 +15,7 @@ using EncryptorFileInfo = ArchiveMaster.ViewModels.FileSystem.EncryptorFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public class EncryptorService(EncryptorConfig config, AppConfig appConfig) : TwoStepServiceBase<EncryptorConfig>(config, appConfig)
+    public class EncryptorService(AppConfig appConfig) : TwoStepServiceBase<EncryptorConfig>(appConfig)
     {
         public const string EncryptedFileExtension = ".ept";
         public const string DirectoryStructureFile = "$files$.txt";
