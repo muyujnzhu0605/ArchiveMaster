@@ -18,27 +18,11 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Services
 {
-    public class PhotoSlimmingService : TwoStepServiceBase<PhotoSlimmingConfig>
+    public class PhotoSlimmingService(AppConfig appConfig) : TwoStepServiceBase<PhotoSlimmingConfig>(appConfig)
     {
-        private readonly Regex rCompress;
-        private readonly Regex rCopy;
+        private Regex rCompress;
+        private Regex rCopy;
         private ConcurrentBag<string> errorMessages;
-
-        public PhotoSlimmingService(PhotoSlimmingConfig config, AppConfig appConfig) : base(config, appConfig)
-        {
-            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
-            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
-
-            if (!config.FolderNameTemplate.Contains(PhotoSlimmingConfig.FolderNamePlaceholder))
-            {
-                throw new Exception("文件夹名模板不包含文件夹名占位符");
-            }
-
-            if (!config.FileNameTemplate.Contains(PhotoSlimmingConfig.FileNamePlaceholder))
-            {
-                throw new Exception("文件夹名模板不包含文件夹名占位符");
-            }
-        }
 
         public enum TaskType
         {
@@ -80,6 +64,9 @@ namespace ArchiveMaster.Services
 
         public override Task InitializeAsync(CancellationToken token)
         {
+            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
+            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
+
             CompressFiles = new SlimmingFilesInfo(Config.SourceDir);
             CopyFiles = new SlimmingFilesInfo(Config.SourceDir);
             DeleteFiles = new SlimmingFilesInfo(Config.SourceDir);

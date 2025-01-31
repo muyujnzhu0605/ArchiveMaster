@@ -5,11 +5,11 @@ using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster.Services;
 
-public class BackupBackgroundService(BackupService backupService, FileBackupperConfig config) : IBackgroundService
+public class BackupBackgroundService(BackupService backupService,AppConfig config) : IBackgroundService
 {
-    public FileBackupperConfig Config { get; } = config;
+    public AppConfig Config { get; } = config;
 
-    public bool IsEnabled => Config.EnableBackgroundBackup;
+    public bool IsEnabled => config.GetConfig<FileBackupperConfig>(nameof(FileBackupperConfig)).EnableBackgroundBackup;
 
     public Task StartAsync(CancellationToken _)
     {

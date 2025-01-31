@@ -14,8 +14,8 @@ using FilesTimeDirInfo = ArchiveMaster.ViewModels.FileSystem.FilesTimeDirInfo;
 
 namespace ArchiveMaster.Services
 {
-    public class TimeClassifyService(TimeClassifyConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<TimeClassifyConfig>(config, appConfig)
+    public class TimeClassifyService(AppConfig appConfig)
+        : TwoStepServiceBase<TimeClassifyConfig>(appConfig)
     {
         public List<FilesTimeDirInfo> TargetDirs { get; set; }
 

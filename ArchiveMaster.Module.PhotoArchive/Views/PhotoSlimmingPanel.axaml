@@ -1,7 +1,8 @@
-<v:TwoStepPanelBase
+<v:MultiVersionConfigTwoStepPanelBase
     x:Class="ArchiveMaster.Views.PhotoSlimmingPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -12,40 +13,110 @@
     x:DataType="vm:PhotoSlimmingViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <Grid
-            Grid.Row="2"
-            ColumnDefinitions="*,8,Auto">
-            <ListBox
-                DisplayMemberBinding="{Binding Name}"
-                ItemsSource="{Binding Configs}"
-                SelectedItem="{Binding SelectedConfig}" />
-            <Grid
-                Grid.Column="2"
-                VerticalAlignment="Center"
-                ColumnDefinitions="Auto,8,Auto"
-                IsEnabled="{Binding !IsWorking}"
-                RowDefinitions="Auto,8,Auto">
-                <Button
-                    Command="{Binding CreateCommand}"
-                    Content="新增" />
-                <Button
-                    Grid.Row="2"
-                    Command="{Binding EditCommand}"
-                    Content="修改"
-                    IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
-                <Button
-                    Grid.Column="2"
-                    Command="{Binding RemoveCommand}"
-                    Content="删除"
-                    IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
-                <Button
-                    Grid.Row="2"
-                    Grid.Column="2"
-                    Command="{Binding CloneCommand}"
-                    Content="克隆"
-                    IsEnabled="{Binding Config, Converter={StaticResource NotNullConverter}}" />
-            </Grid>
-        </Grid>
+        <StackPanel>
+            <gb:GroupBox Header="目录和文件">
+                <ct:StackFormItemGroup>
+                    <ct:FormItem Label="源目录：">
+                        <ct:FilePickerTextBox
+                            Grid.Row="2"
+                            FileNames="{Binding Config.SourceDir}"
+                            Type="OpenFolder" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="目标目录：">
+                        <ct:FilePickerTextBox
+                            Grid.Row="2"
+                            FileNames="{Binding Config.DistDir}"
+                            Type="OpenFolder" />
+                    </ct:FormItem>
+
+                    <ct:FormItem Label="最深目录层级：">
+                        <NumericUpDown
+                            Increment="1"
+                            Maximum="10000"
+                            Minimum="0"
+                            Value="{Binding Config.DeepestLevel}" />
+                    </ct:FormItem>
+                    <TextBlock
+                        Opacity="0.7"
+                        Text="例如设置为2，相对路径为D1/D2/D3/D4/File.ext，则目标相对路径将改为D1/D2/D3-D4-File.ext"
+                        TextWrapping="Wrap" />
+                    <CheckBox
+                        Grid.ColumnSpan="99"
+                        Content="跳过已经存在的文件（而不是覆盖）"
+                        IsChecked="{Binding Config.SkipIfExist}" />
+
+                    <ct:FormItem Label="目标文件名：">
+                        <TextBox Text="{Binding Config.FileNameTemplate}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="目标文件夹名：">
+                        <TextBox Text="{Binding Config.FolderNameTemplate}" />
+                    </ct:FormItem>
+                </ct:StackFormItemGroup>
+            </gb:GroupBox>
+
+
+            <gb:GroupBox Header="文件筛选">
+                <ct:StackFormItemGroup>
+                    <ct:FormItem Label="匹配条件：">
+                        <v:FileFilterControl Filter="{Binding Config.Filter}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="复制后缀名：">
+                        <TextBox Text="{Binding Config.CopyDirectlyExtensions, Converter={StaticResource StringListConverter}}" />
+                    </ct:FormItem>
+                    <TextBlock
+                        Opacity="0.7"
+                        Text="直接复制的文件的后缀名。使用逗号分隔。"
+                        TextWrapping="Wrap" />
+                    <ct:FormItem Label="压缩后缀名：">
+                        <TextBox Text="{Binding Config.CompressExtensions, Converter={StaticResource StringListConverter}}" />
+                    </ct:FormItem>
+                    <TextBlock
+                        Opacity="0.7"
+                        Text="需要压缩的图像的后缀名。使用逗号分隔。"
+                        TextWrapping="Wrap" />
+                </ct:StackFormItemGroup>
+            </gb:GroupBox>
+
+
+            <gb:GroupBox Header="图像压缩">
+                <ct:StackFormItemGroup>
+                    <ct:FormItem Label="最大长边像素：">
+                        <NumericUpDown
+                            Increment="10"
+                            Maximum="20000"
+                            Minimum="10"
+                            Value="{Binding Config.MaxLongSize}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="最大短边像素：">
+                        <NumericUpDown
+                            Increment="10"
+                            Maximum="10000"
+                            Minimum="10"
+                            Value="{Binding Config.MaxShortSize}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="压缩后类型：">
+                        <TextBox Text="{Binding Config.OutputFormat}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="JPEG质量：">
+                        <NumericUpDown
+                            FormatString="0"
+                            Increment="10"
+                            Maximum="100"
+                            Minimum="10"
+                            Value="{Binding Config.Quality}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="处理线程数：">
+                        <NumericUpDown
+                            FormatString="0"
+                            Increment="1"
+                            Maximum="16"
+                            Minimum="1"
+                            Value="{Binding Config.Thread}" />
+                    </ct:FormItem>
+                </ct:StackFormItemGroup>
+            </gb:GroupBox>
+
+        </StackPanel>
 
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
@@ -128,4 +199,4 @@
 
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+</v:MultiVersionConfigTwoStepPanelBase>

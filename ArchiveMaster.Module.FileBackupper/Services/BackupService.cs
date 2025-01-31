@@ -6,20 +6,15 @@ using Serilog;
 
 namespace ArchiveMaster.Services;
 
-public partial class BackupService
+public partial class BackupService(AppConfig config)
 {
     private CancellationToken ct;
 
     private CancellationTokenSource cts;
 
-    public BackupService(FileBackupperConfig config)
-    {
-        Config = config;
-    }
-
     public static event EventHandler<BackupLogEventArgs> NewLog;
     
-    public FileBackupperConfig Config { get; }
+    public FileBackupperConfig Config { get; } = config.GetConfig<FileBackupperConfig>(nameof(FileBackupperConfig));
 
     public bool IsAutoBackingUp { get; private set; }
 

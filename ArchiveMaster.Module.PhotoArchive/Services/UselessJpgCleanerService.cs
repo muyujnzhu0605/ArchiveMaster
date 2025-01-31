@@ -11,8 +11,8 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Services
 {
-    public class UselessJpgCleanerService(UselessJpgCleanerConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<UselessJpgCleanerConfig>(config, appConfig)
+    public class UselessJpgCleanerService(AppConfig appConfig)
+        : TwoStepServiceBase<UselessJpgCleanerConfig>(appConfig)
     {
         public List<SimpleFileInfo> DeletingJpgFiles { get; set; }
 

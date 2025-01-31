@@ -8,8 +8,8 @@ using FzLib.Avalonia.Messages;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<PackingService, PackingConfig>(config, appConfig)
+public partial class PackingViewModel(AppConfig appConfig)
+    : SingleVersionConfigTwoStepViewModelBase<PackingService, PackingConfig>(appConfig)
 {
     [ObservableProperty]
     private List<FileSystem.DiscFilePackage> discFilePackages;
@@ -92,7 +92,6 @@ public partial class PackingViewModel(PackingConfig config, AppConfig appConfig)
         {
             await this.ShowErrorAsync("导出可能失败", "部分文件导出失败，请检查");
         }
-
     }
 
     protected override void OnReset()

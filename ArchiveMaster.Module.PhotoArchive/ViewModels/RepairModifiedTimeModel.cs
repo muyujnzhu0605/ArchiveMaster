@@ -12,8 +12,8 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RepairModifiedTimeViewModel(RepairModifiedTimeConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<RepairModifiedTimeService, RepairModifiedTimeConfig>(config, appConfig)
+public partial class RepairModifiedTimeViewModel(AppConfig appConfig)
+    : SingleVersionConfigTwoStepViewModelBase<RepairModifiedTimeService, RepairModifiedTimeConfig>(appConfig)
 {
     [ObservableProperty]
     private List<ExifTimeFileInfo> files = new List<ExifTimeFileInfo>();

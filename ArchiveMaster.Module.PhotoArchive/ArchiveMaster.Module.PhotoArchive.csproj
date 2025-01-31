@@ -24,9 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\PhotoSlimmingConfigDialog.axaml.cs">
-      <DependentUpon>%(Filename)</DependentUpon>
-    </Compile>
     <Compile Update="Views\PhotoSlimmingPanel.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>

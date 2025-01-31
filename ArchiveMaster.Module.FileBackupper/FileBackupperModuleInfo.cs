@@ -19,9 +19,9 @@ namespace ArchiveMaster
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.FileBackupper/Assets/";
         public IList<Type> BackgroundServices { get; } = [typeof(BackupBackgroundService)];
-        public IList<ConfigInfo> Configs =>
+        public IList<ConfigMetadata> Configs =>
         [
-            new ConfigInfo(typeof(FileBackupperConfig)),
+            new ConfigMetadata(typeof(FileBackupperConfig)),
         ];
 
         public string ModuleName => "文件备份服务";

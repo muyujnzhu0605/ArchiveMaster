@@ -17,10 +17,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>
+public partial class PhotoSlimmingViewModel(AppConfig appConfig)
+    : MultiVersionConfigTwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(appConfig,
+        PhotoArchiveModuleInfo.PHOTO_SLIMMING_GROUP)
 {
-    private readonly AppConfig appConfig;
-
     [ObservableProperty]
     private bool canCancel;
 
@@ -36,29 +36,6 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
     [ObservableProperty]
     private ObservableCollection<string> errorMessages;
 
-    [ObservableProperty]
-    private PhotoSlimmingConfig selectedConfig;
-    public PhotoSlimmingViewModel(AppConfig appConfig, PhotoSlimmingConfig config = null)
-        : base(config, appConfig)
-    {
-        Configs = HostServices.GetRequiredService<PhotoSlimmingCollectionConfig>().List;
-        if (Configs.Count == 0)
-        {
-            Configs.Add(new PhotoSlimmingConfig());
-        }
-
-        SelectedConfig = Configs[0];
-        this.appConfig = appConfig;
-    }
-
-    public override PhotoSlimmingConfig Config => SelectedConfig;
-
-    public ObservableCollection<PhotoSlimmingConfig> Configs { get; set; }
-
-    protected override PhotoSlimmingService CreateServiceImplement()
-    {
-        return new PhotoSlimmingService(Config, appConfig);
-    }
     protected override Task OnExecutedAsync(CancellationToken token)
     {
         ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
@@ -94,44 +71,5 @@ public partial class PhotoSlimmingViewModel : TwoStepViewModelBase<PhotoSlimming
         CompressFiles = null;
         DeleteFiles = null;
         ErrorMessages = null;
-    }
-
-    [RelayCommand]
-    private void Clone()
-    {
-        var newObj = Config.Adapt<PhotoSlimmingConfig>();
-        newObj.Name += "（复制）";
-        Configs.Add(newObj);
-    }
-
-    [RelayCommand]
-    private async Task CreateAsync()
-    {
-        var message = new DialogHostMessage(new PhotoSlimmingConfigDialog());
-        WeakReferenceMessenger.Default.Send(message);
-        var result = await message.Task;
-        if (result is PhotoSlimmingConfig config)
-        {
-            Configs.Add(config);
-        }
-    }
-
-    [RelayCommand]
-    private async Task EditAsync()
-    {
-        var message = new DialogHostMessage(new PhotoSlimmingConfigDialog(SelectedConfig));
-        WeakReferenceMessenger.Default.Send(message);
-        var result = await message.Task;
-        if (result is PhotoSlimmingConfig config)
-        {
-            Configs[Configs.IndexOf(SelectedConfig)] = config;
-            SelectedConfig = config;
-        }
-    }
-
-    [RelayCommand]
-    private void Remove()
-    {
-        Configs.Remove(SelectedConfig);
     }
 }

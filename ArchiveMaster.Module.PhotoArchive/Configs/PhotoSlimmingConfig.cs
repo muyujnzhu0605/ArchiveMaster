@@ -7,19 +7,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public partial class PhotoSlimmingCollectionConfig : ConfigBase
-    {
-        public ObservableCollection<PhotoSlimmingConfig> List { get; set; } = [new PhotoSlimmingConfig()];
-        public override void Check()
-        {
-            
-        }
-    }
     public partial class PhotoSlimmingConfig : ConfigBase
     {
-        [ObservableProperty]
-        private string name = "未命名";
-
         /// <summary>
         /// 是否在处理前清空目标目录
         /// </summary>
@@ -129,12 +118,21 @@ namespace ArchiveMaster.Configs
 
         public override void Check()
         {
-            CheckEmpty(Name,"配置名");
-            CheckDir(SourceDir,"源目录");
-            CheckEmpty(DistDir,"目标目录");
-            CheckEmpty(OutputFormat,"图片输出格式");
-            CheckEmpty(FolderNameTemplate,"文件夹名模板");
-            CheckEmpty(FileNameTemplate,"文件名模板");
+            CheckDir(SourceDir, "源目录");
+            CheckEmpty(DistDir, "目标目录");
+            CheckEmpty(OutputFormat, "图片输出格式");
+            CheckEmpty(FolderNameTemplate, "文件夹名模板");
+            CheckEmpty(FileNameTemplate, "文件名模板");
+            
+            if (!FolderNameTemplate.Contains(PhotoSlimmingConfig.FolderNamePlaceholder))
+            {
+                throw new Exception("文件夹名模板不包含文件夹名占位符");
+            }
+
+            if (!FileNameTemplate.Contains(PhotoSlimmingConfig.FileNamePlaceholder))
+            {
+                throw new Exception("文件夹名模板不包含文件夹名占位符");
+            }
         }
     }
 }

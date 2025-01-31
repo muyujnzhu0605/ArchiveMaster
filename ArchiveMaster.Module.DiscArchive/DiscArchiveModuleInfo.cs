@@ -17,10 +17,10 @@ namespace ArchiveMaster
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.DiscArchive/Assets/";
         public IList<Type> BackgroundServices { get; }
-        public IList<ConfigInfo> Configs =>
+        public IList<ConfigMetadata> Configs =>
         [
-            new ConfigInfo(typeof(PackingConfig)),
-            new ConfigInfo(typeof(RebuildConfig)),
+            new ConfigMetadata(typeof(PackingConfig)),
+            new ConfigMetadata(typeof(RebuildConfig)),
         ];
 
         public string ModuleName => "光盘归档工具";

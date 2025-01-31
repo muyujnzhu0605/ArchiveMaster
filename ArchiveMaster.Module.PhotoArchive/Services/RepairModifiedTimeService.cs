@@ -14,10 +14,10 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Services
 {
-    public class RepairModifiedTimeService(RepairModifiedTimeConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<RepairModifiedTimeConfig>(config, appConfig)
+    public class RepairModifiedTimeService(AppConfig appConfig)
+        : TwoStepServiceBase<RepairModifiedTimeConfig>(appConfig)
     {
-        public string[] Extensions = { "jpg", "jpeg", "heif", "heic","dng" };
+        public string[] Extensions = { "jpg", "jpeg", "heif", "heic", "dng" };
 
         public ConcurrentBag<ExifTimeFileInfo> Files { get; } = new ConcurrentBag<ExifTimeFileInfo>();
 
@@ -68,17 +68,14 @@ namespace ArchiveMaster.Services
                 FilesLoopOptions.Builder()
                     .AutoApplyFileNumberProgress()
                     .WithMultiThreads(Config.ThreadCount)
-                    .Catch((file, ex) =>
-                {
-                    Files.Add(file as ExifTimeFileInfo);
-                }).Build());
+                    .Catch((file, ex) => { Files.Add(file as ExifTimeFileInfo); }).Build());
         }
 
         private DateTime? FindExifTime(string file)
         {
             IReadOnlyList<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(file);
-         
-            foreach (var dir in directories.Where(p=>p.Name=="Exif SubIFD"))
+
+            foreach (var dir in directories.Where(p => p.Name == "Exif SubIFD"))
             {
                 if (dir.TryGetDateTime(36867, out DateTime time1))
                 {

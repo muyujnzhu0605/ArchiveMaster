@@ -6,7 +6,7 @@ using DiscFile = ArchiveMaster.ViewModels.FileSystem.DiscFile;
 namespace ArchiveMaster.Services
 {
     public abstract class DiscServiceBase<TConfig>(TConfig config, AppConfig appConfig)
-        : TwoStepServiceBase<TConfig>(config, appConfig)
+        : TwoStepServiceBase<TConfig>(appConfig)
         where TConfig : ConfigBase
     {
         public const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss.fff";

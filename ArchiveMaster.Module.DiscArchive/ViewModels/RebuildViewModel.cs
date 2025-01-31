@@ -8,8 +8,8 @@ using FzLib;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RebuildViewModel(RebuildConfig config, AppConfig appConfig)
-    : TwoStepViewModelBase<RebuildService, RebuildConfig>(config, appConfig)
+public partial class RebuildViewModel(AppConfig appConfig)
+    : SingleVersionConfigTwoStepViewModelBase<RebuildService, RebuildConfig>(appConfig)
 {
     [ObservableProperty]
     private FileSystemTree fileTree;
@@ -65,6 +65,4 @@ public partial class RebuildViewModel(RebuildConfig config, AppConfig appConfig)
     //         }
     //     }
     // }
-
-
 }

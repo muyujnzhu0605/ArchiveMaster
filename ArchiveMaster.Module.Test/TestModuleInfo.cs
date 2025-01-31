@@ -28,7 +28,7 @@ namespace ArchiveMaster
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.Test/Assets/";
         public IList<Type> BackgroundServices { get; }
-        public IList<ConfigInfo> Configs =>
+        public IList<ConfigMetadata> Configs =>
         [
         ];
 
