@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Messages;
+using Mapster;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -12,13 +14,19 @@ public abstract partial class
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new()
 {
-    protected string ConfigGroupName { get; }
+    [ObservableProperty]
+    private string configName;
+
+    [ObservableProperty]
+    private ObservableCollection<string> configNames;
 
     protected MultiVersionConfigTwoStepViewModelBase(AppConfig appConfig, string configGroupName)
     {
         ConfigGroupName = configGroupName;
         AppConfig = appConfig;
     }
+
+    protected string ConfigGroupName { get; }
 
     public override void OnEnter()
     {
@@ -50,18 +58,23 @@ public abstract partial class
             }).Task is string result)
         {
             ConfigNames.Add(result);
-            AppConfig.AddVersion<TConfig>(typeof(TConfig).Name, result);
+            AppConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name, result);
             ConfigName = result;
         }
     }
 
     partial void OnConfigNameChanged(string oldValue, string newValue)
     {
+        if (newValue == null)
+        {
+            Config = null;
+            return;
+        }
+
         AppConfig.SetCurrentVersion(ConfigGroupName, newValue);
-        Config = AppConfig.GetConfig<TConfig>(typeof(TConfig).Name, newValue);
+        Config = AppConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name, newValue);
         ResetCommand.Execute(null);
     }
-
 
     [RelayCommand]
     private async Task RemoveConfigAsync()
@@ -89,10 +102,51 @@ public abstract partial class
         }
     }
 
+    [RelayCommand]
+    private void CloneConfig()
+    {
+        string newName = ConfigName;
+        int i = 1;
+        while (ConfigNames.Contains(newName))
+        {
+            i++;
+            newName = $"{ConfigName} ({i})";
+        }
 
-    [ObservableProperty]
-    private string configName;
+        var newConfig = AppConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name, newName);
+        Config.Adapt(newConfig);
+        ConfigNames.Add(newName);
+        ConfigName = newName;
+    }
 
-    [ObservableProperty]
-    private ObservableCollection<string> configNames;
+    [RelayCommand]
+    private async Task ModifyConfigNameAsync()
+    {
+        if (await this.SendMessage(new InputDialogMessage()
+            {
+                Type = InputDialogMessage.InputDialogType.Text,
+                Title = "修改配置名称",
+                DefaultValue = ConfigName,
+                Validation = t =>
+                {
+                    if (string.IsNullOrWhiteSpace(t))
+                    {
+                        throw new Exception("配置名为空");
+                    }
+
+                    if (ConfigNames.Contains(t))
+                    {
+                        throw new Exception("配置名已存在");
+                    }
+                }
+            }).Task is string result)
+        {
+            AppConfig.RenameVersion(ConfigGroupName, ConfigName, result);
+
+            var index = ConfigNames.IndexOf(ConfigName);
+            Debug.Assert(index >= 0);
+            ConfigNames[index] = result;
+            ConfigName = result;
+        }
+    }
 }

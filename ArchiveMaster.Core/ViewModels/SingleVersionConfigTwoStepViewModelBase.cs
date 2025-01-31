@@ -5,6 +5,6 @@ namespace ArchiveMaster.ViewModels;
 
 public abstract class
     SingleVersionConfigTwoStepViewModelBase<TService, TConfig>(AppConfig appConfig)
-    : TwoStepViewModelBase<TService, TConfig>(appConfig.GetConfig<TConfig>(typeof(TConfig).Name), appConfig)
+    : TwoStepViewModelBase<TService, TConfig>(appConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name), appConfig)
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new();

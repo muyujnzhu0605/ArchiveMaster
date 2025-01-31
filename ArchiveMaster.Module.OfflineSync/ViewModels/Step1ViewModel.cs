@@ -108,11 +108,10 @@ namespace ArchiveMaster.ViewModels
 
         protected override async Task OnExecutingAsync(CancellationToken token)
         {
-            var dirs = Config.SyncDirs.ToHashSet();
+            var dirs = (Config.SyncDirs ?? []).ToHashSet();
             if (dirs.Count == 0)
             {
-                await this.ShowErrorAsync("目录为空", "未选择任何目录");
-                return;
+                throw new Exception("未选择任何目录");
             }
 
             if (string.IsNullOrWhiteSpace(Config.OutputFile))

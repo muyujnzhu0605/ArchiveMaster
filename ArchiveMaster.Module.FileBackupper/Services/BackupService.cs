@@ -14,7 +14,7 @@ public partial class BackupService(AppConfig config)
 
     public static event EventHandler<BackupLogEventArgs> NewLog;
     
-    public FileBackupperConfig Config { get; } = config.GetConfig<FileBackupperConfig>(nameof(FileBackupperConfig));
+    public FileBackupperConfig Config { get; } = config.GetOrCreateConfig<FileBackupperConfig>(nameof(FileBackupperConfig));
 
     public bool IsAutoBackingUp { get; private set; }
 

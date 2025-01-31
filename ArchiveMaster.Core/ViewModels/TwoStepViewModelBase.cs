@@ -134,6 +134,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     {
         if (!EnableInitialize)
         {
+            AppConfig.Save(false);
             CreateService();
         }
 

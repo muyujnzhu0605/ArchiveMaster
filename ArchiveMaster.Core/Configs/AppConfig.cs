@@ -20,7 +20,7 @@ namespace ArchiveMaster.Configs
         public const string DEFAULT_VERSION = "默认";
 
         private const string JKEY_MODULES = "Modules";
-        
+
         private const string JKEY_GROUPS = "Groups";
 
         private const string CONFIG_FILE = "configs.json";
@@ -88,19 +88,17 @@ namespace ArchiveMaster.Configs
             currentVersions[groupName] = version;
         }
 
-        public T GetConfig<T>(string key, string version = null) where T : new()
+        public T GetOrCreateConfig<T>(string key, string version = null) where T : new()
         {
             ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Version == version);
+            if (!configMetadata.TryGetValue(key, out ConfigMetadata metadata))
+            {
+                throw new Exception($"没有注册名为{key}的配置");
+            }
 
             if (configItem == null)
             {
-                configItem = new ConfigItem
-                {
-                    Key = key,
-                    Version = version,
-                    Type = typeof(T),
-                    Config = new T()
-                };
+                configItem = ConfigItem.FromConfigMetadata(metadata, new T(), version);
                 configs.Add(configItem);
             }
             else
@@ -204,25 +202,6 @@ namespace ArchiveMaster.Configs
             }
         }
 
-        public T AddVersion<T>(string name, string version) where T : ConfigBase, new()
-        {
-            if (configs.Any(p => p.Key == name && p.Version == version))
-            {
-                throw new Exception($"已存在名为{name}、版本为{version}的配置");
-            }
-
-            var configItem = new ConfigItem
-            {
-                Key = name,
-                // Group = group,
-                Version = version,
-                Config = new T(),
-                Type = typeof(T)
-            };
-            configs.Add(configItem);
-            return (T)configItem.Config;
-        }
-
         public bool RemoveVersion<T>(string key, string version) where T : ConfigBase, new()
         {
             var configItems = configs.Where(p => p.Key == key && p.Version == version).ToList();
@@ -238,6 +217,17 @@ namespace ArchiveMaster.Configs
 
             //考虑设置当前版本号
             return true;
+        }
+
+        public void RenameVersion(string group, string oldName, string newName)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(group);
+            ArgumentException.ThrowIfNullOrEmpty(oldName);
+            ArgumentException.ThrowIfNullOrEmpty(newName);
+            foreach (var config in configs.Where(p => p.Group == group && p.Version == oldName))
+            {
+                config.Version = newName;
+            }
         }
     }
 }

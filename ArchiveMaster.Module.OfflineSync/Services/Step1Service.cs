@@ -19,6 +19,7 @@ namespace ArchiveMaster.Services
 
         public override async Task ExecuteAsync(CancellationToken token = default)
         {
+            Config.Check();
             int index = 0;
             List<SyncFileInfo> syncFiles = new List<SyncFileInfo>();
             var groups = Config.SyncDirs.GroupBy(p => Path.GetFileName(p));
