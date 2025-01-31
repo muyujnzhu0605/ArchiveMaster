@@ -10,8 +10,7 @@ using SyncFileInfo = ArchiveMaster.ViewModels.FileSystem.SyncFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public class Step3Service(Step3Config config, AppConfig appConfig)
-        : TwoStepServiceBase<Step3Config>(config, appConfig)
+    public class Step3Service(AppConfig appConfig) : TwoStepServiceBase<OfflineSyncStep3Config>(appConfig)
     {
         private readonly DateTime createTime = DateTime.Now;
         public List<SyncFileInfo> DeletingDirectories { get; private set; }
@@ -101,7 +100,9 @@ namespace ArchiveMaster.Services
                 {
                     string patch = file.TempName == null ? null : Path.Combine(Config.PatchDir, file.TempName);
                     string target = file.Path;
-                    string oldPath = file.OldRelativePath == null ? null : Path.Combine(file.TopDirectory, file.OldRelativePath);
+                    string oldPath = file.OldRelativePath == null
+                        ? null
+                        : Path.Combine(file.TopDirectory, file.OldRelativePath);
                     if (file.UpdateType is not (FileUpdateType.Delete or FileUpdateType.Move) && !File.Exists(patch))
                     {
                         file.Warn("补丁文件不存在");
@@ -203,7 +204,7 @@ namespace ArchiveMaster.Services
                 }
 
                 DeletingDirectories.AddRange(deletingDirsInThisTopDir.Select(p => new SyncFileInfo()
-                { Path = p, TopDirectory = topDir }));
+                    { Path = p, TopDirectory = topDir }));
             }
         }
 
@@ -238,7 +239,9 @@ namespace ArchiveMaster.Services
                     }
 
                     string target = file.Path;
-                    string oldPath = file.OldRelativePath == null ? null : Path.Combine(file.TopDirectory, file.OldRelativePath);
+                    string oldPath = file.OldRelativePath == null
+                        ? null
+                        : Path.Combine(file.TopDirectory, file.OldRelativePath);
                     if (!Directory.Exists(Path.GetDirectoryName(target)))
                     {
                         Directory.CreateDirectory(Path.GetDirectoryName(target));

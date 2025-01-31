@@ -59,20 +59,20 @@ namespace ArchiveMaster.Services
                     Path.Combine(remoteDir, "syncDir1"),
                     Path.Combine(remoteDir, "folder", "syncDir2"),
                 };
-                Step1Config c1 = new Step1Config()
+                OfflineSyncStep1Config c1 = new OfflineSyncStep1Config()
                 {
                     SyncDirs = syncDirs,
                     OutputFile = Path.GetTempFileName()
                 };
-                Step1Service u1 = new Step1Service(c1, appConfig);
-                await u1.ExecuteAsync();
+                Step1Service s1 = new Step1Service(appConfig) { Config = c1 };
+                await s1.ExecuteAsync();
 
                 string[] searchingDirs =
                 [
                     localDir,
                     Path.Combine(localDir, "folder")
                 ];
-                Step2Config c2 = new Step2Config()
+                OfflineSyncStep2Config c2 = new OfflineSyncStep2Config()
                 {
                     OffsiteSnapshot = c1.OutputFile,
                     PatchDir = Path.Combine(dir, "patch"),
@@ -87,7 +87,7 @@ namespace ArchiveMaster.Services
                 };
                 var match = await Step2Service.MatchLocalAndOffsiteDirsAsync(c2.OffsiteSnapshot, searchingDirs);
                 c2.MatchingDirs = new ObservableCollection<LocalAndOffsiteDir>(match);
-                Step2Service u2 = new Step2Service(c2, appConfig);
+                Step2Service u2 = new Step2Service(appConfig) { Config = c2 };
                 await u2.InitializeAsync();
 
                 Check(u2.UpdateFiles != null);
@@ -108,12 +108,12 @@ namespace ArchiveMaster.Services
 
                 await u2.ExecuteAsync();
 
-                Step3Config c3 = new Step3Config()
+                OfflineSyncStep3Config c3 = new OfflineSyncStep3Config()
                 {
                     PatchDir = c2.PatchDir,
                     DeleteMode = DeleteMode.MoveToDeletedFolder,
                 };
-                Step3Service u3 = new Step3Service(c3, appConfig);
+                Step3Service u3 = new Step3Service(appConfig) { Config = c3 };
                 await u3.InitializeAsync();
                 await u3.ExecuteAsync();
                 u3.AnalyzeEmptyDirectories(CancellationToken.None);
@@ -169,6 +169,7 @@ namespace ArchiveMaster.Services
                 throw new Exception();
             }
         }
+
         private static void CreateRandomFile(string path)
         {
             using FileStream file = File.Create(path);

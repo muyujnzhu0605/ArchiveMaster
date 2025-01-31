@@ -1,4 +1,4 @@
-﻿<v:OfflineSyncPanelBase
+﻿<v:MultiVersionConfigTwoStepPanelBase
     x:Class="ArchiveMaster.Views.Step1Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,9 +13,9 @@
     x:DataType="vm:Step1ViewModel"
     ExecuteButtonContent="导出"
     mc:Ignorable="d">
-    <v:OfflineSyncPanelBase.Styles>
+    <v:MultiVersionConfigTwoStepPanelBase.Styles>
         <StyleInclude Source="Styles.axaml" />
-    </v:OfflineSyncPanelBase.Styles>
+    </v:MultiVersionConfigTwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid
             Margin="8"
@@ -59,4 +59,4 @@
             </StackPanel>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
-</v:OfflineSyncPanelBase>
+</v:MultiVersionConfigTwoStepPanelBase>

@@ -14,16 +14,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel(AppConfig appConfig) : OfflineSyncViewModelBase<Step3Service, Step3Config, FileSystem.SyncFileInfo>(appConfig)
+    public partial class Step3ViewModel(AppConfig appConfig)
+        : OfflineSyncViewModelBase<Step3Service, OfflineSyncStep3Config, FileSystem.SyncFileInfo>(appConfig)
     {
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
-
-        public override Step3Config Config =>
-            HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step3;
-        protected override Step3Service CreateServiceImplement()
-        {
-            return new Step3Service(Config, appConfig);
-        }
 
         protected override Task OnInitializedAsync()
         {
@@ -46,8 +40,7 @@ namespace ArchiveMaster.ViewModels
                 }).Task;
                 if (result.Equals(true))
                 {
-                    Service.DeleteEmptyDirectories(Config.DeleteMode,
-                        HostServices.GetRequiredService<OfflineSyncConfig>().DeleteDirName);
+                    Service.DeleteEmptyDirectories(Config.DeleteMode, Config.DeleteDir);
                 }
             }
         }

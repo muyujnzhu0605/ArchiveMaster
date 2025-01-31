@@ -16,33 +16,28 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract class
-    SingleVersionConfigTwoStepViewModelBase<TService, TConfig>(AppConfig appConfig, bool enableInitialize = true)
-    : TwoStepViewModelBase<TService, TConfig>(appConfig.GetConfig<TConfig>(typeof(TConfig).Name), appConfig,
-        enableInitialize)
-    where TService : TwoStepServiceBase<TConfig>
-    where TConfig : ConfigBase, new();
-
 public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewModelBase
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new()
 {
-    public TwoStepViewModelBase(TConfig config, AppConfig appConfig, bool enableInitialize = true)
+    protected TwoStepViewModelBase()
     {
-        Config = config;
-        this.appConfig = appConfig;
-        EnableInitialize = enableInitialize;
-        CanInitialize = enableInitialize;
-        CanExecute = !enableInitialize;
     }
 
-    protected virtual TService Service { get; private set; }
+    protected TwoStepViewModelBase(TConfig config, AppConfig appConfig)
+    {
+        Config = config;
+        AppConfig = appConfig;
+    }
 
-    public virtual TConfig Config { get; }
+    protected TService Service { get; private set; }
+
+    [ObservableProperty]
+    private TConfig config;
 
     protected virtual TService CreateServiceImplement()
     {
-        var service= HostServices.GetRequiredService<TService>();
+        var service = HostServices.GetRequiredService<TService>();
         service.Config = Config;
         return service;
     }
@@ -66,9 +61,9 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
-    protected readonly AppConfig appConfig;
+    public AppConfig AppConfig { get; protected internal init; }
 
-    public bool EnableInitialize { get; }
+    public virtual bool EnableInitialize => true;
 
     public bool ProgressIndeterminate => double.IsNaN(Progress);
 
@@ -171,7 +166,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     private async Task InitializeAsync(CancellationToken token)
     {
         Stopwatch sw = Stopwatch.StartNew();
-        appConfig.Save(false);
+        AppConfig.Save(false);
         var a = sw.ElapsedMilliseconds;
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();

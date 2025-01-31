@@ -10,7 +10,7 @@ namespace ArchiveMaster
     public interface IModuleInfo
     {
         public IList<Type> BackgroundServices { get; }
-        public IList<ConfigInfo> Configs { get; }
+        public IList<ConfigMetadata> Configs { get; }
         public string ModuleName { get; }
         public int Order { get; }
         public IList<Type> SingletonServices { get; }

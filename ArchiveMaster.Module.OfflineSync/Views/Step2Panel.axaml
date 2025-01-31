@@ -1,4 +1,4 @@
-﻿<v:OfflineSyncPanelBase
+﻿<v:MultiVersionConfigTwoStepPanelBase
     x:Class="ArchiveMaster.Views.Step2Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -19,9 +19,9 @@
     ExecuteButtonContent="3.导出补丁"
     InitializeButtonContent="2.分析差异"
     mc:Ignorable="d">
-    <v:OfflineSyncPanelBase.Styles>
+    <v:MultiVersionConfigTwoStepPanelBase.Styles>
         <StyleInclude Source="Styles.axaml" />
-    </v:OfflineSyncPanelBase.Styles>
+    </v:MultiVersionConfigTwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <Grid ColumnDefinitions="*,8,*">
             <ctrl:StackFormItemGroup>
@@ -116,4 +116,4 @@
         <v:SyncFilesList />
     </v:TwoStepPanelBase.ResultsContent>
 
-</v:OfflineSyncPanelBase>
+</v:MultiVersionConfigTwoStepPanelBase>

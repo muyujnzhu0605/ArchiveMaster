@@ -19,6 +19,10 @@
       <DependentUpon>ProgressDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\OfflineSyncPanelBase.axaml.cs">
+      <DependentUpon>OfflineSyncPanelBase.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 

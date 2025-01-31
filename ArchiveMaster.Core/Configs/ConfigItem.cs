@@ -1,7 +1,19 @@
 namespace ArchiveMaster.Configs;
 
-public class ConfigItem : ConfigInfo
+public class ConfigItem : ConfigMetadata
 {
+    public static ConfigItem FromConfigMetadata(ConfigMetadata metadata,object config,string version)
+    {
+        return new ConfigItem
+        {
+            Key = metadata.Key,
+            Type = metadata.Type,
+            Group = metadata.Group,
+            Config = config,
+            Version = version
+        };
+    }
+    
     /// <summary>
     /// 配置对象
     /// </summary>
@@ -11,10 +23,4 @@ public class ConfigItem : ConfigInfo
     /// 启用多版本配置时的版本号
     /// </summary>
     public string Version { get; set; }
-
-    /// <summary>
-    /// 启用多版本配置时的版本组名。同一个组名内的配置共享一组版本号。
-    /// </summary>
-    /// <returns></returns>
-    public string Group { get; set; }
 }

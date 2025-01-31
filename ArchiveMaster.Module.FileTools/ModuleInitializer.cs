@@ -17,13 +17,13 @@ namespace ArchiveMaster
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.FileTools/Assets/";
         public IList<Type> BackgroundServices { get; }
-        public IList<ConfigInfo> Configs =>
+        public IList<ConfigMetadata> Configs =>
         [
-            new ConfigInfo(typeof(EncryptorConfig)),
-            new ConfigInfo(typeof(DirStructureSyncConfig)),
-            new ConfigInfo(typeof(DirStructureCloneConfig)),
-            new ConfigInfo(typeof(RenameConfig)),
-            new ConfigInfo(typeof(DuplicateFileCleanupConfig))
+            new ConfigMetadata(typeof(EncryptorConfig)),
+            new ConfigMetadata(typeof(DirStructureSyncConfig)),
+            new ConfigMetadata(typeof(DirStructureCloneConfig)),
+            new ConfigMetadata(typeof(RenameConfig)),
+            new ConfigMetadata(typeof(DuplicateFileCleanupConfig))
         ];
 
         public string ModuleName => "文件目录工具";

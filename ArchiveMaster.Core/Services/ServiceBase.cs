@@ -12,7 +12,7 @@ namespace ArchiveMaster.Services
     {
         public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
         public event EventHandler<MessageUpdateEventArgs> MessageUpdate;
-        public virtual TConfig Config { get; internal set; }
+        public TConfig Config { get; set; }
 
         protected void NotifyProgressIndeterminate()
         {

@@ -32,7 +32,7 @@ public static class Initializer
 #endif
         new FileToolsModuleInfo(),
         // new PhotoArchiveModuleInfo(),
-        // new OfflineSyncModuleInfo(),
+        new OfflineSyncModuleInfo(),
         // new DiscArchiveModuleInfo(),
         // new FileBackupperModuleInfo(),
     ];
@@ -70,7 +70,7 @@ public static class Initializer
         var builder = Host.CreateApplicationBuilder();
         var config = new AppConfig();
         InitializeModules(builder.Services, config);
-        config.Load();
+        config.Initialize();
         builder.Services.AddSingleton(config);
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<MainView>();

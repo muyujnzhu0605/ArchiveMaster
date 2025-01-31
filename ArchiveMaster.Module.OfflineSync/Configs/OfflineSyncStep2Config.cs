@@ -6,7 +6,7 @@ using LocalAndOffsiteDir = ArchiveMaster.ViewModels.FileSystem.LocalAndOffsiteDi
 
 namespace ArchiveMaster.Configs
 {
-    public partial class Step2Config : ConfigBase
+    public partial class OfflineSyncStep2Config : ConfigBase
     {
         [ObservableProperty]
         private FileFilterConfig filter = new FileFilterConfig();
@@ -15,7 +15,13 @@ namespace ArchiveMaster.Configs
         private ExportMode exportMode = ExportMode.Copy;
 
         [ObservableProperty]
+        private bool checkMoveIgnoreFileName = true;
+
+        [ObservableProperty]
         private string localDir;
+        
+        [ObservableProperty]
+        private double maxTimeToleranceSecond;
 
         [ObservableProperty]
         private string patchDir;
@@ -35,6 +41,7 @@ namespace ArchiveMaster.Configs
         public override void Check()
         {
             CheckFile(OffsiteSnapshot, "异地快照文件");
+            CheckEmpty(LocalDir,"本地搜索目录");
         }
     }
 }

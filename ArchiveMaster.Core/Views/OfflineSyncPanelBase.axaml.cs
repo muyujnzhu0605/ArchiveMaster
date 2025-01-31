@@ -5,9 +5,9 @@ using ArchiveMaster.Services;
 
 namespace ArchiveMaster.Views
 {
-    public partial class OfflineSyncPanelBase : TwoStepPanelBase
+    public partial class MultiVersionConfigTwoStepPanelBase : TwoStepPanelBase
     {
-        protected OfflineSyncPanelBase()
+        protected MultiVersionConfigTwoStepPanelBase()
         {
             InitializeComponent();
         }

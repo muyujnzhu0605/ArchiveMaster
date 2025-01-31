@@ -88,6 +88,7 @@ public partial class MainView : UserControl
     private void RegisterMessages()
     {
         this.RegisterDialogHostMessage();
+        this.RegisterInputDialogMessage();
         this.RegisterGetClipboardMessage();
         this.RegisterGetStorageProviderMessage();
         this.RegisterCommonDialogMessage();

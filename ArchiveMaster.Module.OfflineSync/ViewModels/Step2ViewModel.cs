@@ -16,17 +16,9 @@ using LocalAndOffsiteDir = ArchiveMaster.ViewModels.FileSystem.LocalAndOffsiteDi
 namespace ArchiveMaster.ViewModels
 {
     public partial class Step2ViewModel(AppConfig appConfig)
-        : OfflineSyncViewModelBase<Step2Service, Step2Config, FileSystem.SyncFileInfo>(appConfig)
+        : OfflineSyncViewModelBase<Step2Service, OfflineSyncStep2Config, FileSystem.SyncFileInfo>(appConfig)
     {
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
-
-        public override Step2Config Config =>
-            HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
-
-        protected override Step2Service CreateServiceImplement()
-        {
-            return new Step2Service(Config, appConfig);
-        }
 
         [RelayCommand]
         private async Task BrowseLocalDirAsync()
@@ -109,13 +101,7 @@ namespace ArchiveMaster.ViewModels
         {
             try
             {
-                Config.Check();
-
-                string[] localSearchingDirs =
-                    Config.LocalDir.Split(LocalDirSplitter, StringSplitOptions.RemoveEmptyEntries);
-                Config.MatchingDirs =
-                    new ObservableCollection<LocalAndOffsiteDir>(await Step2Service
-                        .MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot, localSearchingDirs));
+                await MatchDirectoriesAsync();
             }
             catch (OperationCanceledException)
             {
@@ -126,11 +112,21 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
+        private async Task MatchDirectoriesAsync()
+        {
+            Config.Check();
+            string[] localSearchingDirs =
+                Config.LocalDir.Split(LocalDirSplitter, StringSplitOptions.RemoveEmptyEntries);
+            Config.MatchingDirs =
+                new ObservableCollection<LocalAndOffsiteDir>(await Step2Service
+                    .MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot, localSearchingDirs));
+        }
+
         protected override async Task OnInitializingAsync()
         {
             if (Config.MatchingDirs is null or { Count: 0 })
             {
-                await MatchDirsAsync();
+                await MatchDirectoriesAsync();
             }
         }
 

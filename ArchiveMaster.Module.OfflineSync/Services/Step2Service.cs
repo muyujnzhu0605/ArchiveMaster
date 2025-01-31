@@ -20,10 +20,8 @@ using SyncFileInfo = ArchiveMaster.ViewModels.FileSystem.SyncFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public class Step2Service(Step2Config config, AppConfig appConfig) :
-        TwoStepServiceBase<Step2Config>(config, appConfig)
+    public class Step2Service(AppConfig appConfig) : TwoStepServiceBase<OfflineSyncStep2Config>(appConfig)
     {
-        public override Step2Config Config { get; } = config;
         public Dictionary<string, List<string>> LocalDirectories { get; } = new Dictionary<string, List<string>>();
         public List<SyncFileInfo> UpdateFiles { get; } = new List<SyncFileInfo>();
 
@@ -213,7 +211,6 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token = default)
         {
-            bool checkMoveIgnoreFileName = false;
             UpdateFiles.Clear();
             LocalDirectories.Clear();
             int index = 0;
@@ -287,7 +284,7 @@ namespace ArchiveMaster.Services
                         if (offsitePath2File.TryGetValue(relativePath, out var offsiteFile)) //路径相同，说明是没有变化或者文件被修改
                         {
                             if ((offsiteFile.Time - file.LastWriteTime).Duration().TotalSeconds <
-                                OfflineSyncConfig.MaxTimeTolerance
+                                Config.MaxTimeToleranceSecond
                                 && offsiteFile.Length == file.Length) //文件没有发生改动
                             {
                                 continue;
@@ -303,8 +300,7 @@ namespace ArchiveMaster.Services
                                 UpdateType = FileUpdateType.Modify,
                                 TopDirectory = offsiteTopDirectory,
                             };
-                            if ((offsiteFile.Time - file.LastWriteTime).TotalSeconds >
-                                OfflineSyncConfig.MaxTimeTolerance)
+                            if ((offsiteFile.Time - file.LastWriteTime).TotalSeconds > Config.MaxTimeToleranceSecond)
                             {
                                 newFile.Warn("异地文件时间晚于本地文件时间");
                             }
@@ -313,7 +309,7 @@ namespace ArchiveMaster.Services
                         }
                         else //新增文件或文件被移动或重命名
                         {
-                            var sameFiles = !checkMoveIgnoreFileName
+                            var sameFiles = !Config.CheckMoveIgnoreFileName
                                 ? (offsiteTime2File.GetOrDefault(file.LastWriteTime) ??
                                    Enumerable.Empty<SyncFileInfo>())
                                 .Intersect(offsiteLength2File.GetOrDefault(file.Length) ??

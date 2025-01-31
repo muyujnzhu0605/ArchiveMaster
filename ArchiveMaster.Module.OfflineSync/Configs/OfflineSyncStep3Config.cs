@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public partial class Step3Config : ConfigBase
+    public partial class OfflineSyncStep3Config : ConfigBase
     {
         [ObservableProperty]
         private DeleteMode deleteMode = DeleteMode.MoveToDeletedFolder;

@@ -10,7 +10,7 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// UpdatePanel.xaml 的交互逻辑
     /// </summary>
-    public partial class Step1Panel : OfflineSyncPanelBase
+    public partial class Step1Panel : MultiVersionConfigTwoStepPanelBase
     {
         public Step1Panel()
         {

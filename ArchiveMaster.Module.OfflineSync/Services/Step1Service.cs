@@ -10,7 +10,7 @@ using SyncFileInfo = ArchiveMaster.ViewModels.FileSystem.SyncFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public class Step1Service(Step1Config config, AppConfig appConfig) : TwoStepServiceBase<Step1Config>(config, appConfig)
+    public class Step1Service(AppConfig appConfig) : TwoStepServiceBase<OfflineSyncStep1Config>(appConfig)
     {
         public override Task InitializeAsync(CancellationToken token = default)
         {

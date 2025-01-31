@@ -26,11 +26,16 @@ namespace ArchiveMaster
 {
     public class OfflineSyncModuleInfo : IModuleInfo
     {
+        public const string CONFIG_GRROUP = "OfflineSync";
+
         private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
         public IList<Type> BackgroundServices { get; }
-        public IList<ConfigInfo> Configs =>
+
+        public IList<ConfigMetadata> Configs =>
         [
-            new ConfigInfo(typeof(OfflineSyncConfig))
+            new ConfigMetadata(typeof(OfflineSyncStep1Config), CONFIG_GRROUP),
+            new ConfigMetadata(typeof(OfflineSyncStep2Config), CONFIG_GRROUP),
+            new ConfigMetadata(typeof(OfflineSyncStep3Config), CONFIG_GRROUP),
         ];
 
         public string ModuleName => "异地备份离线同步";

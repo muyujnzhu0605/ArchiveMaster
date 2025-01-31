@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public partial class Step1Config : ConfigBase
+    public partial class OfflineSyncStep1Config : ConfigBase
     {
         [ObservableProperty]
         private string outputFile;

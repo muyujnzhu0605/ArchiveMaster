@@ -18,36 +18,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ArchiveMaster.ViewModels
 {
     public abstract partial class
-        OfflineSyncViewModelBase<TService, TConfig, TFile> : TwoStepViewModelBase<TService, TConfig>
+        OfflineSyncViewModelBase<TService, TConfig, TFile>(AppConfig appConfig)
+        : MultiVersionConfigTwoStepViewModelBase<TService, TConfig>(appConfig, OfflineSyncModuleInfo.CONFIG_GRROUP)
         where TService : TwoStepServiceBase<TConfig>
-        where TConfig : ConfigBase
+        where TConfig : ConfigBase, new()
         where TFile : SimpleFileInfo
     {
-        public OfflineSyncViewModelBase(AppConfig appConfig, TConfig config = null) : base(config, appConfig)
-        {
-        }
-
-        public OfflineSyncViewModelBase(AppConfig appConfig, bool enableInitialize, TConfig config = null)
-            : base(config, appConfig, enableInitialize)
-        {
-        }
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(Config))]
-        private string configName;
-
-        [ObservableProperty]
-        private IList<string> configNames;
-
-        public override void OnEnter()
-        {
-            base.OnEnter();
-            string currentName = HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
-
-            ConfigNames = HostServices.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
-            ConfigName = currentName;
-        }
-
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(AddedFileLength),
             nameof(AddedFileCount),
@@ -80,34 +56,6 @@ namespace ArchiveMaster.ViewModels
         public int MovedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Move && p.IsChecked)?.Count() ?? 0;
 
-        [RelayCommand]
-        private async Task AddConfigAsync()
-        {
-            if (await this.SendMessage(new InputDialogMessage()
-            {
-                Type = InputDialogMessage.InputDialogType.Text,
-                Title = "新增配置",
-                DefaultValue = "新配置",
-                Validation = t =>
-                {
-                    if (string.IsNullOrWhiteSpace(t))
-                    {
-                        throw new Exception("配置名为空");
-                    }
-
-                    if (ConfigNames.Contains(t))
-                    {
-                        throw new Exception("配置名已存在");
-                    }
-                }
-            }).Task is string result)
-            {
-                ConfigNames.Add(result);
-                HostServices.GetRequiredService<OfflineSyncConfig>().ConfigCollection
-                    .Add(result, new SingleConfig());
-                ConfigName = result;
-            }
-        }
 
         private void AddFileCheckedNotify(SimpleFileInfo file)
         {
@@ -149,15 +97,6 @@ namespace ArchiveMaster.ViewModels
             };
         }
 
-        partial void OnConfigNameChanged(string oldValue, string newValue)
-        {
-            if (HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfigName != newValue)
-            {
-                HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfigName = newValue;
-            }
-
-            ResetCommand.Execute(null);
-        }
 
         partial void OnFilesChanged(ObservableCollection<TFile> value)
         {
@@ -170,31 +109,6 @@ namespace ArchiveMaster.ViewModels
             value.CollectionChanged += (s, e) => throw new NotSupportedException("不允许对集合进行修改");
         }
 
-        [RelayCommand]
-        private async Task RemoveConfigAsync()
-        {
-            var name = ConfigName;
-            var result = await this.SendMessage(new CommonDialogMessage()
-            {
-                Type = CommonDialogMessage.CommonDialogType.YesNo,
-                Title = "删除配置",
-                Message = $"是否移除配置：{name}？"
-            }).Task;
-            if (result.Equals(true))
-            {
-                ConfigNames.Remove(name);
-                HostServices.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Remove(name);
-                if (ConfigNames.Count == 0)
-                {
-                    ConfigNames.Add("默认");
-                    ConfigName = "默认";
-                }
-                else
-                {
-                    ConfigName = ConfigNames[0];
-                }
-            }
-        }
 
         [RelayCommand]
         private void SelectAll()
