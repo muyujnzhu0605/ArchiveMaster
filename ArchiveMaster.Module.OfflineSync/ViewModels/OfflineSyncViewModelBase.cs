@@ -42,9 +42,9 @@ namespace ArchiveMaster.ViewModels
         public override void OnEnter()
         {
             base.OnEnter();
-            string currentName = HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
+            string currentName = HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfigName;
 
-            ConfigNames = HostServices.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
+            ConfigNames = HostServices.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Keys.ToList();
             ConfigName = currentName;
         }
 
@@ -103,7 +103,7 @@ namespace ArchiveMaster.ViewModels
             }).Task is string result)
             {
                 ConfigNames.Add(result);
-                HostServices.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection
+                HostServices.GetRequiredService<OfflineSyncConfig>().ConfigCollection
                     .Add(result, new SingleConfig());
                 ConfigName = result;
             }
@@ -151,9 +151,9 @@ namespace ArchiveMaster.ViewModels
 
         partial void OnConfigNameChanged(string oldValue, string newValue)
         {
-            if (HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName != newValue)
+            if (HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfigName != newValue)
             {
-                HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfigName = newValue;
+                HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfigName = newValue;
             }
 
             ResetCommand.Execute(null);
@@ -183,7 +183,7 @@ namespace ArchiveMaster.ViewModels
             if (result.Equals(true))
             {
                 ConfigNames.Remove(name);
-                HostServices.Provider.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Remove(name);
+                HostServices.GetRequiredService<OfflineSyncConfig>().ConfigCollection.Remove(name);
                 if (ConfigNames.Count == 0)
                 {
                     ConfigNames.Add("默认");

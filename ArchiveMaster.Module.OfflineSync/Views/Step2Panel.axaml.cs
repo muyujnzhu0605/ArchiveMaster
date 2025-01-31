@@ -11,11 +11,9 @@ namespace ArchiveMaster.Views
     /// </summary>
     public partial class Step2Panel : OfflineSyncPanelBase
     {
-        public Step2Panel(Step2ViewModel viewModel)
+        public Step2Panel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
-
     }
 }

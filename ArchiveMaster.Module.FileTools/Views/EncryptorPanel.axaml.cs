@@ -5,9 +5,8 @@ namespace ArchiveMaster.Views
 {
     public partial class EncryptorPanel : TwoStepPanelBase
     {
-        public EncryptorPanel(EncryptorViewModel viewModel)
+        public EncryptorPanel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

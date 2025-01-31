@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,44 +15,35 @@ using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster
 {
-    public class FileBackupperModuleInitializer : IModuleInitializer
+    public class FileBackupperModuleInfo : IModuleInfo
     {
-        public string ModuleName => "文件备份服务";
-
-        public int Order => 5;
-
+        private readonly string baseUrl = "avares://ArchiveMaster.Module.FileBackupper/Assets/";
+        public IList<Type> BackgroundServices { get; } = [typeof(BackupBackgroundService)];
         public IList<ConfigInfo> Configs =>
         [
             new ConfigInfo(typeof(FileBackupperConfig)),
         ];
 
-        public void RegisterServices(IServiceCollection services)
-        {
-            services.AddViewAndViewModel<BackupTasksPanel, BackupTasksViewModel>();
-            services.AddViewAndViewModel<BackupManageCenterPanel, BackupManageCenterViewModel>();
+        public string ModuleName => "文件备份服务";
 
-            services.AddSingleton<BackupService>();
-            services.AddHostedService<BackupBackgroundService>();
-        }
+        public int Order => 5;
+        public IList<Type> SingletonServices { get; } = [typeof(BackupService)];
+
+        public IList<Type> TransientServices { get; }
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                
-                new ToolPanelInfo(typeof(BackupTasksPanel), "备份任务配置", "备份任务的管理以及日志查看", baseUrl + "backup.svg"),
-                new ToolPanelInfo(typeof(BackupManageCenterPanel), "备份管理中心", "控制后台备份，查看当前状态，查看任务日志",
-                    baseUrl + "configuration.svg"),
-                
+                new ToolPanelInfo(typeof(BackupTasksPanel), typeof(BackupTasksViewModel), "备份任务配置", "备份任务的管理以及日志查看",
+                    baseUrl + "backup.svg"),
+                new ToolPanelInfo(typeof(BackupManageCenterPanel), typeof(BackupManageCenterViewModel), "备份管理中心",
+                    "控制后台备份，查看当前状态，查看任务日志", baseUrl + "configuration.svg"),
             },
             GroupName = ModuleName
         };
-
-
         public void RegisterMessages(Visual visual)
         {
         }
-
-        private readonly string baseUrl = "avares://ArchiveMaster.Module.FileBackupper/Assets/";
     }
 }

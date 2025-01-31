@@ -14,7 +14,6 @@ namespace ArchiveMaster.Views
     {
         public FileFilterTestPanel()
         {
-            DataContext =new FileFilterTestViewModel();
             InitializeComponent();
         }
     }

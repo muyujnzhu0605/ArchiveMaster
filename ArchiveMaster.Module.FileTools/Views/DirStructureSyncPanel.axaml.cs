@@ -8,9 +8,8 @@ namespace ArchiveMaster.Views
     /// </summary>
     public partial class DirStructureSyncPanel : TwoStepPanelBase
     {
-        public DirStructureSyncPanel(DirStructureSyncViewModel viewModel)
+        public DirStructureSyncPanel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

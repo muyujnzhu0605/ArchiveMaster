@@ -5,9 +5,8 @@ namespace ArchiveMaster.Views
 {
     public partial class RepairModifiedTimePanel : TwoStepPanelBase
     {
-        public RepairModifiedTimePanel(RepairModifiedTimeViewModel viewModel)
+        public RepairModifiedTimePanel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

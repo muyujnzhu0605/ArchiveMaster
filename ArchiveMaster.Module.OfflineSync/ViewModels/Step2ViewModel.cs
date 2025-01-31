@@ -21,7 +21,7 @@ namespace ArchiveMaster.ViewModels
         public IEnumerable ExportModes => Enum.GetValues<ExportMode>();
 
         public override Step2Config Config =>
-            HostServices.Provider.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
+            HostServices.GetRequiredService<OfflineSyncConfig>().CurrentConfig?.Step2;
 
         protected override Step2Service CreateServiceImplement()
         {

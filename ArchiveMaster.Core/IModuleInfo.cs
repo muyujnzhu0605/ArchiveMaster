@@ -1,19 +1,20 @@
 ﻿using ArchiveMaster.Configs;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace ArchiveMaster
 {
-    public interface IModuleInitializer
+    public interface IModuleInfo
     {
+        public IList<Type> BackgroundServices { get; }
         public IList<ConfigInfo> Configs { get; }
-        public ToolPanelGroupInfo Views { get; }
-        public void RegisterMessages(Visual visual);
         public string ModuleName { get; }
         public int Order { get; }
-        public void RegisterServices(IServiceCollection services);
+        public IList<Type> SingletonServices { get; }
+        public IList<Type> TransientServices { get; }
+        public ToolPanelGroupInfo Views { get; }
     }
 }

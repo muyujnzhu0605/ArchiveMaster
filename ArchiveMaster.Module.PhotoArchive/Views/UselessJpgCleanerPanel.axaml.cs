@@ -5,9 +5,8 @@ namespace ArchiveMaster.Views
 {
     public partial class UselessJpgCleanerPanel : TwoStepPanelBase
     {
-        public UselessJpgCleanerPanel(UselessJpgCleanerViewModel viewModel)
+        public UselessJpgCleanerPanel()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

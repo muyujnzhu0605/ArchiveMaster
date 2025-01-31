@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Models;
 using ArchiveMaster.Platforms;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
+using Avalonia;
+using Avalonia.Controls;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Program.Startup;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,16 +25,16 @@ public static class Initializer
     private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
     public static IHost AppHost { get; private set; }
 
-    public static IModuleInitializer[] ModuleInitializers { get; } =
+    public static IModuleInfo[] ModuleInitializers { get; } =
     [
 #if DEBUG
-        new TestModuleInitializer(),
+        new TestModuleInfo(),
 #endif
-        new FileToolsModuleInitializer(),
-        new PhotoArchiveModuleInitializer(),
-        new OfflineSyncModuleInitializer(),
-        new DiscArchiveModuleInitializer(),
-        new FileBackupperModuleInitializer(),
+        new FileToolsModuleInfo(),
+        new PhotoArchiveModuleInfo(),
+        new OfflineSyncModuleInfo(),
+        new DiscArchiveModuleInfo(),
+        new FileBackupperModuleInfo(),
     ];
 
     public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
@@ -45,6 +48,14 @@ public static class Initializer
                 panel.PanelInstance = null;
             }
         }
+    }
+
+    public static IReadOnlyList<IBackgroundService> GetBackgroundServices()
+    {
+        return HostServices.GetServices<IHostedService>()
+            .OfType<IBackgroundService>()
+            .ToList()
+            .AsReadOnly();
     }
 
     public static void Initialize()
@@ -81,29 +92,57 @@ public static class Initializer
 
         return Task.CompletedTask;
     }
-
     private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
     {
         List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
 
         foreach (var moduleInitializer in ModuleInitializers)
         {
-            moduleInitializer.RegisterServices(services);
-
             try
             {
-                if (moduleInitializer.Configs != null)
+                //注册配置
+                foreach (var config in moduleInitializer.Configs ?? [])
                 {
-                    foreach (var config in moduleInitializer.Configs)
-                    {
-                        appConfig.RegisterConfig(config);
-                    }
+                    appConfig.RegisterConfig(config);
                 }
 
-                if (moduleInitializer.Views != null)
+                //注册后台服务
+                foreach (var type in moduleInitializer.BackgroundServices ?? [])
                 {
-                    viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
+                    if (!typeof(IBackgroundService).IsAssignableFrom(type))
+                    {
+                        throw new Exception($"后台服务{type.Name}没有实现{nameof(IBackgroundService)}接口");
+                    }
+
+                    services.AddSingleton(typeof(IHostedService), s => ActivatorUtilities.CreateInstance(s, type));
+                    //无法使用 services.AddHostedService(type);
                 }
+
+                //注册单例服务
+                foreach (var service in moduleInitializer.SingletonServices ?? [])
+                {
+                    services.AddSingleton(service);
+                }
+
+                //注册瞬时服务
+                foreach (var service in moduleInitializer.TransientServices ?? [])
+                {
+                    services.AddTransient(service);
+                }
+
+                //注册视图和视图模型
+                foreach (var panel in moduleInitializer.Views?.Panels ?? [])
+                {
+                    services.AddTransient(panel.ViewType, s =>
+                    {
+                        var obj = (StyledElement)ActivatorUtilities.CreateInstance(s, panel.ViewType);
+                        obj.DataContext = s.GetRequiredService(panel.ViewModelType);
+                        return obj;
+                    });
+                    services.AddTransient(panel.ViewModelType);
+                }
+
+                viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
             }
             catch (Exception ex)
             {
