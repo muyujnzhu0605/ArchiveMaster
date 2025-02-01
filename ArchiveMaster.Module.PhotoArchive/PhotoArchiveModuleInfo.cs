@@ -23,7 +23,7 @@ namespace ArchiveMaster
         [
             new ConfigMetadata(typeof(TimeClassifyConfig)),
             new ConfigMetadata(typeof(RepairModifiedTimeConfig)),
-            new ConfigMetadata(typeof(UselessJpgCleanerConfig)),
+            new ConfigMetadata(typeof(TwinFileCleanerConfig)),
             new ConfigMetadata(typeof(PhotoSlimmingConfig)),
         ];
 
@@ -34,8 +34,8 @@ namespace ArchiveMaster
                 new ToolPanelInfo(typeof(TimeClassifyPanel), typeof(TimeClassifyViewModel), "根据时间段归档",
                     "识别目录中相同时间段的文件，将它们移动到相同的新目录中",
                     baseUrl + "archive.svg"),
-                new ToolPanelInfo(typeof(UselessJpgCleanerPanel), typeof(UselessJpgCleanerViewModel), "删除多余JPG",
-                    "删除目录中存在同名RAW文件的JPG文件", baseUrl + "jpg.svg"),
+                new ToolPanelInfo(typeof(TwinFileCleanerPanel), typeof(TwinFileCleanerViewModel), "异后缀同名文件清理",
+                    "当目录中存在某后缀文件（如.dng）时，自动删除同名不同后缀的关联文件（如.jpg）", baseUrl + "jpg.svg"),
                 new ToolPanelInfo(typeof(RepairModifiedTimePanel), typeof(RepairModifiedTimeViewModel), "修复文件修改时间",
                     "寻找EXIF信息中的拍摄时间与照片修改时间不同的文件，将修改时间更新闻EXIF时间", baseUrl + "time.svg"),
                 new ToolPanelInfo(typeof(PhotoSlimmingPanel), typeof(PhotoSlimmingViewModel), "创建照片集合副本",
@@ -51,7 +51,7 @@ namespace ArchiveMaster
         [
             typeof(PhotoSlimmingService),
             typeof(RepairModifiedTimeService),
-            typeof(UselessJpgCleanerService),
+            typeof(TwinFileCleanerService),
             typeof(TimeClassifyService)
         ];
 

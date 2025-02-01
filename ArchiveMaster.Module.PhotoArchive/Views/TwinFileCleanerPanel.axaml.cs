@@ -3,9 +3,9 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class UselessJpgCleanerPanel : TwoStepPanelBase
+    public partial class TwinFileCleanerPanel : TwoStepPanelBase
     {
-        public UselessJpgCleanerPanel()
+        public TwinFileCleanerPanel()
         {
             InitializeComponent();
         }

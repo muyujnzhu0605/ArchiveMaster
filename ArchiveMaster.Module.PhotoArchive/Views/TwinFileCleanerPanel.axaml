@@ -1,5 +1,5 @@
 <v:TwoStepPanelBase
-    x:Class="ArchiveMaster.Views.UselessJpgCleanerPanel"
+    x:Class="ArchiveMaster.Views.TwinFileCleanerPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ct="using:FzLib.Avalonia.Controls"
@@ -9,7 +9,7 @@
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="vm:UselessJpgCleanerViewModel"
+    x:DataType="vm:TwinFileCleanerViewModel"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
@@ -19,8 +19,20 @@
                     Type="OpenFolder" />
             </ct:FormItem>
 
-            <ct:FormItem Label="RAW文件后缀：">
-                <TextBox Text="{Binding Config.RawExtension}" />
+            <ct:FormItem Label="后缀：">
+                <WrapPanel Orientation="Horizontal">
+                    <WrapPanel.Styles>
+                        <Style Selector="TextBox">
+                            <Setter Property="Margin" Value="8,0" />
+                            <Setter Property="Width" Value="80" />
+                        </Style>
+                    </WrapPanel.Styles>
+                    <TextBlock Text="若存在后缀为" />
+                    <TextBox Text="{Binding Config.SearchExtension}" />
+                    <TextBlock Text="的文件，则删除后缀为" />
+                    <TextBox Text="{Binding Config.DeletingExtension}" />
+                    <TextBlock Text="的同名文件（后缀名不区分大小写）" />
+                </WrapPanel>
             </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>

@@ -4,13 +4,15 @@ namespace ArchiveMaster.Helpers;
 
 public static class FileEnumerateExtension
 {
-    public static EnumerationOptions GetEnumerationOptions(bool includingSubDirs = true)
+    public static EnumerationOptions GetEnumerationOptions(bool includingSubDirs = true,
+        MatchCasing matchCasing = MatchCasing.PlatformDefault)
     {
         return new EnumerationOptions()
         {
             IgnoreInaccessible = true,
             AttributesToSkip = 0,
             RecurseSubdirectories = includingSubDirs,
+            MatchCasing = matchCasing
         };
     }
 

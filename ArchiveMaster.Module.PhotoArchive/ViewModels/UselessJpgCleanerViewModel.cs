@@ -11,8 +11,8 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class UselessJpgCleanerViewModel(AppConfig appConfig)
-    : TwoStepViewModelBase<UselessJpgCleanerService, UselessJpgCleanerConfig>(appConfig)
+public partial class TwinFileCleanerViewModel(AppConfig appConfig)
+    : TwoStepViewModelBase<TwinFileCleanerService, TwinFileCleanerConfig>(appConfig)
 {
     [ObservableProperty]
     private List<SimpleFileInfo> deletingJpgFiles;

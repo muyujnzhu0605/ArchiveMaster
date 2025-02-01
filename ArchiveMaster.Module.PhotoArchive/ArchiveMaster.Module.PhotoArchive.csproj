@@ -33,7 +33,7 @@
     <Compile Update="Views\TimeClassifyPanel.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
-    <Compile Update="Views\UselessJpgCleanerPanel.axaml.cs">
+    <Compile Update="Views\TwinFileCleanerPanel.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>
   </ItemGroup>
