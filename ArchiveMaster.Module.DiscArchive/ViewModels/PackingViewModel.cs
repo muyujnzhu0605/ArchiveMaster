@@ -9,7 +9,7 @@ using FzLib.Avalonia.Messages;
 namespace ArchiveMaster.ViewModels;
 
 public partial class PackingViewModel(AppConfig appConfig)
-    : SingleVersionConfigTwoStepViewModelBase<PackingService, PackingConfig>(appConfig)
+    : TwoStepViewModelBase<PackingService, PackingConfig>(appConfig, DiscArchiveModuleInfo.CONFIG_GRROUP)
 {
     [ObservableProperty]
     private List<FileSystem.DiscFilePackage> discFilePackages;

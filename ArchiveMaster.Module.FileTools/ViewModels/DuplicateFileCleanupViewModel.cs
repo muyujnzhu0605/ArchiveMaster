@@ -17,7 +17,7 @@ using ArchiveMaster.ViewModels.FileSystem;
 namespace ArchiveMaster.ViewModels;
 
 public partial class DuplicateFileCleanupViewModel(AppConfig appConfig)
-    : SingleVersionConfigTwoStepViewModelBase<DuplicateFileCleanupService, DuplicateFileCleanupConfig>(appConfig)
+    : TwoStepViewModelBase<DuplicateFileCleanupService, DuplicateFileCleanupConfig>(appConfig)
 {
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> groups;

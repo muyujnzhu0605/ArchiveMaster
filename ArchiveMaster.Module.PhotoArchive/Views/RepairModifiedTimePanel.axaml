@@ -24,6 +24,7 @@
                     <ct:FormItem Label="线程数：">
                         <NumericUpDown
                             Width="120"
+                            FormatString="0"
                             Maximum="16"
                             Minimum="1"
                             Value="{Binding Config.ThreadCount}" />
@@ -32,7 +33,6 @@
                     <ct:FormItem Label="最长容忍差异时间（秒）：">
                         <NumericUpDown
                             Width="120"
-                            FormatString="0"
                             Maximum="86400"
                             Minimum="1"
                             Value="{Binding Config.MaxDurationTolerance, Converter={StaticResource TimeSpanNumberConverter}, ConverterParameter=s}" />

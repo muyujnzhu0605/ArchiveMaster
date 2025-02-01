@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,18 @@ using Serilog;
 
 namespace ArchiveMaster.Configs
 {
+    /// <summary>
+    /// 配置管理中心
+    /// </summary>
+    /// <remarks>
+    /// 每个模块通过<see cref="RegisterConfig"/>上报自己所需要的配置，然后通过<see cref="GetOrCreateConfig{T}"/>获取配置。
+    /// 配置基本信息为<see cref="ConfigMetadata"/>，运行后增加配置对象和版本，使用<see cref="ConfigItem"/>存储。
+    /// 支持多配置功能，或称为多预设，即能够保存多个配置项，在程序中命名为版本（Version）。
+    /// 通常来说，配置项之间的版本是独立的，一个配置增删改版本，不影响其他配置项。
+    /// 但可以通过设置组来实现多个配置之间共享版本，一个典型的例子是OfflineSync，模块中的多个板块是步骤的关系，因此需要共享版本。
+    /// 共享版本时，提供相同的组名，此时增删改其中一个配置项的版本，会同步反映到其他配置项上。
+    /// 启用共享版本时，需要在IModuleInfo中提供Configs时指定每个Config使用相同的Group，并且在TwoStepViewModel初始化时提供Group。
+    /// </remarks>
     public class AppConfig
     {
         public const string DEFAULT_VERSION = "默认";
@@ -56,11 +69,13 @@ namespace ArchiveMaster.Configs
 
         public string GetCurrentVersion(string groupName)
         {
+            ArgumentException.ThrowIfNullOrEmpty(groupName);
             return currentVersions.GetValueOrDefault(groupName, DEFAULT_VERSION);
         }
 
         public IReadOnlyList<string> GetVersions(string groupName)
         {
+            ArgumentException.ThrowIfNullOrEmpty(groupName);
             var sameGroupConfigs = configMetadata.Values
                 .Where(p => p.Group == groupName)
                 .Select(p => p.Key)
@@ -85,11 +100,14 @@ namespace ArchiveMaster.Configs
 
         public void SetCurrentVersion(string groupName, string version)
         {
+            ArgumentException.ThrowIfNullOrEmpty(groupName);
+            ArgumentException.ThrowIfNullOrEmpty(version);
             currentVersions[groupName] = version;
         }
 
         public T GetOrCreateConfig<T>(string key, string version = null) where T : new()
         {
+            ArgumentException.ThrowIfNullOrEmpty(key);
             ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Version == version);
             if (!configMetadata.TryGetValue(key, out ConfigMetadata metadata))
             {
@@ -158,11 +176,13 @@ namespace ArchiveMaster.Configs
 
         private void ParseGroups(JsonObject jobj)
         {
+            Debug.Assert(jobj!=null);
             currentVersions = jobj.Deserialize<Dictionary<string, string>>();
         }
 
         private void ParseModules(JsonArray jarray)
         {
+            Debug.Assert(jarray!=null);
             foreach (var key in configMetadata.Keys)
             {
                 var configItemJsons =
@@ -178,6 +198,7 @@ namespace ArchiveMaster.Configs
 
         public void RegisterConfig(ConfigMetadata config)
         {
+            ArgumentNullException.ThrowIfNull(config);
             configMetadata.Add(config.Key, config);
         }
 
@@ -204,6 +225,8 @@ namespace ArchiveMaster.Configs
 
         public bool RemoveVersion<T>(string key, string version) where T : ConfigBase, new()
         {
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            ArgumentException.ThrowIfNullOrEmpty(version);
             var configItems = configs.Where(p => p.Key == key && p.Version == version).ToList();
             if (configItems.Count == 0)
             {

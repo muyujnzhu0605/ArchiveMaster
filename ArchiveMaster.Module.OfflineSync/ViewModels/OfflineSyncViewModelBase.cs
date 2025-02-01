@@ -19,7 +19,7 @@ namespace ArchiveMaster.ViewModels
 {
     public abstract partial class
         OfflineSyncViewModelBase<TService, TConfig, TFile>(AppConfig appConfig)
-        : MultiVersionConfigTwoStepViewModelBase<TService, TConfig>(appConfig, OfflineSyncModuleInfo.CONFIG_GRROUP)
+        : TwoStepViewModelBase<TService, TConfig>(appConfig, OfflineSyncModuleInfo.CONFIG_GRROUP)
         where TService : TwoStepServiceBase<TConfig>
         where TConfig : ConfigBase, new()
         where TFile : SimpleFileInfo

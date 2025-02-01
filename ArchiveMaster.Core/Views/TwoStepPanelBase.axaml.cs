@@ -4,7 +4,7 @@ using System;
 
 namespace ArchiveMaster.Views
 {
-    public partial class TwoStepPanelBase : PanelBase
+    public partial class TwoStepPanelBase : MultiVersionConfigPanelBase
     {
         public static readonly StyledProperty<object> ConfigsContentProperty =
             AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ConfigsContent));

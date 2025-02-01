@@ -9,7 +9,7 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class
     DirStructureCloneViewModel(AppConfig appConfig)
-    : SingleVersionConfigTwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(appConfig)
+    : TwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(appConfig)
 {
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;

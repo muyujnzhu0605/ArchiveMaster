@@ -15,7 +15,6 @@ namespace ArchiveMaster
 {
     public class PhotoArchiveModuleInfo : IModuleInfo
     {
-        public const string PHOTO_SLIMMING_GROUP = "PhotoSlimming";
         public string ModuleName => "照片工具";
 
         public int Order => 2;
@@ -25,7 +24,7 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(TimeClassifyConfig)),
             new ConfigMetadata(typeof(RepairModifiedTimeConfig)),
             new ConfigMetadata(typeof(UselessJpgCleanerConfig)),
-            new ConfigMetadata(typeof(PhotoSlimmingConfig), PHOTO_SLIMMING_GROUP),
+            new ConfigMetadata(typeof(PhotoSlimmingConfig)),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

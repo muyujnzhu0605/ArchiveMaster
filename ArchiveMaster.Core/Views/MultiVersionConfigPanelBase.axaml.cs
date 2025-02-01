@@ -5,9 +5,9 @@ using ArchiveMaster.Services;
 
 namespace ArchiveMaster.Views
 {
-    public partial class MultiVersionConfigTwoStepPanelBase : TwoStepPanelBase
+    public partial class MultiVersionConfigPanelBase : PanelBase
     {
-        protected MultiVersionConfigTwoStepPanelBase()
+        protected MultiVersionConfigPanelBase()
         {
             InitializeComponent();
         }

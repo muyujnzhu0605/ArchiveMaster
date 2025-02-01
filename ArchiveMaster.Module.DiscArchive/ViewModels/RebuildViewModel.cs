@@ -9,7 +9,7 @@ using FzLib;
 namespace ArchiveMaster.ViewModels;
 
 public partial class RebuildViewModel(AppConfig appConfig)
-    : SingleVersionConfigTwoStepViewModelBase<RebuildService, RebuildConfig>(appConfig)
+    : TwoStepViewModelBase<RebuildService, RebuildConfig>(appConfig, DiscArchiveModuleInfo.CONFIG_GRROUP)
 {
     [ObservableProperty]
     private FileSystemTree fileTree;

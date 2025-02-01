@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace ArchiveMaster.ViewModels;
 
 public partial class TimeClassifyViewModel(AppConfig appConfig)
-    : SingleVersionConfigTwoStepViewModelBase<TimeClassifyService, TimeClassifyConfig>(appConfig)
+    : TwoStepViewModelBase<TimeClassifyService, TimeClassifyConfig>(appConfig)
 {
     [ObservableProperty]
     private List<FileSystem.FilesTimeDirInfo> sameTimePhotosDirs;

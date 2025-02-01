@@ -14,7 +14,7 @@ using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class EncryptorViewModel : SingleVersionConfigTwoStepViewModelBase<EncryptorService, EncryptorConfig>
+public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService, EncryptorConfig>
 {
     [ObservableProperty]
     private bool isEncrypting = true;

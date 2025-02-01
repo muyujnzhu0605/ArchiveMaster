@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace ArchiveMaster.ViewModels;
 
 public partial class RenameViewModel(AppConfig appConfig)
-    : SingleVersionConfigTwoStepViewModelBase<RenameService, RenameConfig>(appConfig)
+    : TwoStepViewModelBase<RenameService, RenameConfig>(appConfig)
 {
     [ObservableProperty]
     private ObservableCollection<FileSystem.RenameFileInfo> files;

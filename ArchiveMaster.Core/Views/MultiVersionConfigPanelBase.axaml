@@ -1,12 +1,11 @@
-<v:TwoStepPanelBase
-    x:Class="ArchiveMaster.Views.MultiVersionConfigTwoStepPanelBase"
+<v:PanelBase
+    x:Class="ArchiveMaster.Views.MultiVersionConfigPanelBase"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Configs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
-    x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -34,23 +33,28 @@
                 Grid.Row="2"
                 Width="128"
                 ItemsSource="{Binding ConfigNames}"
-                SelectedItem="{Binding ConfigName}" />
+                SelectedItem="{Binding ConfigName}"
+                ToolTip.Tip="切换配置" />
             <Button
                 Grid.Column="2"
                 Command="{Binding AddConfigCommand}"
-                Content="{StaticResource Add}" />
+                Content="{StaticResource Add}"
+                ToolTip.Tip="新增配置" />
             <Button
                 Grid.Column="4"
                 Command="{Binding RemoveConfigCommand}"
-                Content="{StaticResource Delete}" />
+                Content="{StaticResource Delete}"
+                ToolTip.Tip="删除当前配置" />
             <Button
                 Grid.Column="6"
                 Command="{Binding ModifyConfigNameCommand}"
-                Content="{StaticResource Edit}" />
+                Content="{StaticResource Edit}"
+                ToolTip.Tip="修改当前配置名称" />
             <Button
                 Grid.Column="8"
                 Command="{Binding CloneConfigCommand}"
-                Content="{StaticResource Copy}" />
+                Content="{StaticResource Copy}"
+                ToolTip.Tip="建立当前配置的副本" />
         </Grid>
     </v:PanelBase.RightTopContent>
-</v:TwoStepPanelBase>
+</v:PanelBase>

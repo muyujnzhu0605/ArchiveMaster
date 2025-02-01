@@ -9,7 +9,7 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// RebuildPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class Step2Panel : MultiVersionConfigTwoStepPanelBase
+    public partial class Step2Panel : TwoStepPanelBase
     {
         public Step2Panel()
         {

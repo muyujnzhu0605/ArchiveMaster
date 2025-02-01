@@ -10,11 +10,11 @@ namespace ArchiveMaster.Configs
         {
         }
 
-        public ConfigMetadata(Type type, string group=null)
+        public ConfigMetadata(Type type, string group = null)
         {
             Type = type;
             Key = type.Name;
-            Group = group;
+            Group = group ?? type.Name;
         }
 
         [JsonIgnore]

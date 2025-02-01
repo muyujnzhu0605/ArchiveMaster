@@ -18,8 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ArchiveMaster.ViewModels;
 
 public partial class PhotoSlimmingViewModel(AppConfig appConfig)
-    : MultiVersionConfigTwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(appConfig,
-        PhotoArchiveModuleInfo.PHOTO_SLIMMING_GROUP)
+    : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(appConfig)
 {
     [ObservableProperty]
     private bool canCancel;

@@ -1,4 +1,4 @@
-﻿<v:MultiVersionConfigTwoStepPanelBase
+﻿<v:TwoStepPanelBase
     x:Class="ArchiveMaster.Views.Step3Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,9 +16,9 @@
     ExecuteButtonContent="2.更新"
     InitializeButtonContent="1.分析"
     mc:Ignorable="d">
-    <v:MultiVersionConfigTwoStepPanelBase.Styles>
+    <v:TwoStepPanelBase.Styles>
         <StyleInclude Source="Styles.axaml" />
-    </v:MultiVersionConfigTwoStepPanelBase.Styles>
+    </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="本地补丁目录：">
@@ -63,4 +63,4 @@
     <v:TwoStepPanelBase.ResultsContent>
         <v:SyncFilesList />
     </v:TwoStepPanelBase.ResultsContent>
-</v:MultiVersionConfigTwoStepPanelBase>
+</v:TwoStepPanelBase>
