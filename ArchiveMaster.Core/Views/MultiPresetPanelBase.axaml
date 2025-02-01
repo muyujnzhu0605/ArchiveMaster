@@ -9,10 +9,10 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <v:PanelBase.RightTopContent>
-        <Grid
-            ColumnDefinitions="Auto,8,Auto,4,Auto,4,Auto,4,Auto"
-            RowDefinitions="Auto,8,Auto">
-            <Grid.Styles>
+        <StackPanel
+            VerticalAlignment="Top"
+            Orientation="Horizontal">
+            <StackPanel.Styles>
                 <Style Selector="Button">
                     <Setter Property="Padding" Value="0" />
                     <Setter Property="Width" Value="32" />
@@ -24,36 +24,29 @@
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
                 </Style>
-            </Grid.Styles>
-            <TextBlock
-                Grid.ColumnSpan="99"
-                Text="预设" />
+            </StackPanel.Styles>
             <ComboBox
-                Grid.Row="2"
                 Width="128"
+                VerticalAlignment="Center"
                 ItemsSource="{Binding PresetNames}"
                 SelectedItem="{Binding PresetName}"
                 ToolTip.Tip="切换预设" />
             <Button
-                Grid.Column="2"
                 Command="{Binding AddPresetCommand}"
                 Content="{StaticResource Add}"
                 ToolTip.Tip="新增预设" />
             <Button
-                Grid.Column="4"
                 Command="{Binding RemovePresetCommand}"
                 Content="{StaticResource Delete}"
                 ToolTip.Tip="删除当前预设" />
             <Button
-                Grid.Column="6"
                 Command="{Binding ModifyPresetNameCommand}"
                 Content="{StaticResource Edit}"
                 ToolTip.Tip="修改当前预设名称" />
             <Button
-                Grid.Column="8"
                 Command="{Binding ClonePresetCommand}"
                 Content="{StaticResource Copy}"
                 ToolTip.Tip="建立当前预设的副本" />
-        </Grid>
+        </StackPanel>
     </v:PanelBase.RightTopContent>
 </v:PanelBase>

@@ -129,60 +129,56 @@ public static class Initializer
 
         foreach (var moduleInitializer in ModuleInitializers)
         {
-#if !DEBUG
             try
             {
-#endif
-            //注册配置
-            foreach (var config in moduleInitializer.Configs ?? [])
-            {
-                appConfig.RegisterConfig(config);
-            }
-
-            //注册后台服务
-            foreach (var type in moduleInitializer.BackgroundServices ?? [])
-            {
-                if (!typeof(IBackgroundService).IsAssignableFrom(type))
+                //注册配置
+                foreach (var config in moduleInitializer.Configs ?? [])
                 {
-                    throw new Exception($"后台服务{type.Name}没有实现{nameof(IBackgroundService)}接口");
+                    appConfig.RegisterConfig(config);
                 }
 
-                services.AddSingleton(typeof(IHostedService), s => ActivatorUtilities.CreateInstance(s, type));
-                //无法使用 services.AddHostedService(type);
-            }
-
-            //注册单例服务
-            foreach (var service in moduleInitializer.SingletonServices ?? [])
-            {
-                services.AddSingleton(service);
-            }
-
-            //注册瞬时服务
-            foreach (var service in moduleInitializer.TransientServices ?? [])
-            {
-                services.AddTransient(service);
-            }
-
-            //注册视图和视图模型
-            foreach (var panel in moduleInitializer.Views?.Panels ?? [])
-            {
-                services.AddTransient(panel.ViewType, s =>
+                //注册后台服务
+                foreach (var type in moduleInitializer.BackgroundServices ?? [])
                 {
-                    var obj = (StyledElement)ActivatorUtilities.CreateInstance(s, panel.ViewType);
-                    obj.DataContext = s.GetRequiredService(panel.ViewModelType);
-                    return obj;
-                });
-                services.AddTransient(panel.ViewModelType);
-            }
+                    if (!typeof(IBackgroundService).IsAssignableFrom(type))
+                    {
+                        throw new Exception($"后台服务{type.Name}没有实现{nameof(IBackgroundService)}接口");
+                    }
 
-            viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
-#if !DEBUG
+                    services.AddSingleton(typeof(IHostedService), s => ActivatorUtilities.CreateInstance(s, type));
+                    //无法使用 services.AddHostedService(type);
+                }
+
+                //注册单例服务
+                foreach (var service in moduleInitializer.SingletonServices ?? [])
+                {
+                    services.AddSingleton(service);
+                }
+
+                //注册瞬时服务
+                foreach (var service in moduleInitializer.TransientServices ?? [])
+                {
+                    services.AddTransient(service);
+                }
+
+                //注册视图和视图模型
+                foreach (var panel in moduleInitializer.Views?.Panels ?? [])
+                {
+                    services.AddTransient(panel.ViewType, s =>
+                    {
+                        var obj = (StyledElement)ActivatorUtilities.CreateInstance(s, panel.ViewType);
+                        obj.DataContext = s.GetRequiredService(panel.ViewModelType);
+                        return obj;
+                    });
+                    services.AddTransient(panel.ViewModelType);
+                }
+
+                viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
             }
             catch (Exception ex)
             {
                 throw new Exception($"加载模块{moduleInitializer.ModuleName}时出错: {ex.Message}");
             }
-#endif
         }
 
         views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
