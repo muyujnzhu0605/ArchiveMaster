@@ -1,4 +1,4 @@
-#define DYNAMIC_DLL
+//#define DYNAMIC_DLL
 
 using System;
 using System.Collections.Generic;
@@ -36,7 +36,6 @@ public static class Initializer
         new TestModuleInfo(),
 #endif
         new FileToolsModuleInfo(),
-        new PhotoArchiveModuleInfo(),
         new OfflineSyncModuleInfo(),
         new DiscArchiveModuleInfo(),
         new FileBackupperModuleInfo(),

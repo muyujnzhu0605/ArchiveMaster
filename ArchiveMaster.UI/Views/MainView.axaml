@@ -100,10 +100,9 @@
                                 <ItemsControl ItemsSource="{Binding Panels}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <WrapPanel
+                                            <local:ExtendedWrapPanel
                                                 HorizontalAlignment="Center"
-                                                ItemHeight="{DynamicResource BoxHeight}"
-                                                ItemWidth="{DynamicResource BoxWidth}" />
+                                                HorizontalContentAlignment="Center" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
@@ -111,6 +110,8 @@
                                             <local:ToolItemBox
                                                 x:Name="tib"
                                                 Title="{Binding Title}"
+                                                Width="{DynamicResource BoxWidth}"
+                                                Height="{DynamicResource BoxHeight}"
                                                 Description="{Binding Description}"
                                                 Focusable="{Binding !#root.DataContext.IsToolOpened}"
                                                 Icon="{Binding IconUri}"
