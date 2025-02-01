@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 
@@ -37,16 +38,22 @@ namespace ArchiveMaster.Services
             }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
-        public override Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken token)
         {
             rRepairTime = new Regex(@$"\.({string.Join('|', Extensions)})$",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
             NotifyProgressIndeterminate();
             NotifyMessage("正在查找文件");
-            var files = new DirectoryInfo(Config.Dir).EnumerateFiles("*", SearchOption.AllDirectories)
-                .Select(p => new ExifTimeFileInfo(p, Config.Dir))
-                .ToList();
-            return TryForFilesAsync(files, (file, s) =>
+            List<ExifTimeFileInfo> files = null;
+            await Task.Run(() =>
+            {
+                files = new DirectoryInfo(Config.Dir)
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .ApplyFilter(token)
+                    .Select(p => new ExifTimeFileInfo(p, Config.Dir))
+                    .ToList();
+            });
+            await TryForFilesAsync(files, (file, s) =>
                 {
                     NotifyMessage($"正在扫描照片日期{s.GetFileNumberMessage()}");
                     if (rRepairTime.IsMatch(file.Name))

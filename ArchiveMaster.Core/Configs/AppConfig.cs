@@ -32,11 +32,9 @@ namespace ArchiveMaster.Configs
     {
         public const string DEFAULT_PRESET = "默认";
 
-        private const string JKEY_MODULES = "Modules";
-
-        private const string JKEY_GROUPS = "Groups";
-
         private const string CONFIG_FILE = "configs.json";
+        private const string JKEY_GROUPS = "Groups";
+        private const string JKEY_MODULES = "Modules";
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
         {
@@ -45,14 +43,14 @@ namespace ArchiveMaster.Configs
         };
 
         /// <summary>
-        /// 模块配置
-        /// </summary>
-        private readonly List<ConfigItem> configs = new List<ConfigItem>();
-
-        /// <summary>
         /// 模块配置的元数据
         /// </summary>
         private readonly Dictionary<string, ConfigMetadata> configMetadata = new Dictionary<string, ConfigMetadata>();
+
+        /// <summary>
+        /// 模块配置
+        /// </summary>
+        private readonly List<ConfigItem> configs = new List<ConfigItem>();
 
         /// <summary>
         /// 各配置组的当前预设
@@ -70,7 +68,38 @@ namespace ArchiveMaster.Configs
         public string GetCurrentPreset(string groupName)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
-            return currentPresets.GetValueOrDefault(groupName, DEFAULT_PRESET);
+            return currentPresets.TryGetValue(groupName, out string value) ? value : GetPresets(groupName)[0];
+        }
+
+        public T GetOrCreateConfig<T>(string key, string preset = null) where T : new()
+        {
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
+            if (!configMetadata.TryGetValue(key, out ConfigMetadata metadata))
+            {
+                throw new Exception($"没有注册名为{key}的配置");
+            }
+
+            if (configItem == null)
+            {
+                configItem = ConfigItem.FromConfigMetadata(metadata, new T(), preset);
+                configs.Add(configItem);
+            }
+            else
+            {
+                if (configItem.Config is not T)
+                {
+                    throw new InvalidCastException(
+                        $"配置列表中的配置项{key}（预设：{preset ?? "（无）"}）的配置项对象类型（{configItem.Type?.Name}）与请求的类型（{typeof(T).Name}）不一致");
+                }
+            }
+
+            return (T)configItem.Config;
+        }
+
+        public T GetOrCreateConfigWithDefaultKey<T>(string preset = null) where T : new()
+        {
+            return GetOrCreateConfig<T>(typeof(T).Name, preset);
         }
 
         public IReadOnlyList<string> GetPresets(string groupName)
@@ -98,106 +127,61 @@ namespace ArchiveMaster.Configs
             return presets.AsReadOnly();
         }
 
-        public void SetCurrentPreset(string groupName, string preset)
-        {
-            ArgumentException.ThrowIfNullOrEmpty(groupName);
-            ArgumentException.ThrowIfNullOrEmpty(preset);
-            currentPresets[groupName] = preset;
-        }
-
-        public T GetOrCreateConfigWithDefaultKey<T>(string preset = null) where T : new()
-        {
-            return GetOrCreateConfig<T>(typeof(T).Name, preset);
-        }
-        
-        public T GetOrCreateConfig<T>(string key, string preset = null) where T : new()
-        {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
-            if (!configMetadata.TryGetValue(key, out ConfigMetadata metadata))
-            {
-                throw new Exception($"没有注册名为{key}的配置");
-            }
-
-            if (configItem == null)
-            {
-                configItem = ConfigItem.FromConfigMetadata(metadata, new T(), preset);
-                configs.Add(configItem);
-            }
-            else
-            {
-                if (configItem.Config is not T)
-                {
-                    throw new InvalidCastException(
-                        $"配置列表中的配置项{key}（预设：{preset ?? "（无）"}）的配置项对象类型（{configItem.Type?.Name}）与请求的类型（{typeof(T).Name}）不一致");
-                }
-            }
-
-            return (T)configItem.Config;
-        }
-
         public void Initialize()
         {
             try
             {
-                if (File.Exists(CONFIG_FILE))
+                if (!File.Exists(CONFIG_FILE))
                 {
-                    var json = JsonNode.Parse(File.ReadAllText(CONFIG_FILE));
-                    if (json is not JsonObject jobj)
-                    {
-                        throw new Exception("配置文件内不是Json Object");
-                    }
-
-                    if (!jobj.ContainsKey(JKEY_MODULES))
-                    {
-                        throw new Exception($"配置文件内不包含{JKEY_MODULES}");
-                    }
-
-                    if (!jobj.ContainsKey(JKEY_GROUPS))
-                    {
-                        throw new Exception($"配置文件内不包含{JKEY_GROUPS}");
-                    }
-
-                    if (jobj[JKEY_GROUPS] is not JsonObject jg)
-                    {
-                        throw new Exception($"配置文件内的{JKEY_GROUPS}不是Json Object");
-                    }
-
-                    if (jobj[JKEY_MODULES] is not JsonArray jm)
-                    {
-                        throw new Exception($"配置文件内的{JKEY_MODULES}不是Json Array");
-                    }
-
-                    ParseModules(jm);
-                    ParseGroups(jg);
+                    return;
                 }
+
+                var json = JsonNode.Parse(File.ReadAllText(CONFIG_FILE));
+                if (json is not JsonObject jobj)
+                {
+                    throw new Exception("配置文件内不是Json Object");
+                }
+
+                //迁移旧版本配置文件
+                if (!jobj.ContainsKey(JKEY_MODULES) && !jobj.ContainsKey(JKEY_GROUPS))
+                {
+                    try
+                    {
+                        jobj = MigrateOldVersionConfigJson(jobj);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"迁移旧版本配置文件失败：{ex.Message}", ex);
+                    }
+                }
+
+                if (!jobj.ContainsKey(JKEY_MODULES))
+                {
+                    throw new Exception($"配置文件内不包含{JKEY_MODULES}");
+                }
+
+                if (!jobj.ContainsKey(JKEY_GROUPS))
+                {
+                    throw new Exception($"配置文件内不包含{JKEY_GROUPS}");
+                }
+
+                if (jobj[JKEY_GROUPS] is not JsonObject jg)
+                {
+                    throw new Exception($"配置文件内的{JKEY_GROUPS}不是Json Object");
+                }
+
+                if (jobj[JKEY_MODULES] is not JsonArray jm)
+                {
+                    throw new Exception($"配置文件内的{JKEY_MODULES}不是Json Array");
+                }
+
+                ParseModules(jm);
+                ParseGroups(jg);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "加载配置失败");
-                LoadError = new Exception("加载配置文件失败，将重置配置", ex);
-            }
-        }
-
-        private void ParseGroups(JsonObject jobj)
-        {
-            Debug.Assert(jobj!=null);
-            currentPresets = jobj.Deserialize<Dictionary<string, string>>();
-        }
-
-        private void ParseModules(JsonArray jarray)
-        {
-            Debug.Assert(jarray!=null);
-            foreach (var key in configMetadata.Keys)
-            {
-                var configItemJsons =
-                    jarray.Where(p => key.Equals(p[nameof(ConfigMetadata.Key)]?.GetValue<string>()));
-                foreach (var j in configItemJsons)
-                {
-                    var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
-                    var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type);
-                    configs.Add(ConfigItem.FromConfigMetadata(configMetadata[key], instance, preset));
-                }
+                LoadError = new Exception($"加载配置文件失败：{ex.Message}", ex);
             }
         }
 
@@ -205,27 +189,6 @@ namespace ArchiveMaster.Configs
         {
             ArgumentNullException.ThrowIfNull(config);
             configMetadata.Add(config.Key, config);
-        }
-
-        public void Save(bool raiseEvent = true)
-        {
-            if (raiseEvent)
-            {
-                BeforeSaving?.Invoke(this, EventArgs.Empty);
-            }
-
-            try
-            {
-                var json = JsonSerializer.Serialize(new Dictionary<string, object>
-                {
-                    [JKEY_MODULES] = configs,
-                    [JKEY_GROUPS] = currentPresets
-                }, JsonOptions);
-                File.WriteAllText(CONFIG_FILE, json);
-            }
-            catch (Exception ex)
-            {
-            }
         }
 
         public bool RemovePreset<T>(string key, string preset) where T : ConfigBase, new()
@@ -255,6 +218,110 @@ namespace ArchiveMaster.Configs
             foreach (var config in configs.Where(p => p.Group == group && p.Preset == oldName))
             {
                 config.Preset = newName;
+            }
+        }
+
+        public void Save(bool raiseEvent = true)
+        {
+            if (raiseEvent)
+            {
+                BeforeSaving?.Invoke(this, EventArgs.Empty);
+            }
+
+            try
+            {
+                var json = JsonSerializer.Serialize(new Dictionary<string, object>
+                {
+                    [JKEY_MODULES] = configs,
+                    [JKEY_GROUPS] = currentPresets
+                }, JsonOptions);
+                File.WriteAllText(CONFIG_FILE, json);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public void SetCurrentPreset(string groupName, string preset)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(groupName);
+            ArgumentException.ThrowIfNullOrEmpty(preset);
+            currentPresets[groupName] = preset;
+        }
+
+        private JsonObject MigrateOldVersionConfigJson(JsonObject jobj)
+        {
+            var root = new JsonObject();
+            var jModules = new JsonArray();
+            var jGroups = new JsonObject();
+            root.Add(JKEY_MODULES, jModules);
+            root.Add(JKEY_GROUPS, jGroups);
+            foreach (var oldConfig in jobj)
+            {
+                var key = oldConfig.Key;
+                var content = oldConfig.Value;
+                if (oldConfig.Key == "PhotoSlimmingCollectionConfig")
+                {
+                    JsonArray jSubConfigs = (JsonArray)((JsonObject)content)["List"];
+                    foreach (JsonObject jSubConfig in jSubConfigs)
+                    {
+                        string preset = jSubConfig["Name"].GetValue<string>();
+                        MigrateConfigItem("PhotoSlimmingConfig", preset, jSubConfig);
+                    }
+                }
+                else if (oldConfig.Key == "OfflineSyncConfig")
+                {
+                    JsonObject jSubConfigs = (JsonObject)((JsonObject)content)["ConfigCollection"];
+                    foreach (var subConfig in jSubConfigs)
+                    {
+                        var preset = subConfig.Key;
+                        for (int i = 1; i <= 3; i++)
+                        {
+                            var step = ((JsonObject)subConfig.Value)[$"Step{i}"];
+                            MigrateConfigItem($"OfflineSyncStep{i}Config", preset, step);
+                        }
+                    }
+                }
+                else
+                {
+                    MigrateConfigItem(key, DEFAULT_PRESET, content);
+                }
+            }
+
+            return root;
+
+            void MigrateConfigItem(string key, string preset, JsonNode content)
+            {
+                JsonObject jNewConfig = new JsonObject
+                {
+                    { nameof(ConfigMetadata.Key), key },
+                    { nameof(ConfigMetadata.Group), key },
+                    { nameof(ConfigItem.Preset), preset },
+                    { nameof(ConfigItem.Config), content.DeepClone() }
+                };
+                jModules.Add(jNewConfig);
+            }
+        }
+
+        private void ParseGroups(JsonObject jobj)
+        {
+            Debug.Assert(jobj != null);
+            currentPresets = jobj.Deserialize<Dictionary<string, string>>();
+        }
+
+        private void ParseModules(JsonArray jarray)
+        {
+            Debug.Assert(jarray != null);
+            foreach (var key in configMetadata.Keys)
+            {
+                var configItemJsons =
+                    jarray.Where(p => key.Equals(p[nameof(ConfigMetadata.Key)]?.GetValue<string>()));
+                foreach (var j in configItemJsons)
+                {
+                    var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
+                    var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type);
+                    configs.Add(ConfigItem.FromConfigMetadata(configMetadata[key], instance, preset));
+                }
             }
         }
     }
