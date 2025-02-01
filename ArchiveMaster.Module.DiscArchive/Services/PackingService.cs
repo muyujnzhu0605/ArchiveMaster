@@ -11,7 +11,7 @@ using DiscFilePackage = ArchiveMaster.ViewModels.FileSystem.DiscFilePackage;
 
 namespace ArchiveMaster.Services
 {
-    public class PackingService(PackingConfig config, AppConfig appConfig) : DiscServiceBase<PackingConfig>(config, appConfig)
+    public class PackingService(AppConfig appConfig) : DiscServiceBase<PackingConfig>(appConfig)
     {
         /// <summary>
         /// 光盘文件包

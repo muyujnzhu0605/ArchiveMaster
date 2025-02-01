@@ -9,7 +9,7 @@ using DiscFile = ArchiveMaster.ViewModels.FileSystem.DiscFile;
 
 namespace ArchiveMaster.Services
 {
-    public class RebuildService(RebuildConfig config, AppConfig appConfig) : DiscServiceBase<RebuildConfig>(config, appConfig)
+    public class RebuildService(AppConfig appConfig) : DiscServiceBase<RebuildConfig>(appConfig)
     {
         private Dictionary<string, List<DiscFile>> files;
 

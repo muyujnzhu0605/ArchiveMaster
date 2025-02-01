@@ -15,12 +15,14 @@ namespace ArchiveMaster
 {
     public class DiscArchiveModuleInfo : IModuleInfo
     {
+        public const string CONFIG_GRROUP = "DiscArchive";
         private readonly string baseUrl = "avares://ArchiveMaster.Module.DiscArchive/Assets/";
         public IList<Type> BackgroundServices { get; }
+
         public IList<ConfigMetadata> Configs =>
         [
-            new ConfigMetadata(typeof(PackingConfig)),
-            new ConfigMetadata(typeof(RebuildConfig)),
+            new ConfigMetadata(typeof(PackingConfig), CONFIG_GRROUP),
+            new ConfigMetadata(typeof(RebuildConfig), CONFIG_GRROUP),
         ];
 
         public string ModuleName => "光盘归档工具";

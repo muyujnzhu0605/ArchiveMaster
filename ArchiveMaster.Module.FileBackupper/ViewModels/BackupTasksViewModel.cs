@@ -23,15 +23,15 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private ObservableCollection<BackupTask> tasks;
 
-        public BackupTasksViewModel(FileBackupperConfig config, AppConfig appConfig, BackupService backupService)
+        public BackupTasksViewModel(AppConfig appConfig, BackupService backupService)
         {
             this.backupService = backupService;
-            Config = config;
+            Config = appConfig.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
             AppConfig = appConfig;
 #if DEBUG
-            if (config.Tasks.Count == 0)
+            if (Config.Tasks.Count == 0)
             {
-                config.Tasks.Add(new BackupTask()
+                Config.Tasks.Add(new BackupTask()
                 {
                     Name = "任务名",
                     SourceDir = @"C:\Users\autod\Desktop\备份源目录",

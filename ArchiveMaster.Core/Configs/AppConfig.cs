@@ -21,16 +21,16 @@ namespace ArchiveMaster.Configs
     /// </summary>
     /// <remarks>
     /// 每个模块通过<see cref="RegisterConfig"/>上报自己所需要的配置，然后通过<see cref="GetOrCreateConfig{T}"/>获取配置。
-    /// 配置基本信息为<see cref="ConfigMetadata"/>，运行后增加配置对象和版本，使用<see cref="ConfigItem"/>存储。
-    /// 支持多配置功能，或称为多预设，即能够保存多个配置项，在程序中命名为版本（Version）。
-    /// 通常来说，配置项之间的版本是独立的，一个配置增删改版本，不影响其他配置项。
-    /// 但可以通过设置组来实现多个配置之间共享版本，一个典型的例子是OfflineSync，模块中的多个板块是步骤的关系，因此需要共享版本。
-    /// 共享版本时，提供相同的组名，此时增删改其中一个配置项的版本，会同步反映到其他配置项上。
-    /// 启用共享版本时，需要在IModuleInfo中提供Configs时指定每个Config使用相同的Group，并且在TwoStepViewModel初始化时提供Group。
+    /// 配置基本信息为<see cref="ConfigMetadata"/>，运行后增加配置对象和预设，使用<see cref="ConfigItem"/>存储。
+    /// 支持多预设，即能够保存多个配置项，在程序中命名为Preset。
+    /// 通常来说，配置项之间的预设是独立的，一个配置增删改预设，不影响其他配置项。
+    /// 但可以通过设置组来实现多个配置之间共享预设，一个典型的例子是OfflineSync，模块中的多个板块是步骤的关系，因此需要共享预设。
+    /// 共享预设时，提供相同的组名，此时增删改其中一个配置项的预设，会同步反映到其他配置项上。
+    /// 启用共享预设时，需要在IModuleInfo中提供Configs时指定每个Config使用相同的Group，并且在TwoStepViewModel初始化时提供Group。
     /// </remarks>
     public class AppConfig
     {
-        public const string DEFAULT_VERSION = "默认";
+        public const string DEFAULT_PRESET = "默认";
 
         private const string JKEY_MODULES = "Modules";
 
@@ -55,9 +55,9 @@ namespace ArchiveMaster.Configs
         private readonly Dictionary<string, ConfigMetadata> configMetadata = new Dictionary<string, ConfigMetadata>();
 
         /// <summary>
-        /// 各配置组的当前版本
+        /// 各配置组的当前预设
         /// </summary>
-        private Dictionary<string, string> currentVersions = new Dictionary<string, string>();
+        private Dictionary<string, string> currentPresets = new Dictionary<string, string>();
 
         public event EventHandler BeforeSaving;
 
@@ -67,13 +67,13 @@ namespace ArchiveMaster.Configs
 
         public Exception LoadError { get; private set; }
 
-        public string GetCurrentVersion(string groupName)
+        public string GetCurrentPreset(string groupName)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
-            return currentVersions.GetValueOrDefault(groupName, DEFAULT_VERSION);
+            return currentPresets.GetValueOrDefault(groupName, DEFAULT_PRESET);
         }
 
-        public IReadOnlyList<string> GetVersions(string groupName)
+        public IReadOnlyList<string> GetPresets(string groupName)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
             var sameGroupConfigs = configMetadata.Values
@@ -85,30 +85,35 @@ namespace ArchiveMaster.Configs
                 throw new Exception($"没有组名为{groupName}的配置文件");
             }
 
-            var versions = configs
+            var presets = configs
                 .Where(p => sameGroupConfigs.Contains(p.Key))
-                .Select(p => p.Version)
+                .Select(p => p.Preset)
                 .Distinct()
                 .ToList();
-            if (versions.Count == 0)
+            if (presets.Count == 0)
             {
-                versions.Add(DEFAULT_VERSION);
+                presets.Add(DEFAULT_PRESET);
             }
 
-            return versions.AsReadOnly();
+            return presets.AsReadOnly();
         }
 
-        public void SetCurrentVersion(string groupName, string version)
+        public void SetCurrentPreset(string groupName, string preset)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
-            ArgumentException.ThrowIfNullOrEmpty(version);
-            currentVersions[groupName] = version;
+            ArgumentException.ThrowIfNullOrEmpty(preset);
+            currentPresets[groupName] = preset;
         }
 
-        public T GetOrCreateConfig<T>(string key, string version = null) where T : new()
+        public T GetOrCreateConfigWithDefaultKey<T>(string preset = null) where T : new()
+        {
+            return GetOrCreateConfig<T>(typeof(T).Name, preset);
+        }
+        
+        public T GetOrCreateConfig<T>(string key, string preset = null) where T : new()
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
-            ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Version == version);
+            ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
             if (!configMetadata.TryGetValue(key, out ConfigMetadata metadata))
             {
                 throw new Exception($"没有注册名为{key}的配置");
@@ -116,7 +121,7 @@ namespace ArchiveMaster.Configs
 
             if (configItem == null)
             {
-                configItem = ConfigItem.FromConfigMetadata(metadata, new T(), version);
+                configItem = ConfigItem.FromConfigMetadata(metadata, new T(), preset);
                 configs.Add(configItem);
             }
             else
@@ -124,7 +129,7 @@ namespace ArchiveMaster.Configs
                 if (configItem.Config is not T)
                 {
                     throw new InvalidCastException(
-                        $"配置列表中的配置项{key}（版本：{version ?? "（无）"}）的配置项对象类型（{configItem.Type?.Name}）与请求的类型（{typeof(T).Name}）不一致");
+                        $"配置列表中的配置项{key}（预设：{preset ?? "（无）"}）的配置项对象类型（{configItem.Type?.Name}）与请求的类型（{typeof(T).Name}）不一致");
                 }
             }
 
@@ -177,7 +182,7 @@ namespace ArchiveMaster.Configs
         private void ParseGroups(JsonObject jobj)
         {
             Debug.Assert(jobj!=null);
-            currentVersions = jobj.Deserialize<Dictionary<string, string>>();
+            currentPresets = jobj.Deserialize<Dictionary<string, string>>();
         }
 
         private void ParseModules(JsonArray jarray)
@@ -189,9 +194,9 @@ namespace ArchiveMaster.Configs
                     jarray.Where(p => key.Equals(p[nameof(ConfigMetadata.Key)]?.GetValue<string>()));
                 foreach (var j in configItemJsons)
                 {
-                    var version = j[nameof(ConfigItem.Version)]?.GetValue<string>();
+                    var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
                     var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type);
-                    configs.Add(ConfigItem.FromConfigMetadata(configMetadata[key], instance, version));
+                    configs.Add(ConfigItem.FromConfigMetadata(configMetadata[key], instance, preset));
                 }
             }
         }
@@ -214,7 +219,7 @@ namespace ArchiveMaster.Configs
                 var json = JsonSerializer.Serialize(new Dictionary<string, object>
                 {
                     [JKEY_MODULES] = configs,
-                    [JKEY_GROUPS] = currentVersions
+                    [JKEY_GROUPS] = currentPresets
                 }, JsonOptions);
                 File.WriteAllText(CONFIG_FILE, json);
             }
@@ -223,11 +228,11 @@ namespace ArchiveMaster.Configs
             }
         }
 
-        public bool RemoveVersion<T>(string key, string version) where T : ConfigBase, new()
+        public bool RemovePreset<T>(string key, string preset) where T : ConfigBase, new()
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
-            ArgumentException.ThrowIfNullOrEmpty(version);
-            var configItems = configs.Where(p => p.Key == key && p.Version == version).ToList();
+            ArgumentException.ThrowIfNullOrEmpty(preset);
+            var configItems = configs.Where(p => p.Key == key && p.Preset == preset).ToList();
             if (configItems.Count == 0)
             {
                 return false;
@@ -238,18 +243,18 @@ namespace ArchiveMaster.Configs
                 configs.Remove(configItem);
             }
 
-            //考虑设置当前版本号
+            //考虑设置当前预设
             return true;
         }
 
-        public void RenameVersion(string group, string oldName, string newName)
+        public void RenamePreset(string group, string oldName, string newName)
         {
             ArgumentException.ThrowIfNullOrEmpty(group);
             ArgumentException.ThrowIfNullOrEmpty(oldName);
             ArgumentException.ThrowIfNullOrEmpty(newName);
-            foreach (var config in configs.Where(p => p.Group == group && p.Version == oldName))
+            foreach (var config in configs.Where(p => p.Group == group && p.Preset == oldName))
             {
-                config.Version = newName;
+                config.Preset = newName;
             }
         }
     }

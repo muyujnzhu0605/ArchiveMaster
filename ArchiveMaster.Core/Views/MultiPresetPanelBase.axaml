@@ -1,8 +1,7 @@
 <v:PanelBase
-    x:Class="ArchiveMaster.Views.MultiVersionConfigPanelBase"
+    x:Class="ArchiveMaster.Views.MultiPresetPanelBase"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:c="using:ArchiveMaster.Configs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
@@ -28,33 +27,33 @@
             </Grid.Styles>
             <TextBlock
                 Grid.ColumnSpan="99"
-                Text="配置文件" />
+                Text="预设" />
             <ComboBox
                 Grid.Row="2"
                 Width="128"
-                ItemsSource="{Binding ConfigNames}"
-                SelectedItem="{Binding ConfigName}"
-                ToolTip.Tip="切换配置" />
+                ItemsSource="{Binding PresetNames}"
+                SelectedItem="{Binding PresetName}"
+                ToolTip.Tip="切换预设" />
             <Button
                 Grid.Column="2"
-                Command="{Binding AddConfigCommand}"
+                Command="{Binding AddPresetCommand}"
                 Content="{StaticResource Add}"
-                ToolTip.Tip="新增配置" />
+                ToolTip.Tip="新增预设" />
             <Button
                 Grid.Column="4"
-                Command="{Binding RemoveConfigCommand}"
+                Command="{Binding RemovePresetCommand}"
                 Content="{StaticResource Delete}"
-                ToolTip.Tip="删除当前配置" />
+                ToolTip.Tip="删除当前预设" />
             <Button
                 Grid.Column="6"
-                Command="{Binding ModifyConfigNameCommand}"
+                Command="{Binding ModifyPresetNameCommand}"
                 Content="{StaticResource Edit}"
-                ToolTip.Tip="修改当前配置名称" />
+                ToolTip.Tip="修改当前预设名称" />
             <Button
                 Grid.Column="8"
-                Command="{Binding CloneConfigCommand}"
+                Command="{Binding ClonePresetCommand}"
                 Content="{StaticResource Copy}"
-                ToolTip.Tip="建立当前配置的副本" />
+                ToolTip.Tip="建立当前预设的副本" />
         </Grid>
     </v:PanelBase.RightTopContent>
 </v:PanelBase>

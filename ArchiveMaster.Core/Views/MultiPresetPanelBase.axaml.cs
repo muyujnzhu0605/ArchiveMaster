@@ -5,9 +5,9 @@ using ArchiveMaster.Services;
 
 namespace ArchiveMaster.Views
 {
-    public partial class MultiVersionConfigPanelBase : PanelBase
+    public partial class MultiPresetPanelBase : PanelBase
     {
-        protected MultiVersionConfigPanelBase()
+        protected MultiPresetPanelBase()
         {
             InitializeComponent();
         }

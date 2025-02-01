@@ -27,9 +27,9 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private int selectedTabIndex;
 
-        public BackupManageCenterViewModel(FileBackupperConfig config, AppConfig appConfig, BackupService backupService)
+        public BackupManageCenterViewModel(AppConfig appConfig, BackupService backupService)
         {
-            Config = config;
+            Config = appConfig.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
             this.appConfig = appConfig;
             this.backupService = backupService;
             BackupService.NewLog += (s, e) =>

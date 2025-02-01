@@ -5,7 +5,7 @@ using DiscFile = ArchiveMaster.ViewModels.FileSystem.DiscFile;
 
 namespace ArchiveMaster.Services
 {
-    public abstract class DiscServiceBase<TConfig>(TConfig config, AppConfig appConfig)
+    public abstract class DiscServiceBase<TConfig>(AppConfig appConfig)
         : TwoStepServiceBase<TConfig>(appConfig)
         where TConfig : ConfigBase
     {

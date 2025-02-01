@@ -18,7 +18,7 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewModelBase
+public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPresetViewModelBase<TConfig>
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new()
 {
@@ -46,24 +46,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     [ObservableProperty]
     private bool canReset = false;
 
-    /// <summary>
-    /// 当前配置项
-    /// </summary>
-    [ObservableProperty]
-    private TConfig config;
-
-    /// <summary>
-    /// 当前配置版本的名称
-    /// </summary>
-    [ObservableProperty]
-    private string configName;
-
-    /// <summary>
-    /// 所有配置项版本的名称
-    /// </summary>
-    [ObservableProperty]
-    private ObservableCollection<string> configNames;
-
     [ObservableProperty]
     private string message = "就绪";
 
@@ -71,48 +53,32 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
-    protected TwoStepViewModelBase(AppConfig appConfig, string configGroupName)
+    protected TwoStepViewModelBase(AppConfig appConfig, string configGroupName):base(appConfig,configGroupName)
     {
-        ConfigGroupName = configGroupName;
-        AppConfig = appConfig;
     }
+    
     protected TwoStepViewModelBase(AppConfig appConfig):this(appConfig,typeof(TConfig).Name)
     {
     }
 
     /// <summary>
-    /// 配置管理
-    /// </summary>
-    public AppConfig AppConfig { get; }
-    
-    /// <summary>
     /// 是否启用Two-Step中的初始化。若禁用，将不显示初始化按钮
     /// </summary>
     public virtual bool EnableInitialize => true;
-    
+
     /// <summary>
     /// 当进度为double.NaN时，认为进度为非确定模式
     /// </summary>
     public bool ProgressIndeterminate => double.IsNaN(Progress);
-    
-    /// <summary>
-    /// 配置版本的组名（见AppConfig）
-    /// </summary>
-    protected string ConfigGroupName { get; }
 
     /// <summary>
     /// 核心服务
     /// </summary>
     protected TService Service { get; private set; }
 
-    /// <summary>
-    /// 进入面板，重置配置和页面
-    /// </summary>
     public override void OnEnter()
     {
         base.OnEnter();
-        ConfigNames = new ObservableCollection<string>(AppConfig.GetVersions(ConfigGroupName));
-        ConfigName = AppConfig.GetCurrentVersion(ConfigGroupName);
         ResetCommand.Execute(null);
     }
 
@@ -138,21 +104,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
         return service;
     }
 
-    /// <summary>
-    /// 注销服务
-    /// </summary>
-    private void DisposeService()
+    protected override void OnConfigChanged()
     {
-        if (Service == null)
-        {
-            return;
-        }
-
-        Service.ProgressUpdate -= Service_ProgressUpdate;
-        Service.MessageUpdate -= Service_MessageUpdate;
-        Service = null;
+        ResetCommand.Execute(null);
     }
-
     /// <summary>
     /// 执行完成后的任务
     /// </summary>
@@ -199,38 +154,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     }
 
     /// <summary>
-    /// 新增配置版本
-    /// </summary>
-    /// <exception cref="Exception"></exception>
-    [RelayCommand]
-    private async Task AddConfigAsync()
-    {
-        if (await this.SendMessage(new InputDialogMessage()
-            {
-                Type = InputDialogMessage.InputDialogType.Text,
-                Title = "新增配置",
-                DefaultValue = "新配置",
-                Validation = t =>
-                {
-                    if (string.IsNullOrWhiteSpace(t))
-                    {
-                        throw new Exception("配置名为空");
-                    }
-
-                    if (ConfigNames.Contains(t))
-                    {
-                        throw new Exception("配置名已存在");
-                    }
-                }
-            }).Task is string result)
-        {
-            ConfigNames.Add(result);
-            AppConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name, result);
-            ConfigName = result;
-        }
-    }
-
-    /// <summary>
     /// 取消正在执行或初始化的任务
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanCancel))]
@@ -252,25 +175,19 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
     }
 
     /// <summary>
-    /// 建立当前配置的副本
+    /// 注销服务
     /// </summary>
-    [RelayCommand]
-    private void CloneConfig()
+    private void DisposeService()
     {
-        string newName = ConfigName;
-        int i = 1;
-        while (ConfigNames.Contains(newName))
+        if (Service == null)
         {
-            i++;
-            newName = $"{ConfigName} ({i})";
+            return;
         }
 
-        var newConfig = AppConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name, newName);
-        Config.Adapt(newConfig);
-        ConfigNames.Add(newName);
-        ConfigName = newName;
+        Service.ProgressUpdate -= Service_ProgressUpdate;
+        Service.MessageUpdate -= Service_MessageUpdate;
+        Service = null;
     }
-
     /// <summary>
     /// 执行任务
     /// </summary>
@@ -357,88 +274,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : ViewMode
         CancelCommand.NotifyCanExecuteChanged();
     }
 
-    /// <summary>
-    /// 修改当前配置的版本名称
-    /// </summary>
-    /// <exception cref="Exception"></exception>
-    [RelayCommand]
-    private async Task ModifyConfigNameAsync()
-    {
-        if (await this.SendMessage(new InputDialogMessage()
-        {
-            Type = InputDialogMessage.InputDialogType.Text,
-            Title = "修改配置名称",
-            DefaultValue = ConfigName,
-            Validation = t =>
-            {
-                if (string.IsNullOrWhiteSpace(t))
-                {
-                    throw new Exception("配置名为空");
-                }
-
-                if (ConfigNames.Contains(t))
-                {
-                    throw new Exception("配置名已存在");
-                }
-            }
-        }).Task is string result)
-        {
-            AppConfig.RenameVersion(ConfigGroupName, ConfigName, result);
-
-            var index = ConfigNames.IndexOf(ConfigName);
-            Debug.Assert(index >= 0);
-            ConfigNames[index] = result;
-            ConfigName = result;
-        }
-    }
-
-    /// <summary>
-    /// 配置版本改变，重新获取该配置版本的配置对象
-    /// </summary>
-    /// <param name="oldValue"></param>
-    /// <param name="newValue"></param>
-    partial void OnConfigNameChanged(string oldValue, string newValue)
-    {
-        if (newValue == null)
-        {
-            Config = null;
-            return;
-        }
-
-        AppConfig.SetCurrentVersion(ConfigGroupName, newValue);
-        Config = AppConfig.GetOrCreateConfig<TConfig>(typeof(TConfig).Name, newValue);
-        ResetCommand.Execute(null);
-    }
-
-    /// <summary>
-    /// 移除当前配置
-    /// </summary>
-    [RelayCommand]
-    private async Task RemoveConfigAsync()
-    {
-        var name = ConfigName;
-        var result = await this.SendMessage(new CommonDialogMessage()
-        {
-            Type = CommonDialogMessage.CommonDialogType.YesNo,
-            Title = "删除配置",
-            Message = $"是否移除配置：{name}？"
-        }).Task;
-        if (result.Equals(true))
-        {
-            ConfigNames.Remove(name);
-            AppConfig.RemoveVersion<TConfig>(typeof(TConfig).Name, name);
-            if (ConfigNames.Count == 0)
-            {
-                ConfigNames.Add(AppConfig.DEFAULT_VERSION);
-                ConfigName = AppConfig.DEFAULT_VERSION;
-            }
-            else
-            {
-                ConfigName = ConfigNames[0];
-            }
-        }
-    }
-    
     /// <summary>
     /// 重置
     /// </summary>

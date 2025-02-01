@@ -10,7 +10,7 @@ public class ConfigItem : ConfigMetadata
             Type = metadata.Type,
             Group = metadata.Group,
             Config = config,
-            Version = version
+            Preset = version
         };
     }
     
@@ -22,5 +22,5 @@ public class ConfigItem : ConfigMetadata
     /// <summary>
     /// 启用多版本配置时的版本号
     /// </summary>
-    public string Version { get; set; }
+    public string Preset { get; set; }
 }
