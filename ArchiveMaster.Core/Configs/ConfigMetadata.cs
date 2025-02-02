@@ -17,7 +17,6 @@ namespace ArchiveMaster.Configs
             Group = group ?? type.Name;
         }
 
-        [JsonIgnore]
         public Type Type { get; set; }
 
         public string Key { get; set; }

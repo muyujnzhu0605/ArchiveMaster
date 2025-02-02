@@ -71,7 +71,7 @@ namespace ArchiveMaster.Configs
             return currentPresets.TryGetValue(groupName, out string value) ? value : GetPresets(groupName)[0];
         }
 
-        public T GetOrCreateConfig<T>(string key, string preset = null) where T : new()
+        public T GetOrCreateConfig<T>(string key, string preset = DEFAULT_PRESET) where T : new()
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
             ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
@@ -82,7 +82,7 @@ namespace ArchiveMaster.Configs
 
             if (configItem == null)
             {
-                configItem = ConfigItem.FromConfigMetadata(metadata, new T(), preset);
+                configItem = new ConfigItem(key, new T(), preset);
                 configs.Add(configItem);
             }
             else
@@ -97,7 +97,7 @@ namespace ArchiveMaster.Configs
             return (T)configItem.Config;
         }
 
-        public T GetOrCreateConfigWithDefaultKey<T>(string preset = null) where T : new()
+        public T GetOrCreateConfigWithDefaultKey<T>(string preset = DEFAULT_PRESET) where T : new()
         {
             return GetOrCreateConfig<T>(typeof(T).Name, preset);
         }
@@ -320,7 +320,7 @@ namespace ArchiveMaster.Configs
                 {
                     var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
                     var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type);
-                    configs.Add(ConfigItem.FromConfigMetadata(configMetadata[key], instance, preset));
+                    configs.Add(new ConfigItem(key, instance, preset));
                 }
             }
         }

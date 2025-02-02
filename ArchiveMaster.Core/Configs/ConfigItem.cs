@@ -2,18 +2,17 @@ namespace ArchiveMaster.Configs;
 
 public class ConfigItem : ConfigMetadata
 {
-    public static ConfigItem FromConfigMetadata(ConfigMetadata metadata,object config,string version)
+    public ConfigItem()
     {
-        return new ConfigItem
-        {
-            Key = metadata.Key,
-            Type = metadata.Type,
-            Group = metadata.Group,
-            Config = config,
-            Preset = version
-        };
     }
-    
+
+    public ConfigItem(string key, object config, string version)
+    {
+        Key = key;
+        Config = config;
+        Preset = version;
+    }
+
     /// <summary>
     /// 配置对象
     /// </summary>
