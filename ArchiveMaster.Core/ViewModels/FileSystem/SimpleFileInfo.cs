@@ -111,8 +111,13 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
         public void Error(Exception ex)
         {
+            Error(ex.Message);
+        }
+
+        public void Error(string message)
+        {
             status = ProcessStatus.Error;
-            message = ex.Message;
+            this.message = message;
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(IsCompleted));
             OnPropertyChanged(nameof(Message));

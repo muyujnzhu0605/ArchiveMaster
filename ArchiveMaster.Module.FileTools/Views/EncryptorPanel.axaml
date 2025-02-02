@@ -7,6 +7,7 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -24,12 +25,12 @@
     </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
-            <ct:FormItem Label="原始目录：">
+            <ct:FormItem Label="未加密目录：">
                 <ct:FilePickerTextBox
                     FileNames="{Binding Config.RawDir}"
                     Type="OpenFolder" />
             </ct:FormItem>
-            <ct:FormItem Label="加密目录：">
+            <ct:FormItem Label="加密后目录：">
                 <ct:FilePickerTextBox
                     FileNames="{Binding Config.EncryptedDir}"
                     Type="OpenFolder" />
@@ -79,17 +80,23 @@
 
                     <ct:FormItem Label="加密算法：">
                         <ComboBox
+                            Width="128"
                             ItemsSource="{Binding CipherModes}"
                             SelectedItem="{Binding Config.CipherMode}" />
+                    </ct:FormItem>
+
+                    <ct:FormItem Label="当目标文件存在时：">
+                        <ComboBox
+                            Width="128"
+                            DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
+                            ItemsSource="{me:EnumValues e:FilenameDuplicationPolicy}"
+                            SelectedItem="{Binding Config.FilenameDuplicationPolicy}" />
                     </ct:FormItem>
 
                     <CheckBox
                         Content="删除处理前文件"
                         IsChecked="{Binding Config.DeleteSourceFiles}" />
 
-                    <CheckBox
-                        Content="覆盖已存在文件"
-                        IsChecked="{Binding Config.OverwriteExistedFiles}" />
                 </ctrl:WrapFormItemGroup>
             </ct:FormItem>
 

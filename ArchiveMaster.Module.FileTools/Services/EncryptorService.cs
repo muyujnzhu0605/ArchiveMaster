@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using EncryptorFileInfo = ArchiveMaster.ViewModels.FileSystem.EncryptorFileInfo;
 
@@ -53,17 +54,20 @@ namespace ArchiveMaster.Services
                     index++;
 
                     ProcessFileNames(file, dirStructureDic);
+                    if (!CheckFileAndDirectoryExists(file))
+                    {
+                        return;
+                    }
+
                     if (isEncrypting)
                     {
                         aes.GenerateIV();
-                        aes.EncryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
-                            progressReport);
+                        aes.EncryptFile(file.Path, file.TargetPath, token, BufferSize, progressReport);
                         file.IsFileNameEncrypted = Config.EncryptFileNames;
                     }
                     else
                     {
-                        aes.DecryptFile(file.Path, file.TargetPath, token, BufferSize, Config.OverwriteExistedFiles,
-                            progressReport);
+                        aes.DecryptFile(file.Path, file.TargetPath, token, BufferSize, progressReport);
                         file.IsFileNameEncrypted = false;
                     }
 
@@ -81,6 +85,7 @@ namespace ArchiveMaster.Services
                     }
                 }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build());
 
+                //文件结构加密，输出文件名对应关系
                 if (Config.EncryptDirectoryStructure && isEncrypting)
                 {
                     using var fs = File.CreateText(Path.Combine(Config.EncryptedDir, DirectoryStructureFile));
@@ -93,6 +98,42 @@ namespace ArchiveMaster.Services
                 }
             }, token);
         }
+
+        /// <summary>
+        /// 检查文件是否存在，并根据策略作出操作
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns>是否继续加密或解密</returns>
+        private bool CheckFileAndDirectoryExists(EncryptorFileInfo file)
+        {
+            string path = file.TargetPath;
+            if (File.Exists(path))
+            {
+                switch (Config.FilenameDuplicationPolicy)
+                {
+                    case FilenameDuplicationPolicy.Overwrite:
+                        if (File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly))
+                        {
+                            File.SetAttributes(path, FileAttributes.Normal);
+                        }
+
+                        File.Delete(path);
+                        break;
+
+                    case FilenameDuplicationPolicy.Skip:
+                        file.Warn("目标文件已存在");
+                        return false;
+
+                    case FilenameDuplicationPolicy.Throw:
+                        file.Error("目标文件已存在");
+                        return false;
+                }
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            return true;
+        }
+
 
         private Dictionary<string, string> CreateDirStructureDic()
         {
@@ -199,6 +240,7 @@ namespace ArchiveMaster.Services
 
             await TryForFilesAsync(new DirectoryInfo(sourceDir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                .ApplyFilter(token)
                 .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 var isEncrypted = IsEncryptedFile(file.Path);
