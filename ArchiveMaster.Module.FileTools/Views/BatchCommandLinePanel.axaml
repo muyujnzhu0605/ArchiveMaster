@@ -88,7 +88,7 @@
                         </Border.Styles>
                         <Grid
                             ColumnDefinitions="Auto,8,*"
-                            RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto">
+                            RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto,8,Auto,8,Auto">
                             <Grid.Styles>
                                 <Style Selector="TextBlock.Title">
                                     <Setter Property="FontWeight" Value="Bold" />
@@ -127,13 +127,32 @@
                             <TextBox
                                 Grid.Row="6"
                                 Grid.Column="2"
-                                Text="{Binding CommandLine}" />
+                                Text="{Binding CommandLine}"
+                                TextWrapping="Wrap" />
                             <TextBlock
                                 Grid.Row="8"
                                 Classes="Title"
-                                Text="信息：" />
+                                Text="进程输出：" />
                             <TextBox
                                 Grid.Row="8"
+                                Grid.Column="2"
+                                Text="{Binding ProcessOutput}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                Grid.Row="10"
+                                Classes="Title"
+                                Text="进程错误：" />
+                            <TextBox
+                                Grid.Row="10"
+                                Grid.Column="2"
+                                Text="{Binding ProcessError}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                Grid.Row="12"
+                                Classes="Title"
+                                Text="信息：" />
+                            <TextBox
+                                Grid.Row="12"
                                 Grid.Column="2"
                                 Text="{Binding Message}" />
 

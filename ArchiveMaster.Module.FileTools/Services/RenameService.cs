@@ -16,155 +16,7 @@ namespace ArchiveMaster.Services;
 public class RenameService(AppConfig appConfig)
     : TwoStepServiceBase<RenameConfig>(appConfig)
 {
-    public static readonly Dictionary<string, Func<SimpleFileInfo, string, string>> fileAttributesDic =
-        new Dictionary<string, Func<SimpleFileInfo, string, string>>()
-        {
-            //文件名
-            { "<Name>", (item, arg) => item.Name },
-            //无扩展名的文件名
-            { "<NameWithoutExtension>", (item, arg) => Path.GetFileNameWithoutExtension(item.Name) },
-            //文件扩展名
-            {
-                "<NameExtension>", (item, arg) =>
-                {
-                    string extension = Path.GetExtension(item.Name);
-                    return extension == "" ? "" : extension.Replace(".", "");
-                }
-            },
-            //无扩展名的文件名截取
-            {
-                "<NameWithoutExtension-" + SubStringRegexString + ">", (item, arg) =>
-                {
-                    try
-                    {
-                        string extension = Path.GetExtension(item.Name);
-                        string name = extension == "" ? item.Name : item.Name.Replace(extension, "");
-                        Match match = Regex.Match(arg, "<NameWithoutExtension-" + SubStringRegexString + ">");
-                        string direction = match.Groups["Direction"].Value;
-                        int from = int.Parse(match.Groups["From"].Value);
-                        int count = int.Parse(match.Groups["Count"].Value);
-                        int length = name.Length;
-                        if (direction == "Left")
-                        {
-                            if (from >= length)
-                            {
-                                return "";
-                            }
-
-                            if (from + count > length || count <= 0)
-                            {
-                                return name[from..];
-                            }
-
-                            return name.Substring(from, count);
-                        }
-                        else
-                        {
-                            int realFrom = length - from - count;
-                            if (realFrom >= length)
-                            {
-                                return "";
-                            }
-
-                            if (from + count > length || count <= 0)
-                            {
-                                return name[..(length - from)];
-                            }
-
-                            return name.Substring(realFrom, count);
-                        }
-                    }
-                    catch
-                    {
-                        return "";
-                    }
-                }
-            },
-            //文件大小
-            { "<Size>", (item, arg) => item is SimpleFileInfo f ? f.Length.ToString() : "0" },
-            //文件夹名
-            { "<Directory>", (item, arg) => Path.GetDirectoryName(item.Path) },
-            //创建时间
-            {
-                "<CreatTime-" + DateTimeRegexString + ">",
-                (item, arg) =>
-                    File.GetCreationTime(item.Path).ToString(Regex.Match(arg, "<CreatTime-" + DateTimeRegexString + ">")
-                        .Groups["arg"]
-                        .Value)
-            },
-            //创建时间UTC
-            {
-                "<CreatTimeUtc-" + DateTimeRegexString + ">",
-                (item, arg) =>
-                    File.GetCreationTimeUtc(item.Path).ToString(Regex
-                        .Match(arg, "<CreatTimeUtc-" + DateTimeRegexString + ">")
-                        .Groups["arg"].Value)
-            },
-            //上次访问时间
-            {
-                "<LastAccessTime-" + DateTimeRegexString + ">",
-                (item, arg) =>
-                    File.GetLastAccessTime(item.Path).ToString(Regex
-                        .Match(arg, "<LastAccessTime-" + DateTimeRegexString + ">")
-                        .Groups["arg"].Value)
-            },
-            {
-                "<LastAccessTimeUtc-" + DateTimeRegexString + ">",
-                (item, arg) =>
-                    File.GetLastAccessTimeUtc(item.Path).ToString(Regex
-                        .Match(arg, "<LastAccessTimeUtc-" + DateTimeRegexString + ">")
-                        .Groups["arg"].Value)
-            },
-            //修改时间
-            {
-                "<LastWriteTime-" + DateTimeRegexString + ">",
-                (item, arg) =>
-                    item.Time.ToString(Regex.Match(arg, "<LastWriteTime-" + DateTimeRegexString + ">")
-                        .Groups["arg"].Value)
-            },
-            {
-                "<LastWriteTimeUtc-" + DateTimeRegexString + ">",
-                (item, arg) =>
-                    item.Time.ToString(Regex.Match(arg, "<LastWriteTimeUtc-" + DateTimeRegexString + ">")
-                        .Groups["arg"].Value)
-            },
-            //Exif信息
-            // {
-            //     "{Exif-(?<attri>[a-zA-Z]+)}", (item, arg) =>
-            //     {
-            //         try
-            //         {
-            //             string attri = Regex.Match(arg, "{Exif-(?<attri>[a-zA-Z]+)}").Groups["attri"].Value;
-            //             var exfi = new EXIFMetaData();
-            //             EXIFMetaData.Metadata m = exfi.GetEXIFMetaData(item.FullName);
-            //             var fields = m.GetType().GetFields();
-            //             if (!fields.Any(p => p.Name == attri))
-            //             {
-            //                 return "";
-            //             }
-            //
-            //             var result = fields.First(p => p.Name == attri).GetValue(m) as EXIFMetaData.MetadataDetail?;
-            //             if (!result.HasValue)
-            //             {
-            //                 return "";
-            //             }
-            //             else
-            //             {
-            //                 return result.Value.DisplayValue;
-            //             }
-            //         }
-            //         catch
-            //         {
-            //             return "";
-            //         }
-            //     }
-            // }
-        };
-
-    private const string DateTimeRegexString = @"(?<arg>[a-zA-Z\-]+)";
-    private const string SubStringRegexString = @"(?<Direction>Left|Right)-(?<From>[0-9]+)-(?<Count>[0-9]+)";
     private static readonly Dictionary<string, Regex> regexes = new Dictionary<string, Regex>();
-    private string[] replacePatterns;
     public IReadOnlyList<RenameFileInfo> Files { get; private set; }
 
     public override async Task ExecuteAsync(CancellationToken token = default)
@@ -220,9 +72,10 @@ public class RenameService(AppConfig appConfig)
         NotifyProgressIndeterminate();
         NotifyMessage("正在查找文件");
 
+
         await Task.Run(() =>
         {
-            PreprocessReplacePattern();
+            FilePlaceholderReplacer placeholderReplacer = new FilePlaceholderReplacer(Config.ReplacePattern);
 
             // 获取所有待处理文件
             IEnumerable<FileSystemInfo> files;
@@ -248,7 +101,7 @@ public class RenameService(AppConfig appConfig)
 
                 if (renameFile.IsMatched)
                 {
-                    string originalNewName = Rename(renameFile);
+                    string originalNewName = Rename(placeholderReplacer, renameFile);
                     renameFile.NewName = originalNewName; // 临时存储原始目标名称
                 }
                 else
@@ -296,19 +149,6 @@ public class RenameService(AppConfig appConfig)
 
     private RegexOptions regexOptions;
 
-    private string GetTargetName(RenameFileInfo file)
-    {
-        return string.Concat(replacePatterns.Select(p =>
-        {
-            if (p[0] == '<' && fileAttributesDic.TryGetValue(p, out Func<SimpleFileInfo, string, string> func))
-            {
-                return func(file, p);
-            }
-
-            return p;
-        }));
-    }
-
     private bool IsMatched(RenameFileInfo file)
     {
         string name = Config.SearchPath ? file.Path : file.Name;
@@ -325,67 +165,10 @@ public class RenameService(AppConfig appConfig)
         };
     }
 
-    private void PreprocessReplacePattern()
-    {
-        string text = Config.ReplacePattern;
-        if (text == null)
-        {
-            if (Config.RenameMode is RenameMode.RetainMatched or RenameMode.RetainMatchedExtension)
-            {
-                return;
-            }
-            else
-            {
-                text = "";
-            }
-        }
-
-        List<string> list = new List<string>();
-        int left = 0;
-        int right = 0;
-        bool hasLeftBracket = false;
-        while (right < text.Length)
-        {
-            char c = text[right];
-            switch (c)
-            {
-                case '<':
-                    hasLeftBracket = true;
-                    if (right > left)
-                    {
-                        list.Add(text[left..right]);
-                        left = right;
-                    }
-
-                    right++;
-                    break;
-                case '>':
-                    right++;
-                    if (hasLeftBracket)
-                    {
-                        hasLeftBracket = false;
-                        list.Add(text[left..right]);
-                        left = right;
-                    }
-
-                    break;
-                default:
-                    right++;
-                    break;
-            }
-        }
-
-        if (left != right)
-        {
-            list.Add(text[left..]);
-        }
-
-        replacePatterns = [.. list];
-    }
 
     private StringComparison stringComparison;
 
-    private string Rename(RenameFileInfo file)
+    private string Rename(FilePlaceholderReplacer replacer, RenameFileInfo file)
     {
         string name = file.Name;
         string matched = null;
@@ -399,10 +182,10 @@ public class RenameService(AppConfig appConfig)
 
         return Config.RenameMode switch
         {
-            RenameMode.ReplaceMatched => name.Replace(matched, GetTargetName(file), stringComparison),
-            RenameMode.ReplaceExtension => $"{Path.GetFileNameWithoutExtension(name)}.{GetTargetName(file)}",
-            RenameMode.ReplaceName => GetTargetName(file) + Path.GetExtension(name),
-            RenameMode.ReplaceAll => GetTargetName(file),
+            RenameMode.ReplaceMatched => name.Replace(matched, replacer.GetTargetName(file), stringComparison),
+            RenameMode.ReplaceExtension => $"{Path.GetFileNameWithoutExtension(name)}.{replacer.GetTargetName(file)}",
+            RenameMode.ReplaceName => replacer.GetTargetName(file) + Path.GetExtension(name),
+            RenameMode.ReplaceAll => replacer.GetTargetName(file),
             RenameMode.RetainMatched => matched,
             RenameMode.RetainMatchedExtension => $"{matched}{Path.GetExtension(name)}",
             _ => throw new ArgumentOutOfRangeException(),
