@@ -112,7 +112,7 @@ namespace ArchiveMaster.Services
                         case ExportMode.PreferHardLink:
                             try
                             {
-                                CreateHardLink(destFile, sourceFile);
+                                HardLinkCreator.CreateHardLink(destFile, sourceFile);
                             }
                             catch (IOException)
                             {
@@ -150,7 +150,7 @@ namespace ArchiveMaster.Services
 
                             break;
                         case ExportMode.HardLink:
-                            CreateHardLink(destFile, sourceFile);
+                            HardLinkCreator.CreateHardLink(destFile, sourceFile);
                             break;
                         case ExportMode.Script:
                             string sourceFileWithReplaceSpecialChars = sourceFile.Replace("%", "%%");
@@ -173,6 +173,8 @@ namespace ArchiveMaster.Services
                                 $"Start-BitsTransfer -Source '{sourceFileWithNoWildcards}' -Destination '{file.TempName}' -DisplayName '正在复制文件' -Description '{sourceFile} => {file.TempName}'");
                             ps1Script.AppendLine($"}}");
                             break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }, token, FilesLoopOptions.Builder().AutoApplyStatus().Finally(file =>
                 {
@@ -208,7 +210,7 @@ namespace ArchiveMaster.Services
                 ZipService.WriteToZip(model, Path.Combine(Config.PatchDir, "file.os2"));
             }, token);
         }
-        
+
         public override async Task InitializeAsync(CancellationToken token = default)
         {
             UpdateFiles.Clear();
@@ -286,8 +288,9 @@ namespace ArchiveMaster.Services
                             {
                                 end = end.AddSeconds(1);
                             }
+
                             end = end.AddSeconds(Config.MaxTimeToleranceSecond);
-                            
+
                             for (DateTime time = start; time <= end; time = time.AddTicks(TimeSpan.TicksPerSecond))
                             {
                                 if (offsiteTime2File.TryGetValue(time, out List<SyncFileInfo> list))
@@ -349,7 +352,9 @@ namespace ArchiveMaster.Services
                         }
                         else //新增文件或文件被移动或重命名
                         {
-                            var time = Config.MaxTimeToleranceSecond > 0 ? file.LastWriteTime.TruncateToSecond() : file.LastWriteTime;
+                            var time = Config.MaxTimeToleranceSecond > 0
+                                ? file.LastWriteTime.TruncateToSecond()
+                                : file.LastWriteTime;
                             var sameFiles = Config.CheckMoveIgnoreFileName
                                 ? (offsiteTime2File.GetOrDefault(time) ??
                                    Enumerable.Empty<SyncFileInfo>())
@@ -414,7 +419,7 @@ namespace ArchiveMaster.Services
 
                     token.ThrowIfCancellationRequested();
 
-                    
+
                     NotifyMessage($"正在查找删除的文件");
                     List<string> localSubDirs = new List<string>();
                     foreach (var subDir in localDir.EnumerateDirectories("*", SearchOption.AllDirectories))
@@ -446,34 +451,6 @@ namespace ArchiveMaster.Services
                     }
                 }
             }, token);
-        }
-
-        [DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool CreateHardLink(string lpFileName, string lpExistingFileName,
-            IntPtr lpSecurityAttributes);
-
-        private static void CreateHardLink(string link, string source)
-        {
-            if (!File.Exists(source))
-            {
-                throw new FileNotFoundException(source);
-            }
-
-            if (File.Exists(link))
-            {
-                File.Delete(link);
-            }
-
-            if (Path.GetPathRoot(link) != Path.GetPathRoot(source))
-            {
-                throw new IOException("硬链接的两者必须在同一个分区中");
-            }
-
-            bool value = CreateHardLink(link, source, IntPtr.Zero);
-            if (!value)
-            {
-                throw new Exception($"未知错误，无法创建硬链接：" + Marshal.GetLastWin32Error());
-            }
         }
 
         private static string GetTempFileName(SyncFileInfo file, SHA256 sha256)

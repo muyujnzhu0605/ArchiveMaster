@@ -2,6 +2,8 @@
 using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.Helpers;
+using System;
+using System.IO;
 
 public static class FileNameHelper
 {
