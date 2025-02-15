@@ -78,9 +78,9 @@
                 ColumnIsCheckedIndex="-1"
                 ColumnLengthIndex="-1"
                 ColumnNameHeader="旧文件（夹）名"
-                ColumnNameIndex="2"
+                ColumnNameIndex="3"
                 ColumnPathHeader="旧路径"
-                ColumnPathIndex="3"
+                ColumnPathIndex="4"
                 ColumnStatusIndex="1"
                 ColumnTimeIndex="-1"
                 ItemsSource="{Binding Files}">
@@ -105,6 +105,21 @@
                                     Margin="16,0"
                                     VerticalAlignment="Center"
                                     IsVisible="{Binding IsMatched}"
+                                    Text="●" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="为避免重复，已添加后缀">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    x:Name="e"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="Orange"
+                                    IsVisible="{Binding HasUniqueNameProcessed}"
                                     Text="●" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
