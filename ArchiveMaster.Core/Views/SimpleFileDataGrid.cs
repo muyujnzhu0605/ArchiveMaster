@@ -30,7 +30,7 @@ public class SimpleFileDataGrid : DataGrid
 
     protected static readonly DateTimeConverter DateTimeConverter = new DateTimeConverter();
 
-    protected static readonly FileLength2StringConverter FileLength2StringConverter = new FileLength2StringConverter();
+    protected static readonly FileDirLength2StringConverter FileDirLength2StringConverter = new FileDirLength2StringConverter();
 
     protected static readonly InverseBoolConverter InverseBoolConverter = new InverseBoolConverter();
 
@@ -134,8 +134,8 @@ public class SimpleFileDataGrid : DataGrid
         return new DataGridTextColumn()
         {
             Header = ColumnLengthHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Length))
-            { Converter = FileLength2StringConverter, Mode = BindingMode.OneWay },
+            Binding = new Binding(".")
+            { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             IsReadOnly = true,
             MaxWidth = 120,
         };

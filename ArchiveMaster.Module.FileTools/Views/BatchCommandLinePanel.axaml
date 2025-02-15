@@ -1,0 +1,146 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.BatchCommandLinePanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TwinFileCleanerViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <ct:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="程序：">
+                <Grid ColumnDefinitions="*,8,Auto">
+                    <TextBox Text="{Binding Config.Program}" />
+                    <StackPanel
+                        Grid.Column="2"
+                        Orientation="Horizontal">
+                        <HyperlinkButton
+                            Command="{Binding SetProcessCommand}"
+                            CommandParameter="cmd"
+                            Content="cmd" />
+                        <HyperlinkButton
+                            Command="{Binding SetProcessCommand}"
+                            CommandParameter="powershell"
+                            Content="powershell" />
+                        <HyperlinkButton
+                            Command="{Binding SetProcessCommand}"
+                            CommandParameter="/bin/bash"
+                            Content="/bin/bash" />
+                    </StackPanel>
+                </Grid>
+            </ct:FormItem>
+
+            <ct:FormItem
+                Description="使用{file}作为文件或目录地址的占位符。例如：cp {file} output.txt"
+                Label="命令行参数：">
+                <TextBox Text="{Binding Config.Arguments}" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="列举对象：">
+                <Grid ColumnDefinitions="*,Auto">
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource DescriptionConverter}}"
+                        ItemsSource="{me:EnumValues e:BatchTarget}"
+                        SelectedItem="{Binding Config.Target}" />
+                    <ct:FormItem
+                        Grid.Column="1"
+                        Margin="32,0,0,0"
+                        Description="欲查找的目录层级。例如设置为2，目录为C:\，则只会查找C:\*\*下的文件或目录作为列举对象"
+                        IsVisible="{Binding ShowLevels}"
+                        Label="层数："
+                        LabelWidth="48">
+                        <NumericUpDown
+                            FormatString="0"
+                            Maximum="100"
+                            Minimum="1"
+                            Value="{Binding Config.Level}" />
+                    </ct:FormItem>
+                </Grid>
+            </ct:FormItem>
+
+
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
+            <v:SimpleFileDataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <Border Padding="8">
+                        <Border.Styles>
+                            <Style Selector="TextBox">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                        </Border.Styles>
+                        <Grid
+                            ColumnDefinitions="Auto,8,*"
+                            RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto">
+                            <Grid.Styles>
+                                <Style Selector="TextBlock.Title">
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </Style>
+                            </Grid.Styles>
+                            <TextBlock
+                                Classes="Title"
+                                Text="文件名：" />
+                            <TextBox
+                                Grid.Column="2"
+                                Text="{Binding Name}" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Classes="Title"
+                                Text="绝对路径：" />
+                            <TextBox
+                                Grid.Row="2"
+                                Grid.Column="2"
+                                Text="{Binding Path}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                Grid.Row="4"
+                                Classes="Title"
+                                Text="相对路径：" />
+                            <TextBox
+                                Grid.Row="4"
+                                Grid.Column="2"
+                                Text="{Binding RelativePath}"
+                                TextWrapping="Wrap" />
+
+                            <TextBlock
+                                Grid.Row="6"
+                                Classes="Title"
+                                Text="命令行：" />
+                            <TextBox
+                                Grid.Row="6"
+                                Grid.Column="2"
+                                Text="{Binding CommandLine}" />
+                            <TextBlock
+                                Grid.Row="8"
+                                Classes="Title"
+                                Text="信息：" />
+                            <TextBox
+                                Grid.Row="8"
+                                Grid.Column="2"
+                                Text="{Binding Message}" />
+
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </v:SimpleFileDataGrid.RowDetailsTemplate>
+        </v:SimpleFileDataGrid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

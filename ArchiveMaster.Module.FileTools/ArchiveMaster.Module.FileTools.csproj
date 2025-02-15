@@ -28,6 +28,10 @@
       <DependentUpon>TwinFileCleanerPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\BatchCommandLinePanel.axaml.cs">
+      <DependentUpon>BatchCommandLinePanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
