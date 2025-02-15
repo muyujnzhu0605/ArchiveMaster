@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
@@ -215,11 +216,15 @@ public class RenameService(AppConfig appConfig)
     {
         regexOptions = Config.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
         stringComparison = Config.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
         NotifyProgressIndeterminate();
         NotifyMessage("正在查找文件");
+
         await Task.Run(() =>
         {
             PreprocessReplacePattern();
+
+            // 获取所有待处理文件
             IEnumerable<FileSystemInfo> files;
             if (Config.RenameTarget == RenameTargetType.File)
             {
@@ -233,17 +238,45 @@ public class RenameService(AppConfig appConfig)
             }
 
             List<RenameFileInfo> renameFiles = new List<RenameFileInfo>();
+            HashSet<string> usedPaths = new HashSet<string>(FileNameHelper.GetStringComparer());
 
-            TryForFiles(files.Select(file => new RenameFileInfo(file, Config.Dir)), (renameFile, s) =>
+
+            foreach (var file in files)
             {
-                NotifyMessage($"正在处理文件{s.GetFileNumberMessage()}：{renameFile.Name}");
-                renameFiles.Add(renameFile);
+                var renameFile = new RenameFileInfo(file, Config.Dir);
                 renameFile.IsMatched = IsMatched(renameFile);
+
                 if (renameFile.IsMatched)
                 {
-                    renameFile.NewName = Rename(renameFile);
+                    string originalNewName = Rename(renameFile);
+                    renameFile.NewName = originalNewName; // 临时存储原始目标名称
                 }
-            }, token, FilesLoopOptions.DoNothing());
+                else
+                {
+                    usedPaths.Add(file.FullName);
+                }
+
+                renameFiles.Add(renameFile);
+            }
+
+            //有一种情况：三个文件，abc、abbc、abbbbc，b重命名为bb，
+            //实际是无冲突的，但若直接检测会认为有冲突
+            //所以采用了一些方法来规避这个问题，但不完美。
+            foreach (var renameFile in renameFiles
+                         .Where(p => p.IsMatched)
+                         .Where(p => p.Name != p.NewName))
+            {
+                string desiredPath = renameFile.GetNewPath();
+
+                string finalPath = FileNameHelper.GenerateUniquePath(desiredPath, usedPaths);
+                if (finalPath != desiredPath)
+                {
+                    renameFile.HasUniqueNameProcessed = true;
+                }
+
+                renameFile.NewName = Path.GetFileName(finalPath);
+                usedPaths.Add(finalPath);
+            }
 
             Files = renameFiles.AsReadOnly();
         }, token);

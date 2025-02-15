@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
+using ArchiveMaster.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
@@ -31,9 +32,6 @@ namespace ArchiveMaster.Configs
         private bool encryptFolderNames;
 
         [ObservableProperty]
-        private bool overwriteExistedFiles;
-
-        [ObservableProperty]
         private PaddingMode paddingMode = PaddingMode.PKCS7;
 
         [ObservableProperty]
@@ -44,6 +42,9 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private bool rememberPassword;
+        
+        [ObservableProperty]
+        private FilenameDuplicationPolicy filenameDuplicationPolicy;
 
         [ObservableProperty]
         private EncryptorTaskType type = EncryptorTaskType.Encrypt;
@@ -53,10 +54,10 @@ namespace ArchiveMaster.Configs
             switch (Type)
             {
                 case EncryptorTaskType.Encrypt:
-                    CheckDir(RawDir,"原始目录");
+                    CheckDir(RawDir,"未加密目录");
                     break;
                 case EncryptorTaskType.Decrypt:
-                    CheckDir(EncryptedDir,"加密目录");
+                    CheckDir(EncryptedDir,"加密后目录");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

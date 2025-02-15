@@ -48,6 +48,13 @@ namespace ArchiveMaster.ViewModels.FileSystem
                     return Path;
                 }
 
+                
+                // if (Path.StartsWith(TopDirectory))
+                // {
+                //     return Path[TopDirectory.Length..].TrimStart([System.IO.Path.DirectorySeparatorChar,System.IO.Path.AltDirectorySeparatorChar]);
+                // }
+                //下面这个效率太低了，所以如果上面的可以就用上面的
+                //更新：上面的代码，潜在问题太多了，比如如果 TopDirectory 是 C:\Foo，而 Path 是 C:\Foo\Bar\file.txt，还是用下面的
                 return System.IO.Path.GetRelativePath(TopDirectory, Path);
             }
         }
@@ -111,8 +118,13 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
         public void Error(Exception ex)
         {
+            Error(ex.Message);
+        }
+
+        public void Error(string message)
+        {
             status = ProcessStatus.Error;
-            message = ex.Message;
+            this.message = message;
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(IsCompleted));
             OnPropertyChanged(nameof(Message));

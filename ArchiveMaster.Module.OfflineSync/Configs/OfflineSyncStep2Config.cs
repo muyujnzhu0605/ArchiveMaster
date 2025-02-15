@@ -19,9 +19,9 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string localDir;
-        
+
         [ObservableProperty]
-        private double maxTimeToleranceSecond;
+        private int maxTimeToleranceSecond = 3;
 
         [ObservableProperty]
         private string patchDir;
@@ -41,7 +41,7 @@ namespace ArchiveMaster.Configs
         public override void Check()
         {
             CheckFile(OffsiteSnapshot, "异地快照文件");
-            CheckEmpty(LocalDir,"本地搜索目录");
+            CheckEmpty(LocalDir, "本地搜索目录");
         }
     }
 }

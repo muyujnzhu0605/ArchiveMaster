@@ -23,8 +23,8 @@
         <StyleInclude Source="Styles.axaml" />
     </v:TwoStepPanelBase.Styles>
     <v:TwoStepPanelBase.ConfigsContent>
-        <Grid ColumnDefinitions="*,8,*">
-            <ctrl:StackFormItemGroup>
+        <Grid ColumnDefinitions="2*,8,*">
+            <ctrl:StackFormItemGroup x:Name="configs">
                 <ctrl:FormItem Label="异地快照文件：">
                     <ctrl:FilePickerTextBox
                         FileNames="{Binding Config.OffsiteSnapshot}"
@@ -39,63 +39,92 @@
                             MaxLines="3"
                             Text="{Binding Config.LocalDir}"
                             Watermark="在选择的目录中搜索需要同步的目录；一行一项" />
-                        <Button
-                            Grid.Column="2"
-                            Classes="Middle"
-                            Command="{Binding BrowseLocalDirCommand}"
-                            Content="添加.." />
+                        <StackPanel Grid.Column="2">
+                            <Button
+                                Classes="Long"
+                                Command="{Binding BrowseLocalDirCommand}"
+                                Content="添加.." />
+                            <Button
+                                HorizontalAlignment="Right"
+                                Classes="Primary Long"
+                                Command="{Binding MatchDirsCommand}"
+                                Content="1. 匹配目录" />
+                        </StackPanel>
                     </Grid>
                 </ctrl:FormItem>
-                <Button
-                    HorizontalAlignment="Right"
-                    Classes="Primary Long"
-                    Command="{Binding MatchDirsCommand}"
-                    Content="1. 匹配目录" />
+
                 <ctrl:FormItem Label="导出补丁目录：">
                     <ctrl:FilePickerTextBox
                         FileNames="{Binding Config.PatchDir}"
                         Type="OpenFolder" />
                 </ctrl:FormItem>
-                <ctrl:FormItem Label="筛选：">
-                    <v:FileFilterControl Filter="{Binding Config.Filter}" />
-                </ctrl:FormItem>
-                <ctrl:FormItem Label="导出方式：">
-                    <ComboBox
-                        ItemsSource="{Binding ExportModes}"
-                        SelectedItem="{Binding Config.ExportMode}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                        <ToolTip.Tip>
-                            <TextBlock>
-                                <Run FontWeight="Bold">复制：</Run>
-                                <Run>将文件复制到导出目录中</Run>
-                                <LineBreak />
-                                <Run FontWeight="Bold">硬链接：</Run>
-                                <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
-                                <LineBreak />
-                                <Run FontWeight="Bold">硬链接优先：</Run>
-                                <Run>优先使用硬链接，若失败，则复制</Run>
-                                <LineBreak />
-                                <Run FontWeight="Bold">脚本：</Run>
-                                <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
-                            </TextBlock>
-                        </ToolTip.Tip>
-                    </ComboBox>
+
+
+                <ctrl:FormItem Label="选项：">
+                    <ctrl:WrapFormItemGroup>
+                        <ctrl:FormItem Label="筛选：">
+                            <v:FileFilterControl Filter="{Binding Config.Filter}" />
+                        </ctrl:FormItem>
+
+                        <ctrl:FormItem Label="导出方式：">
+                            <ComboBox
+                                Width="128"
+                                ItemsSource="{Binding ExportModes}"
+                                SelectedItem="{Binding Config.ExportMode}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding ., Converter={StaticResource DescriptionConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ToolTip.Tip>
+                                    <TextBlock>
+                                        <Run FontWeight="Bold">复制：</Run>
+                                        <Run>将文件复制到导出目录中</Run>
+                                        <LineBreak />
+                                        <Run FontWeight="Bold">硬链接：</Run>
+                                        <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
+                                        <LineBreak />
+                                        <Run FontWeight="Bold">硬链接优先：</Run>
+                                        <Run>优先使用硬链接，若失败，则复制</Run>
+                                        <LineBreak />
+                                        <Run FontWeight="Bold">脚本：</Run>
+                                        <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
+                                    </TextBlock>
+                                </ToolTip.Tip>
+                            </ComboBox>
+                        </ctrl:FormItem>
+
+                        <ctrl:FormItem
+                            Label="修改时间阈值（秒）："
+                            ToolTip.Tip="本地与异地的对应文件，若修改时间之差小于该值，则标识为同一文件">
+                            <NumericUpDown
+                                Width="128"
+                                FormatString="0"
+                                Value="{Binding Config.MaxTimeToleranceSecond}" />
+                        </ctrl:FormItem>
+
+                        <CheckBox
+                            Content="检查移动文件时，允许文件名不同"
+                            IsChecked="{Binding Config.CheckMoveIgnoreFileName}"
+                            ToolTip.Tip="若勾选，则在判断文件移动时，只要文件的大小和修改时间一致，就认为是同一文件，此时可以避免重命名的文件被识别为删除+新增；否则，还需要确保文件名一致，此时对于重命名的文件会被识别为删除+新增" />
+                    </ctrl:WrapFormItemGroup>
                 </ctrl:FormItem>
             </ctrl:StackFormItemGroup>
-
+            <GridSplitter
+                Grid.Column="1"
+                Background="Transparent" />
+            <!--  绑定宽度，当目录数量较多时，能够在DataGrid内部出现滚动条，而不是整个ConfigsContent的滚动条  -->
             <gb:GroupBox
                 Grid.Column="2"
+                Height="{Binding #configs.Bounds.Height, Mode=OneWay}"
                 Header="目录匹配">
                 <DataGrid
                     AutoGenerateColumns="False"
                     CanUserReorderColumns="True"
-                    ItemsSource="{Binding Config.MatchingDirs}">
+                    ItemsSource="{Binding Config.MatchingDirs}"
+                    VerticalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
                         <DataGridTextColumn
                             Width="*"
@@ -109,6 +138,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </gb:GroupBox>
+
         </Grid>
 
     </v:TwoStepPanelBase.ConfigsContent>

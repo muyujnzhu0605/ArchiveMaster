@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 namespace ArchiveMaster.Services
 {
     public static class AesExtension
@@ -35,6 +36,7 @@ namespace ArchiveMaster.Services
             {
                 input = input[..length];
             }
+
             return (encoding ?? Encoding.UTF8).GetBytes(input);
         }
 
@@ -63,16 +65,19 @@ namespace ArchiveMaster.Services
             return decryptor.TransformFinalBlock(array, 0, array.Length);
         }
 
-        public static void EncryptStreamToStream(this Aes manager, Stream streamInput, Stream streamOutput, int bufferLength = 1024 * 1024)
+        public static void EncryptStreamToStream(this Aes manager, Stream streamInput, Stream streamOutput,
+            int bufferLength = 1024 * 1024)
         {
             if (!streamInput.CanRead)
             {
                 throw new Exception("输入流不可读");
             }
+
             if (!streamOutput.CanWrite)
             {
                 throw new Exception("输出流不可写");
             }
+
             using var encryptor = manager.CreateEncryptor();
             byte[] input = new byte[bufferLength];
             byte[] output = new byte[bufferLength];
@@ -88,21 +93,25 @@ namespace ArchiveMaster.Services
                 {
                     encryptor.TransformBlock(input, 0, size, output, 0);
                 }
+
                 streamOutput.Write(output, 0, output.Length);
                 streamOutput.Flush();
             }
         }
 
-        public static void DecryptStreamToStream(this Aes manager, Stream streamInput, Stream streamOutput, int bufferLength = 1024 * 1024)
+        public static void DecryptStreamToStream(this Aes manager, Stream streamInput, Stream streamOutput,
+            int bufferLength = 1024 * 1024)
         {
             if (!streamInput.CanRead)
             {
                 throw new Exception("输入流不可读");
             }
+
             if (!streamOutput.CanWrite)
             {
                 throw new Exception("输出流不可写");
             }
+
             using var encryptor = manager.CreateDecryptor();
             byte[] input = new byte[bufferLength];
             byte[] output = new byte[bufferLength];
@@ -120,42 +129,22 @@ namespace ArchiveMaster.Services
                 {
                     outputSize = encryptor.TransformBlock(input, 0, size, output, 0);
                 }
+
                 streamOutput.Write(output, 0, outputSize);
                 streamOutput.Flush();
             }
         }
 
-        private static void CheckFileAndDirectoryExists(string path, bool overwriteExistedFiles)
-        {
-            if (File.Exists(path))
-            {
-                if (overwriteExistedFiles)
-                {
-                    if (File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly))
-                    {
-                        File.SetAttributes(path, FileAttributes.Normal);
-                    }
-                    File.Delete(path);
-                }
-                else
-                {
-                    throw new IOException("文件" + path + "已存在");
-                }
-            }
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-            }
-        }
-
-
         public static void EncryptFile(this Aes manager, string sourcePath, string targetPath,
-    CancellationToken cancellationToken,
-    int bufferLength = 1024 * 1024,
-    bool overwriteExistedFile = false,
-    RefreshFileProgress refreshFileProgress = null)
+            CancellationToken cancellationToken,
+            int bufferLength = 1024 * 1024,
+            RefreshFileProgress refreshFileProgress = null)
         {
-            CheckFileAndDirectoryExists(targetPath, overwriteExistedFile);
+            if (File.Exists(targetPath))
+            {
+                throw new IOException($"目标文件{targetPath}已存在");
+            }
+
             try
             {
                 using (FileStream streamSource = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
@@ -189,6 +178,7 @@ namespace ArchiveMaster.Services
                         refreshFileProgress?.Invoke(sourcePath, targetPath, fileLength, currentSize); //更新进度
                     }
                 }
+
                 new FileInfo(targetPath).Attributes = File.GetAttributes(sourcePath);
             }
             catch (Exception ex)
@@ -201,10 +191,13 @@ namespace ArchiveMaster.Services
         public static void DecryptFile(this Aes manager, string sourcePath, string targetPath,
             CancellationToken cancellationToken,
             int bufferLength = 1024 * 1024,
-            bool overwriteExistedFile = false,
             RefreshFileProgress refreshFileProgress = null)
         {
-            CheckFileAndDirectoryExists(targetPath, overwriteExistedFile);
+            if (File.Exists(targetPath))
+            {
+                throw new IOException($"目标文件{targetPath}已存在");
+            }
+
             try
             {
                 using (FileStream streamSource = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
@@ -243,6 +236,7 @@ namespace ArchiveMaster.Services
                         refreshFileProgress?.Invoke(sourcePath, targetPath, fileLength, currentSize); //更新进度
                     }
                 }
+
                 new FileInfo(targetPath).Attributes = File.GetAttributes(sourcePath);
             }
             catch (Exception ex)
@@ -261,6 +255,7 @@ namespace ArchiveMaster.Services
             catch
             {
             }
+
             throw ex;
         }
 

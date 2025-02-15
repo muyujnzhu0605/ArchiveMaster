@@ -17,6 +17,12 @@ public partial class RenameFileInfo : SimpleFileInfo
 
     [ObservableProperty]
     private string newName;
+    
+    /// <summary>
+    /// 经过了唯一文件名处理，即为了保证文件名不重复，新的文件名并非按照规则进行处理后的文件名
+    /// </summary>
+    [ObservableProperty]
+    private bool hasUniqueNameProcessed;
 
     public string TempPath { get; set; }
 

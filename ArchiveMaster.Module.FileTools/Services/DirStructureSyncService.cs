@@ -61,7 +61,7 @@ namespace ArchiveMaster.Services
                     bool notMatched = false;
                     if (Config.CompareName) GetMatchedFiles(name2Template, sourceFile.Name);
                     if (!notMatched && Config.CompareTime)
-                        GetMatchedFiles(modifiedTime2Template, TruncateToSecond(sourceFile.Time));
+                        GetMatchedFiles(modifiedTime2Template, sourceFile.Time.TruncateToSecond());
                     if (!notMatched && Config.CompareLength) GetMatchedFiles(length2Template, sourceFile.Length);
 
                     if (notMatched) //无匹配，不需要继续操作
@@ -177,18 +177,6 @@ namespace ArchiveMaster.Services
             WrongPositionFiles = wrongPositionFiles;
         }
 
-        private static readonly TimeSpan OneSecond = TimeSpan.FromSeconds(1);
-
-        private DateTime TruncateToSecond(DateTime dateTime)
-        {
-            if (dateTime == DateTime.MinValue || dateTime == DateTime.MaxValue)
-            {
-                return dateTime;
-            }
-
-            return dateTime.AddTicks(-(dateTime.Ticks % OneSecond.Ticks));
-        }
-
         private void CreateDictionaries(string dir, int maxTimeTolerance, CancellationToken token)
         {
             name2Template.Clear();
@@ -211,7 +199,7 @@ namespace ArchiveMaster.Services
                 SetOrAdd(length2Template, file.Length);
                 for (int i = -maxTimeTolerance; i <= maxTimeTolerance; i++)
                 {
-                    SetOrAdd(modifiedTime2Template, TruncateToSecond(file.Time).AddSeconds(i));
+                    SetOrAdd(modifiedTime2Template, file.Time.TruncateToSecond().AddSeconds(i));
                 }
 
 

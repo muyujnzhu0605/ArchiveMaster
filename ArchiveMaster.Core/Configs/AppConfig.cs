@@ -35,6 +35,7 @@ namespace ArchiveMaster.Configs
         private const string CONFIG_FILE = "configs.json";
         private const string JKEY_GROUPS = "Groups";
         private const string JKEY_MODULES = "Modules";
+        private const string JKEY_GLOBALS = "Globals";
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
         {
@@ -142,6 +143,10 @@ namespace ArchiveMaster.Configs
                     throw new Exception("配置文件内不是Json Object");
                 }
 
+                GlobalConfigs.Instance = jobj.ContainsKey(JKEY_GLOBALS)
+                    ? (jobj[JKEY_GLOBALS].Deserialize<GlobalConfigs>(JsonOptions) ?? new GlobalConfigs())
+                    : new GlobalConfigs();
+
                 //迁移旧版本配置文件
                 if (!jobj.ContainsKey(JKEY_MODULES) && !jobj.ContainsKey(JKEY_GROUPS))
                 {
@@ -233,7 +238,8 @@ namespace ArchiveMaster.Configs
                 var json = JsonSerializer.Serialize(new Dictionary<string, object>
                 {
                     [JKEY_MODULES] = configs,
-                    [JKEY_GROUPS] = currentPresets
+                    [JKEY_GROUPS] = currentPresets,
+                    [JKEY_GLOBALS] = GlobalConfigs.Instance
                 }, JsonOptions);
                 File.WriteAllText(CONFIG_FILE, json);
             }

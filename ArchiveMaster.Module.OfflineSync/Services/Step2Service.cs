@@ -208,7 +208,7 @@ namespace ArchiveMaster.Services
                 ZipService.WriteToZip(model, Path.Combine(Config.PatchDir, "file.os2"));
             }, token);
         }
-
+        
         public override async Task InitializeAsync(CancellationToken token = default)
         {
             UpdateFiles.Clear();
@@ -252,28 +252,68 @@ namespace ArchiveMaster.Services
                 {
                     var localDir = new DirectoryInfo(localAndOffsiteDir.LocalDir);
                     var offsiteDir = new DirectoryInfo(localAndOffsiteDir.OffsiteDir);
-                    NotifyMessage($"正在查找：{localDir}");
-                    var localFileList = localDir.EnumerateFiles("*", SearchOption.AllDirectories).ToList();
+                    NotifyMessage($"正在查找：{offsiteDir}→{localDir}");
+                    var localFileList = localDir
+                        .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                        .ApplyFilter(token)
+                        .ToList();
                     var localFilePathSet = localFileList.Select(p => p.FullName).ToHashSet();
 
                     //从路径、文件名、时间、长度寻找本地文件的字典
                     string offsiteTopDirectory = localAndOffsiteDir.OffsiteDir;
+                    var a = offsiteTopDir2Files[offsiteTopDirectory].Select(p => p.RelativePath).ToList();
                     Dictionary<string, SyncFileInfo> offsitePath2File =
                         offsiteTopDir2Files[offsiteTopDirectory].ToDictionary(p => p.RelativePath);
                     Dictionary<string, List<SyncFileInfo>> offsiteName2File = offsiteTopDir2Files[offsiteTopDirectory]
                         .GroupBy(p => p.Name).ToDictionary(p => p.Key, p => p.ToList());
-                    Dictionary<DateTime, List<SyncFileInfo>> offsiteTime2File = offsiteTopDir2Files[offsiteTopDirectory]
-                        .GroupBy(p => p.Time).ToDictionary(p => p.Key, p => p.ToList());
                     Dictionary<long, List<SyncFileInfo>> offsiteLength2File = offsiteTopDir2Files[offsiteTopDirectory]
                         .GroupBy(p => p.Length).ToDictionary(p => p.Key, p => p.ToList());
 
+                    //对于时间，有点特殊。
+                    //如果MaxTimeToleranceSecond为0，那么就是严格的时间相等
+                    //如果MaxTimeToleranceSecond>0，那么需要将这个文件放入文件时间前后几秒的时间字典内
+                    Dictionary<DateTime, List<SyncFileInfo>> offsiteTime2File;
+                    if (Config.MaxTimeToleranceSecond > 0)
+                    {
+                        offsiteTime2File = new Dictionary<DateTime, List<SyncFileInfo>>();
+                        foreach (var file in offsiteTopDir2Files[offsiteTopDirectory])
+                        {
+                            var t = file.Time;
+                            DateTime start = t.TruncateToSecond().AddSeconds(-Config.MaxTimeToleranceSecond);
 
+                            DateTime end = t.TruncateToSecond();
+                            if (t.Ticks != end.Ticks) //毫秒数不为0
+                            {
+                                end = end.AddSeconds(1);
+                            }
+                            end = end.AddSeconds(Config.MaxTimeToleranceSecond);
+                            
+                            for (DateTime time = start; time <= end; time = time.AddTicks(TimeSpan.TicksPerSecond))
+                            {
+                                if (offsiteTime2File.TryGetValue(time, out List<SyncFileInfo> list))
+                                {
+                                    list.Add(file);
+                                }
+                                else
+                                {
+                                    offsiteTime2File.Add(time, [file]);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        offsiteTime2File = offsiteTopDir2Files[offsiteTopDirectory]
+                            .GroupBy(p => p.Time).ToDictionary(p => p.Key, p => p.ToList());
+                    }
+
+                    //开始对比文件
                     foreach (var file in localFileList)
                     {
                         token.ThrowIfCancellationRequested();
 
                         string relativePath = Path.GetRelativePath(localDir.FullName, file.FullName);
-                        NotifyMessage($"正在比对第（{++index} 个）：{relativePath}");
+                        NotifyMessage($"正在比对（第{++index}/{localFileList.Count} 个）：{relativePath}");
                         localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
 
                         if (!filter.IsMatched(file))
@@ -309,17 +349,22 @@ namespace ArchiveMaster.Services
                         }
                         else //新增文件或文件被移动或重命名
                         {
-                            var sameFiles = !Config.CheckMoveIgnoreFileName
-                                ? (offsiteTime2File.GetOrDefault(file.LastWriteTime) ??
+                            var time = Config.MaxTimeToleranceSecond > 0 ? file.LastWriteTime.TruncateToSecond() : file.LastWriteTime;
+                            var sameFiles = Config.CheckMoveIgnoreFileName
+                                ? (offsiteTime2File.GetOrDefault(time) ??
                                    Enumerable.Empty<SyncFileInfo>())
                                 .Intersect(offsiteLength2File.GetOrDefault(file.Length) ??
                                            Enumerable.Empty<SyncFileInfo>())
                                 : (offsiteName2File.GetOrDefault(file.Name) ?? Enumerable.Empty<SyncFileInfo>())
-                                .Intersect(offsiteTime2File.GetOrDefault(file.LastWriteTime) ??
+                                .Intersect(offsiteTime2File.GetOrDefault(time) ??
                                            Enumerable.Empty<SyncFileInfo>())
                                 .Intersect(offsiteLength2File.GetOrDefault(file.Length) ??
                                            Enumerable.Empty<SyncFileInfo>());
                             bool move = false;
+                            if (file.Name.Contains("qwen"))
+                            {
+                            }
+
                             if (sameFiles.Count() == 1)
                             {
                                 //满足以下条件时，文件将被移动：
@@ -369,6 +414,8 @@ namespace ArchiveMaster.Services
 
                     token.ThrowIfCancellationRequested();
 
+                    
+                    NotifyMessage($"正在查找删除的文件");
                     List<string> localSubDirs = new List<string>();
                     foreach (var subDir in localDir.EnumerateDirectories("*", SearchOption.AllDirectories))
                     {
@@ -390,7 +437,7 @@ namespace ArchiveMaster.Services
                             continue;
                         }
 
-                        NotifyMessage($"正在查找删除的文件：{++index} / {step1Model.Files.Count}");
+                        NotifyMessage($"正在查找删除的文件：{++index} / {offsiteTopDir2Files[offsiteTopDirectory].Count}");
                         if (!localFiles.ContainsKey(offsitePathWithTopDir))
                         {
                             file.UpdateType = FileUpdateType.Delete;
