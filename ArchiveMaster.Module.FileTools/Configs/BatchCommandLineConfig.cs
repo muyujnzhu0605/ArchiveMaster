@@ -7,23 +7,22 @@ namespace ArchiveMaster.Configs
     public partial class BatchCommandLineConfig : ConfigBase
     {
         [ObservableProperty]
-        private string dir;
-
-        [ObservableProperty]
-        private string program;
-
-        [ObservableProperty]
         private string arguments;
+
+        [ObservableProperty]
+        private string autoCreateDir;
+
+        [ObservableProperty]
+        private string dir;
 
         [ObservableProperty]
         private int level = 1;
 
         [ObservableProperty]
-        private BatchTarget target;
-        
-        [ObservableProperty]
-        private string autoCreateDir;
+        private string program;
 
+        [ObservableProperty]
+        private BatchTarget target;
         public override void Check()
         {
             CheckDir(Dir, "目录");

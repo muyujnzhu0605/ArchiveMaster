@@ -29,15 +29,15 @@
                         Orientation="Horizontal">
                         <HyperlinkButton
                             Command="{Binding SetProcessCommand}"
-                            CommandParameter="cmd"
+                            CommandParameter="cmd /c "
                             Content="cmd" />
                         <HyperlinkButton
                             Command="{Binding SetProcessCommand}"
-                            CommandParameter="powershell"
+                            CommandParameter="powershell -Command "
                             Content="powershell" />
                         <HyperlinkButton
                             Command="{Binding SetProcessCommand}"
-                            CommandParameter="/bin/bash"
+                            CommandParameter="/bin/bash -c"
                             Content="/bin/bash" />
                     </StackPanel>
                 </Grid>
@@ -65,7 +65,7 @@
                     <ct:FormItem
                         Grid.Column="1"
                         Margin="32,0,0,0"
-                        Description="欲查找的目录层级。例如设置为2，目录为C:\，则只会查找C:\*\*下的文件或目录作为列举对象"
+                        Description="欲查找的目录层级。例如设置为2，目录为C:\，则层级为C:\*\*的文件或目录作为列举对象"
                         IsVisible="{Binding ShowLevels}"
                         Label="层数："
                         LabelWidth="48">

@@ -20,8 +20,9 @@ namespace ArchiveMaster.Services
     public class BatchCommandLineService(AppConfig appConfig)
         : TwoStepServiceBase<BatchCommandLineConfig>(appConfig)
     {
-        public List<BatchCommandLineFileInfo> Files { get; set; }
         public event DataReceivedEventHandler ProcessDataReceived;
+
+        public List<BatchCommandLineFileInfo> Files { get; set; }
 
         public override Task ExecuteAsync(CancellationToken token)
         {
@@ -36,6 +37,89 @@ namespace ArchiveMaster.Services
                     await RunProcessAsync(token, file, s);
                 },
                 token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+        }
+
+        public override async Task InitializeAsync(CancellationToken token)
+        {
+            FilePlaceholderReplacer argumentsReplacer = new FilePlaceholderReplacer(Config.Arguments);
+            if (!argumentsReplacer.HasPattern)
+            {
+                throw new Exception("命令行参数不包含需要替换的占位符");
+            }
+
+            FilePlaceholderReplacer autoCreateDirReplacer = null;
+            if (!string.IsNullOrWhiteSpace(Config.AutoCreateDir))
+            {
+                autoCreateDirReplacer = new FilePlaceholderReplacer(Config.AutoCreateDir);
+                if (!argumentsReplacer.HasPattern)
+                {
+                    throw new Exception("自动创建目录不包含需要替换的占位符");
+                }
+            }
+
+            List<BatchCommandLineFileInfo> files = new List<BatchCommandLineFileInfo>();
+            await Task.Run(() =>
+            {
+                NotifyMessage("正在搜索文件");
+                var dir = new DirectoryInfo(Config.Dir);
+                IEnumerable<FileSystemInfo> fileSystems = Config.Target switch
+                {
+                    BatchTarget.EachFiles => dir.EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions()),
+                    BatchTarget.EachDirs => dir.EnumerateDirectories("*",
+                        FileEnumerateExtension.GetEnumerationOptions()),
+                    BatchTarget.EachElement => dir.EnumerateFileSystemInfos("*",
+                        FileEnumerateExtension.GetEnumerationOptions()),
+                    BatchTarget.TopFiles => dir.EnumerateFiles("*",
+                        FileEnumerateExtension.GetEnumerationOptions(false)),
+                    BatchTarget.TopDirs => dir.EnumerateDirectories("*",
+                        FileEnumerateExtension.GetEnumerationOptions(false)),
+                    BatchTarget.TopElements => dir.EnumerateFileSystemInfos("*",
+                        FileEnumerateExtension.GetEnumerationOptions(false)),
+                    BatchTarget.SpecialLevelDirs => SearchSpecialLevelFiles(dir, Config.Level),
+                    BatchTarget.SpecialLevelFiles => SearchSpecialLevelFiles(dir, Config.Level),
+                    BatchTarget.SpecialLevelElements => SearchSpecialLevelFiles(dir, Config.Level),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+#if DEBUG
+                fileSystems = fileSystems.Take(10);
+#endif
+                foreach (var file in fileSystems)
+                {
+                    var batchFile = new BatchCommandLineFileInfo(file, Config.Dir);
+                    batchFile.CommandLine = ReplaceFilePlaceholder(argumentsReplacer, batchFile);
+                    if (autoCreateDirReplacer != null)
+                    {
+                        batchFile.AutoCreateDir = autoCreateDirReplacer.GetTargetName(batchFile);
+                    }
+
+                    files.Add(batchFile);
+                }
+            }, token);
+            Files = files;
+        }
+
+        private string ReplaceFilePlaceholder(FilePlaceholderReplacer replacer, SimpleFileInfo file)
+        {
+            return replacer.GetTargetName(file, fileName =>
+            {
+                string escapedFileName;
+                if (OperatingSystem.IsWindows())
+                {
+                    // Windows 平台：双引号转义为两个双引号，并用双引号包裹
+                    escapedFileName = fileName.Replace("\"", "\"\"");
+                }
+                else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                {
+                    // Unix 平台：双引号转义为反斜杠加双引号，并用双引号包裹
+                    escapedFileName = fileName.Replace("\"", "\\\"");
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException();
+                }
+
+                return escapedFileName;
+            });
         }
 
         private async Task RunProcessAsync(CancellationToken token, BatchCommandLineFileInfo file, FilesLoopStates s)
@@ -97,7 +181,7 @@ namespace ArchiveMaster.Services
 
         private List<FileSystemInfo> SearchSpecialLevelFiles(DirectoryInfo dir, int lastLevelCount)
         {
-            if (lastLevelCount > 0)
+            if (lastLevelCount > 1)
             {
                 return dir.EnumerateDirectories("*", FileEnumerateExtension.GetEnumerationOptions(false))
                     .SelectMany(p => SearchSpecialLevelFiles(p, lastLevelCount - 1))
@@ -114,89 +198,6 @@ namespace ArchiveMaster.Services
                     FileEnumerateExtension.GetEnumerationOptions(false)),
                 _ => throw new ArgumentOutOfRangeException()
             }).ToList();
-        }
-
-        private string ReplaceFilePlaceholder(FilePlaceholderReplacer replacer, SimpleFileInfo file)
-        {
-            return replacer.GetTargetName(file, fileName =>
-            {
-                string escapedFileName;
-                if (OperatingSystem.IsWindows())
-                {
-                    // Windows 平台：双引号转义为两个双引号，并用双引号包裹
-                    escapedFileName = fileName.Replace("\"", "\"\"");
-                }
-                else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-                {
-                    // Unix 平台：双引号转义为反斜杠加双引号，并用双引号包裹
-                    escapedFileName = fileName.Replace("\"", "\\\"");
-                }
-                else
-                {
-                    throw new PlatformNotSupportedException();
-                }
-
-                return escapedFileName;
-            });
-        }
-
-        public override async Task InitializeAsync(CancellationToken token)
-        {
-            FilePlaceholderReplacer argumentsReplacer = new FilePlaceholderReplacer(Config.Arguments);
-            if (!argumentsReplacer.HasPattern)
-            {
-                throw new Exception("命令行参数不包含需要替换的占位符");
-            }
-
-            FilePlaceholderReplacer autoCreateDirReplacer = null;
-            if (!string.IsNullOrWhiteSpace(Config.AutoCreateDir))
-            {
-                autoCreateDirReplacer = new FilePlaceholderReplacer(Config.AutoCreateDir);
-                if (!argumentsReplacer.HasPattern)
-                {
-                    throw new Exception("自动创建目录不包含需要替换的占位符");
-                }
-            }
-
-            List<BatchCommandLineFileInfo> files = new List<BatchCommandLineFileInfo>();
-            await Task.Run(() =>
-            {
-                NotifyMessage("正在搜索文件");
-                var dir = new DirectoryInfo(Config.Dir);
-                IEnumerable<FileSystemInfo> fileSystems = Config.Target switch
-                {
-                    BatchTarget.EachFiles => dir.EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions()),
-                    BatchTarget.EachDirs => dir.EnumerateDirectories("*",
-                        FileEnumerateExtension.GetEnumerationOptions()),
-                    BatchTarget.EachElement => dir.EnumerateFileSystemInfos("*",
-                        FileEnumerateExtension.GetEnumerationOptions()),
-                    BatchTarget.TopFiles => dir.EnumerateFiles("*",
-                        FileEnumerateExtension.GetEnumerationOptions(false)),
-                    BatchTarget.TopDirs => dir.EnumerateDirectories("*",
-                        FileEnumerateExtension.GetEnumerationOptions(false)),
-                    BatchTarget.TopElements => dir.EnumerateFileSystemInfos("*",
-                        FileEnumerateExtension.GetEnumerationOptions(false)),
-                    BatchTarget.SpecialLevelDirs => SearchSpecialLevelFiles(dir, Config.Level),
-                    BatchTarget.SpecialLevelFiles => SearchSpecialLevelFiles(dir, Config.Level),
-                    BatchTarget.SpecialLevelElements => SearchSpecialLevelFiles(dir, Config.Level),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-#if DEBUG
-                fileSystems = fileSystems.Take(10);
-#endif
-                foreach (var file in fileSystems)
-                {
-                    var batchFile = new BatchCommandLineFileInfo(file, Config.Dir);
-                    batchFile.CommandLine = ReplaceFilePlaceholder(argumentsReplacer, batchFile);
-                    if (autoCreateDirReplacer != null)
-                    {
-                        batchFile.AutoCreateDir = autoCreateDirReplacer.GetTargetName(batchFile);
-                    }
-
-                    files.Add(batchFile);
-                }
-            }, token);
-            Files = files;
         }
     }
 }

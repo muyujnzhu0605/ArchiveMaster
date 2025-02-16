@@ -15,15 +15,14 @@ namespace ArchiveMaster.ViewModels;
 public partial class BatchCommandLineViewModel : TwoStepViewModelBase<BatchCommandLineService, BatchCommandLineConfig>
 {
     [ObservableProperty]
-    private bool showLevels;
-    
+    private List<BatchCommandLineFileInfo> files;
+
     [ObservableProperty]
     private string processOutput;
 
     [ObservableProperty]
-    private List<BatchCommandLineFileInfo> files;
+    private bool showLevels;
 
-    /// <inheritdoc/>
     public BatchCommandLineViewModel(AppConfig appConfig) : base(appConfig)
     {
     }
@@ -40,18 +39,6 @@ public partial class BatchCommandLineViewModel : TwoStepViewModelBase<BatchComma
         SetLevelsVisibility();
     }
 
-    private void SetLevelsVisibility()
-    {
-        ShowLevels = Config.Target is BatchTarget.SpecialLevelDirs or BatchTarget.SpecialLevelElements
-            or BatchTarget.SpecialLevelFiles;
-    }
-
-    protected override Task OnInitializedAsync()
-    {
-        Files = Service.Files;
-        return base.OnInitializedAsync();
-    }
-
     protected override Task OnExecutingAsync(CancellationToken token)
     {
         Service.ProcessDataReceived += (s, e) =>
@@ -61,9 +48,21 @@ public partial class BatchCommandLineViewModel : TwoStepViewModelBase<BatchComma
         return Task.CompletedTask;
     }
 
+    protected override Task OnInitializedAsync()
+    {
+        Files = Service.Files;
+        return base.OnInitializedAsync();
+    }
+
     protected override void OnReset()
     {
         Files = null;
+    }
+
+    private void SetLevelsVisibility()
+    {
+        ShowLevels = Config.Target is BatchTarget.SpecialLevelDirs or BatchTarget.SpecialLevelElements
+            or BatchTarget.SpecialLevelFiles;
     }
 
     [RelayCommand]
