@@ -34,7 +34,8 @@ namespace ArchiveMaster.Services
             await Task.Run(() =>
             {
                 files = new DirectoryInfo(Config.Dir)
-                    .EnumerateFiles("*." + Config.SearchExtension, FileEnumerateExtension.GetEnumerationOptions(matchCasing:MatchCasing.CaseInsensitive))
+                    .EnumerateFiles("*." + Config.SearchExtension,
+                        FileEnumerateExtension.GetEnumerationOptions(matchCasing: MatchCasing.CaseInsensitive))
                     .ApplyFilter(token)
                     .Select(p => new SimpleFileInfo(p, Config.Dir))
                     .ToList();
@@ -42,11 +43,11 @@ namespace ArchiveMaster.Services
             await TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在查找同名不同后缀的文件{s.GetFileNumberMessage()}");
-                var rawFile =
+                var twinFile =
                     $"{Path.Combine(Path.GetDirectoryName(file.Path), Path.GetFileNameWithoutExtension(file.Name))}.{Config.DeletingExtension}";
-                if (File.Exists(rawFile))
+                if (File.Exists(twinFile))
                 {
-                    DeletingJpgFiles.Add(file);
+                    DeletingJpgFiles.Add(new SimpleFileInfo(new FileInfo(twinFile), Config.Dir));
                 }
             }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
         }
