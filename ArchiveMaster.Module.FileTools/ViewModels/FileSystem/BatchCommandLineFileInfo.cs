@@ -9,6 +9,9 @@ public partial class BatchCommandLineFileInfo(FileSystemInfo file, string topDir
     private string commandLine;
 
     [ObservableProperty]
+    private string autoCreateDir;
+
+    [ObservableProperty]
     private string processOutput;
     
     [ObservableProperty]

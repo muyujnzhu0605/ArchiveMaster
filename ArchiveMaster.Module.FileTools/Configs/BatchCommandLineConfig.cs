@@ -20,6 +20,9 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private BatchTarget target;
+        
+        [ObservableProperty]
+        private string autoCreateDir;
 
         public override void Check()
         {

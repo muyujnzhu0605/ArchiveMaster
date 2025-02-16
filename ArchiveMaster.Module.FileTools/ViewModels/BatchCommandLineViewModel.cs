@@ -16,6 +16,9 @@ public partial class BatchCommandLineViewModel : TwoStepViewModelBase<BatchComma
 {
     [ObservableProperty]
     private bool showLevels;
+    
+    [ObservableProperty]
+    private string processOutput;
 
     [ObservableProperty]
     private List<BatchCommandLineFileInfo> files;
@@ -47,6 +50,15 @@ public partial class BatchCommandLineViewModel : TwoStepViewModelBase<BatchComma
     {
         Files = Service.Files;
         return base.OnInitializedAsync();
+    }
+
+    protected override Task OnExecutingAsync(CancellationToken token)
+    {
+        Service.ProcessDataReceived += (s, e) =>
+        {
+            ProcessOutput = e.Data.Replace("\b", "");
+        };
+        return Task.CompletedTask;
     }
 
     protected override void OnReset()

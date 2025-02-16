@@ -36,7 +36,7 @@
                         <TextBlock
                             Classes="Title"
                             Text="文件名：" />
-                        <TextBox
+                        <SelectableTextBlock
                             Grid.Column="2"
                             Text="{Binding Name}" />
 
@@ -44,7 +44,7 @@
                             Grid.Row="2"
                             Classes="Title"
                             Text="绝对路径：" />
-                        <TextBox
+                        <SelectableTextBlock
                             Grid.Row="2"
                             Grid.Column="2"
                             Text="{Binding Path}"
@@ -53,7 +53,7 @@
                             Grid.Row="4"
                             Classes="Title"
                             Text="相对路径：" />
-                        <TextBox
+                        <SelectableTextBlock
                             Grid.Row="4"
                             Grid.Column="2"
                             Text="{Binding RelativePath}"
@@ -63,7 +63,7 @@
                             Grid.Row="6"
                             Classes="Title"
                             Text="信息：" />
-                        <TextBox
+                        <SelectableTextBlock
                             Grid.Row="6"
                             Grid.Column="2"
                             Text="{Binding Message}" />

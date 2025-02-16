@@ -3,6 +3,7 @@ using ArchiveMaster.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,52 +21,78 @@ namespace ArchiveMaster.Services
         : TwoStepServiceBase<BatchCommandLineConfig>(appConfig)
     {
         public List<BatchCommandLineFileInfo> Files { get; set; }
+        public event DataReceivedEventHandler ProcessDataReceived;
 
         public override Task ExecuteAsync(CancellationToken token)
         {
-            return TryForFilesAsync(Files, (file, s) =>
+            return TryForFilesAsync(Files, async (file, s) =>
                 {
                     NotifyMessage($"正在处理{s.GetFileNumberMessage()}");
-                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    if (file.AutoCreateDir != null)
                     {
-                        FileName = Config.Program,
-                        Arguments = file.CommandLine,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-                    Process process = null;
-                    token.Register(() =>
-                    {
-                        try
-                        {
-                            if (!process.HasExited) // 检查进程是否已经退出
-                            {
-                                process.Kill(); // 终止进程
-                            }
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            // 忽略进程未启动或已释放的异常
-                        }
-                    });
-                    using (process = new Process { StartInfo = startInfo })
-                    {
-                        token.ThrowIfCancellationRequested();
-                        process.Start();
-                        string output = process.StandardOutput.ReadToEnd();
-                        string error = process.StandardError.ReadToEnd();
-                        process.WaitForExit();
-                        file.ProcessOutput = output;
-                        file.ProcessError = error;
-                        if (process.ExitCode != 0)
-                        {
-                            file.Error($"进程退出代码不为0（为{process.ExitCode}）");
-                        }
+                        Directory.CreateDirectory(file.AutoCreateDir);
                     }
+
+                    await RunProcessAsync(token, file, s);
                 },
                 token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+        }
+
+        private async Task RunProcessAsync(CancellationToken token, BatchCommandLineFileInfo file, FilesLoopStates s)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = Config.Program,
+                Arguments = file.CommandLine,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage),
+                StandardErrorEncoding =  Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage),
+            };
+
+
+            StringBuilder strOutput = new StringBuilder();
+            StringBuilder strError = new StringBuilder();
+
+            Process process = new Process
+            {
+                StartInfo = startInfo,
+                EnableRaisingEvents = true
+            };
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (e.Data != null)
+                {
+                    strOutput.AppendLine(e.Data);
+                    ProcessDataReceived?.Invoke(this, e);
+                }
+            };
+            process.ErrorDataReceived += (_, e) =>
+            {
+                if (e.Data != null)
+                {
+                    strError.AppendLine(e.Data);
+                    ProcessDataReceived?.Invoke(this, e);
+                }
+            };
+            NotifyMessage($"正在运行进程{s.GetFileNumberMessage()}：{file.Name}");
+
+
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            await process.WaitForExitAsync(token);
+
+            if (process.ExitCode != 0)
+            {
+                file.Error($"进程退出代码不为0（为{process.ExitCode}）");
+            }
+
+            file.ProcessOutput = strOutput.ToString();
+            file.ProcessError = strError.ToString();
         }
 
         private List<FileSystemInfo> SearchSpecialLevelFiles(DirectoryInfo dir, int lastLevelCount)
@@ -115,10 +142,20 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            FilePlaceholderReplacer replacer = new FilePlaceholderReplacer(Config.Arguments);
-            if (!replacer.HasPattern)
+            FilePlaceholderReplacer argumentsReplacer = new FilePlaceholderReplacer(Config.Arguments);
+            if (!argumentsReplacer.HasPattern)
             {
                 throw new Exception("命令行参数不包含需要替换的占位符");
+            }
+
+            FilePlaceholderReplacer autoCreateDirReplacer = null;
+            if (!string.IsNullOrWhiteSpace(Config.AutoCreateDir))
+            {
+                autoCreateDirReplacer = new FilePlaceholderReplacer(Config.AutoCreateDir);
+                if (!argumentsReplacer.HasPattern)
+                {
+                    throw new Exception("自动创建目录不包含需要替换的占位符");
+                }
             }
 
             List<BatchCommandLineFileInfo> files = new List<BatchCommandLineFileInfo>();
@@ -144,11 +181,18 @@ namespace ArchiveMaster.Services
                     BatchTarget.SpecialLevelElements => SearchSpecialLevelFiles(dir, Config.Level),
                     _ => throw new ArgumentOutOfRangeException()
                 };
-
+#if DEBUG
+                fileSystems = fileSystems.Take(10);
+#endif
                 foreach (var file in fileSystems)
                 {
                     var batchFile = new BatchCommandLineFileInfo(file, Config.Dir);
-                    batchFile.CommandLine = ReplaceFilePlaceholder(replacer, batchFile);
+                    batchFile.CommandLine = ReplaceFilePlaceholder(argumentsReplacer, batchFile);
+                    if (autoCreateDirReplacer != null)
+                    {
+                        batchFile.AutoCreateDir = autoCreateDirReplacer.GetTargetName(batchFile);
+                    }
+
                     files.Add(batchFile);
                 }
             }, token);
