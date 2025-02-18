@@ -22,7 +22,7 @@ public class FileDirLength2StringConverter : IValueConverter
             return DirString;
         }
 
-        return NumberConverter.ByteToFitString((long)value);
+        return NumberConverter.ByteToFitString(fileOrDir.Length, 2, " B", " KB", " MB", " GB", " TB");
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

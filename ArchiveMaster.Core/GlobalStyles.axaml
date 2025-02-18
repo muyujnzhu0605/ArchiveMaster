@@ -30,6 +30,10 @@
         </Style>
     </Style>
 
+    <Style Selector="DataGridCell.Right">
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
+    </Style>
+
     <Style Selector="ListBox">
         <Setter Property="Background" Value="Transparent" />
     </Style>
