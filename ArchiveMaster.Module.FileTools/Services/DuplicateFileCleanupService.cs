@@ -44,7 +44,7 @@ namespace ArchiveMaster.Services
                 foreach (var group in DuplicateGroups.SubDirs)
                 {
                     NotifyMessage($"正在删除与“{group.Name}”相同的文件");
-                    foreach (var file in group.SubFiles.Where(p => p.IsChecked))
+                    foreach (var file in group.SubFiles.CheckedOnly())
                     {
                         try
                         {

@@ -17,6 +17,17 @@ public static class FileEnumerateExtension
         };
     }
 
+    public static IEnumerable<T> CheckedOnly<T>(this IEnumerable<T> files) where T : SimpleFileInfo
+    {
+        foreach (var file in files)
+        {
+            if (file.IsChecked)
+            {
+                yield return file;
+            }
+        }
+    }
+
     public static IEnumerable<T> ApplyFilter<T>(this IEnumerable<T> source,
         CancellationToken cancellationToken, FileFilterConfig filter = null, bool skipRecycleBin = true)
     {

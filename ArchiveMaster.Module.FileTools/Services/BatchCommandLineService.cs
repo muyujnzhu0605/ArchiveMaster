@@ -26,7 +26,7 @@ namespace ArchiveMaster.Services
 
         public override Task ExecuteAsync(CancellationToken token)
         {
-            return TryForFilesAsync(Files, async (file, s) =>
+            return TryForFilesAsync(Files.CheckedOnly().ToList(), async (file, s) =>
                 {
                     NotifyMessage($"正在处理{s.GetFileNumberMessage()}");
                     if (file.AutoCreateDir != null)
@@ -172,7 +172,22 @@ namespace ArchiveMaster.Services
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-            await process.WaitForExitAsync(token);
+            try
+            {
+                await process.WaitForExitAsync(token);
+            }
+            catch (OperationCanceledException)
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch
+                {
+                }
+
+                throw;
+            }
 
             if (process.ExitCode != 0)
             {

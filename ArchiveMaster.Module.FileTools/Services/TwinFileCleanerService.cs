@@ -19,7 +19,7 @@ namespace ArchiveMaster.Services
 
         public override Task ExecuteAsync(CancellationToken token)
         {
-            var files = DeletingJpgFiles.Where(p => p.IsChecked).ToList();
+            var files = DeletingJpgFiles.CheckedOnly().ToList();
             return TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在删除{s.GetFileNumberMessage()}：{file.Name}");
