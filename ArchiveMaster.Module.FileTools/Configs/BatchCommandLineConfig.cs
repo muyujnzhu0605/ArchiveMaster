@@ -19,10 +19,14 @@ namespace ArchiveMaster.Configs
         private int level = 1;
 
         [ObservableProperty]
+        private FileFilterConfig filter = new FileFilterConfig();
+
+        [ObservableProperty]
         private string program;
 
         [ObservableProperty]
         private BatchTarget target;
+
         public override void Check()
         {
             CheckDir(Dir, "目录");

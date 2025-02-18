@@ -1,3 +1,4 @@
+using ArchiveMaster.Configs;
 using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Helpers;
@@ -17,29 +18,43 @@ public static class FileEnumerateExtension
     }
 
     public static IEnumerable<T> ApplyFilter<T>(this IEnumerable<T> source,
-        CancellationToken cancellationToken, bool skipRecycleBin = true)
+        CancellationToken cancellationToken, FileFilterConfig filter = null, bool skipRecycleBin = true)
     {
+        var filterHelper = filter == null ? null : new FileFilterHelper(filter);
         foreach (var item in source)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!skipRecycleBin)
-            {
-                yield return item;
-            }
-            else
+            bool canYieldReturn = true;
+            if (skipRecycleBin)
             {
                 string path = item switch
                 {
                     string str => str,
                     FileSystemInfo fi => fi.FullName,
                     SimpleFileInfo sf => sf.Path,
-                    _ => null
+                    _ => throw new NotSupportedException($"不支持ApplyFilter的类型：{typeof(T).Name}")
                 };
 
-                if (path == null || !path.Contains("$RECYCLE.BIN", StringComparison.OrdinalIgnoreCase))
+                if (path != null && path.Contains("$RECYCLE.BIN", StringComparison.OrdinalIgnoreCase))
                 {
-                    yield return item;
+                    canYieldReturn = false;
                 }
+            }
+
+            if (filter != null && canYieldReturn)
+            {
+                canYieldReturn = item switch
+                {
+                    string str => filterHelper.IsMatched(str),
+                    FileSystemInfo fi => filterHelper.IsMatched(fi),
+                    SimpleFileInfo sf => filterHelper.IsMatched(sf),
+                    _ => throw new NotSupportedException($"不支持ApplyFilter的类型：{typeof(T).Name}")
+                };
+            }
+
+            if (canYieldReturn)
+            {
+                yield return item;
             }
         }
     }

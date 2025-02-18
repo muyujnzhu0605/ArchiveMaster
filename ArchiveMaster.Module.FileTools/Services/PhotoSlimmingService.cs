@@ -129,22 +129,16 @@ namespace ArchiveMaster.Services
 
         private void SearchCopyingAndCompressingFiles(CancellationToken token)
         {
-            var filter = new FileFilterHelper(Config.Filter);
-
             NotifyProgressIndeterminate();
             NotifyMessage("正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
                 .EnumerateFiles("*", SearchOption.AllDirectories)
+                .ApplyFilter(token, Config.Filter)
                 .Select(p => new SimpleFileInfo(p, Config.SourceDir));
 
             TryForFiles(files, (file, s) =>
             {
                 NotifyMessage($"正在查找文件{s.GetFileNumberMessage()}");
-
-                if (!filter.IsMatched(file))
-                {
-                    return;
-                }
 
                 if (rCompress.IsMatch(file.Name))
                 {

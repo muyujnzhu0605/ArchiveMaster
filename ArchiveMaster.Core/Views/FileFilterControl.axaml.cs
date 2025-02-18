@@ -14,6 +14,14 @@ public partial class FileFilterControl : UserControl
         AvaloniaProperty.Register<FileFilterControl, FileFilterConfig>(
             nameof(Filter), defaultBindingMode: BindingMode.TwoWay);
 
+    public static readonly StyledProperty<object> ButtonContentProperty = AvaloniaProperty.Register<FileFilterControl, object>(
+        nameof(ButtonContent),"设置..");
+
+    public object ButtonContent
+    {
+        get => GetValue(ButtonContentProperty);
+        set => SetValue(ButtonContentProperty, value);
+    }
     public FileFilterControl()
     {
         InitializeComponent();

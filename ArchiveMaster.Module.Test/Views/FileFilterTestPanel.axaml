@@ -15,7 +15,7 @@
         <Grid RowDefinitions="Auto,8,*">
             <ct:StackFormItemGroup>
                 <ct:FormItem Label="目录：">
-                    <ct:FilePickerTextBox
+                    <v:FilePickerTextBox
                         FileNames="{Binding Dir}"
                         Type="OpenFolder" />
                 </ct:FormItem>

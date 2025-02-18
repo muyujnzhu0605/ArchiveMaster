@@ -9,7 +9,7 @@ namespace ArchiveMaster.Helpers;
 public partial class FileFilterHelper
 {
     private static readonly char[] PathSplitter = ['/', '\\'];
-    
+
     private readonly string[] excludeFiles;
 
     private readonly string[] excludeFolders;
@@ -88,6 +88,7 @@ public partial class FileFilterHelper
                 : filter.ExcludePaths.Split(Environment.NewLine);
         }
     }
+
     public bool IsMatched(string path)
     {
         string name = Path.GetFileName(path);
@@ -111,7 +112,7 @@ public partial class FileFilterHelper
         return IsMatched(file.Path);
     }
 
-    public bool IsMatched(FileInfo file)
+    public bool IsMatched(FileSystemInfo file)
     {
         return IsMatched(file.FullName);
     }

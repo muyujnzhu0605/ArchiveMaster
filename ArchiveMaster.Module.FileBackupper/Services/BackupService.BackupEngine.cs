@@ -122,11 +122,9 @@ public partial class BackupService
 
         private List<FileInfo> GetSourceFiles(CancellationToken cancellationToken)
         {
-            var filter = new FileFilterHelper(BackupTask.Filter);
             var files = new DirectoryInfo(BackupTask.SourceDir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                .ApplyFilter(cancellationToken)
-                .Where(filter.IsMatched)
+                .ApplyFilter(cancellationToken,BackupTask.Filter)
                 .ToList();
             return files;
         }

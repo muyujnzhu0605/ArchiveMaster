@@ -57,43 +57,47 @@ namespace ArchiveMaster.Services
                 }
             }
 
-            List<BatchCommandLineFileInfo> files = new List<BatchCommandLineFileInfo>();
+            List<BatchCommandLineFileInfo> files = null;
             await Task.Run(() =>
             {
                 NotifyMessage("正在搜索文件");
                 var dir = new DirectoryInfo(Config.Dir);
-                IEnumerable<FileSystemInfo> fileSystems = Config.Target switch
-                {
-                    BatchTarget.EachFiles => dir.EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions()),
-                    BatchTarget.EachDirs => dir.EnumerateDirectories("*",
-                        FileEnumerateExtension.GetEnumerationOptions()),
-                    BatchTarget.EachElement => dir.EnumerateFileSystemInfos("*",
-                        FileEnumerateExtension.GetEnumerationOptions()),
-                    BatchTarget.TopFiles => dir.EnumerateFiles("*",
-                        FileEnumerateExtension.GetEnumerationOptions(false)),
-                    BatchTarget.TopDirs => dir.EnumerateDirectories("*",
-                        FileEnumerateExtension.GetEnumerationOptions(false)),
-                    BatchTarget.TopElements => dir.EnumerateFileSystemInfos("*",
-                        FileEnumerateExtension.GetEnumerationOptions(false)),
-                    BatchTarget.SpecialLevelDirs => SearchSpecialLevelFiles(dir, Config.Level),
-                    BatchTarget.SpecialLevelFiles => SearchSpecialLevelFiles(dir, Config.Level),
-                    BatchTarget.SpecialLevelElements => SearchSpecialLevelFiles(dir, Config.Level),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                files = (Config.Target switch
+                    {
+                        BatchTarget.EachFiles => dir.EnumerateFiles("*",
+                            FileEnumerateExtension.GetEnumerationOptions()),
+                        BatchTarget.EachDirs => dir.EnumerateDirectories("*",
+                            FileEnumerateExtension.GetEnumerationOptions()),
+                        BatchTarget.EachElement => dir.EnumerateFileSystemInfos("*",
+                            FileEnumerateExtension.GetEnumerationOptions()),
+                        BatchTarget.TopFiles => dir.EnumerateFiles("*",
+                            FileEnumerateExtension.GetEnumerationOptions(false)),
+                        BatchTarget.TopDirs => dir.EnumerateDirectories("*",
+                            FileEnumerateExtension.GetEnumerationOptions(false)),
+                        BatchTarget.TopElements => dir.EnumerateFileSystemInfos("*",
+                            FileEnumerateExtension.GetEnumerationOptions(false)),
+                        BatchTarget.SpecialLevelDirs => SearchSpecialLevelFiles(dir, Config.Level),
+                        BatchTarget.SpecialLevelFiles => SearchSpecialLevelFiles(dir, Config.Level),
+                        BatchTarget.SpecialLevelElements => SearchSpecialLevelFiles(dir, Config.Level),
+                        _ => throw new ArgumentOutOfRangeException()
+                    }).ApplyFilter(token, Config.Filter)
 #if DEBUG
-                fileSystems = fileSystems.Take(10);
+                    .Take(10)
 #endif
-                foreach (var file in fileSystems)
+                    .Select(p => new BatchCommandLineFileInfo(p, Config.Dir))
+                    .ToList();
+
+
+                TryForFiles(files, (file, s) =>
                 {
-                    var batchFile = new BatchCommandLineFileInfo(file, Config.Dir);
-                    batchFile.CommandLine = ReplaceFilePlaceholder(argumentsReplacer, batchFile);
+                    NotifyMessage($"正在生成命令行{s.GetFileNumberMessage()}：{file.RelativePath}");
+
+                    file.CommandLine = ReplaceFilePlaceholder(argumentsReplacer, file);
                     if (autoCreateDirReplacer != null)
                     {
-                        batchFile.AutoCreateDir = autoCreateDirReplacer.GetTargetName(batchFile);
+                        file.AutoCreateDir = autoCreateDirReplacer.GetTargetName(file);
                     }
-
-                    files.Add(batchFile);
-                }
+                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
             }, token);
             Files = files;
         }
@@ -133,7 +137,7 @@ namespace ArchiveMaster.Services
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage),
-                StandardErrorEncoding =  Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage),
+                StandardErrorEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage),
             };
 
 

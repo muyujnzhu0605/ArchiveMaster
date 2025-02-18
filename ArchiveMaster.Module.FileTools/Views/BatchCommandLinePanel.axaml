@@ -16,8 +16,10 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="目录：">
-                <ct:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterButtonVisible="True"
                     Type="OpenFolder" />
             </ct:FormItem>
 
