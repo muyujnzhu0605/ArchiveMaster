@@ -25,6 +25,13 @@ namespace ArchiveMaster;
 
 public static class Initializer
 {
+    public class ServiceInitializingEventArgs(IServiceCollection services) : EventArgs
+    {
+        public IServiceCollection Services { get; } = services;
+    }
+
+    public static event EventHandler<ServiceInitializingEventArgs> ServiceInitializing;
+
     private static bool stopped = false;
     private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
     public static IHost AppHost { get; private set; }
@@ -82,6 +89,7 @@ public static class Initializer
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddHostedService<AppLifetime>();
         builder.Services.TryAddStartupManager();
+        ServiceInitializing?.Invoke(null, new ServiceInitializingEventArgs(builder.Services));
         AppHost = builder.Build();
         HostServices.Initialize(AppHost.Services);
         AppHost.Start();
