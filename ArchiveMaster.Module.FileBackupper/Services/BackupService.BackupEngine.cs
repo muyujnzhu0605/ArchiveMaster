@@ -1,8 +1,10 @@
+using System.Buffers;
 using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
+using FzLib.Avalonia.Converters;
 using Microsoft.Extensions.Logging;
 
 namespace ArchiveMaster.Services;
@@ -37,8 +39,8 @@ public partial class BackupService
 
                     db.Add(snapshot);
                     await db.SaveChangesAsync(cancellationToken);
-                    await LogAsync(db, LogLevel.Information, $"开始备份，模式：{type}", snapshot);
-
+                    await LogAsync(db, LogLevel.Information, $"开始备份，模式：{DescriptionConverter.GetDescription(type)}", snapshot);
+                    await LogAsync(db, LogLevel.Information, $"正在枚举文件", snapshot);
                     var files = GetSourceFiles(cancellationToken);
                     await LogAsync(db, LogLevel.Information, $"完成枚举磁盘文件，共{files.Count}个", snapshot);
 
@@ -83,6 +85,7 @@ public partial class BackupService
         private async Task CreateNewBackupFileAsync(DbService db, BackupSnapshotEntity snapshot,
             FileInfo file, FileRecordType recordType, bool isVirtual, CancellationToken cancellationToken)
         {
+            Debug.WriteLine(cancellationToken.GetHashCode());
             if (recordType == FileRecordType.Deleted)
             {
                 throw new ArgumentException("不支持删除类型", nameof(recordType));
@@ -104,27 +107,32 @@ public partial class BackupService
             {
                 dbFile.BackupFileName = Guid.NewGuid().ToString("N");
                 string backupFilePath = Path.Combine(BackupTask.BackupDir, dbFile.BackupFileName);
-                dbFile.Hash =
-                    await FileHashHelper.CopyAndComputeSha1Async(file.FullName, backupFilePath, cancellationToken);
+                dbFile.Hash = await FileIOHelper.ComputeSha1Async(file.FullName, cancellationToken: cancellationToken);
 
                 var existedFile = db.GetSameFile(file.LastWriteTime, file.Length, dbFile.Hash);
-                if (existedFile != null) //已经存在一样的物理文件了，那就把刚刚备份的文件给删掉
+                if (existedFile != null) //已经存在一样的物理文件了
                 {
                     await LogAsync(db, LogLevel.Information,
                         $"文件{rawRelativeFilePath}找到了已经存在的相同物理文件{dbFile.BackupFileName}", snapshot);
-                    File.Delete(backupFilePath);
+                    //File.Delete(backupFilePath);
                     dbFile.BackupFileName = existedFile.BackupFileName;
                 }
+                else
+                {
+                    await FileIOHelper.CopyFileAsync(file.FullName, backupFilePath, cancellationToken);
+                }
+
             }
 
             db.Add(dbFile);
         }
 
+
         private List<FileInfo> GetSourceFiles(CancellationToken cancellationToken)
         {
             var files = new DirectoryInfo(BackupTask.SourceDir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                .ApplyFilter(cancellationToken,BackupTask.Filter)
+                .ApplyFilter(cancellationToken, BackupTask.Filter)
                 .ToList();
             return files;
         }
@@ -138,14 +146,15 @@ public partial class BackupService
                 string rawRelativeFilePath = Path.GetRelativePath(BackupTask.SourceDir, file.FullName);
                 try
                 {
+                    await LogAsync(db, LogLevel.Information, $"开始备份文件 {rawRelativeFilePath}", snapshot);
                     await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, isVirtualFull,
                         cancellationToken);
-                    await LogAsync(db, LogLevel.Information, $"文件{rawRelativeFilePath}已备份", snapshot);
+                    await LogAsync(db, LogLevel.Information, $"文件 {rawRelativeFilePath} 已备份", snapshot);
                     snapshot.CreatedFileCount++;
                 }
                 catch (IOException ex)
                 {
-                    await LogAsync(db, LogLevel.Error, $"文件{rawRelativeFilePath}备份失败", snapshot, ex.ToString());
+                    await LogAsync(db, LogLevel.Error, $"文件 {rawRelativeFilePath} 备份失败", snapshot, ex.ToString());
                 }
             }
         }
@@ -166,7 +175,7 @@ public partial class BackupService
                     {
                         if (latestFile.Time != file.LastWriteTime || latestFile.Length != file.Length)
                         {
-                            await LogAsync(db, LogLevel.Information, $"文件{rawRelativeFilePath}已修改", snapshot);
+                            await LogAsync(db, LogLevel.Information, $"文件 {rawRelativeFilePath} 已修改，开始备份", snapshot);
                             await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Modified, false,
                                 cancellationToken);
                             snapshot.ModifiedFileCount++;
@@ -176,7 +185,7 @@ public partial class BackupService
                     }
                     else
                     {
-                        await LogAsync(db, LogLevel.Information, $"文件{rawRelativeFilePath}已新增", snapshot);
+                        await LogAsync(db, LogLevel.Information, $"文件 {rawRelativeFilePath} 已新增，开始备份", snapshot);
                         await CreateNewBackupFileAsync(db, snapshot, file, FileRecordType.Created, false,
                             cancellationToken);
                         snapshot.CreatedFileCount++;
