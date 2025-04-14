@@ -13,7 +13,7 @@ public partial class BackupService(AppConfig config)
     private CancellationTokenSource cts;
 
     public static event EventHandler<BackupLogEventArgs> NewLog;
-    
+
     public FileBackupperConfig Config { get; } = config.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
 
     public bool IsAutoBackingUp { get; private set; }
@@ -162,13 +162,16 @@ public partial class BackupService(AppConfig config)
                    {
                        try
                        {
-                           CreateCancellationToken();
 #if DEBUG
-                           await Task.Delay(10000, ct);
+                           await Task.Delay(10000);
 #else
-                        await Task.Delay(60 * 1000, ct);
+                           await Task.Delay(60 * 1000);
 #endif
-                           await CheckAndBackupAllAsync();
+                           if (!IsBackingUp)
+                           {
+                               CreateCancellationToken();
+                               await CheckAndBackupAllAsync();
+                           }
                        }
                        catch (OperationCanceledException)
                        {

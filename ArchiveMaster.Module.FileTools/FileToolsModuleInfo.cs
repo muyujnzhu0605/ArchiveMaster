@@ -28,6 +28,7 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(RepairModifiedTimeConfig)),
             new ConfigMetadata(typeof(TwinFileCleanerConfig)),
             new ConfigMetadata(typeof(PhotoSlimmingConfig)),
+            new ConfigMetadata(typeof(BatchCommandLineConfig)),
         ];
 
         public string ModuleName => "文件目录工具";
@@ -45,7 +46,8 @@ namespace ArchiveMaster
             typeof(PhotoSlimmingService),
             typeof(RepairModifiedTimeService),
             typeof(TwinFileCleanerService),
-            typeof(TimeClassifyService)
+            typeof(TimeClassifyService),
+            typeof(BatchCommandLineService)
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -71,6 +73,8 @@ namespace ArchiveMaster
                     "寻找EXIF信息中的拍摄时间与照片修改时间不同的文件，将修改时间更新闻EXIF时间", baseUrl + "time.svg"),
                 new ToolPanelInfo(typeof(PhotoSlimmingPanel), typeof(PhotoSlimmingViewModel), "创建照片集合副本",
                     "复制或压缩照片，用于生成更小的照片集副本", baseUrl + "zip.svg"),
+                new ToolPanelInfo(typeof(BatchCommandLinePanel), typeof(BatchCommandLineViewModel), "批量命令行执行",
+                    "以文件或目录为元素，批量执行命令行", baseUrl + "cmd.svg"),
 
             },
             GroupName = ModuleName

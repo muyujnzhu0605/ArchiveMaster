@@ -38,7 +38,7 @@ namespace ArchiveMaster.Services
                 Dictionary<string, string> dirStructureDic = CreateDirStructureDic();
 
                 //初始化进度通知
-                var files = ProcessingFiles.Where(p => p.IsChecked).ToList();
+                var files = ProcessingFiles.CheckedOnly().ToList();
                 int count = files.Count;
 
                 var progressReport = new AesExtension.RefreshFileProgress(

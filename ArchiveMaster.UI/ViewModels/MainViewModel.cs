@@ -39,7 +39,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
 
-    public MainViewModel(AppConfig appConfig, IStartupManager startupManager,
+    public MainViewModel(AppConfig appConfig, IStartupManager startupManager = null,
         IBackCommandService backCommandService = null)
     {
         this.startupManager = startupManager;
@@ -60,7 +60,7 @@ public partial class MainViewModel : ObservableObject
         });
         BackCommandService = backCommandService;
 
-        IsAutoStart = startupManager.IsStartupEnabled();
+        IsAutoStart = startupManager?.IsStartupEnabled() ?? false;
     }
 
     public IBackCommandService BackCommandService { get; }
@@ -101,6 +101,10 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void SetAutoStart(bool autoStart)
     {
+        if (startupManager == null)
+        {
+            return;
+        }
         if (autoStart)
         {
             startupManager.EnableStartup("s");

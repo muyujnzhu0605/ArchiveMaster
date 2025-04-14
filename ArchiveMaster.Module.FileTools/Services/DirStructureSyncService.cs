@@ -31,7 +31,6 @@ namespace ArchiveMaster.Services
             List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
             List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
 
-            var filter = new FileFilterHelper(Config.Filter);
             List<SimpleFileInfo> notMatchedFiles = new List<SimpleFileInfo>();
             List<SimpleFileInfo> matchedFiles = new List<SimpleFileInfo>();
 
@@ -46,9 +45,8 @@ namespace ArchiveMaster.Services
                 //枚举源目录
                 var sourceFiles = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .Where(filter.IsMatched)
+                    .ApplyFilter(token, Config.Filter)
                     .Select(p => new SimpleFileInfo(p, Config.SourceDir))
-                    .ApplyFilter(token)
                     .ToList();
 
                 TryForFiles(sourceFiles, (sourceFile, s) =>

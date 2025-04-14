@@ -30,11 +30,13 @@ public class SimpleFileDataGrid : DataGrid
 
     protected static readonly DateTimeConverter DateTimeConverter = new DateTimeConverter();
 
-    protected static readonly FileLength2StringConverter FileLength2StringConverter = new FileLength2StringConverter();
+    protected static readonly FileDirLength2StringConverter FileDirLength2StringConverter =
+        new FileDirLength2StringConverter();
 
     protected static readonly InverseBoolConverter InverseBoolConverter = new InverseBoolConverter();
 
-    protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter = new ProcessStatusColorConverter();
+    protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter =
+        new ProcessStatusColorConverter();
 
     public SimpleFileDataGrid()
     {
@@ -48,7 +50,9 @@ public class SimpleFileDataGrid : DataGrid
     protected override void OnSelectionChanged(SelectionChangedEventArgs e)
     {
         base.OnSelectionChanged(e);
-        RowDetailsVisibilityMode = SelectedItems.Count == 1 ? DataGridRowDetailsVisibilityMode.VisibleWhenSelected : DataGridRowDetailsVisibilityMode.Collapsed;
+        RowDetailsVisibilityMode = SelectedItems.Count == 1
+            ? DataGridRowDetailsVisibilityMode.VisibleWhenSelected
+            : DataGridRowDetailsVisibilityMode.Collapsed;
     }
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
@@ -78,6 +82,7 @@ public class SimpleFileDataGrid : DataGrid
     public virtual string ColumnTimeHeader { get; init; } = "修改时间";
 
     public virtual double ColumnTimeIndex { get; init; } = 0.6;
+
     public object Footer
     {
         get => GetValue(FooterProperty);
@@ -121,7 +126,7 @@ public class SimpleFileDataGrid : DataGrid
                 HorizontalAlignment = HorizontalAlignment.Center,
                 [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
                 [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                { Source = rootPanel, Converter = InverseBoolConverter },
+                    { Source = rootPanel, Converter = InverseBoolConverter },
             };
         });
 
@@ -134,10 +139,11 @@ public class SimpleFileDataGrid : DataGrid
         return new DataGridTextColumn()
         {
             Header = ColumnLengthHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Length))
-            { Converter = FileLength2StringConverter, Mode = BindingMode.OneWay },
+            Binding = new Binding(".")
+                { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             IsReadOnly = true,
             MaxWidth = 120,
+            CellStyleClasses = { "Right" }
         };
     }
 
@@ -190,7 +196,7 @@ public class SimpleFileDataGrid : DataGrid
             Width = 8,
             Height = 8,
             [!Shape.FillProperty] = new Binding(nameof(SimpleFileInfo.Status))
-            { Converter = ProcessStatusColorConverter }
+                { Converter = ProcessStatusColorConverter }
         });
 
         column.CellTemplate = cellTemplate;
@@ -269,6 +275,7 @@ public class SimpleFileDataGrid : DataGrid
             }
         }
     }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();

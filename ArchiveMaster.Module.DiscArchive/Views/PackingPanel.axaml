@@ -31,7 +31,9 @@
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="筛选：">
-                <v:FileFilterControl Filter="{Binding Config.Filter}" />
+                <v:FileFilterControl
+                    HorizontalAlignment="Right"
+                    Filter="{Binding Config.Filter}" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>

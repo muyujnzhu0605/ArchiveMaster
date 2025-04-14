@@ -176,8 +176,12 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
         }
 
         AppConfig.SetCurrentPreset(ConfigGroupName, value);
+        var oldConfig = Config;
         Config = AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(value);
-        OnConfigChanged();
+        if (oldConfig != Config)
+        {
+            OnConfigChanged();
+        }
     }
 
     /// <summary>

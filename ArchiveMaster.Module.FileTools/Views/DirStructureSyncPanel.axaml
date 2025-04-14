@@ -35,7 +35,7 @@
                     <TextBlock
                         Grid.Row="2"
                         Text="文件名" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="2"
                         Grid.Column="2"
                         Text="{Binding Template.Name}" />
@@ -43,7 +43,7 @@
                     <TextBlock
                         Grid.Row="4"
                         Text="相对路径" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="4"
                         Grid.Column="2"
                         Text="{Binding Template.Path}" />
@@ -51,7 +51,7 @@
                     <TextBlock
                         Grid.Row="6"
                         Text="文件大小" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="6"
                         Grid.Column="2"
                         Text="{Binding Template.Length, Converter={StaticResource FileLength2StringConverter}}" />
@@ -59,7 +59,7 @@
                     <TextBlock
                         Grid.Row="8"
                         Text="修改时间" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="8"
                         Grid.Column="2"
                         Text="{Binding Template.Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
@@ -77,7 +77,7 @@
                     <TextBlock
                         Grid.Row="2"
                         Text="文件名" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="2"
                         Grid.Column="2"
                         Text="{Binding Name}" />
@@ -85,7 +85,7 @@
                     <TextBlock
                         Grid.Row="4"
                         Text="相对路径" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="4"
                         Grid.Column="2"
                         Text="{Binding Path}" />
@@ -93,7 +93,7 @@
                     <TextBlock
                         Grid.Row="6"
                         Text="文件大小" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="6"
                         Grid.Column="2"
                         Text="{Binding Length, Mode=OneWay, Converter={StaticResource FileLength2StringConverter}}" />
@@ -101,7 +101,7 @@
                     <TextBlock
                         Grid.Row="8"
                         Text="修改时间" />
-                    <TextBlock
+                    <SelectableTextBlock
                         Grid.Row="8"
                         Grid.Column="2"
                         Text="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
@@ -131,7 +131,9 @@
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="筛选：">
-                <v:FileFilterControl Filter="{Binding Config.Filter}" />
+                <v:FileFilterControl
+                    HorizontalAlignment="Right"
+                    Filter="{Binding Config.Filter}" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="文件匹配选项：">

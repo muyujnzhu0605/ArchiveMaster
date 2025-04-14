@@ -20,7 +20,6 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            var filter = new FileFilterHelper(Config.Filter);
             DiscFilePackageCollection packages = new DiscFilePackageCollection();
             NotifyMessage("正在搜索文件");
 
@@ -28,8 +27,8 @@ namespace ArchiveMaster.Services
             {
                 var filesOrderedByTime = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", SearchOption.AllDirectories)
+                    .ApplyFilter(token, Config.Filter)
                     .Where(p => p.LastWriteTime > Config.EarliestTime)
-                    .Where(filter.IsMatched)
                     .OrderBy(p => p.LastWriteTime)
                     .Select(p => new DiscFile(p, Config.SourceDir));
 

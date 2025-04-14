@@ -21,7 +21,7 @@
             Margin="8"
             RowDefinitions="Auto,8,*,8,Auto">
             <ct:FormItem Label="保存位置：">
-                <ct:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.OutputFile}"
                     SaveFileSuggestedFileName="{Binding SnapshotSuggestedFileName}"
                     StringFileTypeFilter="异地快照文件;*.os1;;"

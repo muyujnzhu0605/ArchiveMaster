@@ -20,7 +20,7 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="目录：">
-                <ct:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
                     Type="OpenFolder" />
             </ct:FormItem>

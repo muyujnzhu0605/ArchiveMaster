@@ -39,7 +39,7 @@ public class TreeFileDirLengthConverter : IValueConverter
                 .Replace("{F}", dir.SubFileCount.ToString("N0", culture));
         }
 
-        return NumberConverter.ByteToFitString(fileOrDir.Length);
+        return NumberConverter.ByteToFitString(fileOrDir.Length, 2, " B", " KB", " MB", " GB", " TB");
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

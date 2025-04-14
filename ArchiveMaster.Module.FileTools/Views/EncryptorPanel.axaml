@@ -26,12 +26,12 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="未加密目录：">
-                <ct:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.RawDir}"
                     Type="OpenFolder" />
             </ct:FormItem>
             <ct:FormItem Label="加密后目录：">
-                <ct:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.EncryptedDir}"
                     Type="OpenFolder" />
             </ct:FormItem>

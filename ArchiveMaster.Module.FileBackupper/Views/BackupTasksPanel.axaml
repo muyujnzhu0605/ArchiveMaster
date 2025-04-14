@@ -77,7 +77,9 @@
                     </ctrl:FormItem>
 
                     <ctrl:FormItem Label="筛选：">
-                        <v:FileFilterControl Filter="{Binding SelectedTask.Filter}" />
+                        <v:FileFilterControl
+                            HorizontalAlignment="Right"
+                            Filter="{Binding SelectedTask.Filter}" />
                     </ctrl:FormItem>
 
                     <TextBlock

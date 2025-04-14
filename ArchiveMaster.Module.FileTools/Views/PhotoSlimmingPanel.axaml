@@ -17,13 +17,13 @@
             <gb:GroupBox Header="目录和文件">
                 <ct:StackFormItemGroup>
                     <ct:FormItem Label="源目录：">
-                        <ct:FilePickerTextBox
+                        <v:FilePickerTextBox
                             Grid.Row="2"
                             FileNames="{Binding Config.SourceDir}"
                             Type="OpenFolder" />
                     </ct:FormItem>
                     <ct:FormItem Label="目标目录：">
-                        <ct:FilePickerTextBox
+                        <v:FilePickerTextBox
                             Grid.Row="2"
                             FileNames="{Binding Config.DistDir}"
                             Type="OpenFolder" />
@@ -58,7 +58,9 @@
             <gb:GroupBox Header="文件筛选">
                 <ct:StackFormItemGroup>
                     <ct:FormItem Label="匹配条件：">
-                        <v:FileFilterControl Filter="{Binding Config.Filter}" />
+                        <v:FileFilterControl
+                            HorizontalAlignment="Right"
+                            Filter="{Binding Config.Filter}" />
                     </ct:FormItem>
                     <ct:FormItem Label="复制后缀名：">
                         <TextBox Text="{Binding Config.CopyDirectlyExtensions, Converter={StaticResource StringListConverter}}" />
